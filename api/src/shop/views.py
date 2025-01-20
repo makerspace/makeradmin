@@ -35,6 +35,7 @@ from shop.entities import (
 from shop.models import ProductImage, TransactionContent
 from shop.pay import (
     CancelSubscriptionsRequest,
+    SetupPaymentMethodResponse,
     StartSubscriptionsRequest,
     cancel_subscriptions,
     pay,
@@ -309,7 +310,7 @@ def pay_route() -> PartialPayment:
 
 # Used to just initiate a capture of a payment method via a setup intent
 @service.route("/setup_payment_method", method=POST, permission=USER, commit_on_error=True)
-def setup_payment_method_route():
+def setup_payment_method_route() -> SetupPaymentMethodResponse:
     return setup_payment_method(request.json, g.user_id)
 
 
@@ -320,12 +321,12 @@ def register_route() -> Any:
 
 
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
-def stripe_callback_route():
+def stripe_callback_route() -> None:
     stripe_callback(request.data, request.headers)
 
 
 @service.route("/download-accounting-file/<int:year>/<int:month>", method=GET, permission=WEBSHOP)
-def download_accounting_file_route(year: str, month: str):
+def download_accounting_file_route(year: int, month: int) -> str:
     zone = get_makerspace_local_timezone()
     start_date = datetime(year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=zone)
     end_data = datetime(
