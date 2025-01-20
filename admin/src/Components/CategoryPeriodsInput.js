@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import DatePeriod from "../Models/DatePeriod";
 import { utcToday } from "../utils";
 import DatePeriodInput from "./DatePeriodInput";
@@ -27,6 +27,54 @@ const CategoryPeriodsInput = ({ categoryPeriods, showHistoric }) => {
         membership: "Medlemsskap",
     };
 
+    const templates = useMemo(
+        () => [
+            { label: "1 day", start: today, end: today },
+            {
+                label: "1 month",
+                start: today,
+                end: new Date(
+                    today.getFullYear(),
+                    today.getMonth() + 1,
+                    today.getDate(),
+                ),
+            },
+            {
+                label: "3 months",
+                start: today,
+                end: new Date(
+                    today.getFullYear(),
+                    today.getMonth() + 3,
+                    today.getDate(),
+                ),
+            },
+            {
+                label: "6 months",
+                start: today,
+                end: new Date(
+                    today.getFullYear(),
+                    today.getMonth() + 6,
+                    today.getDate(),
+                ),
+            },
+            {
+                label: "1 year",
+                start: today,
+                end: new Date(
+                    today.getFullYear() + 1,
+                    today.getMonth(),
+                    today.getDate(),
+                ),
+            },
+            {
+                label: "To end of year",
+                start: today,
+                end: new Date(today.getFullYear(), 11, 31),
+            },
+        ],
+        [],
+    );
+
     return (
         <div>
             <h4 className="uk-margin-top">{categoryTitle[category]}</h4>
@@ -35,8 +83,12 @@ const CategoryPeriodsInput = ({ categoryPeriods, showHistoric }) => {
                     return null;
                 }
                 return (
-                    <div key={p.id}>
-                        <DatePeriodInput period={p} />
+                    <div key={p.id} className="uk-flex uk-flex-middle">
+                        <DatePeriodInput
+                            period={p}
+                            highlightChanges={true}
+                            templates={templates}
+                        />
                         &nbsp;
                         <a
                             onClick={() => categoryPeriods.remove(p)}
