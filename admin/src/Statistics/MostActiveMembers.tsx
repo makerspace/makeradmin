@@ -130,12 +130,13 @@ export default () => {
                                     </td>
                                     <td>{member.score.toFixed(0)}</td>
                                     <td>
-                                        Top{" "}
-                                        {Math.max(
-                                            1,
-                                            100 * member.activity_percentile,
-                                        ).toFixed(0)}
-                                        %
+                                        {member.activity_percentile == 1
+                                            ? "No known visits"
+                                            : `Top ${Math.max(
+                                                  1,
+                                                  100 *
+                                                      member.activity_percentile,
+                                              ).toFixed(0)}%`}
                                     </td>
                                 </tr>
                             ))}
