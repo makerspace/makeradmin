@@ -1,6 +1,6 @@
 import * as _ from "underscore";
 
-export const assert = (expression) => console.assert(expression);
+export const assert = (expression: any) => console.assert(expression);
 
 const utcDateFormat = Intl.DateTimeFormat("sv-SE", {
     timeZone: "UTC",
@@ -9,12 +9,12 @@ const utcDateFormat = Intl.DateTimeFormat("sv-SE", {
     day: "2-digit",
 });
 
-export const formatUtcDate = (date) => utcDateFormat.format(date);
+export const formatUtcDate = (date: Date) => utcDateFormat.format(date);
 
-export const parseUtcDate = (str) => {
+export const parseUtcDate = (str: string) => {
     if (/\d{4}-\d{2}-\d{2}/.test(str)) {
         const d = new Date(str + "T00:00:00.000Z");
-        if (isNaN(d)) {
+        if (isNaN(d.getTime())) {
             return null;
         }
         return d;
@@ -28,12 +28,13 @@ export const utcToday = () => {
     return d;
 };
 
-export const addToDate = (date, millis) => new Date(date.getTime() + millis);
+export const addToDate = (date: Date, millis: number) =>
+    new Date(date.getTime() + millis);
 
 // Parse and format date string.
-export const dateToStr = (date) => {
+export const dateToStr = (date: string) => {
     if (!_.isEmpty(date)) {
-        const options = {
+        const options: Intl.DateTimeFormatOptions = {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
@@ -52,9 +53,9 @@ export const dateToStr = (date) => {
 };
 
 // Parse and format datetime string.
-export const dateTimeToStr = (date) => {
+export const dateTimeToStr = (date: string) => {
     if (!_.isEmpty(date)) {
-        const options = {
+        const options: Intl.DateTimeFormatOptions = {
             year: "numeric",
             month: "numeric",
             day: "numeric",
@@ -75,4 +76,18 @@ export const dateTimeToStr = (date) => {
     return "";
 };
 
-export const deepcopy = (data) => JSON.parse(JSON.stringify(data));
+export const sum = <T>(items: T[], value: (item: T) => number) => {
+    let s = 0;
+    for (const item of items) {
+        s += value(item);
+    }
+    return s;
+};
+
+export const copyArray = <T>(src: T[], dest: T[]) => {
+    for (let i = 0; i < src.length; i++) {
+        dest[i] = src[i]!;
+    }
+};
+
+export const deepcopy = <T>(data: T): T => JSON.parse(JSON.stringify(data));
