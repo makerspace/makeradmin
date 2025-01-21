@@ -30,9 +30,6 @@ class SalesResponse(DataClassJsonMixin):
     amount_unit: str
 
 
-INCLUDE: ColumnElement[bool] = cast(ColumnElement[bool], cast(Any, True))
-
-
 def product_sales(product_id: int, start: Optional[datetime], end: Optional[datetime]) -> SalesResponse:
     (amount, count) = (
         db_session.execute(
@@ -41,8 +38,8 @@ def product_sales(product_id: int, start: Optional[datetime], end: Optional[date
                 sqlalchemy.cast(func.coalesce(func.sum(TransactionContent.count), 0), sqlalchemy.Integer),
             )
             .where(TransactionContent.product_id == product_id)
-            .where(Transaction.created_at >= start if start is not None else INCLUDE)
-            .where(Transaction.created_at < end if end is not None else INCLUDE)
+            .where(Transaction.created_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
+            .where(Transaction.created_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
             .where(Transaction.status == Transaction.COMPLETED)
             .join(TransactionContent.transaction)
         )
@@ -57,8 +54,8 @@ def product_sales(product_id: int, start: Optional[datetime], end: Optional[date
             sqlalchemy.cast(func.sum(TransactionContent.count), sqlalchemy.Integer),
         )
         .where(TransactionContent.product_id == product_id)
-        .where(Transaction.created_at >= start if start is not None else INCLUDE)
-        .where(Transaction.created_at < end if end is not None else INCLUDE)
+        .where(Transaction.created_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
+        .where(Transaction.created_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .where(Transaction.status == Transaction.COMPLETED)
         .group_by(sqlalchemy.cast(Transaction.created_at, sqlalchemy.Date))
         .join(TransactionContent.transaction)
@@ -84,8 +81,8 @@ def category_sales(category_id: int, start: Optional[datetime], end: Optional[da
                 sqlalchemy.cast(func.coalesce(func.sum(TransactionContent.count), 0), sqlalchemy.Integer),
             )
             .where(Product.category_id == category_id)
-            .where(Transaction.created_at >= start if start is not None else INCLUDE)
-            .where(Transaction.created_at < end if end is not None else INCLUDE)
+            .where(Transaction.created_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
+            .where(Transaction.created_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
             .where(Transaction.status == Transaction.COMPLETED)
             .join(TransactionContent.transaction)
             .join(TransactionContent.product)
@@ -101,8 +98,8 @@ def category_sales(category_id: int, start: Optional[datetime], end: Optional[da
             sqlalchemy.cast(func.sum(TransactionContent.count), sqlalchemy.Integer),
         )
         .where(Product.category_id == category_id)
-        .where(Transaction.created_at >= start if start is not None else INCLUDE)
-        .where(Transaction.created_at < end if end is not None else INCLUDE)
+        .where(Transaction.created_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
+        .where(Transaction.created_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .where(Transaction.status == Transaction.COMPLETED)
         .group_by(sqlalchemy.cast(Transaction.created_at, sqlalchemy.Date))
         .join(TransactionContent.transaction)

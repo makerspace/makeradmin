@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, cast
 
+import sqlalchemy
 from dataclasses_json import DataClassJsonMixin, config
 from membership.membership import get_members_and_membership, get_membership_summaries
 from membership.models import Member, Span
@@ -463,17 +464,20 @@ class QuizQuestionMapping:
     options: Dict[str, str]
 
 
-INCLUDE: ColumnElement[bool] = cast(ColumnElement[bool], cast(Any, True))
-
-
 def retention_table(start: Optional[datetime], end: Optional[datetime], spantype: Span.ACCESS_TYPE) -> RetentionTable:
     spans: Sequence[Tuple[int, date, date]] = (
         db_session.execute(
             select(Member.member_id, Span.startdate, Span.enddate)
             .join(Member.spans)
             .filter(Span.type == spantype)
-            .filter(Member.labaccess_agreement_at > start if start is not None else INCLUDE)
-            .filter(Member.labaccess_agreement_at <= end if end is not None else INCLUDE)
+            .filter(
+                Member.labaccess_agreement_at > start
+                if start is not None
+                else sqlalchemy.cast(True, sqlalchemy.Boolean)
+            )
+            .filter(
+                Member.labaccess_agreement_at <= end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean)
+            )
             .filter(Member.labaccess_agreement_at != None)
             .order_by(Member.member_id, Span.startdate)
         )
@@ -484,8 +488,10 @@ def retention_table(start: Optional[datetime], end: Optional[datetime], spantype
     members = {
         m.member_id: m
         for m in db_session.query(Member)
-        .filter(Member.labaccess_agreement_at > start if start is not None else INCLUDE)
-        .filter(Member.labaccess_agreement_at <= end if end is not None else INCLUDE)
+        .filter(
+            Member.labaccess_agreement_at > start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean)
+        )
+        .filter(Member.labaccess_agreement_at <= end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .filter(Member.labaccess_agreement_at != None)
         .all()
     }

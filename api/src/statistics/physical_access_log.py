@@ -12,8 +12,6 @@ from service.logging import logger
 from service.util import format_datetime
 from sqlalchemy import ColumnElement, Date, distinct, func, select, text
 
-INCLUDE: ColumnElement[bool] = cast(ColumnElement[bool], cast(Any, True))
-
 
 @dataclass
 class ActivityEntry(DataClassJsonMixin):
@@ -58,10 +56,16 @@ def activity_by_date(
             if member_id is None
             else func.count(distinct(func.date_format(PhysicalAccessEntry.invoked_at, "%Y-%m-%d"))),
         )
-        .where(PhysicalAccessEntry.invoked_at >= start if start is not None else INCLUDE)
-        .where(PhysicalAccessEntry.invoked_at < end if end is not None else INCLUDE)
+        .where(
+            PhysicalAccessEntry.invoked_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean)
+        )
+        .where(PhysicalAccessEntry.invoked_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .where(PhysicalAccessEntry.member_id.isnot(None))
-        .where(PhysicalAccessEntry.member_id == member_id if member_id is not None else INCLUDE)
+        .where(
+            PhysicalAccessEntry.member_id == member_id
+            if member_id is not None
+            else sqlalchemy.cast(True, sqlalchemy.Boolean)
+        )
         .group_by("grouped_date")
         .order_by(selecter.asc())
     ).t.all()
@@ -90,10 +94,16 @@ def activity_by_day_of_week(
     selecter = func.date_format(PhysicalAccessEntry.invoked_at, "%Y-%m-%d %H:00").label("grouped_date")
     activity_by_day = (
         select(selecter, func.count(distinct(PhysicalAccessEntry.member_id)).label("count"))
-        .where(PhysicalAccessEntry.invoked_at >= start if start is not None else INCLUDE)
-        .where(PhysicalAccessEntry.invoked_at < end if end is not None else INCLUDE)
+        .where(
+            PhysicalAccessEntry.invoked_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean)
+        )
+        .where(PhysicalAccessEntry.invoked_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .where(PhysicalAccessEntry.member_id.isnot(None))
-        .where(PhysicalAccessEntry.member_id == member_id if member_id is not None else INCLUDE)
+        .where(
+            PhysicalAccessEntry.member_id == member_id
+            if member_id is not None
+            else sqlalchemy.cast(True, sqlalchemy.Boolean)
+        )
         .group_by("grouped_date")
         .order_by(selecter.asc())
         .subquery()
