@@ -1,17 +1,21 @@
 import itertools
 import math
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, cast
 
+import sqlalchemy
+from dataclasses_json import DataClassJsonMixin, config
 from membership.membership import get_members_and_membership, get_membership_summaries
 from membership.models import Member, Span
+from quiz.models import QuizAnswer, QuizQuestion, QuizQuestionOption
 from service.db import db_session
 from service.logging import logger
+from service.util import format_datetime
 from shop.entities import category_entity, product_entity
 from shop.models import Product, ProductCategory, Transaction, TransactionContent
-from sqlalchemy import func, text
+from sqlalchemy import ColumnElement, Date, func, select, text
 
 
 def spans_by_date(span_type: str) -> List[Tuple[str, int]]:
@@ -430,3 +434,188 @@ def retention_graph(startdate: date, enddate: date) -> RetentionGraph:
     all_nodes = list(nodes.values())
 
     return RetentionGraph(nodes=all_nodes, links=all_links)
+
+
+@dataclass
+class MemberAttributes:
+    gender: Literal["male", "female", "other", "unknown"]
+    birth_year: int
+    language: Literal["prefers_swedish", "prefers_english", "knows_only_english"]
+
+
+@dataclass
+class RetentionMember(DataClassJsonMixin):
+    member_id: int
+    active_months: List[bool]
+    attributes: Dict[str, str | None]
+
+
+@dataclass
+class RetentionTable(DataClassJsonMixin):
+    members: List[RetentionMember]
+    start_time: Optional[datetime] = field(metadata=config(encoder=format_datetime))
+    end_time: Optional[datetime] = field(metadata=config(encoder=format_datetime))
+
+
+@dataclass
+class QuizQuestionMapping:
+    id: str
+    question_name: str
+    options: Dict[str, str]
+
+
+def retention_table(start: Optional[datetime], end: Optional[datetime], spantype: Span.ACCESS_TYPE) -> RetentionTable:
+    spans: Sequence[Tuple[int, date, date]] = (
+        db_session.execute(
+            select(Member.member_id, Span.startdate, Span.enddate)
+            .join(Member.spans)
+            .filter(Span.type == spantype)
+            .filter(
+                Member.labaccess_agreement_at > start
+                if start is not None
+                else sqlalchemy.cast(True, sqlalchemy.Boolean)
+            )
+            .filter(
+                Member.labaccess_agreement_at <= end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean)
+            )
+            .filter(Member.labaccess_agreement_at != None)
+            .order_by(Member.member_id, Span.startdate)
+        )
+        .tuples()
+        .all()
+    )
+
+    members = {
+        m.member_id: m
+        for m in db_session.query(Member)
+        .filter(
+            Member.labaccess_agreement_at > start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean)
+        )
+        .filter(Member.labaccess_agreement_at <= end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
+        .filter(Member.labaccess_agreement_at != None)
+        .all()
+    }
+
+    spans_by_member_groups = itertools.groupby(spans, key=lambda x: x[0])
+    spans_by_member = [(x[0], list(x[1])) for x in spans_by_member_groups]
+    has_any_spans = set([x[0] for x in spans_by_member])
+
+    for member_id in members.keys():
+        if member_id not in has_any_spans:
+            spans_by_member.append((member_id, []))
+
+    summaries = get_membership_summaries([x[0] for x in spans_by_member])
+    assert len(summaries) == len(spans_by_member)
+
+    interesting_questions: List[QuizQuestionMapping] = [
+        QuizQuestionMapping(
+            id="gender",
+            question_name="What gender are you?",
+            options={
+                "Man": "man",
+                "Woman": "woman",
+                "Other": "other",
+            },
+        ),
+        QuizQuestionMapping(
+            id="language",
+            question_name="Which languages do you prefer?",
+            options={
+                "I prefer Swedish. I understand English as well.": "prefers_swedish_knows_english",
+                "I prefer Swedish. I don't understand English well. (Sorry. This quiz must be hard for you)": "knows_only_swedish",
+                "I prefer English. I understand Swedish as well.": "prefers_english_knows_swedish",
+                "I prefer English. I don't understand Swedish well.": "knows_only_english",
+            },
+        ),
+    ]
+
+    members_to_quiz_answers: Dict[int, Dict[str, str]] = {}
+
+    for q in interesting_questions:
+        question = db_session.scalar(select(QuizQuestion).where(QuizQuestion.question == q.question_name))
+        if question is None:
+            logger.warning(f"Question '{q.question_name}' not found when generating statistics")
+            continue
+
+        for member_id, answer in db_session.execute(
+            select(Member.member_id, QuizQuestionOption.description)
+            .join(QuizAnswer, QuizAnswer.member_id == Member.member_id)
+            .join(QuizQuestionOption, QuizAnswer.option_id == QuizQuestionOption.id)
+            .filter(QuizAnswer.question_id == question.id)
+            .order_by(QuizAnswer.created_at.asc())
+        ).t:
+            mapped_answer = q.options.get(answer, None)
+            if mapped_answer is not None:
+                members_to_quiz_answers.setdefault(member_id, {})[q.id] = mapped_answer
+
+    result: List[RetentionMember] = []
+    current_year = datetime.now().year
+
+    MONTH_LIMIT = 12 * 5
+    for (member_id, spans), summary in zip(spans_by_member, summaries):
+        member = members.get(member_id, None)
+        if member is None:
+            continue
+
+        assert member.labaccess_agreement_at is not None
+
+        # Spans may start before the before the agreement was signed.
+        # This is the case for some old members that were migrated.
+        start_date = (
+            min(member.labaccess_agreement_at.date(), spans[0][1])
+            if len(spans) > 0
+            else member.labaccess_agreement_at.date()
+        )
+
+        active_months = [False for _ in range(MONTH_LIMIT)]
+        last_month = 0
+        for span in spans:
+            (_, span_start, span_end) = span
+            start_month = round((span_start - start_date).days / 30)
+            end_month = round((span_end - start_date).days / 30)
+            assert end_month >= 0 and start_month >= 0
+            start_month = max(0, min(start_month - 1, len(active_months) - 1))
+            end_month = max(0, min(end_month, len(active_months) - 1))
+            last_month = max(last_month, end_month)
+            for i in range(start_month, end_month):
+                active_months[i] = True
+
+        active_months = active_months[:last_month]
+
+        attributes = {q.id: members_to_quiz_answers.get(member_id, {}).get(q.id, None) for q in interesting_questions}
+
+        age_group: str | None = None
+        if member.civicregno is not None:
+            civicregno = member.civicregno.replace("-", "").replace(" ", "").replace("_", "")
+            if len(civicregno) == 10:
+                civicregno = "19" + civicregno
+            if len(civicregno) == 12 and civicregno.isdecimal():
+                # See https://sv.wikipedia.org/wiki/Personnummer_i_Sverige
+                gender = "woman" if int(civicregno[10]) % 2 == 0 else "man"
+
+                # If the member has answered the quiz, we trust that answer more than the personnummer
+                if attributes["gender"] is None:
+                    attributes["gender"] = gender
+
+                try:
+                    birth_year = int(member.civicregno.strip()[0:4])
+                    if birth_year > 1930 and birth_year < current_year:
+                        rounded_age = ((current_year - birth_year) // 10) * 10
+                        age_group = f"{rounded_age}-{rounded_age + 9}"
+                except ValueError:
+                    pass
+
+        attributes["age_group"] = age_group
+        result.append(
+            RetentionMember(
+                member_id=member_id,
+                active_months=active_months,
+                attributes=attributes,
+            )
+        )
+
+    return RetentionTable(
+        members=result,
+        start_time=start,
+        end_time=end,
+    )

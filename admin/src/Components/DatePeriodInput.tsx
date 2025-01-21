@@ -3,24 +3,34 @@ import { DayPicker } from "react-day-picker";
 import DatePeriod from "../Models/DatePeriod";
 import { formatUtcDate, parseUtcDate, utcToday } from "../utils";
 
-const DayPickerInput = ({
+type DateRangeTemplate = {
+    label: string;
+    start: Date;
+    end: Date;
+};
+
+const DayPickerInput = <T extends { label: string }>({
     inputId,
     isValid,
     isChanged,
     value,
     onChange,
     inputStyle,
+    tabindex,
+    templates,
+    onSelectedTemplate,
 }: {
     inputId: string;
     isValid: boolean;
     isChanged: boolean;
+    tabindex?: number;
     value: Date | null;
     onChange: (date: Date | undefined) => void;
     inputStyle?: React.CSSProperties;
+    templates: T[];
+    onSelectedTemplate: (template: T) => void;
 }) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
-    const dialogId = "dialog-" + inputId;
-    const headerId = "header-" + inputId;
 
     // Hold the month in state to control the calendar when the input changes
     const [month, setMonth] = useState(value ?? new Date());
@@ -31,8 +41,19 @@ const DayPickerInput = ({
     // Hold the dialog visibility in state
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    // Function to toggle the dialog visibility
-    const toggleDialog = () => setIsDialogOpen(!isDialogOpen);
+    useEffect(() => {
+        if (value) {
+            const utcDate = new Date(
+                Date.UTC(
+                    value.getFullYear(),
+                    value.getMonth(),
+                    value.getDate(),
+                ),
+            );
+            setInputValue(formatUtcDate(utcDate));
+            setMonth(utcDate);
+        }
+    }, [value]);
 
     // Hook to handle the body scroll behavior and focus trapping.
     useEffect(() => {
@@ -91,6 +112,7 @@ const DayPickerInput = ({
                 value={inputValue}
                 placeholder="YYYY-MM-DD"
                 size={10}
+                tabIndex={tabindex}
                 className={
                     "uk-input" +
                     (isValid
@@ -100,46 +122,47 @@ const DayPickerInput = ({
                         : " uk-form-danger")
                 }
                 onChange={handleInputChange}
-                data-uk-dropdown
             />
-            <button
-                type="button"
-                className="uk-button uk-button-default"
-                style={{ fontSize: "inherit" }}
-                onClick={toggleDialog}
-                aria-controls="dialog"
-                aria-haspopup="dialog"
-                aria-expanded={isDialogOpen}
-                aria-label="Open calendar to choose date"
-            >
-                📆
-            </button>
-            <dialog
-                role="dialog"
-                ref={dialogRef}
-                id={dialogId}
-                aria-modal
-                aria-labelledby={headerId}
-                onClose={() => setIsDialogOpen(false)}
-            >
-                <DayPicker
-                    month={month}
-                    onMonthChange={setMonth}
-                    timeZone="UTC"
-                    autoFocus
-                    mode="single"
-                    selected={value || new Date()}
-                    onSelect={handleDayPickerSelect}
-                />
-            </dialog>
+            <div data-uk-dropdown="pos: bottom-center; delay-hide: 100">
+                <div className="uk-flex">
+                    {templates.length > 0 && (
+                        <ul className="uk-list uk-text-right date-period-templates">
+                            {templates.map((template) => (
+                                <li key={template.label}>
+                                    <a
+                                        className="uk-link-muted"
+                                        onClick={() =>
+                                            onSelectedTemplate(template)
+                                        }
+                                    >
+                                        {template.label}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    <DayPicker
+                        month={month}
+                        onMonthChange={setMonth}
+                        timeZone="UTC"
+                        mode="single"
+                        selected={value || new Date()}
+                        onSelect={handleDayPickerSelect}
+                    />
+                </div>
+            </div>
         </>
     );
 };
 
 const DatePeriodInput = ({
     period,
+    highlightChanges = false,
+    templates = [],
 }: {
     period: DatePeriod & { start: Date | null; end: Date | null };
+    highlightChanges?: boolean;
+    templates?: DateRangeTemplate[];
 }) => {
     const [start, setStart] = useState(period.start || null);
     const [end, setEnd] = useState(period.end || null);
@@ -165,11 +188,31 @@ const DatePeriodInput = ({
         }
     };
 
+    const onSelectedTemplate = (template: DateRangeTemplate) => {
+        // Ensure that the dates are UTC dates at midnight
+        const utcStart = new Date(
+            Date.UTC(
+                template.start.getFullYear(),
+                template.start.getMonth(),
+                template.start.getDate(),
+            ),
+        );
+        const utcEnd = new Date(
+            Date.UTC(
+                template.end.getFullYear(),
+                template.end.getMonth(),
+                template.end.getDate(),
+            ),
+        );
+        handleDayChange(utcStart, "start");
+        handleDayChange(utcEnd, "end");
+    };
+
     const today = utcToday();
     const historicStyle = { color: "darkcyan" };
 
     return (
-        <span>
+        <>
             {/* Input for start date */}
             <span>
                 <DayPickerInput
@@ -179,9 +222,12 @@ const DatePeriodInput = ({
                     }}
                     inputId="start"
                     isValid={period.isValid("start")}
-                    isChanged={period.isDirty("start")}
+                    isChanged={highlightChanges && period.isDirty("start")}
                     value={start}
                     onChange={(date) => handleDayChange(date, "start")}
+                    tabindex={600}
+                    templates={templates}
+                    onSelectedTemplate={onSelectedTemplate}
                 />
             </span>
             &nbsp;-&nbsp;
@@ -193,14 +239,51 @@ const DatePeriodInput = ({
                         ...(end && end < today && historicStyle),
                     }}
                     inputId="end"
+                    tabindex={601}
                     isValid={period.isValid("end")}
-                    isChanged={period.isDirty("end")}
+                    isChanged={highlightChanges && period.isDirty("end")}
                     value={end}
                     onChange={(date) => handleDayChange(date, "end")}
+                    templates={templates}
+                    onSelectedTemplate={onSelectedTemplate}
                 />
             </span>
-        </span>
+        </>
     );
+};
+
+export const commonPeriodTemplates = (now: Date): DateRangeTemplate[] => {
+    return [
+        {
+            label: "Last 30 days",
+            start: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30),
+            end: now,
+        },
+        {
+            label: "Last 90 days",
+            start: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 90),
+            end: now,
+        },
+        {
+            label: "Last 365 days",
+            start: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 365),
+            end: now,
+        },
+        {
+            label: "Last 5 years",
+            start: new Date(
+                now.getFullYear() - 5,
+                now.getMonth(),
+                now.getDate(),
+            ),
+            end: now,
+        },
+        {
+            label: "Year to date",
+            start: new Date(now.getFullYear(), 0, 1),
+            end: now,
+        },
+    ];
 };
 
 export default DatePeriodInput;

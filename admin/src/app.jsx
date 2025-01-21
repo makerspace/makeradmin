@@ -5,18 +5,17 @@ import Icons from "uikit/dist/js/uikit-icons";
 UIkit.use(Icons);
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Router } from "react-router";
 import { Route, Switch } from "react-router-dom";
-import Login from "./Components/Login";
-import auth from "./auth";
-import { browserHistory } from "./browser_history";
-import { Nav, SideNav } from "./nav";
-
 import Page404 from "./Components/404";
+import Login from "./Components/Login";
 import Logout from "./Components/Logout";
 import PasswordReset from "./Components/PasswordReset";
 import RequestPasswordReset from "./Components/RequestPasswordReset";
+import auth from "./auth";
+import { browserHistory } from "./browser_history";
+import { Nav, SideNav } from "./nav";
 
 import { defaultSubpageRoute } from "./Components/Routes";
 import Membership from "./Membership/Routes";
@@ -24,6 +23,7 @@ import Messages from "./Messages/Routes";
 import Quiz from "./Quiz/Routes";
 import Sales from "./Sales/Routes";
 import Settings from "./Settings/Routes";
+import Statistics from "./Statistics/Routes";
 import BoxTerminator from "./boxTerminator/Routes";
 
 const nav = {
@@ -121,6 +121,37 @@ const nav = {
             ],
         },
         {
+            text: "Statistik",
+            target: "/statistics",
+            icon: "image",
+            children: [
+                {
+                    text: "Sales by Product",
+                    target: "/statistics/product/sales",
+                },
+                {
+                    text: "Sales by Category",
+                    target: "/statistics/category/sales",
+                },
+                {
+                    text: "Quiz",
+                    target: "/statistics/quiz",
+                },
+                {
+                    text: "Membership",
+                    target: "/statistics/membership",
+                },
+                {
+                    text: "Physical Access Log",
+                    target: "/statistics/physical_access_log",
+                },
+                {
+                    text: "Members of Interest",
+                    target: "/statistics/members_of_interest",
+                },
+            ],
+        },
+        {
             text: "Inställningar",
             target: "/settings",
             icon: "cog",
@@ -195,6 +226,10 @@ const App = () => {
                                                 component={Messages}
                                             />
                                             <Route
+                                                path="/statistics"
+                                                component={Statistics}
+                                            />
+                                            <Route
                                                 path="/settings"
                                                 component={Settings}
                                             />
@@ -222,4 +257,4 @@ const App = () => {
 
 App.title = "MakerAdmin";
 
-ReactDOM.createRoot(document.getElementById("main")).render(<App />);
+createRoot(document.getElementById("main")).render(<App />);

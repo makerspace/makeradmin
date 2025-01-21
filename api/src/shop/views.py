@@ -35,6 +35,7 @@ from shop.entities import (
 from shop.models import ProductImage, TransactionContent
 from shop.pay import (
     CancelSubscriptionsRequest,
+    SetupPaymentMethodResponse,
     StartSubscriptionsRequest,
     cancel_subscriptions,
     pay,
@@ -50,6 +51,7 @@ from shop.shop_data import (
     pending_actions,
     receipt,
 )
+from shop.statistics import category_sales, product_sales
 from shop.stripe_discounts import get_discount_fraction_off
 from shop.stripe_event import stripe_callback
 from shop.stripe_payment_intent import PartialPayment
@@ -309,7 +311,7 @@ def pay_route() -> PartialPayment:
 
 # Used to just initiate a capture of a payment method via a setup intent
 @service.route("/setup_payment_method", method=POST, permission=USER, commit_on_error=True)
-def setup_payment_method_route():
+def setup_payment_method_route() -> SetupPaymentMethodResponse:
     return setup_payment_method(request.json, g.user_id)
 
 
@@ -320,12 +322,12 @@ def register_route() -> Any:
 
 
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
-def stripe_callback_route():
+def stripe_callback_route() -> None:
     stripe_callback(request.data, request.headers)
 
 
 @service.route("/download-accounting-file/<int:year>/<int:month>", method=GET, permission=WEBSHOP)
-def download_accounting_file_route(year: str, month: str):
+def download_accounting_file_route(year: int, month: int) -> str:
     zone = get_makerspace_local_timezone()
     start_date = datetime(year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=zone)
     end_data = datetime(
@@ -334,3 +336,23 @@ def download_accounting_file_route(year: str, month: str):
     return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
         "ascii"
     )
+
+
+@service.route("/product/<int:product_id>/sales", method=GET, permission=WEBSHOP)
+def product_sales_route(product_id: int) -> Any:
+    start_str = request.args.get("start", default=None)
+    start = datetime.fromisoformat(start_str) if start_str is not None else None
+
+    end_str = request.args.get("end", default=None)
+    end = datetime.fromisoformat(end_str) if end_str is not None else None
+    return product_sales(product_id, start, end).to_dict()
+
+
+@service.route("/category/<int:category_id>/sales", method=GET, permission=WEBSHOP)
+def category_sales_route(category_id: int) -> Any:
+    start_str = request.args.get("start", default=None)
+    start = datetime.fromisoformat(start_str) if start_str is not None else None
+
+    end_str = request.args.get("end", default=None)
+    end = datetime.fromisoformat(end_str) if end_str is not None else None
+    return category_sales(category_id, start, end).to_dict()

@@ -67,6 +67,9 @@ function MemberBox({ children }) {
                     <NavItem to={`/membership/members/${member_id}/spans`}>
                         Perioder
                     </NavItem>
+                    <NavItem to={`/membership/members/${member_id}/statistics`}>
+                        Statistik
+                    </NavItem>
                 </ul>
                 {children}
             </div>

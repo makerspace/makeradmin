@@ -322,9 +322,9 @@ tr.toggle pre {
 }
 
 /* However, in the Navbar they are already aligned */
-ul.uk-navbar-nav > li > a > .uk-icon,
+ul.uk-navbar-nav>li>a>.uk-icon,
 /* As well as when inlined into an input */
-.uk-inline > .uk-icon:has(+input) {
+.uk-inline>.uk-icon:has(+input) {
     transform: translateY(0px);
 }
 
@@ -353,4 +353,10 @@ button > svg {
     border-color: #dbdc8d !important;
     background: #fffff7 !important;
     color: #9b8716 !important;
+}
+
+.date-period-templates {
+    margin-top: 8px;
+    margin-right: 30px;
+    font-size: 0.9em;
 }

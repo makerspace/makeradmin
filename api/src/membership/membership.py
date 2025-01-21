@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
 
 from service.api_definition import NOT_UNIQUE
 from service.db import db_session
-from service.error import PreconditionFailed, UnprocessableEntity
+from service.error import NotFound, PreconditionFailed, UnprocessableEntity
 from service.util import date_to_str
 from sqlalchemy import func
 
@@ -209,7 +209,9 @@ def get_access_summary(member_id: int):
     if accessy_session is None:
         logger.warning("No accessy session, using dummy accessy summary.")
         return dummy_accessy_summary
-    member: Member = db_session.query(Member).filter(Member.member_id == member_id).one()
+    member: Member | None = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
+    if member is None:
+        raise NotFound("Member does not exist")
 
     msisdn: str | None = member.phone
     if msisdn is not None:

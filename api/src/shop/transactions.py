@@ -451,8 +451,8 @@ def validate_order(
 
 
 def validate_labaccess_puchase_with_valid_base_membership(
-    labaccess_in_cart, member_has_base_membership, base_membership_in_cart
-):
+    labaccess_in_cart: bool, member_has_base_membership: bool, base_membership_in_cart: bool
+) -> None:
     if labaccess_in_cart and not (member_has_base_membership or base_membership_in_cart):
         raise BadRequest(
             "Could not purchase selected subscription. Please buy the base annual membership before lab access."

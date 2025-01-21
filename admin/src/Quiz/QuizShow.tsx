@@ -1,5 +1,6 @@
 import React from "react";
 import Quiz from "../Models/Quiz";
+import { QuizGraph } from "../Statistics/Graphs/QuizGraph";
 import { browserHistory } from "../browser_history";
 import { confirmModal } from "../message";
 import QuestionListRouter from "./QuestionList";
@@ -73,6 +74,8 @@ class QuizShow extends React.Component<Props, State> {
                 {quiz_id != null && (
                     <>
                         <QuestionListRouter quiz_id={quiz_id} />
+                        <h2>Statistics</h2>
+                        <QuizGraph quiz_id={quiz_id} />
                     </>
                 )}
             </>

@@ -20,6 +20,7 @@ import MemberBoxNewMessage from "./MemberBoxNewMessage";
 import MemberBoxOrders from "./MemberBoxOrders";
 import MemberBoxPermissions from "./MemberBoxPermissions";
 import MemberBoxSpans from "./MemberBoxSpans";
+import MemberBoxStatistics from "./MemberBoxStatistics";
 import MemberExport from "./MemberExport";
 import MemberList from "./MemberList";
 import SpanList from "./SpanList";
@@ -69,6 +70,10 @@ const Member = ({ match: { path } }) => (
             />
             <Route path={`${path}/messages`} component={MemberBoxMessages} />
             <Route path={`${path}/spans`} component={MemberBoxSpans} />
+            <Route
+                path={`${path}/statistics`}
+                component={MemberBoxStatistics}
+            />
         </Switch>
     </MemberBox>
 );
