@@ -1,5 +1,5 @@
+import { useJson } from "Hooks/useJson";
 import React from "react";
-import { useJson } from "State/useJson";
 import { InitialChartData, ProductChart } from "./Graphs/ProductGraph";
 import { ProductCategory } from "./types";
 

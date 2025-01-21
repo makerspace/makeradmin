@@ -3,9 +3,9 @@ import ButtonGroup from "Components/ButtonGroup";
 import DatePeriodInput, {
     commonPeriodTemplates,
 } from "Components/DatePeriodInput";
+import { useJson } from "Hooks/useJson";
+import { usePeriod } from "Hooks/usePeriod";
 import React, { useEffect, useMemo } from "react";
-import { useJson } from "State/useJson";
-import { usePeriod } from "State/usePeriod";
 import { colorScale, colorScaleSequential } from "../colors";
 
 type RetentionTable = {

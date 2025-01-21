@@ -1,6 +1,6 @@
 import { Chart, ChartConfiguration } from "chart.js";
+import { useJson } from "Hooks/useJson";
 import React, { useEffect } from "react";
-import { useJson } from "State/useJson";
 import { TooltipLineWidth, wordWrap } from "../Charts";
 
 interface Question {

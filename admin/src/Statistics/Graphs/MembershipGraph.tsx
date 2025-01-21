@@ -1,7 +1,7 @@
 import { Chart, ChartConfiguration } from "chart.js";
 import colorbrewer from "colorbrewer";
+import { useJson } from "Hooks/useJson";
 import React, { useEffect, useState } from "react";
-import { useJson } from "State/useJson";
 
 function toPoints<T>(items: [string, T][]): { x: number; y: T }[] {
     const values = [];

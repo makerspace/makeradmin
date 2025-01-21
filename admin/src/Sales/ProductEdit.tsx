@@ -6,7 +6,7 @@ import Product from "../Models/Product";
 
 import ProductForm from "../Components/ProductForm";
 
-import { useJson } from "State/useJson";
+import { useJson } from "Hooks/useJson";
 import { InitialChartData, ProductChart } from "Statistics/Graphs/ProductGraph";
 import { ProductCategory } from "Statistics/types";
 import { confirmModal } from "../message";

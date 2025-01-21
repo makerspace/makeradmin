@@ -1,6 +1,6 @@
+import { useJson } from "Hooks/useJson";
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useJson } from "State/useJson";
 import { QuizGraph } from "./Graphs/QuizGraph";
 
 type Quiz = {
