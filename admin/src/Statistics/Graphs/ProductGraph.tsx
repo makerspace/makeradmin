@@ -422,8 +422,10 @@ const RenderProductGraphByTotal = <T,>(
         if (existing === undefined) {
             newDatasets.push(d);
         } else {
-            // Assume only the data changes
+            // Assume only the data and label changes
             existing.data = d.data;
+            existing.label = d.label;
+            existing.backgroundColor = d.backgroundColor;
         }
     }
     chart.data.datasets = newDatasets;
