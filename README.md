@@ -2,7 +2,60 @@
 
 # Makeradmin
 
-## Install
+Member management system for makerspaces. Built by [Stockholm Makerspace](makerspace.se).
+
+<img src="docs/src/images/member_list.png" alt="member list" width="400"/>
+
+## Features
+
+### Easily administrate members of the makerspace
+
+-   Name, address, etc.
+-   Membership status
+-   Access groups and permissions
+-   Automatic emails about membership renewal and similar.
+
+<img src="docs/src/images/member_view.png" alt="member view" width="400"/>
+
+### Membership portal
+
+Members get their own portal where they can easily:
+
+-   Check their membership status.
+-   Buy additional membership, or even subscribe for automatic membership renewal.
+-   Buy other things in a built-in webshop.
+-   Take quizzes to improve their knowledge
+
+<img src="docs/src/images/member_portal_front.png" alt="member portal" width="400"/>
+
+### Webshop
+
+MakerAdmin has a webshop that can be used to sell everything from drill bits to membership months.
+
+We use **Stripe** as our payment processor.
+
+<img src="docs/src/images/member_portal_shop.png" alt="member portal shop" width="400"/>
+
+### Clean registration flow
+
+With a clean registration flow, members can more easily sign up, and understand what a makerspace entails.
+
+<img src="docs/src/images/registration_flow.png" alt="registration flow" width="400"/>
+
+### Statistics
+
+Get key insights for how to improve the makerspace.
+
+-   Integrates with the webshop.
+-   Integrates with the membership system.
+-   Integrates with the quizzes.
+-   Integrates with [Accessy](https://accessy.se) for tracking visits to the space.
+
+<img src="docs/src/images/statistics_sales.png" alt="sales statistics" width="400"/>
+
+## Installation
+
+First, you'll need some dependencies.
 
 ### Docker
 
