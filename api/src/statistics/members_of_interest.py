@@ -39,9 +39,9 @@ def days_with_visits(
     stmt = (
         select(Member, unique_days.label("days_with_visits"))
         .where(
-            PhysicalAccessEntry.created_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean)
+            PhysicalAccessEntry.invoked_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean)
         )
-        .where(PhysicalAccessEntry.created_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
+        .where(PhysicalAccessEntry.invoked_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .having(unique_days > 0)
         .limit(limit)
         .order_by(desc(unique_days))
