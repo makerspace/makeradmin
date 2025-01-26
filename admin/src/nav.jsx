@@ -25,7 +25,7 @@ export const NavItem = (props) => {
 
 export const Nav = ({ nav: { brand, items } }) => (
     <nav className="uk-navbar-container">
-        <div className="uk-navbar-left uk-margin-left">
+        <div className="uk-navbar-left">
             <Link to="/" className="uk-navbar-item uk-logo">
                 {brand}
             </Link>
