@@ -1,20 +1,18 @@
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from contextlib import closing
 from datetime import datetime, timedelta, timezone
-from os.path import abspath, dirname
 from time import sleep
 from typing import Optional
 from urllib.parse import quote_plus
 
 import requests
 from core.auth import create_access_token
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 from membership.membership import get_members_and_membership
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
-from quiz.views import quiz_member_answer_stats
+from quiz.models import QuizQuestion, QuizQuestionOption
+from quiz.views import QuizMemberStat, quiz_member_answer_stats
 from rocky.process import log_exception, stoppable
 from service.config import config, get_mysql_config, get_public_url
 from service.db import create_mysql_engine, db_session
@@ -22,7 +20,7 @@ from service.logging import logger
 from shop.models import ProductAction
 from shop.shop_data import pending_actions
 from shop.transactions import pending_action_value_sum
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
 
@@ -102,7 +100,7 @@ def send_messages(key: Optional[str], domain: str, sender: str, to_override: Opt
             logger.error(f"failed to send {message.id} to {to}: {response.content.decode('utf-8')}")
 
 
-def already_sent_message(template: MessageTemplate, member: Member, days: int):
+def already_sent_message(template: MessageTemplate, member: Member, days: int) -> bool:
     """True if a message has been sent with the given template to the member in the last #days days"""
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     reminder_sent = (
@@ -321,7 +319,7 @@ def quiz_reminders() -> None:
             )
 
 
-def get_login_link(member, browser, path):
+def get_login_link(member: Member, browser: str, path: str) -> str:
     redirect = get_public_url(path)
     access_token = create_access_token("localhost", browser, member.member_id, valid_duration=timedelta(days=4))[
         "access_token"

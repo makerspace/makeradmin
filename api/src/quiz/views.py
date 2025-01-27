@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from flask import g, request
 from membership.models import Member
@@ -189,7 +190,7 @@ class QuizMemberStat:
     correctly_answered_questions: int
 
 
-def quiz_member_answer_stats(quiz_id: int):
+def quiz_member_answer_stats(quiz_id: int) -> List[QuizMemberStat]:
     """Returns all members which haven't completed the quiz"""
 
     # Calculates how many questions each member has answered correctly
