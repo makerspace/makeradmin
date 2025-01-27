@@ -103,9 +103,9 @@ const ProductForm = ({ product, onDelete, onSave }) => {
         <div className="uk-margin-top">
             <form
                 className="uk-form-stacked"
-                onSubmit={() => {
+                onSubmit={(e) => {
+                    e.preventDefault();
                     onSave();
-                    return false;
                 }}
             >
                 <fieldset className="uk-margin-top">
