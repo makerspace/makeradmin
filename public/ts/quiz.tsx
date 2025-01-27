@@ -140,6 +140,14 @@ class QuizManager extends Component<QuizManagerProps, State> {
                         you good luck with all your exciting projects at
                         Stockholm Makerspace!
                     </p>
+                    <div>
+                        <a
+                            className="uk-button uk-button-primary"
+                            href="/shop/member/courses"
+                        >
+                            Check out more online courses
+                        </a>
+                    </div>
                     {/* Vi hoppas att det var lärorikt och önskar dig lycka till med alla spännande projekt på Stockholm Makerspace */}
                     <div className="quiz-more-questions">
                         <span>
