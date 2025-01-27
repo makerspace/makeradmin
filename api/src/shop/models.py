@@ -137,7 +137,7 @@ class Transaction(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
 
     member: Mapped[Member] = relationship(Member)
-    stripe_pending: Mapped[Optional["StripePending"]] = relationship("StripePending")
+    stripe_pending: Mapped[list["StripePending"]] = relationship("StripePending")
 
     def __repr__(self) -> str:
         return f"Transaction(id={self.id}, amount={self.amount}, status={self.status}, created_at={self.created_at})"
