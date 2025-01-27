@@ -28,7 +28,7 @@ Message.model = {
         created_at: null,
         updated_at: null,
         sent_at: null,
-        recipient_id: 0,
+        member_id: 0,
     },
 };
 

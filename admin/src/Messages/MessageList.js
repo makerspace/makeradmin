@@ -1,11 +1,11 @@
 import React from "react";
-import Collection from "../Models/Collection";
-import CollectionTable from "../Components/CollectionTable";
-import Message from "../Models/Message";
-import DateTimeShow from "../Components/DateTimeShow";
 import { Link } from "react-router-dom";
-import CollectionNavigation from "../Models/CollectionNavigation";
+import CollectionTable from "../Components/CollectionTable";
+import DateTimeShow from "../Components/DateTimeShow";
 import SearchBox from "../Components/SearchBox";
+import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
+import Message from "../Models/Message";
 
 const Row = (props) => {
     const { item } = props;
@@ -15,7 +15,11 @@ const Row = (props) => {
                 <DateTimeShow date={item.created_at} />
             </td>
             <td>{Message.statusText(item)}</td>
-            <td>{item.recipient}</td>
+            <td>
+                <Link to={`/membership/members/${item.member_id}`}>
+                    {item.recipient}
+                </Link>
+            </td>
             <td>
                 <Link to={"/messages/" + item.id}>{item.subject}</Link>
             </td>

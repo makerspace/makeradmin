@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import DateTimeShow from "../Components/DateTimeShow";
 import Message from "../Models/Message";
 
@@ -13,7 +13,7 @@ function MessageShow() {
             created_at: null,
             id: null,
             recipient: "",
-            recipient_id: null,
+            member_id: null,
             recipients: [],
             sent_at: null,
             status: "",
@@ -30,7 +30,7 @@ function MessageShow() {
                 created_at: messageInstance.created_at,
                 id: messageInstance.id,
                 recipient: messageInstance.recipient,
-                recipient_id: messageInstance.recipient_id,
+                member_id: messageInstance.member_id,
                 recipients: messageInstance.recipients,
                 sent_at: messageInstance.sent_at,
                 status: messageInstance.status,
@@ -75,7 +75,17 @@ function MessageShow() {
                         </tr>
                         <tr>
                             <th align="left">Recipient</th>
-                            <td>{message.recipient || "N/A"}</td>
+                            <td>
+                                {message.recipient ? (
+                                    <Link
+                                        to={`/membership/members/${message.member_id}`}
+                                    >
+                                        {message.recipient}
+                                    </Link>
+                                ) : (
+                                    "N/A"
+                                )}
+                            </td>
                         </tr>
                         <tr>
                             <th align="left">Template Used</th>

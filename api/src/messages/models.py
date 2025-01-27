@@ -53,7 +53,7 @@ class Message(Base):
     member: Mapped[Optional[Member]] = relationship(Member)
 
     def __repr__(self) -> str:
-        return f"Message(recipient_id={self.id}, subject={self.subject}, member_id={self.member_id})"
+        return f"Message(id={self.id}, subject={self.subject}, member_id={self.member_id})"
 
 
 # https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
