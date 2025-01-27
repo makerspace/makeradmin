@@ -1,20 +1,18 @@
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from contextlib import closing
 from datetime import datetime, timedelta, timezone
-from os.path import abspath, dirname
 from time import sleep
 from typing import Optional
 from urllib.parse import quote_plus
 
 import requests
 from core.auth import create_access_token
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 from membership.membership import get_members_and_membership
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
-from quiz.views import quiz_member_answer_stats
+from quiz.models import QuizQuestion, QuizQuestionOption
+from quiz.views import QuizMemberStat, quiz_member_answer_stats
 from rocky.process import log_exception, stoppable
 from service.config import config, get_mysql_config, get_public_url
 from service.db import create_mysql_engine, db_session
@@ -22,7 +20,7 @@ from service.logging import logger
 from shop.models import ProductAction
 from shop.shop_data import pending_actions
 from shop.transactions import pending_action_value_sum
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
 
@@ -102,7 +100,7 @@ def send_messages(key: Optional[str], domain: str, sender: str, to_override: Opt
             logger.error(f"failed to send {message.id} to {to}: {response.content.decode('utf-8')}")
 
 
-def already_sent_message(template: MessageTemplate, member: Member, days: int):
+def already_sent_message(template: MessageTemplate, member: Member, days: int) -> bool:
     """True if a message has been sent with the given template to the member in the last #days days"""
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     reminder_sent = (
@@ -225,8 +223,10 @@ def membership_reminder() -> None:
 
 def quiz_reminders() -> None:
     # Assume quiz 1 is the get started quiz
-    quiz_id = 1
+    GET_STARTED_QUIZ_ID = 1
+    quiz_id = GET_STARTED_QUIZ_ID
     quiz_members = quiz_member_answer_stats(quiz_id)
+    quiz_members_dict = {quiz_member.member_id: quiz_member for quiz_member in quiz_members}
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     members, memberships = get_members_and_membership()
@@ -234,6 +234,7 @@ def quiz_reminders() -> None:
 
     # Get all pending shop actions and check which members have pending purchases of lab access
     actions = pending_actions()
+
     members_with_pending_labaccess = set()
     for action in actions:
         if action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0:
@@ -271,9 +272,24 @@ def quiz_reminders() -> None:
         .all()
     )
 
-    for quiz_member in quiz_members:
+    total_quiz_questions = (
+        db_session.scalar(
+            select(func.count()).where(QuizQuestion.quiz_id == quiz_id).where(QuizQuestion.deleted_at.is_(None))
+        )
+        or 0
+    )
+
+    for member in members:
+        quiz_member = quiz_members_dict.get(member.member_id, None)
+        if quiz_member is None:
+            quiz_member = QuizMemberStat(
+                member_id=member.member_id, remaining_questions=total_quiz_questions, correctly_answered_questions=0
+            )
+
         if quiz_member.remaining_questions > 0:
-            member, membership = id_to_member.get(quiz_member.member_id)
+            member_data = id_to_member.get(member.member_id)
+            assert member_data is not None
+            member, membership = member_data
             # Shouldn't really happen, but best check (db race conditions might cause it I guess)
             if member is None:
                 continue
@@ -289,6 +305,10 @@ def quiz_reminders() -> None:
             if not (membership.effective_labaccess_active or pending_labaccess):
                 continue
 
+            if member.labaccess_agreement_at is None:
+                # Members should get the quiz *after* their introduction
+                continue
+
             # Check if a message has already been sent within given time periods
             if member.member_id in recently_sent_messages_by_member:
                 continue
@@ -301,7 +321,8 @@ def quiz_reminders() -> None:
                 # The oldmember template was used when the quiz was first introduced to give
                 # existing members a customized message.
                 # It also applies to those who haven't been members for a long time and become members again.
-                is_oldmember = member.created_at < now - timedelta(days=14)
+                QUIZ_FEATURE_INTRODUCED = datetime(2020, 8, 25)
+                is_oldmember = member.created_at < QUIZ_FEATURE_INTRODUCED - timedelta(days=14)
                 if is_oldmember:
                     template = MessageTemplate.QUIZ_FIRST_OLDMEMBER
                     # Ignore old members. We don't send the quiz to them right now
@@ -309,7 +330,7 @@ def quiz_reminders() -> None:
                 else:
                     template = MessageTemplate.QUIZ_FIRST_NEWMEMBER
 
-            url = get_login_link(member, "automatic quiz reminder", "/member/quiz/1")
+            url = get_login_link(member, "automatic quiz reminder", f"/member/quiz/{quiz_id}")
 
             send_message(
                 template=template,
@@ -321,7 +342,7 @@ def quiz_reminders() -> None:
             )
 
 
-def get_login_link(member, browser, path):
+def get_login_link(member: Member, browser: str, path: str) -> str:
     redirect = get_public_url(path)
     access_token = create_access_token("localhost", browser, member.member_id, valid_duration=timedelta(days=4))[
         "access_token"

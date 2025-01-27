@@ -1,10 +1,14 @@
 import enum
+from datetime import datetime
+from typing import Literal, Optional
 
 from membership.models import Member
 from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Integer, String, Text, func
-from sqlalchemy.orm import configure_mappers, declarative_base, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, configure_mappers, mapped_column, relationship
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
 
 
 class MessageTemplate(enum.Enum):
@@ -28,26 +32,27 @@ class MessageTemplate(enum.Enum):
 
 
 class Message(Base):
-    QUEUED = "queued"
-    SENT = "sent"
-    FAILED = "failed"
+    STATUS = Literal["queued", "sent", "failed"]
+    QUEUED: STATUS = "queued"
+    SENT: STATUS = "sent"
+    FAILED: STATUS = "failed"
 
     __tablename__ = "message"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    subject = Column(Text, nullable=False)
-    body = Column(Text)
-    member_id = Column(Integer, ForeignKey(Member.member_id))
-    recipient = Column(String(255))
-    status = Column(Enum(QUEUED, SENT, FAILED), nullable=False)
-    template = Column(String(120), nullable=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    sent_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    subject: Mapped[str] = mapped_column(Text, nullable=False)
+    body: Mapped[Optional[str]] = mapped_column(Text)
+    member_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(Member.member_id))
+    recipient: Mapped[Optional[str]] = mapped_column(String(255))
+    status: Mapped[STATUS] = mapped_column(Enum(QUEUED, SENT, FAILED), nullable=False)
+    template: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
-    member = relationship(Member)
+    member: Mapped[Optional[Member]] = relationship(Member)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Message(recipient_id={self.id}, subject={self.subject}, member_id={self.member_id})"
 
 

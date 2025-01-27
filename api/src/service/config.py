@@ -56,7 +56,7 @@ dot_env = DotEnvFile()
 config = Config(env, dot_env, default, log_level=INFO)
 
 
-def get_mysql_config():
+def get_mysql_config() -> dict[str, str | int]:
     host = config.get("MYSQL_HOST")
     port = int(config.get("MYSQL_PORT"))
     db = config.get("MYSQL_DB")
@@ -68,7 +68,7 @@ def get_mysql_config():
     return dict(host=host, port=port, db=db, user=user, pwd=pwd)
 
 
-def get_public_url(path):
+def get_public_url(path: str) -> str:
     """Get public site url."""
     host = config.get("HOST_PUBLIC")
     if not host.startswith("http://") and not host.startswith("https://"):
@@ -76,7 +76,7 @@ def get_public_url(path):
     return f"{host}{path}"
 
 
-def get_46elks_auth():
+def get_46elks_auth() -> tuple[str, str] | None:
     usr = config.get("ELKS46_API_USER")
     pwd = config.get("ELKS46_API_KEY", log_value=False)
     if not usr and not pwd:
@@ -84,7 +84,7 @@ def get_46elks_auth():
     return (usr, pwd)
 
 
-def get_admin_url(path):
+def get_admin_url(path: str) -> str:
     """Get public site url."""
     host = config.get("HOST_FRONTEND")
     if not host.startswith("http://") and not host.startswith("https://"):
