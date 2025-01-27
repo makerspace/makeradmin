@@ -489,7 +489,12 @@ def get_subscription_info_from_subscription(sub_type: SubscriptionType, sub_id: 
                 upcoming_invoice=None,
             )
         else:
-            raise e
+            logger.error(f"Error getting upcoming invoice for subscription {sub_id}: {e}")
+            return SubscriptionInfo(
+                type=sub_type,
+                active=False,
+                upcoming_invoice=None,
+            )
 
 
 def list_subscriptions(member_id: int) -> List[SubscriptionInfo]:
