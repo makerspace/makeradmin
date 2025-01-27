@@ -302,7 +302,9 @@ def quiz_reminders() -> None:
             pending_labaccess = member.member_id in members_with_pending_labaccess
 
             # Only send messages to members whose labaccess is active or pending
-            if not (membership.effective_labaccess_active or pending_labaccess):
+            # We don't check effective labaccess, because if a member only has special labaccess,
+            # then they are likely either not super involved, or they are not actually a member, but instead a cleaner or similar.
+            if not (membership.labaccess_active or pending_labaccess):
                 continue
 
             if member.labaccess_agreement_at is None:
