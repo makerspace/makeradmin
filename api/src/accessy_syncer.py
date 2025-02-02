@@ -16,18 +16,16 @@ COMMAND_SHIP = "ship"
 COMMAND_SYNC = "sync"
 
 
-def scheduled_ship_and_sync():
+def scheduled_ship():
+    logger.info("shipping orders")
     try:
-        logger.info("shipping orders")
         ship_orders()
-        logger.info("syncing accessy")
-        sync()
         db_session.commit()
-        logger.info("committing changes to db")
     except Exception as e:
         logger.exception(f"failed to ship orders: {e}")
     finally:
         db_session.remove()
+    logger.info("finished shipping orders")
 
 
 def scheduled_sync():
@@ -35,21 +33,16 @@ def scheduled_sync():
     try:
         sync()
         db_session.commit()
-        logger.info("finished syncing accessy")
     except Exception as e:
         logger.exception(f"failed to sync with accessy: {e}")
     finally:
         db_session.remove()
-
-
-friday = 4
+    logger.info("finished syncing accessy")
 
 
 def daily_job():
-    if datetime.today().weekday() is friday:
-        scheduled_ship_and_sync()
-    else:
-        scheduled_sync()
+    scheduled_ship()
+    scheduled_sync()
 
 
 def main():
