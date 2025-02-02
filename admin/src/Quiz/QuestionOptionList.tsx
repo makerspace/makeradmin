@@ -42,7 +42,7 @@ const Row =
                 </td>
                 <td>
                     <input
-                        className="uk-input"
+                        className="uk-checkbox"
                         type="checkbox"
                         checked={item.correct}
                         onChange={(v) => {
@@ -113,6 +113,7 @@ class QuestionOptionList extends React.Component<Props, State> {
                         )}
                         collection={this.collection}
                         columns={columns}
+                        className="uk-table-middle"
                     />
                 </div>
                 <button

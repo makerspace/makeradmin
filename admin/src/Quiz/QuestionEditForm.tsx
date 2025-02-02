@@ -19,7 +19,7 @@ export default (props: Props) => {
 
     const delete_button = !question.id ? null : (
         <a
-            className="uk-button uk-button-danger uk-float-left"
+            className="uk-button uk-button-danger"
             onClick={onDelete}
         >
             <Icon icon="trash" /> Radera fråga
@@ -27,7 +27,7 @@ export default (props: Props) => {
     );
     const save_button = (
         <a
-            className="uk-button uk-button-primary uk-float-right"
+            className="uk-button uk-button-primary uk-margin-left"
             onClick={onSave}
         >
             <Icon icon="save" /> {question.id ? "Spara" : "Skapa"}
@@ -35,7 +35,7 @@ export default (props: Props) => {
     );
     const new_button = !question.id ? null : (
         <a
-            className="uk-button uk-button-primary uk-float-right"
+            className="uk-button uk-button-primary"
             onClick={onNew}
         >
             <Icon icon="save" /> New question
@@ -68,8 +68,9 @@ export default (props: Props) => {
                         </>
                     )}
                 </fieldset>
-                <div className="form-row uk-margin-top">
+                <div className="form-row uk-margin-top uk-flex">
                     {delete_button}
+                    <div className="uk-flex-1"/>
                     {new_button}
                     {save_button}
                 </div>
