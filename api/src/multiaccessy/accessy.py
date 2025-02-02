@@ -536,6 +536,7 @@ class AccessySession:
             data = self._get(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id()}/membership")
             user.membership_id = data["id"]
 
+        exception_during_fetch = None
         threads = []
         user_ids = list(user_ids)
         thread_count = min(4, len(user_ids))
@@ -548,9 +549,13 @@ class AccessySession:
 
             # Start a thread for each chunk
             def worker(member_slice: list[AccessyMember]) -> None:
-                for member in member_slice:
-                    fill_user_details(member)
-                    fill_membership_id(member)
+                nonlocal exception_during_fetch
+                try:
+                    for member in member_slice:
+                        fill_user_details(member)
+                        fill_membership_id(member)
+                except AccessyError as e:
+                    exception_during_fetch = e
 
             t = threading.Thread(target=worker, args=(member_slice,))
             threads.append(t)
@@ -561,6 +566,11 @@ class AccessySession:
 
         # Filter out API keys
         accessy_members = [m for m in accessy_members if m.phone is not APPLICATION_PHONE_NUMBER]
+
+        if exception_during_fetch:
+            raise RuntimeError(
+                f"One or more threads failed to fetch user details. The last exception as: {exception_during_fetch}"
+            )
 
         return accessy_members
 
