@@ -574,6 +574,38 @@ class AccessySession:
 
         return accessy_members
 
+    def _user_id_to_accessy_member(self, user_id: UUID) -> AccessyMember | None:
+        """Convert an Accessy User ID to an AccessyMember object"""
+
+        APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
+
+        def fill_user_details(user: AccessyMember) -> None:
+            data = self.get_user_details(user_id)
+
+            # API keys do not have phone numbers, set it to sentinel object so we can filter out API keys further down
+            if data.application:
+                user.phone = APPLICATION_PHONE_NUMBER
+                return
+
+            if data.msisdn is not None:
+                user.phone = data.msisdn
+            else:
+                logger.warning(f"User {user_id=} does not have a phone number in accessy. {data=}")
+            user.name = f"{data.firstName} {data.lastName}"
+
+        def fill_membership_id(user: AccessyMember) -> None:
+            data = self._get(f"/asset/admin/user/{user_id}/organization/{self.organization_id()}/membership")
+            user.membership_id = data["id"]
+
+        member = AccessyMember(user_id=user_id)
+        fill_user_details(member)
+        fill_membership_id(member)
+
+        if member.phone is APPLICATION_PHONE_NUMBER:
+            return None
+
+        return member
+
     def _populate_user_groups(self, members: List[AccessyMember]) -> None:
         lab_ids = set(item["userId"] for item in self._get_users_lab())
         special_ids = set(item["userId"] for item in self._get_users_special())
@@ -603,7 +635,7 @@ class AccessySession:
         for item in users_in_org:
             if item.get("msisdn", None) == phone_number:
                 user_id = item["id"]
-                return self._user_ids_to_accessy_members([user_id])[0]
+                return self._user_id_to_accessy_member(user_id)
         else:
             return None
 
