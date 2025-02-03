@@ -240,10 +240,42 @@ class AccessySession:
     def get_all_members(self) -> list[AccessyMember]:
         """Get a list of all Accessy members in the ORG with GROUPS (lab and special)"""
 
-        org_member_ids = set(item["id"] for item in self._get_users_org())
+        def fill_in_group_affiliation_and_membership_id(members: list[AccessyMember], group: UUID) -> None:
+            group_members = self._get_users_in_access_group(group)
+            userId_to_group_member = {m.userId: m for m in group_members}
+            for member in members:
+                assert member.user_id is not None
+                membership = userId_to_group_member.get(member.user_id, None)
 
-        members = self._user_ids_to_accessy_members(org_member_ids)
-        self._populate_user_groups(members)
+                if not membership:
+                    continue
+
+                member.groups.add(group)
+                if member.membership_id is None:
+                    member.membership_id = membership.id
+                elif member.membership_id != membership.id:
+                    raise AccessyError(
+                        f"User {member.name!r} {member.user_id=} has different membership_id for different groups"
+                        f" ({member.membership_id} != {membership.id}). This is a bug"
+                    )
+
+        def fill_in_membership_id_if_missing(member: AccessyMember) -> None:
+            if member.membership_id is None:
+                member.membership_id = self._get(
+                    f"/asset/admin/user/{member.user_id}/organization/{self.organization_id()}/membership"
+                )["id"]
+
+        org_members = [AccessyUser.from_dict(item) for item in self._get_users_org()]
+        members = [
+            AccessyMember(user_id=item.id, phone=item.msisdn, name=f"{item.firstName} {item.lastName}")
+            for item in org_members
+        ]
+
+        for group in [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP]:
+            fill_in_group_affiliation_and_membership_id(members, group)
+
+        for m in members:
+            fill_in_membership_id_if_missing(m)
 
         return members
 
@@ -509,68 +541,6 @@ class AccessySession:
         name = self._get(f"/asset/admin/access-permission-group/{group_id}")["name"]
         assert isinstance(name, str)
         return name
-
-    def _user_ids_to_accessy_members(self, user_ids: Iterable[UUID]) -> list[AccessyMember]:
-        """Convert a list of User ID:s to AccessyMembers"""
-
-        APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
-
-        def fill_user_details(user: AccessyMember) -> None:
-            assert user.user_id is not None
-            data = self.get_user_details(user.user_id)
-
-            # API keys do not have phone numbers, set it to sentinel object so we can filter out API keys further down
-            if data.application:
-                user.phone = APPLICATION_PHONE_NUMBER
-                return
-
-            if data.msisdn is not None:
-                user.phone = data.msisdn
-            else:
-                logger.warning(f"User {user.user_id} does not have a phone number in accessy. {data=}")
-            user.name = f"{data.firstName} {data.lastName}"
-
-        def fill_membership_id(user: AccessyMember) -> None:
-            data = self._get(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id()}/membership")
-            user.membership_id = data["id"]
-
-        exception_during_fetch = None
-        threads = []
-        user_ids = list(user_ids)
-        thread_count = min(4, len(user_ids))
-        accessy_members: List[AccessyMember] = []
-        for i in range(thread_count):
-            # Chunk the user_ids into equal parts for each thread
-            slice = user_ids[i::thread_count]
-            member_slice = [AccessyMember(user_id=uid) for uid in slice]
-            accessy_members.extend(member_slice)
-
-            # Start a thread for each chunk
-            def worker(member_slice: list[AccessyMember]) -> None:
-                nonlocal exception_during_fetch
-                try:
-                    for member in member_slice:
-                        fill_user_details(member)
-                        fill_membership_id(member)
-                except AccessyError as e:
-                    exception_during_fetch = e
-
-            t = threading.Thread(target=worker, args=(member_slice,))
-            threads.append(t)
-            t.start()
-
-        for t in threads:
-            t.join()
-
-        # Filter out API keys
-        accessy_members = [m for m in accessy_members if m.phone is not APPLICATION_PHONE_NUMBER]
-
-        if exception_during_fetch:
-            raise RuntimeError(
-                f"One or more threads failed to fetch user details. The last exception as: {exception_during_fetch}"
-            )
-
-        return accessy_members
 
     def _user_id_to_accessy_member(self, user_id: UUID) -> AccessyMember | None:
         """Convert an Accessy User ID to an AccessyMember object"""
