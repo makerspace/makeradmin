@@ -185,6 +185,14 @@ class AccessyUser(DataClassJsonMixin):
     msisdn: Optional[MSISDN] = None
 
 
+@dataclass
+class AccessyUserMembership(DataClassJsonMixin):
+    id: UUID
+    userId: UUID
+    organizationId: UUID
+    roles: list[str]
+
+
 class AccessySession:
     def __init__(self) -> None:
         self.session_token: str | None = None
@@ -478,18 +486,12 @@ class AccessySession:
             if not v["application"]
         ]
 
-    def _get_users_in_access_group(self, access_group_id: UUID) -> list[dict]:
+    def _get_users_in_access_group(self, access_group_id: UUID) -> list[AccessyUserMembership]:
         """Get all user ID:s in a specific access group"""
-        return self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
-        # {"items":[{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}, ...],"totalItems":3,"pageSize":25,"pageNumber":0,"totalPages":1}
-
-    def _get_users_lab(self) -> list[dict]:
-        """Get all user ID:s with lab access"""
-        return self._get_users_in_access_group(ACCESSY_LABACCESS_GROUP)
-
-    def _get_users_special(self) -> list[dict]:
-        """Get all user ID:s with special access"""
-        return self._get_users_in_access_group(ACCESSY_SPECIAL_LABACCESS_GROUP)
+        return [
+            AccessyUserMembership.from_dict(d)
+            for d in self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
+        ]
 
     def _get_organization_groups(self) -> list[dict]:
         """Get information about all groups"""
@@ -603,14 +605,11 @@ class AccessySession:
         return member
 
     def _populate_user_groups(self, members: List[AccessyMember]) -> None:
-        lab_ids = set(item["userId"] for item in self._get_users_lab())
-        special_ids = set(item["userId"] for item in self._get_users_special())
-
-        for m in members:
-            if m.user_id in lab_ids:
-                m.groups.add(ACCESSY_LABACCESS_GROUP)
-            if m.user_id in special_ids:
-                m.groups.add(ACCESSY_SPECIAL_LABACCESS_GROUP)
+        for group in [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP]:
+            user_ids_in_group = set(item.userId for item in self._get_users_in_access_group(group))
+            for m in members:
+                if m.user_id in user_ids_in_group:
+                    m.groups.add(group)
 
     def get_org_user_from_phone(
         self, phone_number: MSISDN, users_in_org: list[dict] | None = None
