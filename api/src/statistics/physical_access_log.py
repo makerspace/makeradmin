@@ -9,13 +9,13 @@ from dataclasses_json import DataClassJsonMixin, config
 from multiaccessy.models import PhysicalAccessEntry
 from service.db import db_session
 from service.logging import logger
-from service.util import format_datetime
+from service.util import date_to_str, format_datetime
 from sqlalchemy import ColumnElement, Date, distinct, func, select, text
 
 
 @dataclass
 class ActivityEntry(DataClassJsonMixin):
-    date: datetime_date = field(metadata=config(encoder=format_datetime))
+    date: datetime_date = field(metadata=config(encoder=date_to_str))
     count: int
 
 
