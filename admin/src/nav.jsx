@@ -25,18 +25,22 @@ export const NavItem = (props) => {
 
 export const Nav = ({ nav: { brand, items } }) => (
     <nav className="uk-navbar-container">
-        <div className="uk-navbar-left uk-margin-left">
-            <Link to="/" className="uk-navbar-item uk-logo">
-                {brand}
-            </Link>
-            {/* The uk-flex-wrap is added to make the items not overflow. Feels like a hack. */}
-            <ul className="uk-navbar-nav uk-flex-wrap">
-                {items.map((item, i) => (
-                    <NavItem to={item.target} icon={item.icon} key={i}>
-                        {item.text}
-                    </NavItem>
-                ))}
-            </ul>
+        <div className="uk-container">
+            <div data-uk-navbar>
+                <div className="uk-navbar-left uk-margin-left">
+                    <Link to="/" className="uk-navbar-item uk-logo">
+                        {brand}
+                    </Link>
+                    {/* The uk-flex-wrap is added to make the items not overflow. Feels like a hack. */}
+                    <ul className="uk-navbar-nav uk-flex-wrap">
+                        {items.map((item, i) => (
+                            <NavItem to={item.target} icon={item.icon} key={i}>
+                                {item.text}
+                            </NavItem>
+                        ))}
+                    </ul>
+                </div>
+            </div>
         </div>
     </nav>
 );
