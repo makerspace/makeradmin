@@ -340,7 +340,9 @@ button > svg {
 
 /* The navbar items are by default very tall (80px), which takes too much space
  * when combining with the flex layout */
-.uk-navbar-nav > li > a {
+.uk-navbar-nav > li > a,
+.uk-navbar-item,
+.uk-navbar-toggle {
     min-height: 40px !important;
 }
 
