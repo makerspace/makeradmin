@@ -1,6 +1,4 @@
 import json as libjson
-import threading
-import time
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
@@ -198,7 +196,6 @@ class AccessySession:
         self.session_token: str | None = None
         self.session_token_token_expires_at: datetime | None = None
         self._organization_id: str | None = None
-        self._mutex = threading.Lock()
         self._all_webhooks: Optional[List[AccessyWebhook]] = None
         self._accessy_id_to_member_id_cache: dict[str, int] = {}
 
@@ -391,45 +388,44 @@ class AccessySession:
         if not self.has_authentication():
             return
 
-        with self._mutex:  # Only allow one concurrent token refresh as rate limiting on this endpoint is aggressive.
-            if (
-                not self.session_token
-                or self.session_token_token_expires_at is None
-                or datetime.now(timezone.utc).replace(tzinfo=None) > self.session_token_token_expires_at
-            ):
-                now = datetime.now(timezone.utc).replace(tzinfo=None)
-                data = request(
-                    "post",
-                    "/auth/oauth/token",
-                    json={
-                        "audience": ACCESSY_URL,
-                        "grant_type": "client_credentials",
-                        "client_id": ACCESSY_CLIENT_ID,
-                        "client_secret": ACCESSY_CLIENT_SECRET,
-                    },
-                )
+        if (
+            not self.session_token
+            or self.session_token_token_expires_at is None
+            or datetime.now(timezone.utc).replace(tzinfo=None) > self.session_token_token_expires_at
+        ):
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            data = request(
+                "post",
+                "/auth/oauth/token",
+                json={
+                    "audience": ACCESSY_URL,
+                    "grant_type": "client_credentials",
+                    "client_id": ACCESSY_CLIENT_ID,
+                    "client_secret": ACCESSY_CLIENT_SECRET,
+                },
+            )
 
-                self.session_token = data["access_token"]
-                self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
-                logger.info(
-                    f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}"
-                )
+            self.session_token = data["access_token"]
+            self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
+            logger.info(
+                f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}"
+            )
 
-            if not self._organization_id:
-                data = request(
-                    "get",
-                    "/asset/user/organization-membership",
-                    token=self.session_token,
-                )
+        if not self._organization_id:
+            data = request(
+                "get",
+                "/asset/user/organization-membership",
+                token=self.session_token,
+            )
 
-                match len(data):
-                    case 0:
-                        raise AccessyError("The API key does not have a corresponding organization membership")
-                    case l if l > 1:
-                        logger.warning("API key has several memberships. This is probably an error...")
+            match len(data):
+                case 0:
+                    raise AccessyError("The API key does not have a corresponding organization membership")
+                case l if l > 1:
+                    logger.warning("API key has several memberships. This is probably an error...")
 
-                self._organization_id = data[0]["organizationId"]
-                logger.info(f"fetched accessy organization_id {self._organization_id}")
+            self._organization_id = data[0]["organizationId"]
+            logger.info(f"fetched accessy organization_id {self._organization_id}")
 
     def _get(self, path: str, err_msg: str | None = None) -> Any:
         self.__ensure_token()
