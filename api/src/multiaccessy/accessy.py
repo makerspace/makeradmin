@@ -185,6 +185,14 @@ class AccessyUser(DataClassJsonMixin):
     msisdn: Optional[MSISDN] = None
 
 
+@dataclass
+class AccessyUserMembership(DataClassJsonMixin):
+    id: UUID
+    userId: UUID
+    organizationId: UUID
+    roles: list[str]
+
+
 class AccessySession:
     def __init__(self) -> None:
         self.session_token: str | None = None
@@ -232,10 +240,42 @@ class AccessySession:
     def get_all_members(self) -> list[AccessyMember]:
         """Get a list of all Accessy members in the ORG with GROUPS (lab and special)"""
 
-        org_member_ids = set(item["id"] for item in self._get_users_org())
+        def fill_in_group_affiliation_and_membership_id(members: list[AccessyMember], group: UUID) -> None:
+            group_members = self._get_users_in_access_group(group)
+            userId_to_group_member = {m.userId: m for m in group_members}
+            for member in members:
+                assert member.user_id is not None
+                membership = userId_to_group_member.get(member.user_id, None)
 
-        members = self._user_ids_to_accessy_members(org_member_ids)
-        self._populate_user_groups(members)
+                if not membership:
+                    continue
+
+                member.groups.add(group)
+                if member.membership_id is None:
+                    member.membership_id = membership.id
+                elif member.membership_id != membership.id:
+                    raise AccessyError(
+                        f"User {member.name!r} {member.user_id=} has different membership_id for different groups"
+                        f" ({member.membership_id} != {membership.id}). This is a bug"
+                    )
+
+        def fill_in_membership_id_if_missing(member: AccessyMember) -> None:
+            if member.membership_id is None:
+                member.membership_id = self._get(
+                    f"/asset/admin/user/{member.user_id}/organization/{self.organization_id()}/membership"
+                )["id"]
+
+        org_members = [AccessyUser.from_dict(item) for item in self._get_users_org()]
+        members = [
+            AccessyMember(user_id=item.id, phone=item.msisdn, name=f"{item.firstName} {item.lastName}")
+            for item in org_members
+        ]
+
+        for group in [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP]:
+            fill_in_group_affiliation_and_membership_id(members, group)
+
+        for m in members:
+            fill_in_membership_id_if_missing(m)
 
         return members
 
@@ -470,30 +510,20 @@ class AccessySession:
         return self._get(f"/org/admin/user/{user_id}", err_msg="Getting user details")
 
     def _get_users_org(self) -> list[dict]:
-        """Get all user ID:s"""
-
-        def is_application(user: dict) -> bool:
-            return user.get("msisdn", None) is None
+        """Get all users"""
 
         return [
             v
-            for v in self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/user")
-            if not is_application(v)
+            for v in self._get_json_paginated(f"/org/organization/{self.organization_id()}/user")
+            if not v["application"]
         ]
-        # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
 
-    def _get_users_in_access_group(self, access_group_id: UUID) -> list[dict]:
+    def _get_users_in_access_group(self, access_group_id: UUID) -> list[AccessyUserMembership]:
         """Get all user ID:s in a specific access group"""
-        return self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
-        # {"items":[{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}, ...],"totalItems":3,"pageSize":25,"pageNumber":0,"totalPages":1}
-
-    def _get_users_lab(self) -> list[dict]:
-        """Get all user ID:s with lab access"""
-        return self._get_users_in_access_group(ACCESSY_LABACCESS_GROUP)
-
-    def _get_users_special(self) -> list[dict]:
-        """Get all user ID:s with special access"""
-        return self._get_users_in_access_group(ACCESSY_SPECIAL_LABACCESS_GROUP)
+        return [
+            AccessyUserMembership.from_dict(d)
+            for d in self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
+        ]
 
     def _get_organization_groups(self) -> list[dict]:
         """Get information about all groups"""
@@ -512,14 +542,13 @@ class AccessySession:
         assert isinstance(name, str)
         return name
 
-    def _user_ids_to_accessy_members(self, user_ids: Iterable[UUID]) -> list[AccessyMember]:
-        """Convert a list of User ID:s to AccessyMembers"""
+    def _user_id_to_accessy_member(self, user_id: UUID) -> AccessyMember | None:
+        """Convert an Accessy User ID to an AccessyMember object"""
 
         APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
 
         def fill_user_details(user: AccessyMember) -> None:
-            assert user.user_id is not None
-            data = self.get_user_details(user.user_id)
+            data = self.get_user_details(user_id)
 
             # API keys do not have phone numbers, set it to sentinel object so we can filter out API keys further down
             if data.application:
@@ -529,60 +558,28 @@ class AccessySession:
             if data.msisdn is not None:
                 user.phone = data.msisdn
             else:
-                logger.warning(f"User {user.user_id} does not have a phone number in accessy. {data=}")
+                logger.warning(f"User {user_id=} does not have a phone number in accessy. {data=}")
             user.name = f"{data.firstName} {data.lastName}"
 
         def fill_membership_id(user: AccessyMember) -> None:
-            data = self._get(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id()}/membership")
+            data = self._get(f"/asset/admin/user/{user_id}/organization/{self.organization_id()}/membership")
             user.membership_id = data["id"]
 
-        exception_during_fetch = None
-        threads = []
-        user_ids = list(user_ids)
-        thread_count = min(4, len(user_ids))
-        accessy_members: List[AccessyMember] = []
-        for i in range(thread_count):
-            # Chunk the user_ids into equal parts for each thread
-            slice = user_ids[i::thread_count]
-            member_slice = [AccessyMember(user_id=uid) for uid in slice]
-            accessy_members.extend(member_slice)
+        member = AccessyMember(user_id=user_id)
+        fill_user_details(member)
+        fill_membership_id(member)
 
-            # Start a thread for each chunk
-            def worker(member_slice: list[AccessyMember]) -> None:
-                nonlocal exception_during_fetch
-                try:
-                    for member in member_slice:
-                        fill_user_details(member)
-                        fill_membership_id(member)
-                except AccessyError as e:
-                    exception_during_fetch = e
+        if member.phone is APPLICATION_PHONE_NUMBER:
+            return None
 
-            t = threading.Thread(target=worker, args=(member_slice,))
-            threads.append(t)
-            t.start()
-
-        for t in threads:
-            t.join()
-
-        # Filter out API keys
-        accessy_members = [m for m in accessy_members if m.phone is not APPLICATION_PHONE_NUMBER]
-
-        if exception_during_fetch:
-            raise RuntimeError(
-                f"One or more threads failed to fetch user details. The last exception as: {exception_during_fetch}"
-            )
-
-        return accessy_members
+        return member
 
     def _populate_user_groups(self, members: List[AccessyMember]) -> None:
-        lab_ids = set(item["userId"] for item in self._get_users_lab())
-        special_ids = set(item["userId"] for item in self._get_users_special())
-
-        for m in members:
-            if m.user_id in lab_ids:
-                m.groups.add(ACCESSY_LABACCESS_GROUP)
-            if m.user_id in special_ids:
-                m.groups.add(ACCESSY_SPECIAL_LABACCESS_GROUP)
+        for group in [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP]:
+            user_ids_in_group = set(item.userId for item in self._get_users_in_access_group(group))
+            for m in members:
+                if m.user_id in user_ids_in_group:
+                    m.groups.add(group)
 
     def get_org_user_from_phone(
         self, phone_number: MSISDN, users_in_org: list[dict] | None = None
@@ -603,7 +600,7 @@ class AccessySession:
         for item in users_in_org:
             if item.get("msisdn", None) == phone_number:
                 user_id = item["id"]
-                return self._user_ids_to_accessy_members([user_id])[0]
+                return self._user_id_to_accessy_member(user_id)
         else:
             return None
 
