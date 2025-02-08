@@ -24,7 +24,12 @@ export const trackPlausible: (
     tag: string,
     options?: { props?: object; meta?: object },
 ) => void = (...args) => {
-    if (window.plausible !== undefined) {
+    if (window.plausible === undefined) {
+        // It's possible an adblocker has blocked plausible
+        return;
+    }
+
+    if (window.plausible) {
         window.plausible(...args);
     } else {
         (window.plausible.q = window.plausible.q || []).push(args);
