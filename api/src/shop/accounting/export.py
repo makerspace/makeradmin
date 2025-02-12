@@ -1,19 +1,22 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod
 from membership.models import Member
+from service.config import get_makerspace_local_timezone
 from service.db import db_session
 from service.error import InternalServerError
+from zoneinfo import ZoneInfo
+
 from shop.accounting.accounting import (
-    RoundingError,
-    RoundingErrorSource,
+    AccountingError,
     TransactionWithAccounting,
     diff_transactions_and_completed_payments,
     split_transactions_over_accounts,
 )
+from shop.accounting.models import AccountingExport, Aggregation, Status
 from shop.accounting.sie_file import get_sie_string
 from shop.accounting.verification import create_verificatons
 from shop.completed_payment import CompletedPayment, get_completed_payments_from_stripe
@@ -23,7 +26,6 @@ from shop.models import (
     TransactionContent,
     TransactionCostCenter,
 )
-from zoneinfo import ZoneInfo
 
 logger = getLogger("makeradmin")
 
@@ -49,10 +51,7 @@ def transaction_fees_to_transaction_with_accounting(
     return amounts
 
 
-def export_accounting(start_date: datetime, end_date: datetime, group_by_period: TimePeriod, member_id: int) -> str:
-    signer = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
-    if signer is None:
-        raise InternalServerError(f"Member with id {member_id} not found")
+def export_accounting(start_date: datetime, end_date: datetime, aggregation: Aggregation, signer: Member) -> str:
     utc_zone = ZoneInfo("UTC")
     logger.info(
         f"Exporting accounting from {start_date} ({start_date.astimezone(utc_zone)}) to {end_date} ({end_date.astimezone(utc_zone)}) with signer member number {signer.member_number}"
@@ -77,15 +76,38 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
 
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)
     if len(diff) > 0:
-        logger.warning(f"Transactions and completed payments do not match, {diff}")
-        raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
+        raise AccountingError(f"Transactions and completed payments do not match, {diff}")
 
     transactions_with_accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
 
     transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
     transactions_with_accounting.extend(transaction_fees)
+    group_by_period = TimePeriod(aggregation.value)  # aggregation is in fact a subset
 
     verifications = create_verificatons(transactions_with_accounting, group_by_period)
     logger.info(f"Verifications: {verifications}")
 
     return get_sie_string(verifications, start_date, end_date, f"{signer.firstname} {signer.lastname}")
+
+
+def do_export(export: AccountingExport) -> None:
+    if export.status not in (Status.pending, Status.failed):
+        raise ValueError(f"Export with id {export.id} is not pending or failed")
+
+    export.content = None
+    export.status = Status.pending
+
+    zone = get_makerspace_local_timezone()
+    start_dt = datetime.combine(export.start_date, datetime.min.time(), tzinfo=zone)
+    end_dt = datetime.combine(export.end_date, datetime.min.time(), tzinfo=zone)
+
+    try:
+        accounting_info = export_accounting(start_dt, end_dt, export.aggregation, export.signer)
+        export.content = accounting_info
+        export.status = Status.completed
+    except Exception as e:
+        export.content = str(e)
+        export.status = Status.failed
+        logger.exception(f"Failed to export accounting for {export}")
+
+    db_session.commit()

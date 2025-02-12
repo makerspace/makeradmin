@@ -15,6 +15,7 @@ from service.db import db_session
 from service.error import InternalServerError
 from shop.accounting.accounting import (
     AccountCostCenter,
+    AccountingError,
     ProductToAccountCostCenter,
     RoundingErrorSource,
     TransactionWithAccounting,
@@ -264,7 +265,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             type=AccountingEntryType.CREDIT.value,
             fraction=0,
         )
-        with self.assertRaises(InternalServerError) as context:
+        with self.assertRaises(AccountingError) as context:
             ProductToAccountCostCenter()
         self.assertTrue("not in range [1, 100]" in str(context.exception))
 
@@ -277,7 +278,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             type=AccountingEntryType.CREDIT.value,
             fraction=101,
         )
-        with self.assertRaises(InternalServerError) as context:
+        with self.assertRaises(AccountingError) as context:
             ProductToAccountCostCenter()
         self.assertTrue("not in range [1, 100]" in str(context.exception))
 
@@ -290,7 +291,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             type=AccountingEntryType.CREDIT.value,
             fraction=1,
         )
-        with self.assertRaises(InternalServerError) as context:
+        with self.assertRaises(AccountingError) as context:
             ProductToAccountCostCenter()
         self.assertTrue("fraction weights not adding up to 100" in str(context.exception))
 
@@ -301,7 +302,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
                 acc.fraction = acc.fraction + 1
                 break
         db_session.commit()
-        with self.assertRaises(InternalServerError) as context:
+        with self.assertRaises(AccountingError) as context:
             ProductToAccountCostCenter()
         self.assertTrue("fraction weights not adding up to 100" in str(context.exception))
 
@@ -312,7 +313,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
                 acc.fraction = acc.fraction - 1
                 break
         db_session.commit()
-        with self.assertRaises(InternalServerError) as context:
+        with self.assertRaises(AccountingError) as context:
             ProductToAccountCostCenter()
         self.assertTrue("fraction weights not adding up to 100" in str(context.exception))
 
@@ -325,7 +326,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             type=AccountingEntryType.CREDIT.value,
             fraction=100,
         )
-        with self.assertRaises(InternalServerError) as context:
+        with self.assertRaises(AccountingError) as context:
             ProductToAccountCostCenter()
         self.assertTrue("both account and cost center as None" in str(context.exception))
 
