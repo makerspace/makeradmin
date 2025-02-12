@@ -12,6 +12,57 @@ const deleteItem = (collection, item) => {
         );
 };
 
+const Pagination = ({
+    setLoading,
+    onPageNav,
+    page: { index: page_index, count: page_count },
+}) => {
+    const show_count = 2;
+
+    if (!page_count) {
+        page_count = 1;
+    }
+
+    return (
+        <ul className="uk-pagination uk-flex-center uk-clear">
+            {_.range(1, page_count + 1).map((i) => {
+                const distance = Math.abs(i - page_index);
+                if (distance === 0) {
+                    return (
+                        <li key={i} className="uk-active">
+                            <span>{i}</span>
+                        </li>
+                    );
+                } else if (
+                    distance <= show_count ||
+                    i === 1 ||
+                    i === page_count
+                ) {
+                    return (
+                        <li key={i}>
+                            <a
+                                onClick={() => {
+                                    setLoading(true);
+                                    if (onPageNav) onPageNav(i);
+                                }}
+                            >
+                                {i}
+                            </a>
+                        </li>
+                    );
+                } else if (distance === show_count + 1) {
+                    return (
+                        <li key={i}>
+                            <span>...</span>
+                        </li>
+                    );
+                }
+                return null;
+            })}
+        </ul>
+    );
+};
+
 const CollectionTable = (props) => {
     const [sort, setSort] = useState({ key: null, order: "up" });
     const [items, setItems] = useState(null);
@@ -84,55 +135,6 @@ const CollectionTable = (props) => {
         return <th key={i} />;
     };
 
-    const renderPagination = () => {
-        const show_count = 2;
-
-        if (!page.count) {
-            page.count = 1;
-        }
-        return (
-            <ul
-                className="uk-pagination uk-flex-center"
-                style={{ clear: "both" }}
-            >
-                {_.range(1, page.count + 1).map((i) => {
-                    const distance = Math.abs(i - page.index);
-                    if (distance === 0) {
-                        return (
-                            <li key={i} className="uk-active">
-                                <span>{i}</span>
-                            </li>
-                        );
-                    } else if (
-                        distance <= show_count ||
-                        i === 1 ||
-                        i === page.count
-                    ) {
-                        return (
-                            <li key={i}>
-                                <a
-                                    onClick={() => {
-                                        setLoading(true);
-                                        if (onPageNav) onPageNav(i);
-                                    }}
-                                >
-                                    {i}
-                                </a>
-                            </li>
-                        );
-                    } else if (distance === show_count + 1) {
-                        return (
-                            <li key={i}>
-                                <span>...</span>
-                            </li>
-                        );
-                    }
-                    return null;
-                })}
-            </ul>
-        );
-    };
-
     let rows = null;
     if (items !== null) {
         rows = items.map((item, i) => (
@@ -156,9 +158,13 @@ const CollectionTable = (props) => {
 
     const headers = columns.map((c, i) => renderHeading(c, i));
     const pagination =
-        typeof page !== "undefined" && page.count > 1
-            ? renderPagination()
-            : null;
+        page && page.count > 1 ? (
+            <Pagination
+                page={page}
+                onPageNav={onPageNav}
+                setLoading={setLoading}
+            />
+        ) : null;
 
     return (
         <div className={className}>
