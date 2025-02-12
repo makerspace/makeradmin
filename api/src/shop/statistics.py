@@ -58,6 +58,7 @@ def product_sales(product_id: int, start: Optional[datetime], end: Optional[date
         .where(Transaction.created_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .where(Transaction.status == Transaction.COMPLETED)
         .group_by(sqlalchemy.cast(Transaction.created_at, sqlalchemy.Date))
+        .order_by(sqlalchemy.cast(Transaction.created_at, sqlalchemy.Date))
         .join(TransactionContent.transaction)
     )
     by_date = [SalesByDate(row.t[0], float(row.t[1]), row.t[2]) for row in (db_session.execute(stmt).all())]
@@ -102,6 +103,7 @@ def category_sales(category_id: int, start: Optional[datetime], end: Optional[da
         .where(Transaction.created_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .where(Transaction.status == Transaction.COMPLETED)
         .group_by(sqlalchemy.cast(Transaction.created_at, sqlalchemy.Date))
+        .order_by(sqlalchemy.cast(Transaction.created_at, sqlalchemy.Date))
         .join(TransactionContent.transaction)
         .join(TransactionContent.product)
     )
