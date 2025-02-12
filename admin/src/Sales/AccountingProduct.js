@@ -455,7 +455,10 @@ class AccountingProduct extends CollectionNavigation {
                 </form>
 
                 <div className="uk-margin-top">
-                    <SearchBox handleChange={this.onSearch} />
+                    <SearchBox
+                        handleChange={this.onSearch}
+                        value={this.state.search}
+                    />
 
                     <CollectionTable
                         id="product_table"
