@@ -340,7 +340,9 @@ button > svg {
 
 /* The navbar items are by default very tall (80px), which takes too much space
  * when combining with the flex layout */
-.uk-navbar-nav > li > a {
+.uk-navbar-nav > li > a,
+.uk-navbar-item,
+.uk-navbar-toggle {
     min-height: 40px !important;
 }
 
@@ -359,4 +361,22 @@ button > svg {
     margin-top: 8px;
     margin-right: 30px;
     font-size: 0.9em;
+}
+
+.ms-navbar-left,
+.ms-navbar-right {
+    flex: 1 0 0%;
+}
+
+.ms-navbar-right {
+    flex: 1 1 0%;
+}
+
+.ms-navbar-center {
+    flex-grow: 0;
+
+    li {
+        /* Prevent menu items from having their text wrapped if the screen is too small */
+        flex-shrink: 0;
+    }
 }

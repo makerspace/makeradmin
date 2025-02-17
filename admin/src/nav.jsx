@@ -25,18 +25,21 @@ export const NavItem = (props) => {
 
 export const Nav = ({ nav: { brand, items } }) => (
     <nav className="uk-navbar-container">
-        <div className="uk-navbar-left uk-margin-left">
-            <Link to="/" className="uk-navbar-item uk-logo">
-                {brand}
-            </Link>
-            {/* The uk-flex-wrap is added to make the items not overflow. Feels like a hack. */}
-            <ul className="uk-navbar-nav uk-flex-wrap">
+        <div data-uk-navbar>
+            <div className="ms-navbar-left uk-margin-left uk-margin-right uk-navbar-left">
+                <Link to="/" className="uk-navbar-item uk-logo">
+                    {brand}
+                </Link>
+            </div>
+            <ul className="ms-navbar-center uk-navbar-nav">
                 {items.map((item, i) => (
-                    <NavItem to={item.target} icon={item.icon} key={i}>
+                    <NavItem key={i} to={item.target} icon={item.icon}>
                         {item.text}
                     </NavItem>
                 ))}
             </ul>
+            {/* Used to compensate for the left side, to make the center truly centered */}
+            <div className="ms-navbar-right"></div>
         </div>
     </nav>
 );

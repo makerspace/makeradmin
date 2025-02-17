@@ -163,7 +163,10 @@ const CollectionTable = (props) => {
     return (
         <div className={className}>
             {pagination}
-            <div style={{ position: "relative", clear: "both" }}>
+            <div
+                style={{ position: "relative", clear: "both" }}
+                className="uk-overflow-auto"
+            >
                 <table
                     className={
                         "uk-table uk-table-small uk-table-striped uk-table-hover" +
