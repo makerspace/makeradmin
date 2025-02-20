@@ -36,6 +36,7 @@ default = Dict(
         ELKS46_API_USER="",
         ELKS46_API_KEY="",
         HOST_PUBLIC="",
+        MAKERSPACE_LOCAL_TIMEZONE="Europe/Stockholm",
         STRIPE_PRIVATE_KEY=None,
         STRIPE_SIGNING_SECRET=None,
         STRIPE_CURRENCY=None,
