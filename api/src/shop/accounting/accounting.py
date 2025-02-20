@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple
 
 from basic_types.enums import AccountingEntryType
 from service.db import db_session
-from service.error import InternalServerError
+
 from shop.completed_payment import CompletedPayment
 from shop.models import (
     Product,
@@ -19,6 +19,10 @@ from shop.models import (
 )
 
 logger = getLogger("makeradmin")
+
+
+class AccountingError(Exception):
+    pass
 
 
 @dataclass()
@@ -79,11 +83,11 @@ class ProductToAccountCostCenter:
                 account = product_info.account if product_info.account is not None else None
                 cost_center = product_info.cost_center if product_info.cost_center is not None else None
                 if account is None and cost_center is None:
-                    raise InternalServerError(
+                    raise AccountingError(
                         f"Product with id {product.id} has accounting with both account and cost center as None. At least one must be set to a value."
                     )
                 if product_info.fraction <= 0 or product_info.fraction > 100:
-                    raise InternalServerError(
+                    raise AccountingError(
                         f"Product with id {product.id} has accounting with id {product_info.id} with fraction {product_info.fraction} not in range [1, 100]"
                     )
 
@@ -101,11 +105,11 @@ class ProductToAccountCostCenter:
 
             for key in fraction_sums:
                 if not entry_type_found[key]:
-                    raise InternalServerError(
+                    raise AccountingError(
                         f"Product with id {product.id} named {product.name} has no accounting information for {key.value}"
                     )
                 if fraction_sums[key] != 100:
-                    raise InternalServerError(
+                    raise AccountingError(
                         f"Product with id {product.id} named {product.name} has accounting type {key.value} "
                         + f"with fraction weights not adding up to 100, was {fraction_sums[key]}",
                     )
@@ -119,7 +123,7 @@ class ProductToAccountCostCenter:
 def diff_transactions_and_completed_payments(
     transactions: List[Transaction], completed_payments: Dict[int, CompletedPayment]
 ) -> List[Tuple[Transaction | None, CompletedPayment | None]]:
-    unmatched_data: List[Tuple[Transaction | None, CompletedPayment]] = []
+    unmatched_data: List[Tuple[Transaction | None, CompletedPayment | None]] = []
     completed_payments = completed_payments.copy()  # TODO improve this and remove pop
 
     for transaction in transactions:
@@ -179,7 +183,7 @@ def split_transactions_over_accounts(
         for content in transaction.contents:
             product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
             if not product_accounting:
-                raise InternalServerError(f"Product with id {content.product_id} has no accounting information")
+                raise AccountingError(f"Product with id {content.product_id} has no accounting information")
 
             amounts_added: Dict[AccountingEntryType, Decimal] = {type: Decimal(0) for type in AccountingEntryType}
             content_amount_decimal = Decimal(

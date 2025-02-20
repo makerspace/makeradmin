@@ -7,7 +7,13 @@ from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod, date_to_period
 from service.db import db_session
 from service.error import InternalServerError
-from shop.accounting.accounting import TransactionAccount, TransactionCostCenter, TransactionWithAccounting
+
+from shop.accounting.accounting import (
+    AccountingError,
+    TransactionAccount,
+    TransactionCostCenter,
+    TransactionWithAccounting,
+)
 
 logger = getLogger("makeradmin")
 
@@ -30,7 +36,7 @@ def create_verificatons(
         if year_month in verifications:
             if inner_key in verifications[year_month].amounts:
                 if verifications[year_month].types[inner_key] != transaction.type:
-                    raise InternalServerError(
+                    raise AccountingError(
                         f"Multiple transactions with different types for the same account, {transaction.account}, and cost center, {transaction.cost_center}, in the same period {year_month}."
                     )
                 verifications[year_month].amounts[inner_key] += transaction.amount

@@ -1,24 +1,23 @@
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from decimal import Decimal
 from logging import getLogger
-from typing import Dict, List, Tuple
-from unittest import TestCase
+from typing import Dict, List
 from unittest.mock import Mock, patch
 
 import core
 import membership
-import pytest
 import shop
+import shop.accounting
 from basic_types.enums import AccountingEntryType
-from basic_types.time_period import TimePeriod, date_to_period
+from basic_types.time_period import TimePeriod
 from membership.models import Member
 from service.db import db_session
-from shop.accounting.accounting import RoundingError, RoundingErrorSource
 from shop.accounting.export import (
+    do_export,
     export_accounting,
     transaction_fees_to_transaction_with_accounting,
 )
-from shop.accounting.verification import Verification
+from shop.accounting.models import AccountingExport, Aggregation, Status
 from shop.completed_payment import CompletedPayment
 from shop.models import (
     Product,
@@ -34,7 +33,12 @@ from test_aid.test_base import FlaskTestBase
 logger = getLogger("makeradmin")
 
 
-class ExportTest(TestCase):
+class ExportTest(FlaskTestBase):
+    models = [core.models, membership.models, shop.models, shop.accounting.models]
+
+    def setUp(self) -> None:
+        self.member = self.db.create_member(firstname="Test", lastname="Testsson")
+
     def test_fees_to_transaction_with_accounting(self) -> None:
         completed_payments: Dict[int, CompletedPayment] = {}
         num_payments = 10
@@ -55,6 +59,27 @@ class ExportTest(TestCase):
             self.assertEqual(transaction_fees[i].amount, true_fees[i])
             assert transaction_fees[i].account.account == "6573"
             assert transaction_fees[i].cost_center.cost_center == "FG"
+
+    @patch("shop.accounting.export.export_accounting")
+    def test_create_accounting_file(self, export_accounting: Mock) -> None:
+        start_date = datetime(2023, 1, 1)
+        end_date = datetime(2023, 12, 31)
+
+        accounting_info = "accounting string"
+        export_accounting.return_value = accounting_info
+        accounting_export = AccountingExport(
+            signer_member_id=self.member.member_id,
+            aggregation=Aggregation.month,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        db_session.add(accounting_export)
+        db_session.commit()
+
+        do_export(accounting_export)
+
+        self.assertEqual(accounting_export.status, Status.completed)
+        self.assertEqual(accounting_export.content, accounting_info)
 
 
 class AccountingExportWithStripeMockTest(FlaskTestBase):
@@ -168,7 +193,7 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
 
         get_payments_from_stripe.return_value = self.completed_payments
 
-        sie_str = export_accounting(start_date, end_date, TimePeriod.Month, self.member.member_id)
+        sie_str = export_accounting(start_date, end_date, Aggregation.month, self.member)
         sie_rows = sie_str.split("\n")
 
         while True:

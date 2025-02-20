@@ -8,6 +8,7 @@ export type UiKitIconName =
     | "chevron-up"
     | "cog"
     | "commenting"
+    | "cloud-download"
     | "eye-slash"
     | "home"
     | "lock"

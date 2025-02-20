@@ -1,23 +1,17 @@
-from base64 import b64encode
-from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any
 
 from basic_types.enums import PriceLevel
-from basic_types.time_period import TimePeriod
-from dateutil.relativedelta import relativedelta
 from flask import Response, g, make_response, request, send_file
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
-from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT, Arg
-from service.config import get_makerspace_local_timezone
+from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
-from service.error import BadRequest, InternalServerError, PreconditionFailed
+from service.error import BadRequest, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
 
 from shop import service
-from shop.accounting.export import export_accounting
 from shop.entities import (
     category_entity,
     gift_card_content_entity,
@@ -324,18 +318,6 @@ def register_route() -> Any:
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route() -> None:
     stripe_callback(request.data, request.headers)
-
-
-@service.route("/download-accounting-file/<int:year>/<int:month>", method=GET, permission=WEBSHOP)
-def download_accounting_file_route(year: int, month: int) -> str:
-    zone = get_makerspace_local_timezone()
-    start_date = datetime(year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=zone)
-    end_data = datetime(
-        year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=zone
-    ) + relativedelta(months=1)
-    return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
-        "ascii"
-    )
 
 
 @service.route("/product/<int:product_id>/sales", method=GET, permission=WEBSHOP)

@@ -5,7 +5,8 @@ from typing import Dict, List, Tuple
 
 from basic_types.enums import AccountingEntryType
 from membership.models import Member
-from shop.accounting.accounting import TransactionAccount, TransactionCostCenter
+
+from shop.accounting.accounting import AccountingError, TransactionAccount, TransactionCostCenter
 from shop.accounting.verification import Verification
 
 logger = getLogger("makeradmin")
@@ -23,6 +24,10 @@ HEADER_TEMPLATE = """#FLAGGA 0
 #VALUTA SEK
 #DIM 1 "Kostnadställe"
 """
+
+
+class SieExportError(AccountingError):
+    pass
 
 
 def period_to_date_format(period: str) -> str:
@@ -65,7 +70,7 @@ def get_account_header(verifications: List[Verification]) -> List[str]:
             if account not in seen_accounts:
                 seen_accounts.add(account)
                 if account is None:
-                    raise ValueError("Account cannot be None for SIE export.")
+                    raise SieExportError("Account cannot be None for SIE export.")
                 accounts_header.append(f'#KONTO {account.account} "{account.description}"')
 
     return accounts_header
@@ -100,7 +105,7 @@ def convert_to_sie_format(verifications: List[Verification]) -> List[str]:
             account = accounting_key[0]
             cost_center = accounting_key[1]
             if account is None:
-                raise ValueError("Account cannot be None for SIE export.")
+                raise SieExportError("Account cannot be None for SIE export.")
             sie_amount_adjusted = (
                 -amount if verification.types[accounting_key] == AccountingEntryType.CREDIT else amount
             )

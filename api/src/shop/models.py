@@ -9,7 +9,6 @@ from service.error import UnprocessableEntity
 from sqlalchemy import (
     JSON,
     Boolean,
-    Column,
     DateTime,
     Enum,
     ForeignKey,
