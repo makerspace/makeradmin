@@ -94,6 +94,9 @@ def get_admin_url(path: str) -> str:
 
 def get_makerspace_local_timezone() -> ZoneInfo:
     zone_str = config.get("MAKERSPACE_LOCAL_TIMEZONE")
+    if zone_str is None:
+        raise NameError("Variable MAKERSPACE_LOCAL_TIMEZONE not set in .env")
+
     try:
         zone = ZoneInfo(zone_str)
     except ZoneInfoNotFoundError as e:
