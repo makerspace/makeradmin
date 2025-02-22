@@ -90,7 +90,10 @@ class AccountingCostCenter extends CollectionNavigation {
                 </div>
 
                 <div className="uk-margin-top">
-                    <SearchBox handleChange={this.onSearch} />
+                    <SearchBox
+                        handleChange={this.onSearch}
+                        value={this.state.search}
+                    />
                     <CollectionTable
                         className="uk-margin-top"
                         collection={this.collection}
