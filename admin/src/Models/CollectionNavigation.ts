@@ -49,7 +49,7 @@ export default class CollectionNavigation<
             this.params.set("search", this.state.search);
         }
 
-        if (this.state.page === 1) {
+        if (!this.state.page || this.state.page === 1) {
             this.params.delete("page");
         } else {
             this.params.set("page", this.state.page.toString());
