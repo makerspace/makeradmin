@@ -51,8 +51,8 @@ def convert_completed_stripe_charges_to_payments(
             logger.error(f"Missing balance transaction in stripe charge, {charge.id}")
             raise BadRequest(f"Missing balance transaction in stripe charge, {charge.id}")
         elif not MakerspaceMetadataKeys.TRANSACTION_IDS.value in charge.metadata:
-            logger.error(f"Missing transaction id in stripe charge metadata, {charge.id}")
-            raise BadRequest(f"Missing transaction id in stripe charge metadata, {charge.id}")
+            intent = retry(lambda: PaymentIntent.retrieve(charge.payment_intent))
+            id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
         else:
             id = int(charge.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
 
