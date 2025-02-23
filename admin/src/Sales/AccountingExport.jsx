@@ -1,9 +1,9 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import Select from "react-select";
 import UIkit from "uikit";
 import Icon from "../Components/icons";
 import { get, post } from "../gateway";
-import Member from "../Models/Member";
+import useMember from "../Hooks/useMember";
 
 function create_option(label) {
     return { label: label, value: label };
@@ -165,18 +165,7 @@ function Field({ label, value }) {
 }
 
 function Signer({ member_id }) {
-    const [member, setMember] = useState(null);
-    const memberRef = useRef(Member.get(member_id));
-    useEffect(() => {
-        const m = memberRef.current;
-        return m.subscribe(() => {
-            setMember({
-                member_number: m.member_number,
-                firstname: m.firstname,
-                lastname: m.lastname,
-            });
-        });
-    }, [member_id]);
+    const member = useMember(member_id);
 
     return (
         <>
