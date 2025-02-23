@@ -5,14 +5,18 @@
     "main": "webpack.config.js",
     "repository": "https://github.com/makerspace/makeradmin",
     "license": "GPL-3.0",
+    "engines": {
+        "npm": ">=10.5.2",
+        "node": ">=20"
+    },
     "devDependencies": {
-        "@types/d3": "^7.4.0",
-        "@types/d3-sankey": "^0.12.1",
-        "sass": "^1.83.0",
-        "sass-loader": "^10.0.0",
-        "ts-loader": "^9.4.2",
-        "typescript": "^4.9.4",
-        "webpack": "^5.76.0",
+        "@types/d3": "^7.4.3",
+        "@types/d3-sankey": "^0.12.4",
+        "sass": "^1.85.0",
+        "sass-loader": "^16.0.5",
+        "ts-loader": "^9.5.2",
+        "typescript": "^5.7.3",
+        "webpack": "^5.98.0",
         "webpack-cli": "^5.0.1",
         "webpack-dev-server": "^4.11.1",
         "webpack-merge": "^5.8.0"
@@ -21,10 +25,9 @@
         "@types/markdown-it": "^12.2.1",
         "@types/stripe-v3": "^3.1.23",
         "chart.js": "^2.9.4",
-        "d3": "^7.8.3",
+        "d3": "^7.9.0",
         "d3-sankey": "^0.12.3",
         "markdown-it": "^12.2.0",
-        "npm": "^10.5.2",
         "preact": "^10.15.1",
         "preact-render-to-string": "^6.3.1",
         "react-calendly": "^4.1.1"
