@@ -306,5 +306,30 @@ class StripePending(Base):
         return f"StripePending(id={self.id}, stripe_token={self.stripe_token})"
 
 
+class Discount(Base):
+    __tablename__ = "webshop_discounts"
+
+    FOREVER = "forever"
+    ONCE = "once"
+    REPEATING = "repeating"
+
+    # TODO
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    percent_off = Column(Integer, nullable=False)
+    duration = Column(Enum(FOREVER, ONCE, REPEATING), nullable=False)
+    duration_in_months = Column(Integer, nullable=True)
+    stripe_coupon_id = Column(String(64), nullable=True)
+    display_order = Column(Integer, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
+    deleted_at = Column(DateTime)
+
+    def __repr__(self) -> str:
+        return f"Discount(id={self.id}, discount={self.description}, percent_off={self.percent_off}, created_at={self.created_at})"  # TODO
+
+
 # https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
 configure_mappers()

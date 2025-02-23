@@ -15,6 +15,7 @@ from service.db import db_session
 from service.logging import logger
 from shop.models import (
     AccountingEntryType,
+    Discount,
     GiftCard,
     Product,
     ProductAccountsCostCenters,
@@ -364,6 +365,28 @@ def create_shop_products() -> None:
     db_session.commit()
 
 
+def create_shop_discounts() -> None:
+    banner(BLUE, "Creating Fake Shop Discounts")
+
+    member_category = get_or_create(
+        ProductCategory, name="Membership", defaults=dict(display_order=next_display_order(ProductCategory))
+    )
+    products = db_session.query(Product).filter_by(category_id=member_category.id).all()
+
+    discount = get_or_create(
+        Discount,
+        name="Student discount",
+        description="Discount for students",
+        duration=Discount.REPEATING,
+        duration_in_months=3,
+        percent_off=50,
+        stripe_coupon_id=None,
+        display_order=next_display_order(Discount),
+    )
+
+    db_session.commit()
+
+
 def create_shop_transactions() -> None:
     banner(GREEN, "Creating Fake Shop Transactions And Content")
 
@@ -637,6 +660,7 @@ def firstrun() -> None:
         create_members()
         create_groups()
         create_shop_products()
+        create_shop_discounts()
         create_shop_transactions()
         create_shop_accounts_cost_centers()
         create_shop_gift_cards()
