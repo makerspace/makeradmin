@@ -5,7 +5,6 @@ from enum import Enum
 from logging import getLogger
 from typing import Dict, List, Optional
 
-import stripe
 from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
 from service.config import debug_mode
@@ -24,7 +23,6 @@ from shop.stripe_constants import (
 )
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, replace_default_payment_method, retry
-from shop.transactions import PaymentFailed, commit_fail_transaction, payment_success
 
 logger = getLogger("makeradmin")
 
@@ -51,7 +49,10 @@ def convert_completed_stripe_charges_to_payments(
             logger.error(f"Missing balance transaction in stripe charge, {charge.id}")
             raise BadRequest(f"Missing balance transaction in stripe charge, {charge.id}")
         elif not MakerspaceMetadataKeys.TRANSACTION_IDS.value in charge.metadata:
-            intent = retry(lambda: PaymentIntent.retrieve(charge.payment_intent))
+            if charge.payment_intent is None:
+                logger.error(f"Missing payment intent in stripe charge, {charge.id}")
+                raise BadRequest(f"Missing payment intent in stripe charge, {charge.id}")
+            intent = charge.payment_intent
             id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
         else:
             id = int(charge.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
