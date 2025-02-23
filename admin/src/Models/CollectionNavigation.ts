@@ -22,26 +22,6 @@ export default class CollectionNavigation<
         this.state = { search, page } as S;
     }
 
-    override componentDidMount() {
-        this.unsubscribe = (this as any).collection.subscribe(
-            ({ page }: { page: { index: number; count: number } }) =>
-                this.gotNewData(page),
-        );
-    }
-
-    override componentWillUnmount() {
-        this.unsubscribe();
-    }
-
-    gotNewData(page: { index: number; count: number }) {
-        // If the returned result has fewer number of pages, keep the page within bounds
-        let index = this.state.page;
-        // TODO: This seems like a bug. It shouldn't use .last_page here. I don't think that field exists.
-        if (index && (page as any).last_page < index) {
-            this.onPageNav((page as any).last_page);
-        }
-    }
-
     setHistory() {
         if (this.state.search === "") {
             this.params.delete("search");
