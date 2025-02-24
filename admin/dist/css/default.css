@@ -362,21 +362,3 @@ button > svg {
     margin-right: 30px;
     font-size: 0.9em;
 }
-
-.ms-navbar-left,
-.ms-navbar-right {
-    flex: 1 0 0%;
-}
-
-.ms-navbar-right {
-    flex: 1 1 0%;
-}
-
-.ms-navbar-center {
-    flex-grow: 0;
-
-    li {
-        /* Prevent menu items from having their text wrapped if the screen is too small */
-        flex-shrink: 0;
-    }
-}
