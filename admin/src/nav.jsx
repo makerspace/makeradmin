@@ -24,23 +24,21 @@ export const NavItem = (props) => {
 };
 
 export const Nav = ({ nav: { brand, items } }) => (
-    <nav className="uk-navbar-container">
-        <div data-uk-navbar>
-            <div className="uk-navbar-left">
-                <Link to="/" className="uk-navbar-item uk-logo">
-                    {brand}
-                </Link>
+    <nav data-uk-navbar>
+        <div className="uk-navbar-center" style={{ gap: "0 2em" }}>
+            <Link to="/" className="uk-navbar-item uk-logo">
+                {brand}
+            </Link>
 
-                {/* Using a <ul> each with a _single_ <li> sounds insane,
+            {/* Using a <ul> each with a _single_ <li> sounds insane,
                     but that's apparently the way UI-kit is built */}
-                {items.map((item, i) => (
-                    <ul className="uk-navbar-nav" key={i}>
-                        <NavItem to={item.target} icon={item.icon}>
-                            {item.text}
-                        </NavItem>
-                    </ul>
-                ))}
-            </div>
+            {items.map((item, i) => (
+                <ul className="uk-navbar-nav" key={i}>
+                    <NavItem to={item.target} icon={item.icon}>
+                        {item.text}
+                    </NavItem>
+                </ul>
+            ))}
         </div>
     </nav>
 );
