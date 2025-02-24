@@ -1,39 +1,21 @@
 import PropTypes from "prop-types";
-import React, { createContext, useEffect, useRef, useState } from "react";
+import React, { createContext } from "react";
 import { useParams } from "react-router";
-import Member from "../Models/Member";
+import useMember from "../Hooks/useMember";
 import { NavItem } from "../nav";
 
 export const MemberContext = createContext(null);
 
 function MemberBox({ children }) {
     const { member_id } = useParams();
-    const memberRef = useRef(Member.get(member_id));
-    const [memberState, setMemberState] = useState({
-        member_number: "",
-        firstname: "",
-        lastname: "",
-    });
-
-    useEffect(() => {
-        const member = memberRef.current;
-        const unsubscribe = member.subscribe(() => {
-            setMemberState({
-                member_number: member.member_number,
-                firstname: member.firstname,
-                lastname: member.lastname,
-            });
-        });
-        return () => unsubscribe();
-    }, []);
-
-    const { member_number, firstname, lastname } = memberState;
+    const member = useMember(member_id);
 
     return (
-        <MemberContext.Provider value={memberRef.current}>
+        <MemberContext.Provider value={member}>
             <div>
                 <h2>
-                    Medlem #{member_number}: {firstname} {lastname}
+                    Medlem #{member.member_number}: {member.firstname}{" "}
+                    {member.lastname}
                 </h2>
 
                 <ul className="uk-tab">

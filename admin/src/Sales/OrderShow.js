@@ -2,11 +2,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Currency from "../Components/Currency";
+import useMember from "../Hooks/useMember";
 import Collection from "../Models/Collection";
 import Order from "../Models/Order";
 import OrderAction from "../Models/OrderAction";
 import OrderRow from "../Models/OrderRow";
 import { dateTimeToStr } from "../utils";
+
+const MemberInfo = ({ id }) => {
+    const member = useMember(id);
+
+    return (
+        <Link to={`/membership/members/${id}`}>
+            #{member.member_number}: {member.firstname} {member.lastname}
+        </Link>
+    );
+};
 
 const OrderShow = ({ match }) => {
     const { id } = match.params;
@@ -45,15 +56,49 @@ const OrderShow = ({ match }) => {
         };
     }, [order]);
 
+    const member_info = memberId && <MemberInfo id={memberId} />;
+
+    let status_badge = null;
+    switch (order.status) {
+        case "completed":
+            status_badge = (
+                <span className="uk-badge uk-label-success">Klar</span>
+            );
+            break;
+        case "pending":
+            status_badge = (
+                <span className="uk-badge uk-label-info">Pågående</span>
+            );
+            break;
+        case "failed":
+            status_badge = (
+                <span className="uk-badge uk-label-danger">Misslyckades</span>
+            );
+            break;
+        case "":
+            break;
+        default:
+            console.warn("Unhandled order status", order.status);
+            status_badge = (
+                <span className="uk-badge uk-label-default">
+                    Unknown ({order.status})
+                </span>
+            );
+    }
+
+    const date_info = order.created_at && (
+        <>({dateTimeToStr(order.created_at)})</>
+    );
+
     return (
         <div>
             <div className="uk-margin-top">
-                <h2>Order #{id}</h2>
+                <h2>
+                    Order #{id} {date_info} {status_badge}
+                </h2>
                 <div>
                     <h3>Medlem</h3>
-                    <Link to={`/membership/members/${memberId}`}>
-                        member_id {memberId}
-                    </Link>
+                    {member_info}
                 </div>
             </div>
             <div className="uk-margin-top">
