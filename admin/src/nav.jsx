@@ -26,20 +26,21 @@ export const NavItem = (props) => {
 export const Nav = ({ nav: { brand, items } }) => (
     <nav className="uk-navbar-container">
         <div data-uk-navbar>
-            <div className="ms-navbar-left uk-margin-left uk-margin-right uk-navbar-left">
+            <div className="uk-navbar-left">
                 <Link to="/" className="uk-navbar-item uk-logo">
                     {brand}
                 </Link>
-            </div>
-            <ul className="ms-navbar-center uk-navbar-nav">
+
+                {/* Using a <ul> each with a _single_ <li> sounds insane,
+                    but that's apparently the way UI-kit is built */}
                 {items.map((item, i) => (
-                    <NavItem key={i} to={item.target} icon={item.icon}>
-                        {item.text}
-                    </NavItem>
+                    <ul className="uk-navbar-nav" key={i}>
+                        <NavItem to={item.target} icon={item.icon}>
+                            {item.text}
+                        </NavItem>
+                    </ul>
                 ))}
-            </ul>
-            {/* Used to compensate for the left side, to make the center truly centered */}
-            <div className="ms-navbar-right"></div>
+            </div>
         </div>
     </nav>
 );
