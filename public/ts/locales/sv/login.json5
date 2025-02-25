@@ -1,0 +1,23 @@
+{
+    title: "Logga in",
+    magic_link_sent: "Ett email har skickats med en länk som du kan använda för att logga in",
+    errors: {
+        title_failed: "Inloggningen misslyckades",
+        generic: "Fick ett oväntat svar från servern: {{error}}",
+        generic2: "Kunde inte kommunicera med servern.",
+        no_such_user: "Kan inte hitta en medlem med det namnet eller medlemsnumret",
+        bad_credentials: "Felaktig email, medlemsnummer eller lösenord",
+    },
+    form_validation: {
+        missing_tag: "Du måste skriva in en email eller medlemsnummer.",
+        missing_password: "Du måste skriva in ett lösenord.",
+    },
+    tag_placeholder: "Email/medlemsnummer",
+    password_placeholder: "Lösenord",
+    continue: "Fortsätt",
+    login_methods: {
+        email_and_password: "Logga in med lösenord",
+        email_link: "Logga in med endast email",
+    },
+    register: "Bli medlem",
+}

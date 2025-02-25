@@ -2,6 +2,7 @@ import { render } from "preact";
 import { useState } from "preact/hooks";
 import Cart, { useCart } from "./cart";
 import * as common from "./common";
+import { useTranslation } from "./i18n";
 import * as login from "./login";
 import { LoadCurrentMemberInfo } from "./member_common";
 import {
@@ -203,6 +204,7 @@ const SearchField = ({
     id2item: Map<number, Product>;
     onChangeVisibleItems: (visible: Set<number>) => void;
 }) => {
+    const { t } = useTranslation("shop");
     return (
         <form className="product-search uk-search uk-search-default">
             <span uk-search-icon></span>
@@ -210,7 +212,7 @@ const SearchField = ({
                 className="uk-search-input"
                 id="product-search-field"
                 type="search"
-                placeholder="Hitta produkt..."
+                placeholder={t("search_placeholder")}
                 onInput={(e) => {
                     const allItems = [];
                     for (const item of id2item.values()) allItems.push(item);
@@ -241,7 +243,7 @@ const ShopPage = ({ productData }: { productData: ProductData }) => {
         setLayoutModeInternal(mode);
         localStorage.setItem("webshop-layout-mode", mode);
     }
-    if (!layoutModes.includes(layoutMode)) setLayoutMode(layoutModes[0]);
+    if (!layoutModes.includes(layoutMode)) setLayoutMode(layoutModes[0]!);
 
     return (
         <>

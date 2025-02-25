@@ -4,13 +4,14 @@ import { useEffect, useRef } from "preact/hooks";
 import Cart, { Item } from "./cart";
 import * as common from "./common";
 import { ServerResponse } from "./common";
+import { useTranslation } from "./i18n";
 import { member_t } from "./member_common";
 import {
     StartSubscriptionsRequest,
     SubscriptionStart,
     SubscriptionType,
 } from "./subscriptions";
-import { useTranslation } from "./translations";
+import { UnitNames } from "./translations";
 
 declare var UIkit: any;
 
@@ -413,7 +414,8 @@ export const ToPayPreview = ({
     discount: Discount;
     currentMemberships: SubscriptionType[];
 }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("special_products");
+    const { t: tCommon } = useTranslation("common");
     const { payNow, payRecurring } = calculateAmountToPay({
         productData,
         cart,
@@ -425,18 +427,16 @@ export const ToPayPreview = ({
         .map(({ product, amount }) => {
             const product_id = product.product_metadata.special_product_id;
             AssertIsWellKnownProductId(product_id);
-            return t(`special_products.${product_id}.renewal`)(amount);
+            return t(`${product_id}.renewal`, { price: amount });
         })
         .join(" ");
-    if (payRecurring.length == 1) {
-        renewInfoText += " " + t("special_products.renewal.one");
-    } else if (payRecurring.length > 1) {
-        renewInfoText += " " + t("special_products.renewal.many");
+    if (payRecurring.length > 0) {
+        renewInfoText += " " + t("renewal", { count: payRecurring.length });
     }
 
     let anyDiscountedColumn = false;
     const paidRightNowItems: [string, number, number | undefined][] =
-        payNow.map(({ product, amount, originalAmount }, i) => {
+        payNow.map(({ product, amount, originalAmount }) => {
             const product_id = product.product_metadata.special_product_id;
             AssertIsWellKnownProductId(product_id);
             if (
@@ -450,20 +450,18 @@ export const ToPayPreview = ({
             let period =
                 product.smallest_multiple +
                 " " +
-                t(
-                    `unit.${product.unit}.${
-                        product.smallest_multiple > 1 ? "many" : "one"
-                    }`,
-                );
+                tCommon(`unit.${UnitNames[product.unit]}`, {
+                    count: product.smallest_multiple,
+                });
             if (product_id === "access_starter_pack") {
                 // Special case for the starter pack period. Otherwise it would show "1 st"
-                period = t("special_products.access_starter_pack.period");
+                period = t("access_starter_pack.period");
             }
             if (amount !== originalAmount) {
                 anyDiscountedColumn = true;
             }
             return [
-                t(`special_products.${product_id}.summary`) + " - " + period,
+                t(`${product_id}.summary`) + " - " + period,
                 amount,
                 amount !== originalAmount ? originalAmount : undefined,
             ];
@@ -473,7 +471,7 @@ export const ToPayPreview = ({
         return (
             <>
                 <span className="small-print">
-                    {t("special_products.payment_right_now_nothing")}
+                    {t("payment_right_now_nothing")}
                 </span>
                 {payRecurring.length > 0 ? (
                     <span className="small-print">{renewInfoText}</span>
@@ -483,9 +481,7 @@ export const ToPayPreview = ({
     } else {
         return (
             <>
-                <span className="small-print">
-                    {t("special_products.payment_right_now")}
-                </span>
+                <span className="small-print">{t("payment_right_now")}</span>
                 <div class="history-item to-pay-preview">
                     <div
                         class={
@@ -504,24 +500,24 @@ export const ToPayPreview = ({
                                     {normalPrice !== undefined && (
                                         <span className="receipt-item-original-amount strikethrough-price">
                                             {currencyToString(normalPrice)}{" "}
-                                            {t("priceUnit")}
+                                            {tCommon("priceUnit")}
                                         </span>
                                     )}
                                     <span className="receipt-item-amount">
                                         {currencyToString(price)}{" "}
-                                        {t("priceUnit")}
+                                        {tCommon("priceUnit")}
                                     </span>
                                 </>
                             ),
                         )}
                     </div>
                     <div class="receipt-amount">
-                        <span>{t("special_products.cart_total")}</span>
+                        <span>{t("cart_total")}</span>
                         <span className="receipt-amount-value">
                             {currencyToString(
                                 payNow.reduce((s, { amount }) => s + amount, 0),
                             )}{" "}
-                            {t("priceUnit")}
+                            {tCommon("priceUnit")}
                         </span>
                     </div>
                 </div>
@@ -704,7 +700,7 @@ export async function negotiatePayment<
         let res: ServerResponse<R>;
         try {
             res = await common.ajax("POST", endpoint, data, {
-                loginToken: options.loginToken,
+                loginToken: options.loginToken!,
             });
         } catch (e: any) {
             if (e["message"] !== undefined) {

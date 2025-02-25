@@ -7,6 +7,9 @@ import { show_phone_number_dialog } from "./change_phone";
 import * as common from "./common";
 import { UNAUTHORIZED, get_error } from "./common";
 import * as login from "./login";
+
+import { Trans } from "react-i18next";
+import { Translator, useTranslation } from "./i18n";
 import {
     LoadCurrentAccessInfo,
     LoadCurrentMemberGroups,
@@ -34,7 +37,7 @@ import {
     cancelSubscription,
     getCurrentSubscriptions,
 } from "./subscriptions";
-import { Translator, translateUnit, useTranslation } from "./translations";
+import { UnitNames, translateUnit } from "./translations";
 import { URL_CALENDLY_BOOK, URL_MEMBERBOOTH } from "./urls";
 declare var UIkit: any;
 
@@ -140,7 +143,7 @@ function Info2({
     translation_key: "labaccess" | "membership" | "special_labaccess";
     info: membership_info_t;
 }) {
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
     let text: JSX.Element | string;
     let icon: string;
     let color: string;
@@ -157,13 +160,14 @@ function Info2({
 
         if (remainingDays < -1) {
             text = t(
-                `member_page.old_membership_status.${translation_key}.inactive_recent`,
-            )(-remainingDays);
+                `old_membership_status.${translation_key}.inactive_recent`,
+                { days: -remainingDays },
+            );
             icon = "close";
             color = "member-key-color-inactive";
         } else if (remainingDays < 0) {
             text = t(
-                `member_page.old_membership_status.${translation_key}.inactive_yesterday`,
+                `old_membership_status.${translation_key}.inactive_yesterday`,
             );
             icon = "close";
             color = "member-key-color-inactive";
@@ -172,27 +176,28 @@ function Info2({
                 (end - Date.now()) / millisecondsPerHour,
             );
             text = t(
-                `member_page.old_membership_status.${translation_key}.active_hours_remaining`,
-            )(remainingHours);
+                `old_membership_status.${translation_key}.active_hours_remaining`,
+                { hours: remainingHours },
+            );
             icon = "check";
             color = "member-key-color-warning";
         } else if (remainingDays < 14) {
             text = t(
-                `member_page.old_membership_status.${translation_key}.active_few_days_remaining`,
-            )(info.enddate, remainingDays);
+                `old_membership_status.${translation_key}.active_few_days_remaining`,
+                { end_date: info.enddate, days: remainingDays },
+            );
             icon = "check";
             color = "member-key-color-warning";
         } else {
             text = t(
-                `member_page.old_membership_status.${translation_key}.active_days_remaining`,
-            )(info.enddate, remainingDays);
+                `old_membership_status.${translation_key}.active_days_remaining`,
+                { end_date: info.enddate, days: remainingDays },
+            );
             icon = "check";
             color = "member-key-color-active";
         }
     } else {
-        text = t(
-            `member_page.old_membership_status.${translation_key}.inactive`,
-        );
+        text = t(`old_membership_status.${translation_key}.inactive`);
         icon = "close";
         color = "member-key-color-inactive";
     }
@@ -255,7 +260,7 @@ function MissingAccessyInvite({
     member: member_t;
     onSendAccessyInvite: () => void;
 }) {
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
     if (!membership.labaccess_active && !membership.special_labaccess_active) {
         // Accessy is not relevant if the member does not have makerspace access
         return null;
@@ -271,7 +276,7 @@ function MissingAccessyInvite({
         return null;
     }
     return [
-        <WarningItem>{t("member_page.send_accessy_invite_msg")}</WarningItem>,
+        <WarningItem>{t("send_accessy_invite_msg")}</WarningItem>,
         <WarningItem>
             <button
                 onClick={(e) => {
@@ -280,7 +285,7 @@ function MissingAccessyInvite({
                 }}
                 className="uk-button uk-button-primary"
             >
-                {t("member_page.send_accessy_invite")}
+                {t("send_accessy_invite")}
             </button>
         </WarningItem>,
     ];
@@ -345,7 +350,7 @@ function Help({
         return null;
     }
 
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
     const pending_labaccess_instruction = (
         <PendingLabaccessInstructions
             can_sync_labaccess={todo_bullets1.length == 0}
@@ -356,8 +361,7 @@ function Help({
     return (
         <fieldset>
             <legend>
-                <i uk-icon="info"></i>{" "}
-                {t("member_page.instructions_to_become_member")}
+                <i uk-icon="info"></i> {t("instructions_to_become_member")}
             </legend>
             {todo_bullets1}
             {todo_bullets2}
@@ -375,17 +379,14 @@ function Accessy({
     membership: membership_t;
     onSendAccessyInvite: () => void;
 }) {
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
 
     const disabled =
         !member.phone ||
         (!membership.labaccess_active && !membership.special_labaccess_active);
     const accessyInvite = (
         <>
-            <p>
-                If you have reinstalled the Accessy app, you need to re-invite
-                yourself to get access again.
-            </p>
+            <p>{t("accessy_invite_info")}</p>
             <p>
                 <button
                     disabled={disabled}
@@ -395,7 +396,7 @@ function Accessy({
                         onSendAccessyInvite();
                     }}
                 >
-                    {t("member_page.send_accessy_invite")}
+                    {t("send_accessy_invite")}
                 </button>
             </p>
         </>
@@ -403,7 +404,7 @@ function Accessy({
     return (
         <fieldset>
             <legend>
-                <i uk-icon="info"></i> {t("member_page.accessy_invite")}
+                <i uk-icon="info"></i> {t("accessy_invite")}
             </legend>
             {accessyInvite}
         </fieldset>
@@ -447,14 +448,12 @@ async function change_pin_code(member: member_t) {
 async function change_phone_number(
     member: member_t,
     membership: membership_t,
-    t: Translator,
+    t: Translator<"change_phone">,
 ) {
     const r = await show_phone_number_dialog(
         member.member_id,
-        async () =>
-            await UIkit.modal.prompt(t("change_phone.new_number_prompt")),
-        async () =>
-            await UIkit.modal.prompt(t("change_phone.validation_code_prompt")),
+        async () => await UIkit.modal.prompt(t("new_number_prompt")),
+        async () => await UIkit.modal.prompt(t("validation_code_prompt")),
         t,
     );
     switch (r) {
@@ -665,23 +664,24 @@ function PersonalData({
     onChangePhoneNumber: () => void;
 }) {
     const pin_warning =
-        member.pin_code == null ? (
+        member.pin_code === null ? (
             <label class="uk-form-label" style="color: red;">
-                Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att
-                sätta den. PIN-koden används för{" "}
-                <a href={URL_MEMBERBOOTH}>memberbooth</a>.
+                <Trans
+                    i18nKey="member_page:pin_code_not_set_warning"
+                    components={[<a href={URL_MEMBERBOOTH} />]}
+                />
             </label>
         ) : null;
     const [showPinCode, setShowPinCode] = useState(false);
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
     return (
         <fieldset>
             <legend>
-                <i uk-icon="user"></i> Personuppgifter
+                <i uk-icon="user"></i> {t("personal_data")}
             </legend>
             <div>
                 <label for="firstname" class="uk-form-label">
-                    Förnamn
+                    {t("first_name")}
                 </label>
                 <input
                     name="firstname"
@@ -692,7 +692,7 @@ function PersonalData({
             </div>
             <div>
                 <label for="lastname" class="uk-form-label">
-                    Efternamn
+                    {t("last_name")}
                 </label>
                 <input
                     name="lastname"
@@ -703,7 +703,7 @@ function PersonalData({
             </div>
             <div>
                 <label for="email" class="uk-form-label">
-                    E-post
+                    {t("email")}
                 </label>
                 <input
                     name="email"
@@ -714,7 +714,7 @@ function PersonalData({
             </div>
             <div>
                 <label for="phone" class="uk-form-label">
-                    Telefonnummer
+                    {t("phone_number")}
                 </label>
                 <span style="width: 100%; display: flex;">
                     <input
@@ -730,13 +730,13 @@ function PersonalData({
                             onChangePhoneNumber();
                         }}
                     >
-                        {t("member_page.change_phone_number")}
+                        {t("change_phone_number")}
                     </button>
                 </span>
             </div>
             <div>
                 <label for="pin_code" class="uk-form-label">
-                    Pin code
+                    {t("pin_code")}
                 </label>
                 <span style="width: 100%; display: flex;">
                     <input
@@ -762,14 +762,14 @@ function PersonalData({
                             onChangePinCode();
                         }}
                     >
-                        {t("member_page.change_pin_code")}
+                        {t("change_pin_code")}
                     </button>
                 </span>
                 {pin_warning}
             </div>
             <div>
                 <label for="password" class="uk-form-label">
-                    Lösenord
+                    {t("password")}
                 </label>
                 <span style="width: 100%; display: flex;">
                     <input
@@ -778,7 +778,7 @@ function PersonalData({
                         placeholder={
                             member.has_password
                                 ? "********"
-                                : t("member_page.no_password_set")
+                                : t("no_password_set")
                         }
                         disabled
                     />
@@ -797,23 +797,23 @@ function PersonalData({
                                 )
                                 .then(() => {
                                     UIkit.modal.alert(
-                                        t("member_page.set_password_alert")(
-                                            member,
-                                        ),
+                                        t("set_password_alert", {
+                                            email: member.email,
+                                        }),
                                     );
                                 })
                                 .catch((e) => {
                                     UIkit.modal.alert(
-                                        t(
-                                            "member_page.failed_set_password_alert",
-                                        )(get_error(e)),
+                                        t("failed_set_password_alert", {
+                                            error: get_error(e),
+                                        }),
                                     );
                                 });
                         }}
                     >
                         {member.has_password
-                            ? t("member_page.change_password")
-                            : t("member_page.set_password")}
+                            ? t("change_password")
+                            : t("set_password")}
                     </button>
                 </span>
             </div>
@@ -822,14 +822,15 @@ function PersonalData({
 }
 
 function Address({ member }: { member: member_t }) {
+    const { t } = useTranslation("member_page");
     return (
         <fieldset data-uk-margin>
             <legend>
-                <i uk-icon="home"></i> Adress
+                <i uk-icon="home"></i> {t("address.address_title")}
             </legend>
             <div>
                 <label for="address_street" class="uk-form-label">
-                    Address
+                    {t("address.address")}
                 </label>
                 <input
                     name="address_street"
@@ -840,7 +841,7 @@ function Address({ member }: { member: member_t }) {
             </div>
             <div>
                 <label for="address_extra" class="uk-form-label">
-                    Extra adressrad, t ex C/O
+                    {t("address.address_co")}
                 </label>
                 <input
                     name="address_extra"
@@ -851,7 +852,7 @@ function Address({ member }: { member: member_t }) {
             </div>
             <div>
                 <label for="address_zipcode" class="uk-form-label">
-                    Postnummer
+                    {t("address.zip_code")}
                 </label>
                 <input
                     name="address_zipcode"
@@ -862,7 +863,7 @@ function Address({ member }: { member: member_t }) {
             </div>
             <div>
                 <label for="address_city" class="uk-form-label">
-                    Postort
+                    {t("address.postal_city")}
                 </label>
                 <input
                     name="address_city"
@@ -894,12 +895,13 @@ function SubscriptionPayment({
         productData.products,
         `${type}_subscription`,
     )!;
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
+    const { t: tCommon } = useTranslation("common");
 
     return sub ? (
         <div class="uk-button-group">
             <button class="uk-button" disabled>
-                {t("member_page.subscriptions.auto_renewal_active")}
+                {t("subscriptions.auto_renewal_active")}
             </button>
             <button
                 class="uk-button uk-button-danger"
@@ -908,7 +910,7 @@ function SubscriptionPayment({
                     cancelSubscription(type, membership, subscriptions);
                 }}
             >
-                {t("cancel")}
+                {tCommon("cancel")}
             </button>
         </div>
     ) : (
@@ -919,9 +921,7 @@ function SubscriptionPayment({
                     e.preventDefault();
                     if (member.labaccess_agreement_at === null) {
                         UIkit.modal.alert(
-                            t(
-                                "member_page.subscriptions.errors.no_member_introduction",
-                            ),
+                            t("subscriptions.errors.no_member_introduction"),
                         );
                         return;
                     }
@@ -931,13 +931,14 @@ function SubscriptionPayment({
                         member,
                         membership,
                         subscriptions,
+                        t,
                     );
                 }}
             >
-                {t("member_page.subscriptions.activate_auto_renewal")(
-                    product.price,
-                    translateUnit(product.unit, 1, t),
-                )}
+                {t("subscriptions.activate_auto_renewal", {
+                    price: product.price,
+                    unit: translateUnit(product.unit, 1, tCommon),
+                })}
             </button>
         </>
     );
@@ -952,7 +953,8 @@ function SubscriptionProduct({
     cart: Cart;
     onChangeCart: (cart: Cart) => void;
 }) {
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
+    const { t: tCommon } = useTranslation("common");
     if (
         product.unit !== "mån" &&
         product.unit !== "år" &&
@@ -971,15 +973,13 @@ function SubscriptionProduct({
                 onChangeCart(cart);
             }}
         >
-            {t("member_page.subscriptions.add_to_cart")(
-                product.smallest_multiple,
-                t(
-                    `unit.${product.unit}.${
-                        product.smallest_multiple > 1 ? "many" : "one"
-                    }`,
-                ),
-                Number(product.price) * product.smallest_multiple,
-            )}
+            {t("subscriptions.add_to_cart", {
+                count: product.smallest_multiple,
+                unit: tCommon(`unit.${UnitNames[product.unit]}`, {
+                    count: product.smallest_multiple,
+                }),
+                price: Number(product.price) * product.smallest_multiple,
+            })}
         </button>
     );
 }
@@ -1001,12 +1001,12 @@ function BaseMembership({
     onChangeCart: (cart: Cart) => void;
     productData: ProductData;
 }) {
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
     const sub = subscriptions.find((sub) => sub.type === "membership") || null;
     return (
         <fieldset>
             <legend>
-                <i uk-icon="home"></i> Base Membership
+                <i uk-icon="home"></i> {t("base_membership.title")}
             </legend>
             <Info2
                 info={{
@@ -1015,7 +1015,7 @@ function BaseMembership({
                 }}
                 translation_key="membership"
             />
-            <p>{t("member_page.subscriptions.descriptions.membership")}</p>
+            <p>{t("subscriptions.descriptions.membership")}</p>
             <hr />
             <SubscriptionPayment
                 type="membership"
@@ -1028,10 +1028,12 @@ function BaseMembership({
             <div class="uk-margin-small-top" />
             {sub && sub.upcoming_invoice && (
                 <p>
-                    {t("member_page.subscriptions.next_charge")(
-                        sub.upcoming_invoice.amount_due,
-                        sub.upcoming_invoice.payment_date,
-                    )}
+                    {t("subscriptions.next_charge", {
+                        amount: sub.upcoming_invoice.amount_due,
+                        formattedDate: common.formatDate(
+                            sub.upcoming_invoice.payment_date,
+                        ),
+                    })}
                 </p>
             )}
             {!sub && (
@@ -1064,12 +1066,12 @@ function MakerspaceAccess({
     onChangeCart: (cart: Cart) => void;
     productData: ProductData;
 }) {
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
     const sub = subscriptions.find((sub) => sub.type === "labaccess") || null;
     return (
         <fieldset>
             <legend>
-                <i uk-icon="home"></i> Makerspace Access
+                <i uk-icon="home"></i> {t("makerspace_access.title")}
             </legend>
             <Info2
                 info={{
@@ -1089,12 +1091,12 @@ function MakerspaceAccess({
             )}
             {pending_labaccess_days > 0 && (
                 <p>
-                    {t("member_page.subscriptions.pending_makerspace_access")(
-                        pending_labaccess_days,
-                    )}
+                    {t("subscriptions.pending_makerspace_access", {
+                        pending_days: pending_labaccess_days,
+                    })}
                 </p>
             )}
-            <p>{t("member_page.subscriptions.descriptions.labaccess")}</p>
+            <p>{t("subscriptions.descriptions.labaccess")}</p>
             <hr />
             <SubscriptionPayment
                 type="labaccess"
@@ -1107,10 +1109,12 @@ function MakerspaceAccess({
             <div class="uk-margin-small-top" />
             {sub && sub.upcoming_invoice && (
                 <p>
-                    {t("member_page.subscriptions.next_charge")(
-                        sub.upcoming_invoice.amount_due,
-                        sub.upcoming_invoice.payment_date,
-                    )}
+                    {t("subscriptions.next_charge", {
+                        amount: sub.upcoming_invoice.amount_due,
+                        formattedDate: common.formatDate(
+                            sub.upcoming_invoice.payment_date,
+                        ),
+                    })}
                 </p>
             )}
             {!sub && (
@@ -1125,11 +1129,11 @@ function MakerspaceAccess({
 }
 
 function Billing() {
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
     return (
         <fieldset>
             <legend>
-                <i uk-icon="credit-card"></i> {t("member_page.billing.title")}
+                <i uk-icon="credit-card"></i> {t("billing.title")}
             </legend>
             <button
                 className="uk-button"
@@ -1144,7 +1148,7 @@ function Billing() {
                     location.href = url;
                 }}
             >
-                {t("member_page.billing.manage")}
+                {t("billing.manage")}
             </button>
         </fieldset>
     );
@@ -1197,7 +1201,8 @@ function MemberPage({
     // Automatically refresh membership info.
     // This is particularly useful when the user has had the tab open for a long time.
     useFetchRepeatedly(LoadCurrentMembershipInfo, setMembership);
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
+    const { t: tPhone } = useTranslation("change_phone");
     const { cart, setCart } = useCart();
 
     return (
@@ -1208,8 +1213,8 @@ function MemberPage({
             <div id="content">
                 <form class="uk-form uk-form-stacked uk-margin-bottom">
                     <h2>
-                        {t("member_page.member")} {member.member_number}:{" "}
-                        {member.firstname} {member.lastname}
+                        {t("member")} {member.member_number}: {member.firstname}{" "}
+                        {member.lastname}
                     </h2>
                     {show_beta ? (
                         <>
@@ -1261,7 +1266,7 @@ function MemberPage({
                         member={member}
                         onChangePinCode={() => void change_pin_code(member)}
                         onChangePhoneNumber={() =>
-                            void change_phone_number(member, membership, t)
+                            void change_phone_number(member, membership, tPhone)
                         }
                     />
                     <Address member={member} />
@@ -1312,7 +1317,7 @@ common.documentLoaded().then(() => {
                 membership,
                 pending_actions_json,
                 subscriptions,
-                groups,
+                _groups,
                 productData,
                 access,
             ]) => {

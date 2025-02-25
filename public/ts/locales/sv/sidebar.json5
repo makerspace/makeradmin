@@ -1,0 +1,9 @@
+{
+    member: "Medlemsskap",
+    shop: "Webshop",
+    cart: "Kundvagn",
+    purchase_history: "Köphistorik",
+    courses: "Kurser",
+    licenses: "Licenser och rabatter",
+    pay: "Betala",
+}

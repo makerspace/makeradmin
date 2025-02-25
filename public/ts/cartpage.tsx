@@ -3,6 +3,7 @@ import { useMemo, useState } from "preact/hooks";
 import Cart, { Item, useCart } from "./cart";
 import * as common from "./common";
 import { ServerResponse, UNAUTHORIZED } from "./common";
+import { useTranslation } from "./i18n";
 import * as login from "./login";
 import { LoadCurrentMemberInfo } from "./member_common";
 import {
@@ -132,11 +133,12 @@ const PaymentButton = ({
     const [inProgress, setInProgress] = useState(false);
     const paymentConfig = pay_config();
     const element = useMemo(() => createStripeCardInput(), []);
+    const { t } = useTranslation("payment");
 
     return (
         <>
             <form id="pay">
-                <h3>Betala med kort via Stripe</h3>
+                <h3>{t("pay_with_stripe")}</h3>
                 <div class="form-row">
                     <div id="payment_element"></div>
                     <div id="card-element">
@@ -184,7 +186,7 @@ const PaymentButton = ({
                                 }
                             }
                         } catch (e) {
-                            common.show_error("Betalningen misslyckades", e);
+                            common.show_error(t("payment_failed"), e);
                         } finally {
                             setInProgress(false);
                         }
@@ -197,7 +199,7 @@ const PaymentButton = ({
                         uk-spinner={""}
                     ></span>
                     <span>
-                        Betala / Pay
+                        {t("pay")}
                         <span>
                             {" "}
                             {Cart.formatCurrency(cart.sum(productData.id2item))}
@@ -211,13 +213,14 @@ const PaymentButton = ({
 
 const CartPage = ({ productData }: { productData: ProductData }) => {
     const { cart, setCart } = useCart();
+    const { t } = useTranslation("payment");
 
     return (
         <>
             <Sidebar cart={{ cart, productData }} />
             <div id="content" class="cartpage">
                 <div class="content-centering">
-                    <h3 class="cart-header">Varukorg</h3>
+                    <h3 class="cart-header">{t("cart")}</h3>
                     <ul id="cart" class="layout-table">
                         {cart.items.length > 0 ? (
                             cart.items.map((cartItem) => (
@@ -229,9 +232,7 @@ const CartPage = ({ productData }: { productData: ProductData }) => {
                                 />
                             ))
                         ) : (
-                            <p class="empty-cart-text">
-                                Du har inga produkter i varukorgen.
-                            </p>
+                            <p class="empty-cart-text">{t("cart_empty")}</p>
                         )}
                     </ul>
                     <div id="pay-module">
@@ -255,7 +256,7 @@ common.documentLoaded().then(() => {
     initializeStripe();
 
     Promise.all([member, productData])
-        .then(([member, productData]) => {
+        .then(([_member, productData]) => {
             if (root != null) {
                 root.innerHTML = "";
                 render(<CartPage productData={productData} />, root);

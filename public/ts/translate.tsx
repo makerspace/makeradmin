@@ -4,9 +4,11 @@
 ///
 /// This file should rarely require any modifications.
 ///
-/// See https://stackoverflow.com/questions/58277973/how-to-type-check-i18n-dictionaries-with-typescript
 
-import { VNode, isValidElement } from "preact";
+import { isValidElement, VNode } from "preact";
+
+/// See https://stackoverflow.com/questions/58277973/how-to-type-check-i18n-dictionaries-with-typescript
+export type dummy = 0;
 
 // T is the dictionary, S ist the next string part of the object property path
 // If S does not match dict shape, return its next expected properties

@@ -1,0 +1,28 @@
+{
+    labaccess_subscription: {
+        summary: "Makerspace Access",
+        renewal: "Your makerspace access will renew monthly at {{price}} kr/month.",
+    },
+    membership_subscription: {
+        summary: "Base Membership",
+        renewal: "Your base membership will renew yearly at {{price}} kr/year.",
+    },
+    single_labaccess_month: {
+        summary: "Makerspace Access",
+        renewal: "SHOULD NOT BE VISIBLE {{price}}",
+    },
+    single_membership_year: {
+        summary: "Makerspace Access",
+        renewal: "SHOULD NOT BE VISIBLE {{price}}",
+    },
+    access_starter_pack: {
+        summary: "Starter Pack",
+        period: "2 months",
+        renewal: "SHOULD NOT BE VISIBLE {{price}}",
+    },
+    renewal_one: "You can cancel this subscription at any time.",
+    renewal_other: "You can cancel these subscriptions at any time.",
+    cart_total: "Total",
+    payment_right_now_nothing: "Right now, you will pay nothing.",
+    payment_right_now: "Right now, you will pay",
+}

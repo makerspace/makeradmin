@@ -2,6 +2,7 @@ import { render } from "preact";
 import Cart from "./cart";
 import * as common from "./common";
 import { UNAUTHORIZED } from "./common";
+import { useTranslation } from "./i18n";
 import * as login from "./login";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import { LoadProductData, ProductData, Transaction } from "./payment_common";
@@ -18,13 +19,14 @@ const HistoryPage = ({
     member: member_t;
     productData: ProductData;
 }) => {
+    const { t } = useTranslation("history");
     const cart = Cart.fromStorage();
     return (
         <>
             <Sidebar cart={{ cart, productData }} />
             <div id="content" className="purchase-history">
                 <div className="content-centering">
-                    <h2>Köphistorik</h2>
+                    <h2>{t("title")}</h2>
                     <h3>
                         #{member.member_number} {member.firstname}{" "}
                         {member.lastname}

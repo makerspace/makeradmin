@@ -37,6 +37,8 @@ COPY scss /work/scss
 
 COPY src /work/src
 
+COPY scripts /work/scripts
+
 COPY run.sh /work/run.sh
 
 RUN npm exec sass scss/style.scss static/style.css

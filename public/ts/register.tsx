@@ -1,13 +1,27 @@
-import { ComponentChildren, render } from "preact";
-import { StateUpdater, useEffect, useMemo, useState } from "preact/hooks";
+import { ComponentChildren, JSX, render } from "preact";
+import {
+    Dispatch,
+    StateUpdater,
+    useEffect,
+    useMemo,
+    useState,
+} from "preact/hooks";
 import { PopupModal, useCalendlyEventListener } from "react-calendly";
+import { Trans } from "react-i18next";
 import Cart from "./cart";
 import { show_phone_number_dialog } from "./change_phone";
 import * as common from "./common";
 import { ServerResponse, trackPlausible } from "./common";
+import { Translator, useTranslation } from "./i18n";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import {
+    calculateAmountToPay,
+    createPaymentMethod,
+    createStripeCardInput,
     Discount,
+    extractRelevantProducts,
+    initializeStripe,
+    pay,
     PaymentFailedError,
     PriceLevel,
     Product,
@@ -16,15 +30,17 @@ import {
     RegisterPageData,
     StripeCardInput,
     ToPayPreview,
-    calculateAmountToPay,
-    createPaymentMethod,
-    createStripeCardInput,
-    extractRelevantProducts,
-    initializeStripe,
-    pay,
 } from "./payment_common";
-import { TranslationWrapper, Translator, useTranslation } from "./translations";
-import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
+import {
+    accessyURL,
+    URL_CALENDLY_BOOK,
+    URL_GET_STARTED_QUIZ,
+    URL_INSTAGRAM,
+    URL_RELATIVE_MEMBER_PORTAL,
+    URL_SLACK_HELP,
+    URL_SLACK_SIGNUP,
+    URL_WIKI,
+} from "./urls";
 
 declare var UIkit: any;
 const FEATURE_FLAG_LOW_INCOME_DISCOUNT = false;
@@ -97,7 +113,7 @@ const PlanButton = ({
     onClick: () => void;
     order: number;
 }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("register");
     return (
         <div
             className={
@@ -130,28 +146,18 @@ const PlanButton = ({
                 </div>
             )}
             <ul className="checkmark-list">
-                {t(`registration_page.plans.${plan.id}.included`).map(
-                    (reason, i) => (
-                        <li key={i}>
-                            <span
-                                className="positive"
-                                uk-icon="icon: check"
-                            ></span>{" "}
-                            {reason}
-                        </li>
-                    ),
-                )}
-                {t(`registration_page.plans.${plan.id}.notIncluded`).map(
-                    (reason, i) => (
-                        <li key={i}>
-                            <span
-                                className="negative"
-                                uk-icon="icon: close"
-                            ></span>{" "}
-                            {reason}
-                        </li>
-                    ),
-                )}
+                {t(`plans.${plan.id}.included`).map((reason, i) => (
+                    <li key={i}>
+                        <span className="positive" uk-icon="icon: check"></span>{" "}
+                        {reason}
+                    </li>
+                ))}
+                {t(`plans.${plan.id}.notIncluded`).map((reason, i) => (
+                    <li key={i}>
+                        <span className="negative" uk-icon="icon: close"></span>{" "}
+                        {reason}
+                    </li>
+                ))}
             </ul>
             {plan.description2 && (
                 <div className="access-plan-description-bottom">
@@ -186,7 +192,7 @@ type DiscountsInfo = {
 };
 
 const BackButton = ({ onClick }: { onClick: () => void }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("common");
     return (
         <a className="flow-button-back" onClick={onClick}>
             {t("back")}
@@ -194,14 +200,14 @@ const BackButton = ({ onClick }: { onClick: () => void }) => {
     );
 };
 
-const validate_phone_number = async (phone: string, t: Translator) => {
+const validate_phone_number = async (
+    phone: string,
+    t: Translator<"change_phone">,
+) => {
     const r = await show_phone_number_dialog(
         null,
         async () => phone,
-        async () =>
-            await UIkit.modal.prompt(
-                t("registration_page.memberInfo.validatePhone"),
-            ),
+        async () => await UIkit.modal.prompt(t("validatePhone")),
         t,
     );
     return r;
@@ -214,11 +220,12 @@ const MemberInfoForm = ({
     onBack,
 }: {
     info: MemberInfo;
-    onChange: StateUpdater<MemberInfo>;
+    onChange: Dispatch<StateUpdater<MemberInfo>>;
     onSubmit: (info: MemberInfo) => void;
     onBack: () => void;
 }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("register");
+    const { t: tPhone } = useTranslation("change_phone");
     const [showErrors, setShowErrors] = useState(false);
     const [inProgress, setInProgress] = useState(false);
     const onInvalid = () => setShowErrors(true);
@@ -231,7 +238,10 @@ const MemberInfoForm = ({
                 setShowErrors(false);
 
                 try {
-                    if ((await validate_phone_number(info.phone, t)) === "ok") {
+                    if (
+                        (await validate_phone_number(info.phone, tPhone)) ===
+                        "ok"
+                    ) {
                         onSubmit(info);
                     }
                 } finally {
@@ -243,7 +253,7 @@ const MemberInfoForm = ({
             }}
         >
             <LabeledInput
-                label={t("registration_page.memberInfo.firstName")}
+                label={t("memberInfo.firstName")}
                 id="firstName"
                 type="text"
                 required
@@ -254,7 +264,7 @@ const MemberInfoForm = ({
                 onInvalid={onInvalid}
             />
             <LabeledInput
-                label={t("registration_page.memberInfo.lastName")}
+                label={t("memberInfo.lastName")}
                 id="lastName"
                 type="text"
                 required
@@ -265,7 +275,7 @@ const MemberInfoForm = ({
                 onInvalid={onInvalid}
             />
             <LabeledInput
-                label={t("registration_page.memberInfo.email")}
+                label={t("memberInfo.email")}
                 id="email"
                 type="email"
                 required
@@ -274,7 +284,7 @@ const MemberInfoForm = ({
                 onInvalid={onInvalid}
             />
             <LabeledInput
-                label={t("registration_page.memberInfo.phone")}
+                label={t("memberInfo.phone")}
                 id="phone"
                 type="tel"
                 pattern="[\-\+\s0-9]*"
@@ -284,7 +294,7 @@ const MemberInfoForm = ({
                 onInvalid={onInvalid}
             />
             <LabeledInput
-                label={t("registration_page.memberInfo.zipCode")}
+                label={t("memberInfo.zipCode")}
                 id="zipCode"
                 type="text"
                 pattern="[0-9\s]+"
@@ -308,7 +318,7 @@ const MemberInfoForm = ({
                     }
                     uk-spinner={""}
                 />
-                <span>{t("registration_page.memberInfo.submit")}</span>
+                <span>{t("memberInfo.submit")}</span>
             </button>
             <BackButton onClick={onBack} />
         </form>
@@ -322,7 +332,7 @@ const RuleCheckbox = ({
 }: {
     value: boolean;
     rule: string;
-    onChange: StateUpdater<boolean>;
+    onChange: Dispatch<StateUpdater<boolean>>;
 }) => {
     const id = `${(Math.random() * 10000) | 0}`;
     return (
@@ -355,23 +365,26 @@ const TermsAndConditions = ({
     acceptedTerms: Terms;
     onChangeAcceptedTerms: (terms: Terms) => void;
 }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("register");
     return (
         <div class="terms-and-conditions">
-            <h2>{t("registration_page.terms.title")}</h2>
+            <h2>{t("terms.title")}</h2>
             <p>
-                <b>{t("registration_page.terms.pledge")}</b>
+                <b>{t("terms.pledge")}...</b>
             </p>
-            <ol className="rules-list">{t("registration_page.terms.rules")}</ol>
+            <ol
+                className="rules-list"
+                dangerouslySetInnerHTML={{
+                    __html: t("terms.rules").join("\n"),
+                }}
+            />
             <p>
-                <b>{t("registration_page.terms.understanding_pledge")}</b>
+                <b>{t("terms.understandingPledge")}...</b>
             </p>
-            <ol className="rules-list">
-                {t("registration_page.terms.understanding")}
-            </ol>
+            <ol className="rules-list">{t("terms.understanding")}</ol>
 
             <RuleCheckbox
-                rule={t("registration_page.terms.accept")}
+                rule={t("terms.accept")}
                 onChange={() =>
                     onChangeAcceptedTerms({
                         ...acceptedTerms,
@@ -381,7 +394,7 @@ const TermsAndConditions = ({
                 value={acceptedTerms.accepted1}
             />
             <RuleCheckbox
-                rule={t("registration_page.terms.welcoming")}
+                rule={t("terms.welcoming")}
                 onChange={() =>
                     onChangeAcceptedTerms({
                         ...acceptedTerms,
@@ -395,7 +408,7 @@ const TermsAndConditions = ({
                 disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2}
                 onClick={onAccept}
             >
-                {t("registration_page.terms.continue")}
+                {t("terms.continue")}
             </button>
             <BackButton onClick={onBack} />
         </div>
@@ -430,13 +443,24 @@ const Confirmation = ({
     onRegistered: (r: RegistrationSuccess) => void;
     onBack: () => void;
 }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("register");
+    const { t: tPayment } = useTranslation("payment");
     const [inProgress, setInProgress] = useState(false);
 
     return (
         <>
             <div class="uk-flex-1" />
-            {t("registration_page.payment.text")}
+            {<p>{t("payment.subTitle")}</p>}
+            {
+                <p>
+                    <Trans
+                        i18nKey={"register:payment.bookIntroduction"}
+                        components={[
+                            <a target="_blank" href={URL_CALENDLY_BOOK} />,
+                        ]}
+                    />
+                </p>
+            }
             <div class="uk-flex-1" />
             <ToPayPreview
                 productData={productData}
@@ -446,7 +470,7 @@ const Confirmation = ({
             />
             <div class="uk-flex-1" />
             <span class="payment-processor">
-                {t("registration_page.payment.payment_processor")}
+                {t("payment.paymentProcessor")}
             </span>
             <StripeCardInput element={card} />
             <button
@@ -513,7 +537,7 @@ const Confirmation = ({
                     }
                     uk-spinner={""}
                 />
-                <span>{t("payment.pay_with_stripe")}</span>
+                <span>{tPayment("pay_with_stripe")}</span>
             </button>
             <BackButton onClick={onBack} />
             <div class="uk-flex-1" />
@@ -626,7 +650,7 @@ const Success = ({ member }: { member: member_t }) => {
     const [clickedSteps, setClickedSteps] = useState(
         new Set<number | string>(),
     );
-    const t = useTranslation();
+    const { t } = useTranslation("register");
 
     useCalendlyEventListener({
         onEventScheduled: () => {
@@ -634,26 +658,86 @@ const Success = ({ member }: { member: member_t }) => {
         },
     });
 
+    const steps: ((tick: () => void) => JSX.Element)[] = [
+        (tick) => (
+            <>
+                <a
+                    target="_blank"
+                    className="flow-button primary flow-button-small"
+                    href={URL_SLACK_SIGNUP}
+                    onClick={tick}
+                >
+                    {t("success.steps.joinSlackButton")}
+                </a>
+                {t("success.steps.joinSlackWhy")}
+                <a target="_blank" href={URL_SLACK_HELP}>
+                    <i>{t("success.steps.joinSlackWhatIsThis")}</i>
+                </a>
+            </>
+        ),
+        (tick) => (
+            <>
+                <a
+                    target="_blank"
+                    className="flow-button primary flow-button-small"
+                    href={accessyURL()}
+                    onClick={tick}
+                >
+                    {t("success.steps.installAccessy")}
+                </a>{" "}
+                {t("success.steps.installAccessyWhy")}
+            </>
+        ),
+        (tick) => (
+            <>
+                {t("success.steps.quizTake")}{" "}
+                <a target="_blank" href={URL_GET_STARTED_QUIZ} onClick={tick}>
+                    {t("success.steps.quizName")}
+                </a>{" "}
+                {t("success.steps.quizWhy")}
+            </>
+        ),
+        (tick) => (
+            <>
+                {t("success.steps.wikiPrefix")}{" "}
+                <a target="_blank" href={URL_WIKI} onClick={tick}>
+                    {t("success.steps.wikiButton")}
+                </a>
+                .
+            </>
+        ),
+        (tick) => (
+            <>
+                {t("success.steps.instagramPrefix")}{" "}
+                <a target="_blank" href={URL_INSTAGRAM} onClick={tick}>
+                    {t("success.steps.instagramButton")}
+                </a>
+                .
+            </>
+        ),
+    ];
+
     return (
         <>
-            <h1>{t("registration_page.success.title")}</h1>
-            {t("registration_page.success.text")}
+            <h1>{t("success.title")}</h1>
+            <p>{t("success.subTitle")}</p>
+            <p>{t("success.nextSteps")}</p>
             <ul className="registration-task-list">
                 <TaskItem
                     clickedSteps={clickedSteps}
                     setClickedSteps={setClickedSteps}
                     step="booked"
                 >
-                    {(tick) => (
+                    {(_tick) => (
                         <button
                             className="flow-button primary flow-button-small"
                             onClick={() => setBookModalOpen(true)}
                         >
-                            {t("registration_page.success.book_button")}
+                            {t("success.bookButton")}
                         </button>
                     )}
                 </TaskItem>
-                {t("registration_page.success.steps").map((step, i) => (
+                {steps.map((step, i) => (
                     <TaskItem
                         clickedSteps={clickedSteps}
                         setClickedSteps={setClickedSteps}
@@ -668,7 +752,7 @@ const Success = ({ member }: { member: member_t }) => {
                 href={URL_RELATIVE_MEMBER_PORTAL}
                 className="flow-button primary"
             >
-                {t("registration_page.success.continue_to_member_portal")}
+                {t("success.continueToMemberPortal")}
             </a>
             <PopupModal
                 url="https://calendly.com/medlemsintroduktion/medlemsintroduktion"
@@ -699,7 +783,7 @@ const Discounts = ({
     onSubmit: () => void;
     onCancel: () => void;
 }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("register");
 
     const reasons: DiscountReason[] = [
         "student",
@@ -713,8 +797,8 @@ const Discounts = ({
     if (step == 0) {
         return (
             <>
-                <h2>{t("registration_page.discounts.title")}</h2>
-                <p>{t("registration_page.discounts.text")}</p>
+                <h2>{t("discounts.title")}</h2>
+                <p>{t("discounts.text")}</p>
 
                 {reasons.map((reason) => (
                     <div class="rule-checkbox">
@@ -732,14 +816,12 @@ const Discounts = ({
                             }
                         />
                         <label for={`reason.${reason}`}>
-                            {t(`registration_page.discounts.reasons.${reason}`)}
+                            {t(`discounts.reasons.${reason}`)}
                         </label>
                     </div>
                 ))}
                 <textarea
-                    placeholder={t(
-                        "registration_page.discounts.messagePlaceholder",
-                    )}
+                    placeholder={t("discounts.messagePlaceholder")}
                     value={discounts.discountReasonMessage}
                     onChange={(e) =>
                         setDiscounts({
@@ -760,8 +842,8 @@ const Discounts = ({
                     {discounts.discountReason !== null &&
                     discounts.discountReasonMessage.length <
                         MIN_DISCOUNT_REASON_LENGTH
-                        ? t("registration_page.discounts.submit_write_more")
-                        : t("registration_page.discounts.submit")}
+                        ? t("discounts.submitWriteMore")
+                        : t("discounts.submit")}
                 </button>
                 <button
                     className="flow-button primary"
@@ -773,19 +855,23 @@ const Discounts = ({
                         onCancel();
                     }}
                 >
-                    {t("registration_page.discounts.cancel")}
+                    {t("discounts.cancel")}
                 </button>
             </>
         );
     } else {
         return (
             <>
-                <h2>{t("registration_page.discounts.title")}</h2>
-                {t("registration_page.discounts.confirmation")(
-                    discountAmounts["low_income_discount"],
-                )}
+                <h2>{t("discounts.title")}</h2>
+                <p>{t("discounts.confirmationTitle")}</p>
+                <p>
+                    {t("discounts.confirmationDiscount", {
+                        percent: discountAmounts["low_income_discount"] * 100,
+                    })}
+                </p>
+                <p>{t("discounts.confirmationMessage")}</p>
                 <button className="flow-button primary" onClick={onSubmit}>
-                    {t("registration_page.discounts.submit")}
+                    {t("discounts.submit")}
                 </button>
                 <button
                     className="flow-button primary"
@@ -797,7 +883,7 @@ const Discounts = ({
                         onCancel();
                     }}
                 >
-                    {t("registration_page.discounts.cancel")}
+                    {t("discounts.cancel")}
                 </button>
             </>
         );
@@ -921,7 +1007,8 @@ const RegisterPage = ({}: {}) => {
     });
 
     const [loggedInMember, setLoggedInMember] = useState<member_t | null>(null);
-    const t = useTranslation();
+    const { t } = useTranslation("register");
+    const { t: tCommon } = useTranslation("common");
     const card = useMemo(() => createStripeCardInput(), []);
     const [registerPageData, setRegisterPageData] =
         useState<RegisterPageData | null>(null);
@@ -973,27 +1060,27 @@ const RegisterPage = ({}: {}) => {
     const plans: Plan[] = [
         {
             id: "starterPack",
-            title: t("registration_page.plans.starterPack.title"),
-            abovePrice: t("registration_page.plans.starterPack.abovePrice"),
+            title: t("plans.starterPack.title"),
+            abovePrice: t("plans.starterPack.abovePrice"),
             price: "",
-            belowPrice: t("registration_page.plans.ofWhichBaseMembership")(
-                baseMembershipCost,
-            ),
-            description1: t("registration_page.plans.starterPack.description1"),
-            description2: t("registration_page.plans.starterPack.description2"),
+            belowPrice: t("plans.ofWhichBaseMembership", {
+                price: baseMembershipCost,
+            }),
+            description1: t("plans.starterPack.description1"),
+            description2: t("plans.starterPack.description2"),
             products: [relevantProducts.starterPackProduct, membershipProduct],
             highlight: "Recommended",
         },
         {
             id: "singleMonth",
-            title: t("registration_page.plans.singleMonth.title"),
-            abovePrice: t("registration_page.plans.singleMonth.abovePrice"),
+            title: t("plans.singleMonth.title"),
+            abovePrice: t("plans.singleMonth.abovePrice"),
             price: "",
-            belowPrice: t("registration_page.plans.ofWhichBaseMembership")(
-                baseMembershipCost,
-            ),
-            description1: t("registration_page.plans.singleMonth.description1"),
-            description2: t("registration_page.plans.singleMonth.description2"),
+            belowPrice: t("plans.ofWhichBaseMembership", {
+                price: baseMembershipCost,
+            }),
+            description1: t("plans.singleMonth.description1"),
+            description2: t("plans.singleMonth.description2"),
             products: [relevantProducts.labaccessProduct, membershipProduct],
             highlight: null,
         },
@@ -1001,15 +1088,15 @@ const RegisterPage = ({}: {}) => {
     if (abState.registration_base_membership_only_plan_enabled) {
         plans.push({
             id: "decideLater",
-            title: t("registration_page.plans.decideLater.title"),
-            abovePrice: t("registration_page.plans.decideLater.abovePrice"),
+            title: t("plans.decideLater.title"),
+            abovePrice: t("plans.decideLater.abovePrice"),
             price: "",
             belowPrice: "",
-            description1: t("registration_page.plans.decideLater.description1"),
-            description2: t("registration_page.plans.decideLater.description2")(
-                accessCostSingle,
-                accessSubscriptionCost,
-            ),
+            description1: t("plans.decideLater.description1"),
+            description2: t("plans.decideLater.description2", {
+                makerspace_acccess_price: accessCostSingle,
+                makerspace_acccess_subscription_price: accessSubscriptionCost,
+            }),
             products: [membershipProduct],
             highlight: null,
         });
@@ -1038,10 +1125,10 @@ const RegisterPage = ({}: {}) => {
             const toPaySum1 = toPay1.payNow.reduce((a, b) => a + b.amount, 0);
             const toPaySum2 = toPay2.payNow.reduce((a, b) => a + b.amount, 0);
             if (toPaySum1 === 0 || toPaySum2 === 0) {
-                plan.price = toPaySum1 + toPaySum2 + " " + t("priceUnit");
+                plan.price = toPaySum1 + toPaySum2 + " " + tCommon("priceUnit");
             } else {
                 plan.price =
-                    toPaySum1 + " + " + toPaySum2 + " " + t("priceUnit");
+                    toPaySum1 + " + " + toPaySum2 + " " + tCommon("priceUnit");
             }
         } else {
             const toPay = calculateAmountToPay({
@@ -1053,7 +1140,7 @@ const RegisterPage = ({}: {}) => {
             plan.price =
                 toPay.payNow.reduce((a, b) => a + b.amount, 0) +
                 " " +
-                t("priceUnit");
+                tCommon("priceUnit");
         }
     }
 
@@ -1064,12 +1151,14 @@ const RegisterPage = ({}: {}) => {
             return (
                 <>
                     <MakerspaceLogo />
-                    <h1>{t("registration_page.memberships.title")}</h1>
-                    <p>{t("registration_page.memberships.p1")}</p>
-                    <p>{t("registration_page.memberships.p2")}</p>
+                    <h1>{t("memberships.title")}</h1>
+                    <p>{t("memberships.p1")}</p>
+                    <p>
+                        <Trans i18nKey="register:memberships.p2" />
+                    </p>
 
-                    <h2>{t("registration_page.chooseYourPlan.title")}</h2>
-                    <span>{t("registration_page.chooseYourPlan.help")}</span>
+                    <h2>{t("chooseYourPlan.title")}</h2>
+                    <span>{t("chooseYourPlan.help")}</span>
                     <div class="plan-buttons">
                         {plans.map((plan, i) => (
                             <PlanButton
@@ -1087,7 +1176,7 @@ const RegisterPage = ({}: {}) => {
                                 className="flow-button"
                                 onClick={() => setState(State.Discounts)}
                             >
-                                {t("apply_for_discounts")}
+                                {t("discounts.apply_for_discounts")}
                             </button>
                         )}
                     {activePlan !== undefined ? (
@@ -1103,7 +1192,7 @@ const RegisterPage = ({}: {}) => {
                         disabled={selectedPlan == null}
                         onClick={() => setState(State.MemberInfo)}
                     >
-                        {t("continue")}
+                        {tCommon("continue")}
                     </button>
                 </>
             );
@@ -1111,7 +1200,7 @@ const RegisterPage = ({}: {}) => {
             return (
                 <>
                     <MakerspaceLogo />
-                    <h2>{t("registration_page.memberInfo.title")}</h2>
+                    <h2>{t("memberInfo.title")}</h2>
                     <MemberInfoForm
                         info={memberInfo}
                         onChange={setMemberInfo}
@@ -1194,11 +1283,9 @@ common.documentLoaded().then(() => {
     initializeStripe();
     if (root != null) {
         render(
-            <TranslationWrapper>
-                <div className="content-wrapper">
-                    <RegisterPage />
-                </div>
-            </TranslationWrapper>,
+            <div className="content-wrapper">
+                <RegisterPage />
+            </div>,
             root,
         );
     }

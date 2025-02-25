@@ -1,0 +1,7 @@
+{
+    title: "Kurser",
+    description: "Här hittar du alla digitala kurser som $t(brand:makerspace_name) har. De flesta kurser sker på plats och annonseras i facebook-gruppen och på slack. Men vissa har en digital variant som du kan ta när du vill.",
+    course_completed: "Genomförd",
+    course_continue: "Fortsätt",
+    course_take: "Ta kursen",
+}
