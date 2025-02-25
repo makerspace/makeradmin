@@ -499,9 +499,7 @@ async function send_accessy_invite() {
 }
 
 function MembershipView({
-    member,
     membership,
-    pendingLabaccessDays,
 }: {
     member: member_t;
     membership: membership_t;
@@ -572,7 +570,7 @@ function MembershipView({
                 Your <strong>membership</strong> expired yesterday.
             </>
         ),
-        (hours: number) => (
+        (_hours: number) => (
             <>
                 Ditt <strong>föreningsmedlemsskap</strong> går ut idag. <br />
                 Your <strong>membership</strong> expires today.
@@ -603,9 +601,9 @@ function MembershipView({
     ];
 
     const specialLabaccessStrings: template_strings_t = [
-        (enddate: string, days: number) => <></>,
+        (_enddate: string, _days: number) => <></>,
         () => <></>,
-        (hours: number) => <></>,
+        (_hours: number) => <></>,
         (enddate: string, days: number) => (
             <>
                 Du har fått <strong>specialtillträde</strong> till

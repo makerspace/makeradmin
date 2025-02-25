@@ -25,7 +25,7 @@ const ResetPassword = ({ token }: { token: string }) => {
                                     unhashed_password: password,
                                 },
                             )
-                            .then(async (response) => {
+                            .then(async (_response) => {
                                 await UIkit.modal.alert(
                                     "New password was successfully set!",
                                 );

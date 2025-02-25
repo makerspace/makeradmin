@@ -779,7 +779,7 @@ export async function pay(
                     stripe_payment_method_id: paymentMethod.id,
                     transaction_id: null,
                 },
-                { loginToken: options.loginToken },
+                { loginToken: options.loginToken! },
             )
         ).transaction_id;
     } else {
@@ -811,7 +811,7 @@ export async function pay(
                 {
                     subscriptions: subscriptionStarts,
                 } as StartSubscriptionsRequest,
-                { loginToken: options.loginToken },
+                { loginToken: options.loginToken! },
             );
         } catch (e) {
             throw new PaymentFailedError(common.get_error(e));

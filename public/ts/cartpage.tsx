@@ -78,7 +78,7 @@ const CartItem = ({
                     type="button"
                     class="product-delete uk-button uk-button-small uk-button-danger"
                     uk-icon="trash"
-                    onClick={(e) => {
+                    onClick={(_e) => {
                         cart.setItem(item.id, 0);
                         onChangeCart(cart);
                     }}

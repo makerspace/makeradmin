@@ -66,7 +66,7 @@ export class Translation<T extends Record<string, any>> {
         const parts = key.split(".");
         let item = this.translations as Record<string, any>;
         for (let i = 0; i < parts.length - 1; i++) {
-            let child = item[parts[i]];
+            let child = item[parts[i]!];
             if (child === null || child === undefined) {
                 throw new Error("Missing translation for " + key);
             } else if (typeof child !== "object") {
@@ -74,7 +74,7 @@ export class Translation<T extends Record<string, any>> {
             }
             item = child;
         }
-        const v = item[parts[parts.length - 1]];
+        const v = item[parts[parts.length - 1]!];
         if (typeof v !== "object" || Array.isArray(v) || isValidElement(v)) {
             return v as unknown as GetDictValue<S, T>;
         } else {

@@ -588,7 +588,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
     const correctDatasets: Dataset[] = [];
 
     for (let i = 0; i < maxCorrect; i++) {
-        let color = correctColors[Math.min(i, correctColors.length - 1)];
+        let color = correctColors[Math.min(i, correctColors.length - 1)]!;
         correctDatasets.push({
             label: "Korrekt",
             backgroundColor: color,
@@ -598,7 +598,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
         });
     }
     for (let i = 0; i < maxIncorrect; i++) {
-        let color = incorrectColors[Math.min(i, incorrectColors.length - 1)];
+        let color = incorrectColors[Math.min(i, incorrectColors.length - 1)]!;
         incorrectDatasets.push({
             label: "Inkorrekt",
             backgroundColor: color,
@@ -612,7 +612,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
 
     // Go through each question option and add values to the relevant datasets
     for (let qi = 0; qi < data.questions.length; qi++) {
-        const q = data.questions[qi];
+        const q = data.questions[qi]!;
         let correct = 0;
         let incorrect = 0;
 
@@ -631,17 +631,17 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
 
             console.assert(datasetIndex < datasetArray.length);
 
-            datasetArray[datasetIndex].data.push(
+            datasetArray[datasetIndex]!.data.push(
                 o.answer_count / q.member_answer_count,
             );
-            datasetArray[datasetIndex].options.push(o);
+            datasetArray[datasetIndex]!.options.push(o);
         }
 
         // Ensure all datasets have the same length to ensure question indices are not messed up.
         for (let i = 0; i < datasets.length; i++) {
-            if (datasets[i].data.length <= qi) {
-                datasets[i].data.push(0);
-                datasets[i].options.push(null);
+            if (datasets[i]!.data.length <= qi) {
+                datasets[i]!.data.push(0);
+                datasets[i]!.options.push(null);
             }
         }
     }
@@ -679,19 +679,19 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
                 format: "nearest",
                 position: "nearest",
                 callbacks: {
-                    title: (tooltipItems: any[], itemData: any) => {
-                        return data.questions[tooltipItems[0].index].question
+                    title: (tooltipItems: any[], _itemData: any) => {
+                        return data.questions[tooltipItems[0].index]!.question
                             .question;
                     },
-                    label: (tooltipItem: any, data: any) => {
+                    label: (tooltipItem: any, _data: any) => {
                         const option =
-                            datasets[tooltipItem.datasetIndex].options[
+                            datasets[tooltipItem.datasetIndex]!.options[
                                 tooltipItem.index
                             ];
                         if (option != null) {
                             return (
                                 Math.round(
-                                    datasets[tooltipItem.datasetIndex].data[
+                                    datasets[tooltipItem.datasetIndex]!.data[
                                         tooltipItem.index
                                     ] * 100,
                                 ) +

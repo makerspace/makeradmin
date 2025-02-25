@@ -74,10 +74,10 @@ const RoundedInputField = ({
                     onChange(clamped);
                 }
             }}
-            onFocus={(e) => {
+            onFocus={(_e) => {
                 setFocused(true);
             }}
-            onBlur={(e) => {
+            onBlur={(_e) => {
                 setFocused(false);
             }}
         />
@@ -304,7 +304,7 @@ common.documentLoaded().then(() => {
 
     // renderSidebarCategories(productData, true);
     Promise.all([member, productData])
-        .then(([member, productData]) => {
+        .then(([_member, productData]) => {
             if (root != null) {
                 root.innerHTML = "";
                 render(<ShopPage productData={productData} />, root);
