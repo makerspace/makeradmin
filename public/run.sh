@@ -6,11 +6,24 @@ GUNICORN_PORT=80
 GUNICORN_WORKERS=4
 
 function watch_sass() {
+    cmd="npm exec sass scss/style.scss static/style.css"
     echo "starting sass watch process"
+    $cmd || true
     while inotifywait -qq -r -e modify,create,delete scss; do
         echo "updating stylesheets"
         sleep 0.1
-        sass scss/style.scss static/style.css || true
+        $cmd || true
+    done
+}
+
+function watch_locales() {
+    echo "starting locales watch process"
+    cmd="npx tsx scripts/build_locales.ts"
+    $cmd || true
+    while inotifywait -qq -r -e modify,create,delete ts/locales; do
+        echo "updating locales"
+        sleep 0.05
+        $cmd || true
     done
 }
 
@@ -28,6 +41,9 @@ if [ "$DEV_RUN" = "true" ]; then
 
         # Run watch for sass compilation
         watch_sass &
+
+        # Run watch for locales compilation
+        watch_locales &
 
         # Run webpack dev server.
         npm run dev &

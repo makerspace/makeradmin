@@ -1,7 +1,8 @@
 import { render } from "preact";
 import { useState } from "preact/hooks";
 import Cart from "./cart";
-import { ajax, show_error } from "./common";
+import { ajax, formatDate, show_error } from "./common";
+import { Translator, useTranslation } from "./i18n";
 import { member_t, membership_t } from "./member_common";
 import {
     Discount,
@@ -16,11 +17,7 @@ import {
     createStripeCardInput,
     pay,
 } from "./payment_common";
-import {
-    TranslationWrapper,
-    translateUnit,
-    useTranslation,
-} from "./translations";
+import { translateUnit } from "./translations";
 declare var UIkit: any;
 
 export type SubscriptionType = "membership" | "labaccess";
@@ -70,7 +67,11 @@ const PayDialog = ({
     onCancel: () => void;
     onPay: () => void;
 }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("member_page");
+    const { t: tPayment } = useTranslation("payment");
+    const { t: tSpecial } = useTranslation("special_products");
+    const { t: tCommon } = useTranslation("common");
+
     const [inProgress, setInProgress] = useState(false);
     const cart = new Cart(
         products.map((p) => ({ id: p.id, count: p.smallest_multiple })),
@@ -78,7 +79,7 @@ const PayDialog = ({
     return (
         <>
             <div class="uk-modal-header">
-                <h2>{t("member_page.subscriptions.pay_dialog.title")}</h2>
+                <h2>{t("subscriptions.pay_dialog.title")}</h2>
             </div>
             <div class="uk-modal-body">
                 {products
@@ -92,17 +93,15 @@ const PayDialog = ({
 
                         return (
                             <p class="small-print">
-                                {t(
-                                    `special_products.${sub_type}_subscription.summary`,
-                                )}{" "}
-                                {t("member_page.subscriptions.binding_period")(
-                                    p.smallest_multiple,
-                                    translateUnit(
+                                {tSpecial(`${sub_type}_subscription.summary`)}{" "}
+                                {t("subscriptions.binding_period", {
+                                    count: p.smallest_multiple,
+                                    unit: translateUnit(
                                         p.unit,
                                         p.smallest_multiple,
-                                        t,
+                                        tCommon,
                                     ),
-                                )}
+                                })}
                             </p>
                         );
                     })}
@@ -117,7 +116,7 @@ const PayDialog = ({
             </div>
             <div class="uk-modal-footer uk-text-right">
                 <button class="uk-button" onClick={onCancel}>
-                    {t("cancel")}
+                    {tCommon("cancel")}
                 </button>{" "}
                 <button
                     class="uk-button uk-button-primary spinner-button"
@@ -163,7 +162,7 @@ const PayDialog = ({
                         }
                         uk-spinner={""}
                     />
-                    <span>{t("payment.pay_with_stripe")}</span>
+                    <span>{tPayment("pay_with_stripe")}</span>
                 </button>
             </div>
         </>
@@ -181,36 +180,46 @@ const CancelDialog = ({
     onCancelDialog: () => void;
     onCancelSubscriptions: () => void;
 }) => {
-    const t = useTranslation();
+    const { t } = useTranslation("special_products");
+    const { t: tCommon } = useTranslation("common");
+    const { t: tMember } = useTranslation("member_page");
+
     const typeStr = types
-        .map((ty) => t(`special_products.${ty}_subscription.summary`))
-        .join(" " + t("and") + " ");
+        .map((ty) => t(`${ty}_subscription.summary`))
+        .join(" " + tCommon("and") + " ");
     return (
         <>
             <div class="uk-modal-header">
-                <h2>Cancel auto-renewal</h2>
+                <h2>{tMember("subscriptions.cancel.title")}</h2>
             </div>
             <div class="uk-modal-body">
-                <p>Your {typeStr} will no longer be automatically renewed.</p>
+                <p>
+                    {tMember("subscriptions.cancel.no_longer_renewed", {
+                        type: typeStr,
+                    })}
+                </p>
                 {types.includes("membership") &&
                     membership.membership_active && (
                         <p>
-                            {t(
-                                "member_page.subscriptions.cancel.membership.valid_until",
-                            )(membership.membership_end)}
+                            {tMember(
+                                "subscriptions.cancel.membership.valid_until",
+                                { date: formatDate(membership.membership_end) },
+                            )}
                         </p>
                     )}
                 {types.includes("labaccess") && membership.labaccess_active && (
                     <p>
-                        {t(
-                            "member_page.subscriptions.cancel.labaccess.valid_until",
-                        )(membership.labaccess_end)}
+                        {tMember("subscriptions.cancel.labaccess.valid_until", {
+                            date: formatDate(membership.labaccess_end),
+                        })}
                     </p>
                 )}
             </div>
             <div class="uk-modal-footer uk-text-right">
                 <button class="uk-button" onClick={onCancelDialog}>
-                    Nevermind
+                    {tMember(
+                        "subscriptions.cancel.cancel_cancelling_subscription",
+                    )}
                 </button>{" "}
                 <button
                     class="uk-button uk-button-primary"
@@ -262,21 +271,19 @@ export async function cancelSubscription(
     const p = UIkit.modal.dialog("", { bgClose: false });
     const promise = new Promise((resolve, reject) => {
         render(
-            <TranslationWrapper>
-                <CancelDialog
-                    types={types}
-                    membership={membership}
-                    onCancelDialog={() => {
-                        p.hide();
-                        reject();
-                    }}
-                    onCancelSubscriptions={async () => {
-                        await p.hide();
-                        resolve(null);
-                        location.reload();
-                    }}
-                />
-            </TranslationWrapper>,
+            <CancelDialog
+                types={types}
+                membership={membership}
+                onCancelDialog={() => {
+                    p.hide();
+                    reject();
+                }}
+                onCancelSubscriptions={async () => {
+                    await p.hide();
+                    resolve(null);
+                    location.reload();
+                }}
+            />,
             p.panel,
         );
         p.panel.parentElement!.addEventListener("hide", reject);
@@ -290,6 +297,7 @@ export async function activateSubscription(
     member: member_t,
     membership: membership_t,
     subscriptions: SubscriptionInfo[],
+    t: Translator<"member_page">,
 ) {
     if (subscriptions.some((s) => s.type === type)) {
         throw new Error("Member already has this subscription");
@@ -313,7 +321,9 @@ export async function activateSubscription(
     ) {
         try {
             await UIkit.modal.alert(
-                "<p>Activating Makerspace Access Auto-renewal will also activate Base Membership auto-renewal</p>",
+                `<p>${t(
+                    "subscriptions.makerspace_access_also_activates_base_subscription",
+                )}</p>`,
             );
         } catch {
             return;
@@ -342,22 +352,20 @@ export async function activateSubscription(
     const panel: HTMLDivElement = p.panel;
     const promise = new Promise((resolve, reject) => {
         render(
-            <TranslationWrapper>
-                <PayDialog
-                    stripe={stripe}
-                    products={products}
-                    productData={productData}
-                    discount={{ priceLevel: "normal", fractionOff: 0.0 }}
-                    memberInfo={member}
-                    currentMemberships={currentMemberships}
-                    onCancel={() => {
-                        reject();
-                    }}
-                    onPay={() => {
-                        resolve(null);
-                    }}
-                />
-            </TranslationWrapper>,
+            <PayDialog
+                stripe={stripe}
+                products={products}
+                productData={productData}
+                discount={{ priceLevel: "normal", fractionOff: 0.0 }}
+                memberInfo={member}
+                currentMemberships={currentMemberships}
+                onCancel={() => {
+                    reject();
+                }}
+                onPay={() => {
+                    resolve(null);
+                }}
+            />,
             p.panel,
         );
         panel.parentElement!.addEventListener("hide", reject);

@@ -32,7 +32,7 @@ export default class Cart {
         // When using the back button to navigate back
         // many browsers do not actually reload the page, but simply restore it from memory
         // In this case we need to do some refreshing to ensure that for example the shopping cart is up to date
-        const onPageShow = (persisted: PageTransitionEvent) => {
+        const onPageShow = (_persisted: PageTransitionEvent) => {
             onSync(Cart.fromStorage());
         };
 
@@ -49,11 +49,11 @@ export default class Cart {
         let done = false;
 
         for (let i = 0; i < this.items.length; i++) {
-            if (this.items[i].id == productID) {
+            if (this.items[i]!.id == productID) {
                 if (count == 0) {
                     this.items.splice(i, 1);
                 } else {
-                    this.items[i].count = count;
+                    this.items[i]!.count = count;
                 }
                 done = true;
                 break;
@@ -70,7 +70,7 @@ export default class Cart {
 
     getItemCount(productID: number): number {
         for (let i = 0; i < this.items.length; i++) {
-            if (this.items[i].id == productID) return this.items[i].count;
+            if (this.items[i]!.id == productID) return this.items[i]!.count;
         }
         return 0;
     }

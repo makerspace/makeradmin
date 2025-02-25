@@ -1,0 +1,8 @@
+{
+    title: "Köphistorik",
+    receipt: "Kvitto",
+    receipt_sum: "Summa",
+    thank_you_for_your_purchase: "Tack för ditt köp!",
+    receipt_has_been_sent: "Ett kvitto har också skickats till din email.",
+    receipt_not_found: "Kunde inte hitta kvittot",
+}

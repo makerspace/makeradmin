@@ -67,12 +67,12 @@ common.onGetAndDocumentLoaded(
             if (updateField) productAmount.value = "" + newAmount;
             updateCartSum(cart);
         }
-        productAmount.addEventListener("input", (ev) => setCartItem(false));
-        productAmount.addEventListener("change", (ev) => setCartItem(true));
+        productAmount.addEventListener("input", (_ev) => setCartItem(false));
+        productAmount.addEventListener("change", (_ev) => setCartItem(true));
 
         document
             .querySelector(".number-add")!
-            .addEventListener("click", (ev) => {
+            .addEventListener("click", (_ev) => {
                 productAmount.value =
                     "" +
                     (Number(productAmount.value) + product.smallest_multiple);
@@ -81,7 +81,7 @@ common.onGetAndDocumentLoaded(
 
         document
             .querySelector(".number-subtract")!
-            .addEventListener("click", (ev) => {
+            .addEventListener("click", (_ev) => {
                 productAmount.value =
                     "" +
                     (Number(productAmount.value) - product.smallest_multiple);

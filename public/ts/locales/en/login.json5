@@ -1,0 +1,23 @@
+{
+    title: "Log in",
+    magic_link_sent: "An email has been sent with a link that you can use to log in",
+    errors: {
+        title_failed: "Log in failed",
+        generic: "Received an unexpected response from the server: {{error}}",
+        generic2: "Could not communicate with the server.",
+        no_such_user: "Cannot find a user with that email or member number",
+        bad_credentials: "Wrong email, member number or password",
+    },
+    form_validation: {
+        missing_tag: "You must enter an email address or member number.",
+        missing_password: "You must enter a password",
+    },
+    tag_placeholder: "Email/member number",
+    password_placeholder: "Password",
+    continue: "Continue",
+    login_methods: {
+        email_and_password: "Log in using password",
+        email_link: "Log in using only email",
+    },
+    register: "Become a member",
+}

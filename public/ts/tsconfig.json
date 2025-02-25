@@ -4,13 +4,20 @@
         "lib": ["es5", "es6", "es2019", "dom"],
         "noImplicitAny": true,
         "strictNullChecks": true,
+        "exactOptionalPropertyTypes": true,
         "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedParameters": true,
         "forceConsistentCasingInFileNames": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "esModuleInterop": true,
         "sourceMap": true,
         "moduleResolution": "node",
+        "resolveJsonModule": true,
         "jsx": "react-jsx",
         "jsxImportSource": "preact",
         "strict": true,
@@ -21,5 +28,5 @@
             "react-dom": ["./node_modules/preact/compat/"]
         }
     },
-    "include": ["*.ts", "*.tsx"]
+    "include": ["*.ts", "*.tsx", "*.d.ts"]
 }

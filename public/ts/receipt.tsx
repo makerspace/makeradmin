@@ -8,6 +8,7 @@ import {
     get_error,
     show_error,
 } from "./common";
+import { useTranslation } from "./i18n";
 import * as login from "./login";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import {
@@ -30,6 +31,7 @@ const ReceiptWithInfo = ({ transactionId }: { transactionId: number }) => {
     const [receiptData, setReceiptData] = useState<ReceiptResponse | null>(
         null,
     );
+    const { t } = useTranslation("history");
 
     useEffect(() => {
         let id: NodeJS.Timeout;
@@ -47,7 +49,7 @@ const ReceiptWithInfo = ({ transactionId }: { transactionId: number }) => {
                 setReceiptData(data);
             } catch (e) {
                 console.error(e);
-                show_error("Kunde inte hitta kvittot", e);
+                show_error(t("receipt_not_found"), e);
                 clearInterval(id);
             }
         };
@@ -62,7 +64,9 @@ const ReceiptWithInfo = ({ transactionId }: { transactionId: number }) => {
 
     return (
         <>
-            {transaction.status === "completed" && <h1>Tack för ditt köp!</h1>}
+            {transaction.status === "completed" && (
+                <h1>{t("thank_you_for_your_purchase")}</h1>
+            )}
             <Receipt
                 transaction={transaction}
                 member={member}
@@ -70,11 +74,8 @@ const ReceiptWithInfo = ({ transactionId }: { transactionId: number }) => {
             />
             {transaction.status === "completed" && (
                 <div class="receipt-message">
-                    <p>Ett kvitto har också skickats via email.</p>
-                    <p>
-                        Stockholm Makerspace - Drottning Kristinas väg 53, 114
-                        28 Stockholm
-                    </p>
+                    <p>{t("receipt_has_been_sent")}</p>
+                    <p>{t("brand:billing_address")}</p>
                 </div>
             )}
         </>
@@ -112,7 +113,7 @@ documentLoaded().then(() => {
     const root = document.querySelector("#root") as HTMLElement;
 
     Promise.all([member, productData])
-        .then(([member, productData]) => {
+        .then(([_member, productData]) => {
             if (root != null) {
                 root.innerHTML = "";
                 render(

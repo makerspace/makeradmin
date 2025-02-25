@@ -1,0 +1,9 @@
+{
+    title: "Courses",
+    description: "Here you can find all online courses that $t(brand:makerspace_name) provides. \
+    Most courses are held physically and will instead be announced in our Slack group #events. \
+    But some have a digital variant that you can find here, and take whenever you want.",
+    course_completed: "Completed",
+    course_continue: "Continue",
+    course_take: "Take course",
+}

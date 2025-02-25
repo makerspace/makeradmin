@@ -4,6 +4,7 @@
         "charliermarsh.ruff",
         "redhat.vscode-yaml",
         "ms-python.mypy-type-checker",
-        "dbaeumer.vscode-eslint"
+        "dbaeumer.vscode-eslint",
+        "blueglassblock.better-json5"
     ]
 }

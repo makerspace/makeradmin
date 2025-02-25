@@ -1,0 +1,8 @@
+{
+    title: "Receipts",
+    receipt: "Receipt",
+    receipt_sum: "Sum",
+    thank_you_for_your_purchase: "Thank you for your purchase!",
+    receipt_has_been_sent: "A receipt has also been sent via email.",
+    receipt_not_found: "Could not find this receipt",
+}

@@ -1,0 +1,7 @@
+{
+    cart: "Kundvagn",
+    cart_empty: "Din kundvagn är tom",
+    pay_with_stripe: "Betala med Stripe",
+    payment_failed: "Betalning misslyckades",
+    pay: "Betala",
+}

@@ -2,6 +2,7 @@ import { render } from "preact";
 import { useState } from "preact/hooks";
 import * as common from "./common";
 import { ServerResponse } from "./common";
+import { Translator, useTranslation } from "./i18n";
 import { Sidebar } from "./sidebar";
 declare var UIkit: any;
 
@@ -17,6 +18,7 @@ export function login_via_password(
     tag: string,
     password: string,
     redirect: string | null,
+    t: Translator<"login">,
 ) {
     const apiBasePath = window.apiBasePath;
     common.removeToken();
@@ -29,29 +31,30 @@ export function login_via_password(
         })
         .catch((response: ServerResponse<any>) => {
             if (response.status === common.UNAUTHORIZED) {
-                return Promise.reject(
-                    "Felaktig email/medlemsnummer eller lösenord.",
-                );
+                return Promise.reject(t("errors.bad_credentials"));
             }
 
             return Promise.reject(
-                "Oväntad statuskod (" + response.status + ") från servern.",
+                t("errors.generic", { error: response.status }),
             );
         })
         .catch((msg) => {
-            showError("<h2>Inloggningen misslyckades</h2>" + msg);
-            return Promise.reject(null);
+            showError(`<h2>${t("errors.title_failed")}</h2> ${msg}`);
+            return null;
         })
         .then((data) => {
-            let r = data as ServerResponse<any> & { access_token: string };
-            common.login(r.access_token);
-            window.location.replace(redirect || "/");
+            if (data !== null) {
+                let r = data as ServerResponse<any> & { access_token: string };
+                common.login(r.access_token);
+                window.location.replace(redirect || "/");
+            }
         });
 }
 
 export function login_via_single_use_link(
     tag: string,
     redirect: string | null,
+    t: Translator<"login">,
 ) {
     const apiBasePath = window.apiBasePath;
     common.removeToken();
@@ -66,31 +69,33 @@ export function login_via_single_use_link(
         .then((json) => {
             // Yay, success, refresh page
             if (json.data.status === "sent") {
-                showSuccess(
-                    "Ett mail har skickats till dig med en inloggningslänk, använd den för att logga in.",
-                );
+                showSuccess(t("magic_link_sent"));
             } else {
                 showError(
-                    "<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" +
-                        json.data.status,
+                    `<h2>${t("errors.title_failed")}</h2>${t("errors.generic", {
+                        error: json.data.status,
+                    })}`,
                 );
             }
         })
         .catch((json) => {
             if (json.status === "not found") {
                 showError(
-                    "<h2>Inloggningen misslyckades</h2>Hittar inte email eller medlemsnummer.",
+                    `<h2>${t("errors.title_failed")}</h2>${t(
+                        "errors.no_such_user",
+                    )}`,
                 );
             } else {
                 showError(
-                    "<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" +
-                        json.message,
+                    `<h2>${t("errors.title_failed")}</h2>${t("errors.generic", {
+                        error: json.message,
+                    })}`,
                 );
             }
         })
         .catch(() => {
             showError(
-                "<h2>Inloggningen misslyckades</h2>Kunde inte kommunicera med servern.",
+                `<h2>${t("errors.title_failed")}</h2>${t("errors.generic2")}`,
             );
         });
 }
@@ -111,6 +116,7 @@ enum LoginMethod {
 export const Login = ({ redirect }: { redirect: string | null }) => {
     const [tag, setTag] = useState("");
     const [password, setPassword] = useState("");
+    const { t } = useTranslation("login");
 
     let [loginMethod, setLoginMethod] = useState(
         LoginMethod[
@@ -132,7 +138,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                     e.preventDefault();
                     // Error handling
                     if (!tag) {
-                        UIkit.modal.alert("Du måste fylla i din E-postadress");
+                        UIkit.modal.alert(t("form_validation.missing_tag"));
                         return;
                     }
 
@@ -140,16 +146,18 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                         loginMethod == LoginMethod.EmailAndPassword &&
                         !password
                     ) {
-                        UIkit.modal.alert("Du måste fylla i ditt lösenord");
+                        UIkit.modal.alert(
+                            t("form_validation.missing_password"),
+                        );
                         return;
                     }
 
                     localStorage.setItem("last_login_method", loginMethod);
 
                     if (loginMethod === LoginMethod.EmailLink) {
-                        login_via_single_use_link(tag.trim(), redirect);
+                        login_via_single_use_link(tag.trim(), redirect, t);
                     } else {
-                        login_via_password(tag.trim(), password, redirect);
+                        login_via_password(tag.trim(), password, redirect, t);
                     }
                 }}
             >
@@ -159,7 +167,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                         class="uk-form-large uk-width-1-1"
                         type="text"
                         id="email"
-                        placeholder="Email/Medlemsnummer"
+                        placeholder={t("tag_placeholder")}
                         value={tag}
                         onChange={(e) => setTag(e.currentTarget.value)}
                         autoComplete="username"
@@ -177,7 +185,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                         class="uk-form-large uk-width-1-1"
                         type="password"
                         id="password"
-                        placeholder="Lösenord"
+                        placeholder={t("password_placeholder")}
                         value={password}
                         onChange={(e) => setPassword(e.currentTarget.value)}
                         autoComplete="current-password"
@@ -190,7 +198,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                         class="uk-width-1-1 uk-button uk-button-primary uk-button-large"
                     >
                         <span class="uk-icon-check" />
-                        Gå vidare
+                        {t("continue")}
                     </button>
                 </div>
             </form>
@@ -210,12 +218,12 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                     }}
                 >
                     {loginMethod === LoginMethod.EmailLink
-                        ? "Logga in med lösenord"
-                        : "Logga in med endast email"}
+                        ? t("login_methods.email_and_password")
+                        : t("login_methods.email_link")}
                 </a>
             </p>
             <p style="text-align: center;">
-                <a href="/shop/register">Bli medlem / Become a member</a>
+                <a href="/shop/register">{t("register")}</a>
             </p>
         </>
     );
@@ -228,7 +236,8 @@ function LoginPage({
     heading: string | null;
     redirect: string | null;
 }) {
-    heading = heading || "Logga in";
+    const { t } = useTranslation("login");
+    heading = heading || t("title");
 
     return (
         <>

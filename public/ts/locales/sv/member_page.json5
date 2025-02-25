@@ -1,0 +1,99 @@
+{
+    member: "Medlem",
+    billing: {
+        title: "Betalning",
+        manage: "Ändra betalningsmetoder",
+    },
+    old_membership_status: {
+        labaccess: {
+            inactive: "Din makerspace access är inaktiv",
+            inactive_recent: "Din makerspace access gick ut för {{days}} dagar sedan.",
+            inactive_yesterday: "Din makerspace access gick ut igår",
+            active_hours_remaining: "Din makerspace access är giltig valid i endast {{hours}} timmar till.",
+            active_few_days_remaining: "Din makerspace access is valid till och med {{end_date}} (endast {{days}} dagar kvar).",
+            active_days_remaining: "Din makerspace access är giltig till och med {{end_date}} ({{days}} dagar kvar).",
+        },
+        membership: {
+            inactive: "Ditt basmedlemsskap är inaktivt.",
+            inactive_recent: "Ditt basmedlemsskap gick ut för {{days}} dagar sedan.",
+            inactive_yesterday: "Ditt basmedlemsskap gick ut igår",
+            active_hours_remaining: "Ditt basmedlemsskap är giltigt i endast {{hours}} timmar till.",
+            active_few_days_remaining: "Ditt basmedlemsskap är giltigt till och med {{end_date}} (endast {{days}} dagar kvar).",
+            active_days_remaining: "Ditt basmedlemsskap är giltigt till och med {{end_date}} ({{days}} dagar kvar).",
+        },
+        special_labaccess: {
+            inactive: "Din specialaccess är inaktiv.",
+            inactive_recent: "Din specialaccess gick ut för {{days}} dagar sedan.",
+            inactive_yesterday: "Din specialaccess gick ut igår",
+            active_hours_remaining: "Du har fått specialaccess till spacet, som går ut om {{hours}} timmar.",
+            active_few_days_remaining: "Du har fått specialaccess till spacet till och med {{end_date}} (endast {{days}} dagar kvar).",
+            active_days_remaining: "Du har fått specialaccess till spacet till och med {{end_date}} ({{days}} dagar kvar).",
+        },
+    },
+    subscriptions: {
+        cancel: {
+            title: "Avbryt automatisk förnyelse",
+            no_longer_renewed: "Ditt {{type}} kommer inte automatiskt förnyas längre.",
+            cancel_cancelling_subscription: "Nevermind",
+            membership: {
+                valid_until: "Ditt basmedlemsskap fortsätter vara aktivt tills det går ut {{date}}",
+            },
+            labaccess: {
+                valid_until: "Din makerspace access fortsätter vara aktiv tills det går ut {{date}}",
+            },
+        },
+        descriptions: {
+            membership: "Basmedlemsskapet ger dig rösträtt på årsmötet, stödjer ditt lokala makerspace, och tillåter dig att delta i kurser och andra sociala event.",
+            labaccess: "Makerspace access låter dig arbeta på dina egna projekt på makerspacet. \
+                Du får tillgång 24/7 till spacet, och kan också förvara en låda på spacet med dina egna saker. \
+                Makerspace Access kräver att du också har basmedlemsskapet.",
+        },
+        pending_makerspace_access: "Dina <strong>{{pending_days}}</strong> dagar av makerspace access kommer börja när du har varit på en medlemsintroduktion.",
+        add_to_cart: "Lägg till {{count}} {{unit}} till din varukorg: {{price}} kr",
+        binding_period: "prenumerationen har en bindningstid på {{count}} {{unit}}",
+        next_charge: "Ditt medlemsskap kommer att förnyas {{formattedDate}} till en kostnad av {{amount}} kr.",
+        activate_auto_renewal: "Aktivera automatisk förnyelse: {{price}} {{unit}}",
+        auto_renewal_active: "Automatisk förnyelse: Aktiv",
+        makerspace_access_also_activates_base_subscription: "Automatisk förnyelse av Makerspace Access kommer också aktivera automatisk förnyelse av basmedlemsskapet.",
+        errors: {
+            no_member_introduction_title: "Kan inte påbörja en prenumeration",
+            no_member_introduction: "Du måste genomgå en medlemsintroduktion innan du kan starta en prenumeration. Du kan hitta dem i <0>kalendern</0>.",
+        },
+        pay_dialog: {
+            title: "Aktivera automatisk förnyelse",
+        },
+    },
+    base_membership: {
+        title: "Basmedlemsskap",
+    },
+    makerspace_access: {
+        title: "Makerspace Access",
+    },
+    change_phone_number: "Byt",
+    send_accessy_invite_msg: "Installera Accessy-appen på din telefon. Du använder den för att låsa upp dörrar på makerspacet.",
+    send_accessy_invite: "Skicka Accessy-inbjudan",
+    change_pin_code: "Byt",
+    change_password: "Byt",
+    pin_code_not_set_warning: "Du har inte satt en pin-kod ännu. Använd $t(member_page:change_pin_code)-knappet för att sätta den. Pin-koden används till <0>memberbooth</0>",
+    set_password: "Välj",
+    no_password_set: "Inget lösenord valt",
+    set_password_alert: "Vi har skickat ett email till {{email}} med en länk för att byta ditt lösenord.",
+    failed_set_password_alert: "Misslyckades med att skicka en lönk för att byta lösenord: {{error}}",
+    instructions_to_become_member: "Återstående steg för att få makerspace access",
+    accessy_invite: "Bjud in dig själv till Accessy",
+    accessy_invite_info: "Om du har ominstallerat Accessy-appen så kan du behöva bjuda in dig själv för att få access igen.",
+    password: "Lösenord",
+    pin_code: "Pin-kod",
+    phone_number: "Telefonnummer",
+    email: "Email",
+    last_name: "Efternamn",
+    first_name: "Förnamn",
+    personal_data: "Personuppgifter",
+    address: {
+        address_title: "Adress",
+        address: "Adress",
+        address_co: "Extra adressinfo (t.ex. c/o)",
+        zip_code: "Postnummer",
+        postal_city: "Postort",
+    },
+}

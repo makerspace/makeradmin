@@ -1,6 +1,6 @@
 import * as common from "./common";
 import { UNAUTHORIZED } from "./common";
-import { Translator } from "./translations";
+import { Translator } from "./i18n";
 
 declare var UIkit: any;
 
@@ -8,7 +8,7 @@ export async function show_phone_number_dialog(
     member_id: number | null,
     prompt: () => Promise<string | null>,
     validate_prompt: () => Promise<string | null>,
-    t: Translator,
+    t: Translator<"change_phone">,
 ): Promise<"ok" | "cancel" | typeof UNAUTHORIZED> {
     let new_number: string | null = await prompt();
     if (new_number === null) {
@@ -29,7 +29,7 @@ export async function show_phone_number_dialog(
         if (error.status === UNAUTHORIZED) {
             return UNAUTHORIZED;
         } else {
-            await common.show_error(t("change_phone.errors.generic"), error);
+            await common.show_error(t("errors.generic"), error);
             return "cancel";
         }
     }
@@ -40,7 +40,7 @@ export async function show_phone_number_dialog(
 async function validate_phone_number_prompt(
     id: number,
     prompt: () => Promise<string | null>,
-    t: Translator,
+    t: Translator<"change_phone">,
 ): Promise<"ok" | "cancel" | typeof UNAUTHORIZED> {
     while (true) {
         let validation_code: string | null = await prompt();
@@ -49,9 +49,7 @@ async function validate_phone_number_prompt(
         }
 
         if (isNaN(parseInt(validation_code))) {
-            await UIkit.modal.alert(
-                `<h2>${t("change_phone.errors.incorrect_code")}</h2>`,
-            );
+            await UIkit.modal.alert(`<h2>${t("errors.incorrect_code")}</h2>`);
         } else {
             try {
                 await common.ajax(
@@ -64,10 +62,7 @@ async function validate_phone_number_prompt(
                 if (error.status === UNAUTHORIZED) {
                     return UNAUTHORIZED;
                 } else {
-                    await common.show_error(
-                        t("change_phone.errors.incorrect_code"),
-                        error,
-                    );
+                    await common.show_error(t("errors.incorrect_code"), error);
                 }
             }
         }

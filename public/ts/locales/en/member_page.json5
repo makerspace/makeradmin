@@ -1,0 +1,99 @@
+{
+    member: "Member",
+    billing: {
+        title: "Billing",
+        manage: "Manage Payment Methods",
+    },
+    old_membership_status: {
+        labaccess: {
+            inactive: "Your makerspace access is inactive.",
+            inactive_recent: "Your makerspace access expired {{days}} days ago.",
+            inactive_yesterday: "Your makerspace access expired yesterday",
+            active_hours_remaining: "Your makerspace access is valid for only {{hours}} more hours.",
+            active_few_days_remaining: "Your makerspace access is valid through {{end_date}} (only {{days}} days left).",
+            active_days_remaining: "Your makerspace access is valid through {{end_date}} ({{days}} days left).",
+        },
+        membership: {
+            inactive: "Your base membership is inactive.",
+            inactive_recent: "Your base membership expired {{days}} days ago.",
+            inactive_yesterday: "Your base membership expired yesterday",
+            active_hours_remaining: "Your base membership is valid for only {{hours}} more hours.",
+            active_few_days_remaining: "Your base membership is valid through {{end_date}} (only {{days}} days left).",
+            active_days_remaining: "Your base membership is valid through {{end_date}} ({{days}} days left).",
+        },
+        special_labaccess: {
+            inactive: "Your special makerspace access is inactive.",
+            inactive_recent: "Your special makerspace access expired {{days}} days ago.",
+            inactive_yesterday: "Your special makerspace access expired yesterday",
+            active_hours_remaining: "You have been given special access to the premises, which is for only {{hours}} more hours.",
+            active_few_days_remaining: "You have been given special access to the premises through {{end_date}} (only {{days}} days left).",
+            active_days_remaining: "You have been given special access to the premises through {{end_date}} ({{days}} days left).",
+        },
+    },
+    subscriptions: {
+        cancel: {
+            title: "Cancel auto-renewal",
+            no_longer_renewed: "Your {{type}} will no longer be automatically renewed.",
+            cancel_cancelling_subscription: "Nevermind",
+            membership: {
+                valid_until: "Your base membership will stay active until it expires on {{date}}",
+            },
+            labaccess: {
+                valid_until: "Your makerspace access will stay active until it expires on {{date}}",
+            },
+        },
+        descriptions: {
+            membership: "Base membership gives you voting rights at the yearly meeting, supports your local makerspace, and allows you to attend courses/social events.",
+            labaccess: "Makerspace access allows you to work on your own projects at the makerspace. \
+                You get 24/7 access to the space and you can also store one box with your own things at the space. \
+                Makerspace Access requires the Base Membership.",
+        },
+        pending_makerspace_access: "Your <strong>{{pending_days}}</strong> days of makerspace access will start when you attend a member introduction.",
+        add_to_cart: "Add {{count}} {{unit}} to cart: {{price}} kr",
+        binding_period: "subscription has a binding period of {{count}} {{unit}}",
+        next_charge: "Your membership will renew at {{formattedDate}} for {{amount}} kr.",
+        activate_auto_renewal: "Activate auto-renewal: {{price}} {{unit}}",
+        auto_renewal_active: "Auto renew: Active",
+        makerspace_access_also_activates_base_subscription: "Activating Makerspace Access Auto-renewal will also activate Base Membership auto-renewal.",
+        errors: {
+            no_member_introduction_title: "Cannot start subscription",
+            no_member_introduction: "You must attend a member introduction before you can start an auto-renewal subscription. You can find them in the <0>calendar</0>.",
+        },
+        pay_dialog: {
+            title: "Activate auto-renewal",
+        },
+    },
+    base_membership: {
+        title: "Base Membership",
+    },
+    makerspace_access: {
+        title: "Makerspace Access",
+    },
+    change_phone_number: "Change",
+    send_accessy_invite_msg: "Install the Accessy app on your phone. You can use this to unlock doors at the makerspace.",
+    send_accessy_invite: "Send Accessy invite",
+    change_pin_code: "Change",
+    change_password: "Change",
+    pin_code_not_set_warning: "You haven't set a pin-code yet. Use the $t(member_page:change_pin_code)-button to set it. The pin-code is used for <0>memberbooth</0>",
+    set_password: "Set",
+    no_password_set: "No password set",
+    set_password_alert: "We've sent an email to {{email}} with a link for changing your password.",
+    failed_set_password_alert: "Failed to send email for setting password: {{error}}",
+    instructions_to_become_member: "Remaining steps to get makerspace access",
+    accessy_invite: "Invite yourself to Accessy",
+    accessy_invite_info: "If you have reinstalled the Accessy app, you need to re-invite yourself to get access again.",
+    password: "Password",
+    pin_code: "Pin-code",
+    phone_number: "Phone number",
+    email: "Email",
+    last_name: "Last name",
+    first_name: "First name",
+    personal_data: "Personal data",
+    address: {
+        address_title: "Address",
+        address: "Address",
+        address_co: "Extra address info (for example c/o)",
+        zip_code: "Zip code",
+        postal_city: "City",
+    },
+}

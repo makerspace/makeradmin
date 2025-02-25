@@ -1,0 +1,372 @@
+{
+    "brand": {
+        "makerspace_name": "Stockholm Makerspace",
+        "billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm"
+    },
+    "change_phone": {
+        "new_number_prompt": "Nytt telefonnummer",
+        "validation_code_prompt": "Valideringskod: ",
+        "errors": {
+            "generic": "Kunde inte byta telefonnummer",
+            "incorrect_code": "Inkorrekt kod. Försök igen."
+        },
+        "validatePhone": "Vi har skickat en valideringskod till ditt telefonnummer. Skriv in koden här."
+    },
+    "common": {
+        "continue": "Fortsätt",
+        "back": "Tillbaka",
+        "and": "och",
+        "cancel": "Avbryt",
+        "unit": {
+            "year_one": "år",
+            "year_many": "år",
+            "month_one": "månad",
+            "month_many": "månader",
+            "day_one": "dag",
+            "day_many": "dagar",
+            "piece_one": "st",
+            "piece_many": "st"
+        },
+        "priceUnit": "kr",
+        "logOut": "Logga ut"
+    },
+    "courses": {
+        "title": "Kurser",
+        "description": "Här hittar du alla digitala kurser som $t(brand:makerspace_name) har. De flesta kurser sker på plats och annonseras i facebook-gruppen och på slack. Men vissa har en digital variant som du kan ta när du vill.",
+        "course_completed": "Genomförd",
+        "course_continue": "Fortsätt",
+        "course_take": "Ta kursen"
+    },
+    "history": {
+        "title": "Köphistorik",
+        "receipt": "Kvitto",
+        "receipt_sum": "Summa",
+        "thank_you_for_your_purchase": "Tack för ditt köp!",
+        "receipt_has_been_sent": "Ett kvitto har också skickats till din email.",
+        "receipt_not_found": "Kunde inte hitta kvittot"
+    },
+    "login": {
+        "title": "Logga in",
+        "magic_link_sent": "Ett email har skickats med en länk som du kan använda för att logga in",
+        "errors": {
+            "title_failed": "Inloggningen misslyckades",
+            "generic": "Fick ett oväntat svar från servern: {{error}}",
+            "generic2": "Kunde inte kommunicera med servern.",
+            "no_such_user": "Kan inte hitta en medlem med det namnet eller medlemsnumret",
+            "bad_credentials": "Felaktig email, medlemsnummer eller lösenord"
+        },
+        "form_validation": {
+            "missing_tag": "Du måste skriva in en email eller medlemsnummer.",
+            "missing_password": "Du måste skriva in ett lösenord."
+        },
+        "tag_placeholder": "Email/medlemsnummer",
+        "password_placeholder": "Lösenord",
+        "continue": "Fortsätt",
+        "login_methods": {
+            "email_and_password": "Logga in med lösenord",
+            "email_link": "Logga in med endast email"
+        },
+        "register": "Bli medlem"
+    },
+    "member_page": {
+        "member": "Medlem",
+        "billing": {
+            "title": "Betalning",
+            "manage": "Ändra betalningsmetoder"
+        },
+        "old_membership_status": {
+            "labaccess": {
+                "inactive": "Din makerspace access är inaktiv",
+                "inactive_recent": "Din makerspace access gick ut för {{days}} dagar sedan.",
+                "inactive_yesterday": "Din makerspace access gick ut igår",
+                "active_hours_remaining": "Din makerspace access är giltig valid i endast {{hours}} timmar till.",
+                "active_few_days_remaining": "Din makerspace access is valid till och med {{end_date}} (endast {{days}} dagar kvar).",
+                "active_days_remaining": "Din makerspace access är giltig till och med {{end_date}} ({{days}} dagar kvar)."
+            },
+            "membership": {
+                "inactive": "Ditt basmedlemsskap är inaktivt.",
+                "inactive_recent": "Ditt basmedlemsskap gick ut för {{days}} dagar sedan.",
+                "inactive_yesterday": "Ditt basmedlemsskap gick ut igår",
+                "active_hours_remaining": "Ditt basmedlemsskap är giltigt i endast {{hours}} timmar till.",
+                "active_few_days_remaining": "Ditt basmedlemsskap är giltigt till och med {{end_date}} (endast {{days}} dagar kvar).",
+                "active_days_remaining": "Ditt basmedlemsskap är giltigt till och med {{end_date}} ({{days}} dagar kvar)."
+            },
+            "special_labaccess": {
+                "inactive": "Din specialaccess är inaktiv.",
+                "inactive_recent": "Din specialaccess gick ut för {{days}} dagar sedan.",
+                "inactive_yesterday": "Din specialaccess gick ut igår",
+                "active_hours_remaining": "Du har fått specialaccess till spacet, som går ut om {{hours}} timmar.",
+                "active_few_days_remaining": "Du har fått specialaccess till spacet till och med {{end_date}} (endast {{days}} dagar kvar).",
+                "active_days_remaining": "Du har fått specialaccess till spacet till och med {{end_date}} ({{days}} dagar kvar)."
+            }
+        },
+        "subscriptions": {
+            "cancel": {
+                "title": "Avbryt automatisk förnyelse",
+                "no_longer_renewed": "Ditt {{type}} kommer inte automatiskt förnyas längre.",
+                "cancel_cancelling_subscription": "Nevermind",
+                "membership": {
+                    "valid_until": "Ditt basmedlemsskap fortsätter vara aktivt tills det går ut {{date}}"
+                },
+                "labaccess": {
+                    "valid_until": "Din makerspace access fortsätter vara aktiv tills det går ut {{date}}"
+                }
+            },
+            "descriptions": {
+                "membership": "Basmedlemsskapet ger dig rösträtt på årsmötet, stödjer ditt lokala makerspace, och tillåter dig att delta i kurser och andra sociala event.",
+                "labaccess": "Makerspace access låter dig arbeta på dina egna projekt på makerspacet.                 Du får tillgång 24/7 till spacet, och kan också förvara en låda på spacet med dina egna saker.                 Makerspace Access kräver att du också har basmedlemsskapet."
+            },
+            "pending_makerspace_access": "Dina <strong>{{pending_days}}</strong> dagar av makerspace access kommer börja när du har varit på en medlemsintroduktion.",
+            "add_to_cart": "Lägg till {{count}} {{unit}} till din varukorg: {{price}} kr",
+            "binding_period": "prenumerationen har en bindningstid på {{count}} {{unit}}",
+            "next_charge": "Ditt medlemsskap kommer att förnyas {{formattedDate}} till en kostnad av {{amount}} kr.",
+            "activate_auto_renewal": "Aktivera automatisk förnyelse: {{price}} {{unit}}",
+            "auto_renewal_active": "Automatisk förnyelse: Aktiv",
+            "makerspace_access_also_activates_base_subscription": "Automatisk förnyelse av Makerspace Access kommer också aktivera automatisk förnyelse av basmedlemsskapet.",
+            "errors": {
+                "no_member_introduction_title": "Kan inte påbörja en prenumeration",
+                "no_member_introduction": "Du måste genomgå en medlemsintroduktion innan du kan starta en prenumeration. Du kan hitta dem i <0>kalendern</0>."
+            },
+            "pay_dialog": {
+                "title": "Aktivera automatisk förnyelse"
+            }
+        },
+        "base_membership": {
+            "title": "Basmedlemsskap"
+        },
+        "makerspace_access": {
+            "title": "Makerspace Access"
+        },
+        "change_phone_number": "Byt",
+        "send_accessy_invite_msg": "Installera Accessy-appen på din telefon. Du använder den för att låsa upp dörrar på makerspacet.",
+        "send_accessy_invite": "Skicka Accessy-inbjudan",
+        "change_pin_code": "Byt",
+        "change_password": "Byt",
+        "pin_code_not_set_warning": "Du har inte satt en pin-kod ännu. Använd $t(member_page:change_pin_code)-knappet för att sätta den. Pin-koden används till <0>memberbooth</0>",
+        "set_password": "Välj",
+        "no_password_set": "Inget lösenord valt",
+        "set_password_alert": "Vi har skickat ett email till {{email}} med en länk för att byta ditt lösenord.",
+        "failed_set_password_alert": "Misslyckades med att skicka en lönk för att byta lösenord: {{error}}",
+        "instructions_to_become_member": "Återstående steg för att få makerspace access",
+        "accessy_invite": "Bjud in dig själv till Accessy",
+        "accessy_invite_info": "Om du har ominstallerat Accessy-appen så kan du behöva bjuda in dig själv för att få access igen.",
+        "password": "Lösenord",
+        "pin_code": "Pin-kod",
+        "phone_number": "Telefonnummer",
+        "email": "Email",
+        "last_name": "Efternamn",
+        "first_name": "Förnamn",
+        "personal_data": "Personuppgifter",
+        "address": {
+            "address_title": "Adress",
+            "address": "Adress",
+            "address_co": "Extra adressinfo (t.ex. c/o)",
+            "zip_code": "Postnummer",
+            "postal_city": "Postort"
+        }
+    },
+    "payment": {
+        "cart": "Kundvagn",
+        "cart_empty": "Din kundvagn är tom",
+        "pay_with_stripe": "Betala med Stripe",
+        "payment_failed": "Betalning misslyckades",
+        "pay": "Betala"
+    },
+    "register": {
+        "memberships": {
+            "title": "Makerspace Medlemsskap",
+            "p1": "Medlemsskap är uppdelade i två delar",
+            "p2": "Alla har det årliga <strong>Basmedlemsskapet</strong>, och om du vill arbeta på dina egna projekt så måste du också skaffa <strong>Makerspace Access</strong> (betalas månadsvis)."
+        },
+        "chooseYourPlan": {
+            "title": "Välj ditt medlemsskap",
+            "help": ""
+        },
+        "plans": {
+            "ofWhichBaseMembership": "varav {{price}} kr är årliga basmedlemsskapet",
+            "makerspaceAccessSub": {
+                "title": "Makerspace Access Prenumeration",
+                "abovePrice": "",
+                "period": "per månad",
+                "description1": "En månatlig prenumeration ger dig tillgång hela tiden, till en lägre kostnad.\n2 månaders bindningstid.",
+                "description2": "",
+                "included": [
+                    "Delta i kurser och event",
+                    "Rösta på årsmötet",
+                    "Stöd ditt lokala makerspace",
+                    "Tillgång till $t(brand:makerspace_name) 24/7",
+                    "Arbeta på dina egna projekt",
+                    "Förvara en personlig låda på spacet"
+                ],
+                "notIncluded": []
+            },
+            "starterPack": {
+                "title": "Startpaket",
+                "abovePrice": "",
+                "period": "",
+                "description1": "Två månader av makerspace access till ett lägre pris. Endast för nya medlemmar.",
+                "description2": "",
+                "included": [
+                    "Delta i kurser och event",
+                    "Rösta på årsmötet",
+                    "Stöd ditt lokala makerspace",
+                    "Tillgång till $t(brand:makerspace_name) 24/7",
+                    "Arbeta på dina egna projekt",
+                    "Förvara en personlig låda på spacet"
+                ],
+                "notIncluded": []
+            },
+            "singleMonth": {
+                "title": "1 månad av Makerspace Access",
+                "abovePrice": "",
+                "period": "",
+                "description1": "En månad av makerspace access.",
+                "description2": "",
+                "included": [
+                    "Delta i kurser och event",
+                    "Rösta på årsmötet",
+                    "Stöd ditt lokala makerspace",
+                    "Tillgång till $t(brand:makerspace_name) 24/7",
+                    "Arbeta på dina egna projekt",
+                    "Förvara en personlig låda på spacet"
+                ],
+                "notIncluded": []
+            },
+            "decideLater": {
+                "title": "1 år av endast basmedlemsskap",
+                "abovePrice": "",
+                "price": "0",
+                "period": "",
+                "description1": "Ett år av basmedlemsskap.",
+                "description2": "Senare så kan du betala för enskilda månader av makerspace access ({{makerspace_acccess_price}} kr/mån) i vår webshop, eller skaffa en prenumeration ({{makerspace_acccess_subscription_price}} kr/mån).",
+                "included": [
+                    "Delta i kurser och event",
+                    "Rösta på årsmötet",
+                    "Stöd ditt lokala makerspace"
+                ],
+                "notIncluded": [
+                    "Tillgång till spacet utanför event",
+                    "Arbeta på dina egna projekt",
+                    "Förvara en personlig låda på spacet"
+                ]
+            }
+        },
+        "memberInfo": {
+            "title": "Lite om dig",
+            "firstName": "Förnamn",
+            "lastName": "Efternamn",
+            "email": "Email",
+            "phone": "Telefonnummer (ditt telefonnummer kommer att användas som din nyckel till makerspacet)",
+            "zipCode": "Postnummer",
+            "submit": "Fortsätt"
+        },
+        "terms": {
+            "title": "Regler för lokalerna",
+            "continue": "Fortsätt",
+            "accept": "Jag accepterar att",
+            "rules": [
+                "<li>följa och hålla mig uppdaterad om:</li>             <ol>             <li>övergripande regler.</li>             <li>regler för medlemmars förvaring.</li>             <li>regler för specifika lokalutrymmen jag kommer att vara i.</li>             <li>regler för de specifika maskiner och verktyg jag använder.</li>             </ol>             <li>endast vistas i lokalen med giltigt medlemskap för lokalen. Är mitt medlemskap för lokalen inaktivt så har jag inte tillgång till lokalen, annat än som deltagare i Makerspace-aktiviteter, exempelvis kurs, städdag eller öppet hus.</li>             <li>inte bedriva kommersiell verksamhet i lokalen.</li>             <li>ta ansvar för mina egna handlingar samt att visa hänsyn för andra medlemmar.</li>             <li>ta hand om min projektförvaring enligt gällande förvaringsregler. Efterlämnat material tillfaller föreningen.</li>             <li>alltid avse att lämna våra ytor/maskiner/verktyg i bättre skick än jag fann det, samt planera min vistelse så jag hinner städa efter mig.</li>             <li>inte avlägsna utrustning från lokalen.</li>             <li>rapportera skada på utrustning till styrelsen eller på Slack.</li>             <li>fråga andra medlemmar eller styrelsen om jag är osäker på något.</li>             <li>alltid fråga innan jag fotograferar någon eller något i lokalen.</li>             <li>inte göra något olagligt i lokalen.</li>             <li>inte bruka alkohol/droger i lokalen och inte bruka föreningens maskiner påverkad.</li>             <li>inte sova i lokalen.</li>             <li>ta fullt ansvar för vad mina gäster gör i lokalen. Gäster får inte arbeta med eget projekt under vistelsen i lokalen.</li>             <li>inte vistas i andra utrymmen i huset än föreningens, exempelvis ej i AWLs kök på entréplan, såvida inte styrelsen meddelat annat.</li>            "
+            ],
+            "pledge": "Jag lovar att...",
+            "understandingPledge": "Jag förstår att...",
+            "understanding": [
+                "för att kunna hantera medlemskap & lokalaccess så behöver Stockholm Makerspace hantera personuppgifter.",
+                "om jag bryter mot någon av ovanstående regler eller på något annat sätt missbrukar min tillgång till lokalen så kan jag bli avstängd från lokalen utan att erlagd avgift återbetalas.",
+                "jag kan bli ersättningsskyldig om jag agerar vårdslöst.",
+                "lokalen är kameraövervakad."
+            ],
+            "welcoming": "Jag kommer att göra mitt bästa för att säkerställa att Stockholm Makerspace är en ren, säker och välkomnande plats."
+        },
+        "calendar": {
+            "title": "Kalender",
+            "text": "Boka en Medlemsintroduktion. Du kommer får en rundtur av spacet och få tillåtelse att använda makerspacet. Din makerspace access kommer inte aktiveras innan du har varit på en medlemsintroduktion. Vid vissa tillfällen så kan det vara ont om tider att boka. Hör av dig på <a href={{URL_SLACK_HELP}}>Slack</a> om du inte hittar en tid att boka.",
+            "bookButton": "Boka en medlemsintroduktion"
+        },
+        "payment": {
+            "title": "Betalning",
+            "subTitle": "Nästan klart, vi behöver bara ta hand om betalningen.",
+            "bookIntroduction": "Innan du får tillgång till makerspacet så måste du gå på en medlemsintroduktion. Dessa hålls <0>regelbundet var 1-2 vecka</0>.",
+            "paymentProcessor": "Betalning hanteras av Stripe"
+        },
+        "success": {
+            "title": "Välkommen till $t(brand:makerspace_name)!",
+            "subTitle": "Vi ser fram emot att träffa dig!",
+            "bookIntroduction": "För att få tillgång till makerspacet så måste du gå på en medlemsintroduktion. Du kan boka en här, eller göra det senare.",
+            "nextSteps": "Här är dina nästa steg:",
+            "bookButton": "Boka en medlemsintroduktion",
+            "steps": {
+                "joinSlackButton": "Gå med i vår Slack",
+                "joinSlackWhy": "för att chatta med andra medlemmar.",
+                "joinSlackWhatIsThis": "Vad är det här?",
+                "quizTake": "Gör vårt",
+                "quizName": "Välkomstquiz",
+                "quizWhy": "för att lära dig mer om spacet.",
+                "installAccessy": "Installera Accessy",
+                "installAccessyWhy": "för att kunna låsa upp dörrar, efter din introduktion.",
+                "wikiPrefix": "Läs mer på vår",
+                "wikiButton": "wiki",
+                "instagramPrefix": "Bli inspirerad på vår",
+                "instagramButton": "Instagram"
+            },
+            "continueToMemberPortal": "Fortsätt till din medlemssida"
+        },
+        "discounts": {
+            "title": "Låginkomstrabatt",
+            "apply_for_discounts": "Jag har inte råd med medlemsavgiften",
+            "text": "Om du inte kan betala fullt pris för ditt medlemsskap så kan du ansöka om en rabatt.",
+            "confirmationTitle": "Rabatt beviljad!",
+            "confirmationDiscount": "Du kommer få {{percent}}% rabatt på medlemsskap.",
+            "confirmationMessage": "Vi förstår att alla inte har råd med fullt pris för medlemsskap. Men det finns andra sätt att hjälpa till om du vill. Makerspacet drivs av alla medlemmars volontärtid. Hjälp till på en fixardag, hjälp till med att underhålla en maskin, eller varför inte hålla en kurs i något du är intresserad av?",
+            "submit": "Fortsätt",
+            "submitWriteMore": "Skriv lite mer",
+            "cancel": "Avbryt",
+            "messagePlaceholder": "Berätta varför du behöver en rabatt, i minst några meningar.",
+            "reasons": {
+                "student": "Jag är student",
+                "unemployed": "Jag är arbetslös",
+                "senior": "Jag är pensionär",
+                "other": "Annat"
+            }
+        }
+    },
+    "shop": {
+        "search_placeholder": "Sök efter en produkt..."
+    },
+    "sidebar": {
+        "member": "Medlemsskap",
+        "shop": "Webshop",
+        "cart": "Kundvagn",
+        "purchase_history": "Köphistorik",
+        "courses": "Kurser",
+        "licenses": "Licenser och rabatter",
+        "pay": "Betala"
+    },
+    "special_products": {
+        "labaccess_subscription": {
+            "summary": "Makerspace Access",
+            "renewal": "Din makerspace access förnyas varje månad till ett pris av {{price}} kr/månad."
+        },
+        "membership_subscription": {
+            "summary": "Base Membership",
+            "renewal": "Ditt basmedlemsskap förnyas årligen till ett pris av {{price}} kr/år."
+        },
+        "single_labaccess_month": {
+            "summary": "Makerspace Access",
+            "renewal": "SHOULD NOT BE VISIBLE {{price}}"
+        },
+        "single_membership_year": {
+            "summary": "Makerspace Access",
+            "renewal": "SHOULD NOT BE VISIBLE {{price}}"
+        },
+        "access_starter_pack": {
+            "summary": "Startpaket",
+            "period": "2 månader",
+            "renewal": "SHOULD NOT BE VISIBLE {{price}}"
+        },
+        "renewal_one": "Du kan avbryta denna prenumeration när som helst.",
+        "renewal_other": "Du kan avbryta dessa prenumerationer när som helst.",
+        "cart_total": "Totalt",
+        "payment_right_now_nothing": "Just nu betalar du ingenting.",
+        "payment_right_now": "Just nu betalar du"
+    }
+}

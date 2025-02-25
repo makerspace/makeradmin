@@ -1,0 +1,18 @@
+{
+    continue: "Continue",
+    back: "Back",
+    and: "and",
+    cancel: "Cancel",
+    unit: {
+        year_one: "year",
+        year_many: "years",
+        month_one: "month",
+        month_many: "months",
+        day_one: "day",
+        day_many: "days",
+        piece_one: "piece",
+        piece_many: "pieces",
+    },
+    priceUnit: "kr",
+    logOut: "Log out",
+}

@@ -62,7 +62,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
         };
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.checkLogin();
         this.loadQuiz();
     }
@@ -317,7 +317,7 @@ common.documentLoaded().then(() => {
     const root = document.getElementById("root");
     if (root != null) {
         const splits = document.location.href.split("/");
-        let quiz_id = parseInt(splits[splits.length - 1]);
+        let quiz_id = parseInt(splits[splits.length - 1]!);
         if (isNaN(quiz_id)) {
             // Backwards compatibility in case someone has an old link
             quiz_id = 1;

@@ -1,6 +1,7 @@
 import { render } from "preact";
 import * as common from "./common";
 import { ServerResponse, UNAUTHORIZED } from "./common";
+import { useTranslation } from "./i18n";
 import * as login from "./login";
 import { Quiz } from "./quiz";
 import { Sidebar } from "./sidebar";
@@ -13,6 +14,7 @@ interface QuizInfo {
 }
 
 const CourseButton = ({ quizInfo }: { quizInfo: QuizInfo }) => {
+    const { t } = useTranslation("courses");
     const completed =
         quizInfo.correctly_answered_questions >=
         quizInfo.total_questions_in_quiz;
@@ -21,7 +23,8 @@ const CourseButton = ({ quizInfo }: { quizInfo: QuizInfo }) => {
     if (completed) {
         actionBtn = (
             <div class="course-completed">
-                Genomförd <span uk-icon="icon: check; ratio: 1.5" />
+                {t("course_completed")}{" "}
+                <span uk-icon="icon: check; ratio: 1.5" />
             </div>
         );
     } else if (quizInfo.correctly_answered_questions > 0) {
@@ -30,14 +33,14 @@ const CourseButton = ({ quizInfo }: { quizInfo: QuizInfo }) => {
             quizInfo.total_questions_in_quiz;
         actionBtn = (
             <div class="course-not-completed">
-                Fortsätt ({Math.round(completed_fraction * 100)}%){" "}
+                {t("course_continue")} ({Math.round(completed_fraction * 100)}%){" "}
                 <span uk-icon="icon: chevron-right; ratio: 1.5"></span>
             </div>
         );
     } else {
         actionBtn = (
             <div class="course-not-completed">
-                Ta kursen{" "}
+                {t("course_take")}{" "}
                 <span uk-icon="icon: chevron-right; ratio: 1.5"></span>
             </div>
         );
@@ -56,18 +59,14 @@ const CourseButton = ({ quizInfo }: { quizInfo: QuizInfo }) => {
 };
 
 const CoursesPage = ({ courses }: { courses: QuizInfo[] }) => {
+    const { t } = useTranslation("courses");
     return (
         <>
             <Sidebar cart={null} />
             <div id="content">
                 <div class="content-centering courses-page">
-                    <h2>Kurser</h2>
-                    <p>
-                        Här hittar du alla digitala kurser som Stockholm
-                        Makerspace har. De flesta kurser sker på plats och
-                        annonseras i facebook-gruppen och på slack. Men vissa
-                        har en digital variant som du kan ta när du vill.
-                    </p>
+                    <h2>{t("title")}</h2>
+                    <p>{t("description")}</p>
                     <div>
                         {courses.map((quizInfo) => (
                             <CourseButton quizInfo={quizInfo} />

@@ -1,4 +1,5 @@
 import Cart from "./cart";
+import { useTranslation } from "./i18n";
 import { member_t } from "./member_common";
 import { Transaction, TransactionItem } from "./payment_common";
 
@@ -42,13 +43,16 @@ export const Receipt = ({
     member?: member_t;
     detailed: boolean;
 }) => {
+    const { t } = useTranslation("history");
     return (
         <div className={`history-item history-item-${transaction.status}`}>
             <a
                 className="receipt-header"
                 href={`/shop/receipt/${transaction.id}`}
             >
-                <span>Kvitto {transaction.id}</span>
+                <span>
+                    {t("receipt")} {transaction.id}
+                </span>
                 <span className="receipt-date">
                     {new Date(transaction.created_at).toLocaleDateString(
                         "sv-SE",
@@ -69,11 +73,11 @@ export const Receipt = ({
             </div>
             <div className="receipt-amount">
                 {transaction.status === "completed" && detailed ? (
-                    <span>Summa</span>
+                    <span>{t("receipt_sum")}</span>
                 ) : (
                     <span className="receipt-payment-status">
                         {format_receipt_status(transaction.status) ||
-                            (detailed ? "Summa" : "")}
+                            (detailed ? t("receipt_sum") : "")}
                     </span>
                 )}
                 <span className="receipt-amount-value">

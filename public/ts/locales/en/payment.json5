@@ -1,0 +1,7 @@
+{
+    cart: "Cart",
+    cart_empty: "Your cart is empty",
+    pay_with_stripe: "Pay with Stripe",
+    payment_failed: "Payment failed",
+    pay: "Pay",
+}

@@ -1,0 +1,9 @@
+{
+    new_number_prompt: "New phone number",
+    validation_code_prompt: "Validation code: ",
+    errors: {
+        generic: "Could not change phone number",
+        incorrect_code: "Incorrect code. Try again.",
+    },
+    validatePhone: "We have sent a validation code to your phone. Please enter it below.",
+}

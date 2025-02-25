@@ -2,6 +2,7 @@ import { ComponentChildren } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import Cart from "./cart";
 import { logout } from "./common";
+import { useTranslation } from "./i18n";
 import { ProductData } from "./payment_common";
 
 const NavItem = ({
@@ -36,6 +37,7 @@ export const Sidebar = ({
 }) => {
     const sidebarRef = useRef<HTMLDivElement>(null);
     const [isSidebarScrollable, setIsSidebarScrollable] = useState(false);
+    const { t } = useTranslation("sidebar");
 
     useEffect((): (() => void) => {
         const checkSidebarHeight = () => {
@@ -71,10 +73,10 @@ export const Sidebar = ({
                 />
                 <ul className="uk-nav uk-nav-default">
                     <NavItem url="/member" icon="user">
-                        Medlemsvy
+                        {t("member")}
                     </NavItem>
                     <NavItem url="/shop" icon="cart">
-                        Webshop
+                        {t("shop")}
                     </NavItem>
                     {(path === "/shop" || path === "/shop/cart") &&
                         cart !== null && (
@@ -98,7 +100,7 @@ export const Sidebar = ({
                                         </li>
                                     ))}
                                 <NavItem url="/shop/cart" icon="cart">
-                                    Min Kundvagn (
+                                    {t("cart")} (
                                     {Cart.formatCurrency(
                                         cart.cart.sum(cart.productData.id2item),
                                     )}
@@ -107,13 +109,13 @@ export const Sidebar = ({
                             </ul>
                         )}
                     <NavItem url="/shop/member/history" icon="history">
-                        Min köphistorik
+                        {t("purchase_history")}
                     </NavItem>
                     <NavItem url="/shop/member/courses" icon="star">
-                        Kurser
+                        {t("courses")}
                     </NavItem>
                     <NavItem url="/shop/member/licenses" icon="tag">
-                        Licenser och rabatter
+                        {t("licenses")}
                     </NavItem>
                     <li>
                         <a
@@ -122,7 +124,8 @@ export const Sidebar = ({
                                 logout();
                             }}
                         >
-                            <span uk-icon="sign-out"></span> Logga ut
+                            <span uk-icon="sign-out"></span>{" "}
+                            {t("common:logOut")}
                         </a>
                     </li>
 
@@ -133,7 +136,7 @@ export const Sidebar = ({
                             }`}
                         >
                             <a href="/shop/cart">
-                                <span uk-icon="cart"></span> Betala
+                                <span uk-icon="cart"></span> {t("pay")}
                                 <span id="cart-sum">
                                     {Cart.formatCurrency(
                                         cart.cart.sum(cart.productData.id2item),
