@@ -1,4 +1,5 @@
-FROM node:19-alpine@sha256:8ec543d4795e2e85af924a24f8acb039792ae9fe8a42ad5b4bf4c277ab34b62e
+# syntax=docker/dockerfile:1.11
+FROM node:19.9.0-alpine3.18@sha256:8ec543d4795e2e85af924a24f8acb039792ae9fe8a42ad5b4bf4c277ab34b62e
 
 RUN apk add --no-cache tzdata
 ENV TZ=Europe/Stockholm
@@ -18,7 +19,7 @@ COPY ./jestSetup.js /work/
 RUN npm run build
 RUN echo tsc --version
 
-FROM nginx:alpine@sha256:74175cf34632e88c6cfe206897cbfe2d2fecf9bf033c40e7f9775a3689e8adc7
+FROM nginx:1.27.2-alpine3.20@sha256:74175cf34632e88c6cfe206897cbfe2d2fecf9bf033c40e7f9775a3689e8adc7
 
 # Configuration file for nginx
 COPY ./docker/nginx_default_host /etc/nginx/conf.d/default.conf
