@@ -401,33 +401,42 @@ function KeyHandoutForm(props) {
                                             member.labaccess_agreement_at =
                                                 new Date().toISOString();
                                         } else {
-                                            UIkit.modal.confirm(
-                                                renderToString(
-                                                    <div>
-                                                        <p>
-                                                            Är du säker på{" "}
-                                                            {member.firstname}{" "}
-                                                            {member.lastname}{" "}
-                                                            inte har skrivit på
-                                                            ett labbavtal?
-                                                        </p>
-                                                        <p>
-                                                            Labbavtalet mottogs{" "}
-                                                            <strong>
-                                                                {dateTimeToStr(
-                                                                    member.labaccess_agreement_at,
-                                                                )}
-                                                            </strong>
-                                                            .{" "}
-                                                        </p>
-                                                    </div>,
-                                                ),
-                                                function () {
-                                                    member.labaccess_agreement_at =
-                                                        null;
-                                                },
-                                                false,
-                                            );
+                                            UIkit.modal
+                                                .confirm(
+                                                    renderToString(
+                                                        <div>
+                                                            <p>
+                                                                Är du säker på{" "}
+                                                                {
+                                                                    member.firstname
+                                                                }{" "}
+                                                                {
+                                                                    member.lastname
+                                                                }{" "}
+                                                                inte har skrivit
+                                                                på ett
+                                                                labbavtal?
+                                                            </p>
+                                                            <p>
+                                                                Labbavtalet
+                                                                mottogs{" "}
+                                                                <strong>
+                                                                    {dateTimeToStr(
+                                                                        member.labaccess_agreement_at,
+                                                                    )}
+                                                                </strong>
+                                                                .{" "}
+                                                            </p>
+                                                        </div>,
+                                                    ),
+                                                )
+                                                .then(
+                                                    () => {
+                                                        member.labaccess_agreement_at =
+                                                            null;
+                                                    },
+                                                    () => {},
+                                                );
                                         }
                                     }}
                                 />{" "}
