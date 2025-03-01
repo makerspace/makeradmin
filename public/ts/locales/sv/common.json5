@@ -1,0 +1,18 @@
+{
+    continue: "Fortsätt",
+    back: "Tillbaka",
+    and: "och",
+    cancel: "Avbryt",
+    unit: {
+        year_one: "år",
+        year_many: "år",
+        month_one: "månad",
+        month_many: "månader",
+        day_one: "dag",
+        day_many: "dagar",
+        piece_one: "st",
+        piece_many: "st",
+    },
+    priceUnit: "kr",
+    logOut: "Logga ut",
+}

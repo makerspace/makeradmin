@@ -1,0 +1,28 @@
+{
+    labaccess_subscription: {
+        summary: "Makerspace Access",
+        renewal: "Din makerspace access förnyas varje månad till ett pris av {{price}} kr/månad.",
+    },
+    membership_subscription: {
+        summary: "Base Membership",
+        renewal: "Ditt basmedlemsskap förnyas årligen till ett pris av {{price}} kr/år.",
+    },
+    single_labaccess_month: {
+        summary: "Makerspace Access",
+        renewal: "SHOULD NOT BE VISIBLE {{price}}",
+    },
+    single_membership_year: {
+        summary: "Makerspace Access",
+        renewal: "SHOULD NOT BE VISIBLE {{price}}",
+    },
+    access_starter_pack: {
+        summary: "Startpaket",
+        period: "2 månader",
+        renewal: "SHOULD NOT BE VISIBLE {{price}}",
+    },
+    renewal_one: "Du kan avbryta denna prenumeration när som helst.",
+    renewal_other: "Du kan avbryta dessa prenumerationer när som helst.",
+    cart_total: "Totalt",
+    payment_right_now_nothing: "Just nu betalar du ingenting.",
+    payment_right_now: "Just nu betalar du",
+}

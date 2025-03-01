@@ -1,0 +1,9 @@
+{
+    member: "Membership",
+    shop: "Webshop",
+    cart: "Cart",
+    purchase_history: "Receipts",
+    courses: "Courses",
+    licenses: "Licenses and discounts",
+    pay: "Pay",
+}

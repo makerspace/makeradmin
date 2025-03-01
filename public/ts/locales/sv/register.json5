@@ -1,0 +1,178 @@
+{
+    memberships: {
+        title: "Makerspace Medlemsskap",
+        p1: "Medlemsskap är uppdelade i två delar",
+        p2: "Alla har det årliga <strong>Basmedlemsskapet</strong>, och om du vill arbeta på dina egna projekt så måste du också skaffa <strong>Makerspace Access</strong> (betalas månadsvis).",
+    },
+    chooseYourPlan: {
+        title: "Välj ditt medlemsskap",
+        help: "",
+    },
+    plans: {
+        ofWhichBaseMembership: "varav {{price}} kr är årliga basmedlemsskapet",
+        makerspaceAccessSub: {
+            title: "Makerspace Access Prenumeration",
+            abovePrice: "",
+            period: "per månad",
+            description1: "En månatlig prenumeration ger dig tillgång hela tiden, till en lägre kostnad.\n2 månaders bindningstid.",
+            description2: "",
+            included: [
+                "Delta i kurser och event",
+                "Rösta på årsmötet",
+                "Stöd ditt lokala makerspace",
+                "Tillgång till $t(brand:makerspace_name) 24/7",
+                "Arbeta på dina egna projekt",
+                "Förvara en personlig låda på spacet",
+            ],
+            notIncluded: [],
+        },
+        starterPack: {
+            title: "Startpaket",
+            abovePrice: "",
+            period: "",
+            description1: "Två månader av makerspace access till ett lägre pris. Endast för nya medlemmar.",
+            description2: "",
+            included: [
+                "Delta i kurser och event",
+                "Rösta på årsmötet",
+                "Stöd ditt lokala makerspace",
+                "Tillgång till $t(brand:makerspace_name) 24/7",
+                "Arbeta på dina egna projekt",
+                "Förvara en personlig låda på spacet",
+            ],
+            notIncluded: [],
+        },
+        singleMonth: {
+            title: "1 månad av Makerspace Access",
+            abovePrice: "",
+            period: "",
+            description1: "En månad av makerspace access.",
+            description2: "",
+            included: [
+                "Delta i kurser och event",
+                "Rösta på årsmötet",
+                "Stöd ditt lokala makerspace",
+                "Tillgång till $t(brand:makerspace_name) 24/7",
+                "Arbeta på dina egna projekt",
+                "Förvara en personlig låda på spacet",
+            ],
+            notIncluded: [],
+        },
+        decideLater: {
+            title: "1 år av endast basmedlemsskap",
+            abovePrice: "",
+            price: "0",
+            period: "",
+            description1: "Ett år av basmedlemsskap.",
+            description2: "Senare så kan du betala för enskilda månader av makerspace access ({{makerspace_acccess_price}} kr/mån) i vår webshop, eller skaffa en prenumeration ({{makerspace_acccess_subscription_price}} kr/mån).",
+            included: [
+                "Delta i kurser och event",
+                "Rösta på årsmötet",
+                "Stöd ditt lokala makerspace",
+            ],
+            notIncluded: [
+                "Tillgång till spacet utanför event",
+                "Arbeta på dina egna projekt",
+                "Förvara en personlig låda på spacet",
+            ],
+        },
+    },
+    memberInfo: {
+        title: "Lite om dig",
+        firstName: "Förnamn",
+        lastName: "Efternamn",
+        email: "Email",
+        phone: "Telefonnummer (ditt telefonnummer kommer att användas som din nyckel till makerspacet)",
+        zipCode: "Postnummer",
+        submit: "Fortsätt",
+    },
+    terms: {
+        title: "Regler för lokalerna",
+        continue: "Fortsätt",
+        accept: "Jag accepterar att",
+        rules: [
+            "<li>följa och hålla mig uppdaterad om:</li> \
+            <ol> \
+            <li>övergripande regler.</li> \
+            <li>regler för medlemmars förvaring.</li> \
+            <li>regler för specifika lokalutrymmen jag kommer att vara i.</li> \
+            <li>regler för de specifika maskiner och verktyg jag använder.</li> \
+            </ol> \
+            <li>endast vistas i lokalen med giltigt medlemskap för lokalen. Är mitt medlemskap för lokalen inaktivt så har jag inte tillgång till lokalen, annat än som deltagare i Makerspace-aktiviteter, exempelvis kurs, städdag eller öppet hus.</li> \
+            <li>inte bedriva kommersiell verksamhet i lokalen.</li> \
+            <li>ta ansvar för mina egna handlingar samt att visa hänsyn för andra medlemmar.</li> \
+            <li>ta hand om min projektförvaring enligt gällande förvaringsregler. Efterlämnat material tillfaller föreningen.</li> \
+            <li>alltid avse att lämna våra ytor/maskiner/verktyg i bättre skick än jag fann det, samt planera min vistelse så jag hinner städa efter mig.</li> \
+            <li>inte avlägsna utrustning från lokalen.</li> \
+            <li>rapportera skada på utrustning till styrelsen eller på Slack.</li> \
+            <li>fråga andra medlemmar eller styrelsen om jag är osäker på något.</li> \
+            <li>alltid fråga innan jag fotograferar någon eller något i lokalen.</li> \
+            <li>inte göra något olagligt i lokalen.</li> \
+            <li>inte bruka alkohol/droger i lokalen och inte bruka föreningens maskiner påverkad.</li> \
+            <li>inte sova i lokalen.</li> \
+            <li>ta fullt ansvar för vad mina gäster gör i lokalen. Gäster får inte arbeta med eget projekt under vistelsen i lokalen.</li> \
+            <li>inte vistas i andra utrymmen i huset än föreningens, exempelvis ej i AWLs kök på entréplan, såvida inte styrelsen meddelat annat.</li>\
+            ",
+        ],
+        pledge: "Jag lovar att...",
+        understandingPledge: "Jag förstår att...",
+        understanding: [
+            "för att kunna hantera medlemskap & lokalaccess så behöver Stockholm Makerspace hantera personuppgifter.",
+            "om jag bryter mot någon av ovanstående regler eller på något annat sätt missbrukar min tillgång till lokalen så kan jag bli avstängd från lokalen utan att erlagd avgift återbetalas.",
+            "jag kan bli ersättningsskyldig om jag agerar vårdslöst.",
+            "lokalen är kameraövervakad.",
+        ],
+        welcoming: "Jag kommer att göra mitt bästa för att säkerställa att Stockholm Makerspace är en ren, säker och välkomnande plats.",
+    },
+    calendar: {
+        title: "Kalender",
+        text: "Boka en Medlemsintroduktion. Du kommer får en rundtur av spacet och få tillåtelse att använda makerspacet. Din makerspace access kommer inte aktiveras innan du har varit på en medlemsintroduktion. Vid vissa tillfällen så kan det vara ont om tider att boka. Hör av dig på <a href={{URL_SLACK_HELP}}>Slack</a> om du inte hittar en tid att boka.",
+        bookButton: "Boka en medlemsintroduktion",
+    },
+    payment: {
+        title: "Betalning",
+        subTitle: "Nästan klart, vi behöver bara ta hand om betalningen.",
+        bookIntroduction: "Innan du får tillgång till makerspacet så måste du gå på en medlemsintroduktion. Dessa hålls <0>regelbundet var 1-2 vecka</0>.",
+        paymentProcessor: "Betalning hanteras av Stripe",
+    },
+    success: {
+        title: "Välkommen till $t(brand:makerspace_name)!",
+        subTitle: "Vi ser fram emot att träffa dig!",
+        bookIntroduction: "För att få tillgång till makerspacet så måste du gå på en medlemsintroduktion. Du kan boka en här, eller göra det senare.",
+        nextSteps: "Här är dina nästa steg:",
+        bookButton: "Boka en medlemsintroduktion",
+        steps: {
+            joinSlackButton: "Gå med i vår Slack",
+            joinSlackWhy: "för att chatta med andra medlemmar.",
+            joinSlackWhatIsThis: "Vad är det här?",
+            quizTake: "Gör vårt",
+            quizName: "Välkomstquiz",
+            quizWhy: "för att lära dig mer om spacet.",
+            installAccessy: "Installera Accessy",
+            installAccessyWhy: "för att kunna låsa upp dörrar, efter din introduktion.",
+            wikiPrefix: "Läs mer på vår",
+            wikiButton: "wiki",
+            instagramPrefix: "Bli inspirerad på vår",
+            instagramButton: "Instagram",
+        },
+        continueToMemberPortal: "Fortsätt till din medlemssida",
+    },
+    discounts: {
+        title: "Låginkomstrabatt",
+        apply_for_discounts: "Jag har inte råd med medlemsavgiften",
+        text: "Om du inte kan betala fullt pris för ditt medlemsskap så kan du ansöka om en rabatt.",
+        confirmationTitle: "Rabatt beviljad!",
+        confirmationDiscount: "Du kommer få {{percent}}% rabatt på medlemsskap.",
+        confirmationMessage: "Vi förstår att alla inte har råd med fullt pris för medlemsskap. Men det finns andra sätt att hjälpa till om du vill. Makerspacet drivs av alla medlemmars volontärtid. Hjälp till på en fixardag, hjälp till med att underhålla en maskin, eller varför inte hålla en kurs i något du är intresserad av?",
+        submit: "Fortsätt",
+        submitWriteMore: "Skriv lite mer",
+        cancel: "Avbryt",
+        messagePlaceholder: "Berätta varför du behöver en rabatt, i minst några meningar.",
+        reasons: {
+            student: "Jag är student",
+            unemployed: "Jag är arbetslös",
+            senior: "Jag är pensionär",
+            other: "Annat",
+        },
+    },
+}

@@ -1,0 +1,212 @@
+{
+    memberships: {
+        title: "Makerspace Memberships",
+        p1: "Memberships are split into two parts",
+        p2: "Everyone has the yearly <strong>Base Membership</strong>, and if you want to work on your own projects, you must also get <strong>Makerspace Access</strong> (paid monthly).",
+    },
+    chooseYourPlan: {
+        title: "Choose your membership",
+        help: "",
+    },
+    plans: {
+        ofWhichBaseMembership: "of which {{price}} kr is yearly base membership",
+        makerspaceAccessSub: {
+            title: "Makerspace Access Subscription",
+            abovePrice: "",
+            period: "per month",
+            description1: "A monthly subscription gets you access all the time, for a lower price.\n2 months minimum.",
+            description2: "",
+            included: [
+                "Take part in courses and social events",
+                "Vote at yearly meetings",
+                "Support your local makerspace",
+                "Access to Stockholm Makerspace 24/7",
+                "Work on your own projects",
+                "Store a personal box at the space",
+            ],
+            notIncluded: [],
+        },
+        starterPack: {
+            title: "Starter Pack",
+            abovePrice: "",
+            period: "",
+            description1: "Two months of makerspace access for a lower price. New members only.",
+            description2: "",
+            included: [
+                "Take part in courses and social events",
+                "Vote at yearly meetings",
+                "Support your local makerspace",
+                "Access to Stockholm Makerspace 24/7",
+                "Work on your own projects",
+                "Store a personal box at the space",
+            ],
+            notIncluded: [],
+        },
+        singleMonth: {
+            title: "1 month of Makerspace Access",
+            abovePrice: "",
+            period: "",
+            description1: "One month of makerspace access.",
+            description2: "",
+            included: [
+                "Take part in courses and social events",
+                "Vote at yearly meetings",
+                "Support your local makerspace",
+                "Access to Stockholm Makerspace 24/7",
+                "Work on your own projects",
+                "Store a personal box at the space",
+            ],
+            notIncluded: [],
+        },
+        decideLater: {
+            title: "1 year of Base Membership only",
+            abovePrice: "",
+            price: "0",
+            period: "",
+            description1: "One year of base membership.",
+            description2: "Later, you can pay for individual months of makerspace access ({{makerspace_acccess_price}} kr/mo) in our webshop, or get a subscription ({{makerspace_acccess_subscription_price}} kr/mo).",
+            included: [
+                "Take part in courses and social events",
+                "Vote at yearly meetings",
+                "Support your local makerspace",
+            ],
+            notIncluded: [
+                "Access to the space outside of events",
+                "Work on your own projects",
+                "Store a personal box at the space",
+            ],
+        },
+    },
+    memberInfo: {
+        title: "A little bit about you",
+        firstName: "First name",
+        lastName: "Last name",
+        email: "Email",
+        phone: "Phone (your phone will be used as your key to the makerspace)",
+        zipCode: "Zip code",
+        submit: "Continue",
+    },
+    terms: {
+        title: "Rules for the premises",
+        continue: "Continue",
+        accept: "I accept the rules",
+        rules: [
+            "<li>keep myself up to date about:</li> \
+            <ol> \
+            <li>general rules.</li> \
+            <li>rules for storage.</li> \
+            <li>rules for specific rooms that I will be in.</li> \
+            <li>rules for the machines and tools I will use.</li> \
+            </ol> \
+            <li> \
+            only visit the space when I have an active makerspace \
+            access membership. If my makerspace access membership is \
+            not active, I don't have access to the space, except \
+            during events like courses, work days, open house, and \
+            similar. \
+            </li> \
+            <li> \
+            not engage in commercial activities on the premises. \
+            </li> \
+            <li> \
+            take responsibility for my own actions and to be \
+            considerate towards others. \
+            </li> \
+            <li> \
+            store my projects correctly according to current rules. \
+            Left-behind materials belong to the association. \
+            </li> \
+            <li> \
+            always try to leave surfaces/machines/tools in better \
+            condition than I found them, and to plan my visit to \
+            ensure I have time to clean afterwards. \
+            </li> \
+            <li>not remove equipment from the space.</li> \
+            <li>report equipment damage to the board, or on Slack.</li> \
+            <li> \
+            ask other members, or the board, if I am unsure about \
+            something. \
+            </li> \
+            <li> \
+            always ask before I take photos of someone or something \
+            at the space. \
+            </li> \
+            <li>not do anything illegal at the space.</li> \
+            <li> \
+            not consume alcohol/drugs in the premises and to not use \
+            the association's machinery while under the influence. \
+            </li> \
+            <li>not sleep at the space.</li> \
+            <li> \
+            take full responsibility for what my guests do at the \
+            space. Guests may not work on their own projects during \
+            their visit. \
+            </li> \
+            <li> \
+            not use other areas of the building than those that \
+            belong to the space. For example AWL's kitchen on the \
+            entry floor, if the board has not said otherwise. \
+            </li>",
+        ],
+        pledge: "I pledge to...",
+        understandingPledge: "I understand that...",
+        understanding: [
+            "to handle membership and access to the space, Stockholm Makerspace needs to handle personal information.",
+            "if I violate any of the rules above or in any other way misuse my access to the premises, I may be banned from the premises without refund of the paid fee.",
+            "I may be liable for compensation if I act negligently.",
+            "the space has camera surveillance.",
+        ],
+        welcoming: "I will do my best to ensure that the Stockholm Makerspace is a clean, safe and welcoming place.",
+    },
+    calendar: {
+        title: "Calendar",
+        text: "Book a Member Introduction, during which you'll get a tour of the space (if you haven't already) and gain permission to use the makerspace. Your makerspace access will not be activated until you have visited a Member Introduction. In some situations, there may be no available time slots. Please let us know on <a href={{URL_FACEBOOK_GROUP}}>Facebook</a> or <a href={{URL_SLACK_HELP}}>Slack</a> if you cannot book a slot.",
+        bookButton: "Book a member introduction",
+    },
+    payment: {
+        title: "Payment",
+        subTitle: "Almost done, we just need to take care of the payment.",
+        bookIntroduction: "Before you gain access to the makerspace you need to attend a member introduction. These are held <0>regularly every 1-2 weeks</0>.",
+        paymentProcessor: "Payment handled by Stripe",
+    },
+    success: {
+        title: "Welcome to the $t(brand:makerspace_name)!",
+        subTitle: "We look forward to meeting you!",
+        bookIntroduction: "To gain access to the Makerspace you must attend a member introduction. You can book it here, or do it later.",
+        nextSteps: "Here are your next steps:",
+        bookButton: "Book your member introduction",
+        steps: {
+            joinSlackButton: "Join our Slack",
+            joinSlackWhy: "to chat with other members.",
+            joinSlackWhatIsThis: "What is this?",
+            quizTake: "Take our",
+            quizName: "Get Started Quiz",
+            quizWhy: "to learn about the space.",
+            installAccessy: "Install Accessy",
+            installAccessyWhy: "to be able to unlock doors, after your introduction.",
+            wikiPrefix: "Check out our",
+            wikiButton: "wiki",
+            instagramPrefix: "Get inspired on our",
+            instagramButton: "Instagram",
+        },
+        continueToMemberPortal: "Continue to your member page",
+    },
+    discounts: {
+        title: "Low Income Discounts",
+        apply_for_discounts: "I cannot afford the membership fee",
+        text: "If you cannot afford the full price of membership, you can apply for a discount.",
+        confirmationTitle: "Discount approved!",
+        confirmationDiscount: "You'll get a {{percent}}% discount on membership.",
+        confirmationMessage: "We understand that not everyone can afford the full price of membership. But there are other ways you can help, if you want to. The Makerspace is run by its members volonteering their time and effort. Join a work day, help out with maintaining a machine, or why not hold a course about something you are excited about?",
+        submit: "Continue",
+        submitWriteMore: "Please write a bit more",
+        cancel: "Cancel",
+        messagePlaceholder: "Tell us why you need a discount, in at least a few sentences.",
+        reasons: {
+            student: "I am a student",
+            unemployed: "I am unemployed",
+            senior: "I am a senior citizen",
+            other: "Other",
+        },
+    },
+}

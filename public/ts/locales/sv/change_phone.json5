@@ -1,0 +1,9 @@
+{
+    new_number_prompt: "Nytt telefonnummer",
+    validation_code_prompt: "Valideringskod: ",
+    errors: {
+        generic: "Kunde inte byta telefonnummer",
+        incorrect_code: "Inkorrekt kod. Försök igen.",
+    },
+    validatePhone: "Vi har skickat en valideringskod till ditt telefonnummer. Skriv in koden här.",
+}
