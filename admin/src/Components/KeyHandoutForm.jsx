@@ -86,6 +86,65 @@ function DateView(props) {
     );
 }
 
+function MembershipAgreementSign({ member, has_signed }) {
+    function prompt_lab_contract_not_signed() {
+        return UIkit.modal.confirm(
+            renderToString(
+                <div>
+                    <p>
+                        Är du säker på {member.firstname} {member.lastname} inte
+                        har skrivit på ett labbavtal?
+                    </p>
+                    <p>
+                        Labbavtalet mottogs{" "}
+                        <strong>
+                            {dateTimeToStr(member.labaccess_agreement_at)}
+                        </strong>
+                        .{" "}
+                    </p>
+                </div>,
+            ),
+        );
+    }
+
+    return (
+        <div className="uk-section uk-padding-remove-vertical">
+            <h2>1. Ta emot signerat labbmedlemsavtal</h2>
+            <p>
+                Kontrollera att labbmedlemsavtalet är signerat och säkerställ
+                att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.
+            </p>
+            <div>
+                <label htmlFor="signed">
+                    <input
+                        id="signed"
+                        style={{ verticalAlign: "middle" }}
+                        className="uk-checkbox"
+                        type="checkbox"
+                        tabIndex="1"
+                        checked={has_signed}
+                        onChange={(e) => {
+                            if (e.target.checked) {
+                                member.labaccess_agreement_at =
+                                    new Date().toISOString();
+                            } else {
+                                prompt_lab_contract_not_signed().then(() => {
+                                    member.labaccess_agreement_at = null;
+                                });
+                            }
+                        }}
+                    />{" "}
+                    &nbsp; Signerat labbmedlemsavtal mottaget
+                    {has_signed
+                        ? " " + dateTimeToStr(member.labaccess_agreement_at)
+                        : ""}
+                    .
+                </label>
+            </div>
+        </div>
+    );
+}
+
 function KeyHandoutForm(props) {
     const { member } = props;
     const [can_save_member, setCanSaveMember] = useState(false);
@@ -380,68 +439,10 @@ function KeyHandoutForm(props) {
                         return false;
                     }}
                 >
-                    <div className="uk-section uk-padding-remove-vertical">
-                        <h2>1. Ta emot signerat labbmedlemsavtal</h2>
-                        <p>
-                            Kontrollera att labbmedlemsavtalet är signerat och
-                            säkerställ att rätt medlemsnummer står väl synligt
-                            på labbmedlemsavtalet.
-                        </p>
-                        <div>
-                            <label htmlFor="signed">
-                                <input
-                                    id="signed"
-                                    style={{ verticalAlign: "middle" }}
-                                    className="uk-checkbox"
-                                    type="checkbox"
-                                    tabIndex="1"
-                                    checked={has_signed}
-                                    onChange={(e) => {
-                                        if (e.target.checked) {
-                                            member.labaccess_agreement_at =
-                                                new Date().toISOString();
-                                        } else {
-                                            UIkit.modal.confirm(
-                                                renderToString(
-                                                    <div>
-                                                        <p>
-                                                            Är du säker på{" "}
-                                                            {member.firstname}{" "}
-                                                            {member.lastname}{" "}
-                                                            inte har skrivit på
-                                                            ett labbavtal?
-                                                        </p>
-                                                        <p>
-                                                            Labbavtalet mottogs{" "}
-                                                            <strong>
-                                                                {dateTimeToStr(
-                                                                    member.labaccess_agreement_at,
-                                                                )}
-                                                            </strong>
-                                                            .{" "}
-                                                        </p>
-                                                    </div>,
-                                                ),
-                                                function () {
-                                                    member.labaccess_agreement_at =
-                                                        null;
-                                                },
-                                                false,
-                                            );
-                                        }
-                                    }}
-                                />{" "}
-                                &nbsp; Signerat labbmedlemsavtal mottaget
-                                {has_signed
-                                    ? " " +
-                                      dateTimeToStr(
-                                          member.labaccess_agreement_at,
-                                      )
-                                    : ""}
-                                .
-                            </label>
-                        </div>
-                    </div>
+                    <MembershipAgreementSign
+                        member={member}
+                        has_signed={has_signed}
+                    />
                     {has_signed ? section2andon : ""}
                 </form>
             </div>
