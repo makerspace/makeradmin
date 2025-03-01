@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useJson } from "Hooks/useJson";
+import React, { useMemo } from "react";
 import "react-day-picker/style.css";
 import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
@@ -6,17 +7,35 @@ import DateShow from "../Components/DateShow";
 import DateTimeShow from "../Components/DateTimeShow";
 import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
-import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
+import { ActionTypes } from "../Models/ProductAction";
 import Span from "../Models/Span";
-import { get } from "../gateway";
 import { confirmModal } from "../message";
 import MembershipPeriodsInput from "./MembershipPeriodsInput";
 
 const empty_title_with_nonzero_width = <>&nbsp;&nbsp;&nbsp;&nbsp;</>;
 
+type PendingActionsType = {
+    content: {
+        id: number;
+        transaction_id: number;
+        product_id: number;
+        count: number;
+        amount: number;
+    };
+    action: {
+        action: ActionTypes;
+        value: number;
+        id: number;
+    };
+    member_id: number;
+    created_at: string;
+};
+
 function MemberBoxSpans() {
-    const { member_id } = useParams();
-    const [pendingLabaccessDays, setPendingLabaccessDays] = useState("?");
+    const { member_id } = useParams<{ member_id: string }>();
+    const { data: pendingActions } = useJson<PendingActionsType[]>({
+        url: `/membership/member/${member_id}/pending_actions`,
+    });
 
     const collection = useMemo(
         () =>
@@ -29,23 +48,18 @@ function MemberBoxSpans() {
         [member_id],
     );
 
-    useEffect(() => {
-        get({ url: `/membership/member/${member_id}/pending_actions` }).then(
-            (r) => {
-                const sum_pending_labaccess_days = r.data.reduce(
-                    (acc, value) => {
-                        if (value.action.action === ADD_LABACCESS_DAYS)
-                            return acc + value.action.value;
-                        return acc;
-                    },
-                    0,
-                );
-                setPendingLabaccessDays(sum_pending_labaccess_days);
-            },
-        );
-    }, [member_id]);
+    const pendingLabaccessDays =
+        pendingActions === null
+            ? "?"
+            : pendingActions.reduce((acc, value) => {
+                  if (value.action.action === ActionTypes.ADD_LABACCESS_DAYS)
+                      return acc + value.action.value;
+                  return acc;
+              }, 0);
 
-    const deleteItem = (item) =>
+    const deleteItem = (
+        item: any, // Change any -> Span when it has been converted to TS: https://github.com/makerspace/makeradmin/issues/605
+    ) =>
         confirmModal(item.deleteConfirmMessage())
             .then(() => item.del())
             .then(
@@ -76,7 +90,9 @@ function MemberBoxSpans() {
                     { title: "Slut", sort: "enddate" },
                     { title: empty_title_with_nonzero_width },
                 ]}
-                rowComponent={({ item }) => (
+                rowComponent={(
+                    { item }: { item: any }, // Change any -> Span when it has been converted to TS: https://github.com/makerspace/makeradmin/issues/605
+                ) => (
                     <tr>
                         <td>
                             <Link to={"/membership/spans/" + item.id}>
