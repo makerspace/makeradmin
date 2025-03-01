@@ -104,6 +104,7 @@ const RenderProductGraphByTime = <T,>(
     grouping: DateGrouping,
     valueType: ValueType,
     period: DatePeriod,
+    hiddenItemIds: number[],
 ) => {
     if (chart === null) return;
 
@@ -183,6 +184,7 @@ const RenderProductGraphByTime = <T,>(
             data,
             label: itemLabel(d.id) + (d.total_amount == 0 ? " (no sales)" : ""),
             backgroundColor: colors[datasetIndex],
+            hidden: hiddenItemIds.includes(d.id),
         };
         return dataset;
     });
@@ -230,6 +232,11 @@ const RenderProductGraphByTime = <T,>(
                 }
             }
 
+            existing.label = d.label;
+            existing.backgroundColor = d.backgroundColor;
+            existing.borderColor = d.borderColor;
+            existing.hidden = d.hidden;
+
             if (groupingChanged) {
                 // We want chartjs to treat this as completely new data
                 existing.data = d.data;
@@ -263,6 +270,8 @@ const ProductGraphByTime = <T,>({
     cache,
     valueType,
     period,
+    hiddenItemIds,
+    onChangeHiddenItemIds,
 }: {
     items: T[];
     grouping: DateGrouping;
@@ -270,6 +279,10 @@ const ProductGraphByTime = <T,>({
     valueType: ValueType;
     period: DatePeriod;
     itemLabel: (item_id: number) => string;
+    hiddenItemIds: number[];
+    onChangeHiddenItemIds: (
+        update: (hiddenItemIds: number[]) => number[],
+    ) => void;
 }) => {
     const [container, setContainer] = React.useState<HTMLCanvasElement | null>(
         null,
@@ -296,6 +309,24 @@ const ProductGraphByTime = <T,>({
                     },
                     tooltip: {
                         position: "nearest",
+                    },
+                    legend: {
+                        onClick: (_evt, legendItem, legend) => {
+                            const datasetId = (
+                                legend.chart.data.datasets[
+                                    legendItem.datasetIndex!
+                                ] as any
+                            ).id;
+                            onChangeHiddenItemIds((prev) => {
+                                if (prev.includes(datasetId)) {
+                                    return prev.filter(
+                                        (id) => id !== datasetId,
+                                    );
+                                } else {
+                                    return [...prev, datasetId];
+                                }
+                            });
+                        },
                     },
                 },
                 responsive: true,
@@ -348,6 +379,7 @@ const ProductGraphByTime = <T,>({
                 grouping,
                 valueType,
                 period,
+                hiddenItemIds,
             );
         } else {
             // Render immediately if we already have the data
@@ -360,6 +392,7 @@ const ProductGraphByTime = <T,>({
                 grouping,
                 valueType,
                 period,
+                hiddenItemIds,
             );
         }
     }, [
@@ -371,6 +404,7 @@ const ProductGraphByTime = <T,>({
         items,
         itemLabel,
         valueType,
+        hiddenItemIds,
     ]);
 
     return <canvas ref={setContainer} />;
@@ -382,6 +416,7 @@ const RenderProductGraphByTotal = <T,>(
     items: T[],
     itemLabel: (item_id: number) => string,
     valueType: ValueType,
+    hiddenItemIds: number[],
 ) => {
     if (chart === null) return;
 
@@ -408,6 +443,7 @@ const RenderProductGraphByTotal = <T,>(
             data: [valueType == "amount" ? d.total_amount : d.total_count],
             label: itemLabel(d.id) + (d.total_amount == 0 ? " (no sales)" : ""),
             backgroundColor: colors[datasetIndex],
+            hidden: hiddenItemIds.includes(d.id),
         };
         return dataset;
     });
@@ -426,6 +462,8 @@ const RenderProductGraphByTotal = <T,>(
             existing.data = d.data;
             existing.label = d.label;
             existing.backgroundColor = d.backgroundColor;
+            existing.borderColor = d.borderColor;
+            existing.hidden = d.hidden;
         }
     }
     chart.data.datasets = newDatasets;
@@ -445,12 +483,18 @@ const ProductGraphByTotal = <T,>({
     itemLabel,
     cache,
     valueType,
+    hiddenItemIds,
+    onChangeHiddenItemIds,
 }: {
     items: T[];
     itemLabel: (item_id: number) => string;
     cache: DataCache<T, SalesResponse>;
     valueType: ValueType;
     period: DatePeriod;
+    hiddenItemIds: number[];
+    onChangeHiddenItemIds: (
+        update: (hiddenItemIds: number[]) => number[],
+    ) => void;
 }) => {
     const [container, setContainer] = React.useState<HTMLCanvasElement | null>(
         null,
@@ -477,6 +521,24 @@ const ProductGraphByTotal = <T,>({
                     },
                     tooltip: {
                         position: "nearest",
+                    },
+                    legend: {
+                        onClick: (_evt, legendItem, legend) => {
+                            const datasetId = (
+                                legend.chart.data.datasets[
+                                    legendItem.datasetIndex!
+                                ] as any
+                            ).id;
+                            onChangeHiddenItemIds((prev) => {
+                                if (prev.includes(datasetId)) {
+                                    return prev.filter(
+                                        (id) => id !== datasetId,
+                                    );
+                                } else {
+                                    return [...prev, datasetId];
+                                }
+                            });
+                        },
                     },
                 },
                 responsive: true,
@@ -511,7 +573,14 @@ const ProductGraphByTotal = <T,>({
     // Render the graph after a timeout, while loading data
     useEffect(() => {
         if (cache.isLoading) {
-            render(chart, cache.cache, items, itemLabel, valueType);
+            render(
+                chart,
+                cache.cache,
+                items,
+                itemLabel,
+                valueType,
+                hiddenItemIds,
+            );
         } else {
             // Render immediately if we already have the data
             render.cancel();
@@ -521,6 +590,7 @@ const ProductGraphByTotal = <T,>({
                 items,
                 itemLabel,
                 valueType,
+                hiddenItemIds,
             );
         }
     }, [
@@ -562,6 +632,8 @@ export const SalesChart = <
     );
     const { period, lastValidPeriod } = usePeriod(initial);
 
+    const [hiddenItemIds, setHiddenItemIds] = React.useState<number[]>([]);
+
     const now = new Date();
     const periodTemplates = commonPeriodTemplates(now);
 
@@ -581,13 +653,17 @@ export const SalesChart = <
         (p) => dataUrl(p, lastValidPeriod.start!, exclusiveEnd),
     );
 
-    const totalSales = selectedProducts
+    const visibleProducts = selectedProducts.filter(
+        (x) => !hiddenItemIds.includes(x.id),
+    );
+
+    const totalSales = visibleProducts
         .map((x) => cache.cache(x)?.total_amount)
         .reduce(
             (a, b) => (a !== undefined && b !== undefined ? a + b : undefined),
             0,
         );
-    const totalUnits = selectedProducts
+    const totalUnits = visibleProducts
         .map((x) => cache.cache(x)?.total_count)
         .reduce(
             (a, b) => (a !== undefined && b !== undefined ? a + b : undefined),
@@ -632,6 +708,8 @@ export const SalesChart = <
                             "?"
                         }
                         period={period}
+                        hiddenItemIds={hiddenItemIds}
+                        onChangeHiddenItemIds={setHiddenItemIds}
                     />
                 ) : (
                     <ProductGraphByTime
@@ -644,6 +722,8 @@ export const SalesChart = <
                             "?"
                         }
                         period={period}
+                        hiddenItemIds={hiddenItemIds}
+                        onChangeHiddenItemIds={setHiddenItemIds}
                     />
                 )}
                 <dl className="uk-description-list">
