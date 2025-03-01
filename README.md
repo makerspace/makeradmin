@@ -83,7 +83,7 @@ docker compose version
 Makeradmin uses Python 3.11.
 
 ```bash
-sudo apt-get install python3.11-dev python3.11-doc python3-pip
+sudo apt-get install python3.11-dev python3.11-doc python3-pip python3.11-venv
 ```
 
 ### npm
