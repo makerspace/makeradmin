@@ -200,9 +200,11 @@ const App = () => {
                 <Route path="/password-reset" component={PasswordReset} />
                 <Route path="*">
                     {isLoggedIn && (
-                        <div style={{ marginBottom: "2em" }}>
-                            <Nav nav={nav} className="uk-margin-top" />
-                            <div className="uk-container uk-margin-top">
+                        <div className="uk-margin-left uk-margin-right">
+                            <div className="uk-container-expand">
+                                <Nav nav={nav} />
+                            </div>
+                            <div className="uk-container">
                                 <div className="uk-grid">
                                     <div className="uk-width-1-4@m">
                                         <SideNav nav={nav} />
