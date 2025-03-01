@@ -66,6 +66,18 @@ sudo adduser $(whoami) docker
 
 You need to sign out and sign back in again for changes to take effect.
 
+#### Docker Compose plugin
+
+Follow the instructions on <https://docs.docker.com/compose/install/linux/>
+
+And then verify that you have version 2 of the plugin:
+
+```bash
+docker compose version
+# Should print something like
+# Docker Compose version v2.32.4
+```
+
 ### Python
 
 Makeradmin uses Python 3.11.
