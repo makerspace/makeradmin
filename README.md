@@ -110,7 +110,7 @@ If you are deploying on a server you need to configure hosts and other settings 
 If you do modify the `.env` file you need to restart the services afterwards by running
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ## Start MakerAdmin, web shop, etc.
