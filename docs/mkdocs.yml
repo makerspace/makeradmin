@@ -59,3 +59,6 @@ nav:
   - Developer Guide:
       - Getting Started: dev-guide/getting-started.md
       - Running tests: dev-guide/run-tests.md
+  - Admin Guide:
+      - Registering a new member: admin-guide/register-new-member.md
+      - Finalizing the registration: admin-guide/finalize-registration.md
