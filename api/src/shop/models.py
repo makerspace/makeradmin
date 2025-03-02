@@ -165,6 +165,7 @@ class TransactionAction(Base):
     class Status(enum.Enum):
         completed = "completed"
         pending = "pending"
+        cancelled = "cancelled"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     content_id: Mapped[int] = mapped_column(Integer, ForeignKey(TransactionContent.id), nullable=False)
