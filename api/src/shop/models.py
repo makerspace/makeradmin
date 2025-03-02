@@ -1,3 +1,4 @@
+import enum
 from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Literal, Optional
@@ -124,15 +125,15 @@ class ProductAction(Base):
 class Transaction(Base):
     __tablename__ = "webshop_transactions"
 
-    STATUS = Literal["pending", "completed", "failed"]
-    PENDING: STATUS = "pending"
-    COMPLETED: STATUS = "completed"
-    FAILED: STATUS = "failed"
+    class Status(enum.Enum):
+        completed = "completed"
+        pending = "pending"
+        failed = "failed"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id: Mapped[int] = mapped_column(Integer, ForeignKey(Member.member_id), nullable=True)
     amount: Mapped[Decimal] = mapped_column(Numeric(precision="15,2"), nullable=False)
-    status: Mapped[STATUS] = mapped_column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
+    status: Mapped[Status]
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
 
     member: Mapped[Member] = relationship(Member)
@@ -161,9 +162,9 @@ class TransactionContent(Base):
 class TransactionAction(Base):
     __tablename__ = "webshop_transaction_actions"
 
-    STATUS = Literal["pending", "completed"]
-    PENDING: STATUS = "pending"
-    COMPLETED: STATUS = "completed"
+    class Status(enum.Enum):
+        completed = "completed"
+        pending = "pending"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     content_id: Mapped[int] = mapped_column(Integer, ForeignKey(TransactionContent.id), nullable=False)
@@ -171,7 +172,7 @@ class TransactionAction(Base):
         Enum(ProductAction.ADD_MEMBERSHIP_DAYS, ProductAction.ADD_LABACCESS_DAYS), nullable=False
     )
     value: Mapped[Optional[int]] = mapped_column(Integer)
-    status: Mapped[STATUS] = mapped_column(Enum(PENDING, COMPLETED), nullable=False)
+    status: Mapped[Status] = mapped_column(default=Status.pending)
     completed_at: Mapped[Optional[datetime]]
 
     content: Mapped[TransactionContent] = relationship(TransactionContent, backref="actions", cascade_backrefs=False)
@@ -198,17 +199,17 @@ class GiftCard(Base):
 
     __tablename__ = "webshop_gift_card"
 
-    STATUS = Literal["valid", "used", "expired", "cancelled"]
-    VALID: STATUS = "valid"
-    USED: STATUS = "used"
-    EXPIRED: STATUS = "expired"
-    CANCELLED: STATUS = "cancelled"
+    class Status(enum.Enum):
+        valid = "valid"
+        used = "used"
+        expired = "expired"
+        cancelled = "cancelled"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     amount: Mapped[Decimal] = mapped_column(Numeric(precision="15,2"), nullable=False)
     validation_code: Mapped[str] = mapped_column(String(16), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    status: Mapped[STATUS] = mapped_column(Enum(VALID, USED, EXPIRED, CANCELLED), nullable=False, default=VALID)
+    status: Mapped[Status] = mapped_column(default=Status.valid)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 

@@ -117,7 +117,7 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     transaction = db_session.get(Transaction, transaction_id)
     if not transaction:
         raise BadRequest(f"unknown transaction ({transaction_id})")
-    if transaction.status == Transaction.FAILED:
+    if transaction.status == Transaction.Status.failed:
         # We might receive a stripe charge event and update transaction to failed already
         raise BadRequest(log=f"transaction {transaction_id} already failed")
 
@@ -127,7 +127,7 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
         raise BadRequest(f"unexpected stripe payment intent status {status}")
 
     action_info = None
-    if transaction.status != Transaction.COMPLETED:
+    if transaction.status != Transaction.Status.completed:
         # In case transaction was updated after stripe charge event, no action needed.
         try:
             action_info = create_client_response(transaction, payment_intent)

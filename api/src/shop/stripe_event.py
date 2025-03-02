@@ -50,7 +50,7 @@ def get_pending_source_transaction(payment_intent_id: str) -> Transaction:
     if not transaction:
         raise IgnoreEvent(f"no transaction exists for payment intent ({payment_intent_id})")
 
-    if transaction.status != Transaction.PENDING:
+    if transaction.status != Transaction.Status.pending:
         raise IgnoreEvent(
             f"transaction {transaction.id} status is {transaction.status}, payment intent {payment_intent_id}"
         )
@@ -141,7 +141,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             transaction = Transaction(
                 member_id=member_id,
                 amount=amount,
-                status=Transaction.COMPLETED,
+                status=Transaction.Status.completed,
                 # This created_at time is important, as any membership days that are added
                 # will not be added before this time.
                 # It is important that we set this explicitly instead of using the default (current time),
@@ -166,7 +166,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                     if subscription_type == SubscriptionType.LAB
                     else ProductAction.ADD_MEMBERSHIP_DAYS,
                     value=days,
-                    status=TransactionAction.PENDING,
+                    status=TransactionAction.Status.pending,
                 )
             )
 

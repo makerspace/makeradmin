@@ -167,7 +167,7 @@ class ObjFactory:
     def create_transaction(self, **kwargs) -> Transaction:
         member_id = kwargs.pop("member_id", None) or (self.member and self.member["member_id"])
         obj = dict(
-            status=Transaction.COMPLETED,
+            status=Transaction.Status.completed,
             amount=Decimal("100.0"),
             member_id=member_id,
         )
