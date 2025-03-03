@@ -125,7 +125,7 @@ class ProductAction(Base):
 class Transaction(Base):
     __tablename__ = "webshop_transactions"
 
-    class Status(enum.Enum):
+    class Status(str, enum.Enum):
         completed = "completed"
         pending = "pending"
         failed = "failed"
@@ -162,7 +162,7 @@ class TransactionContent(Base):
 class TransactionAction(Base):
     __tablename__ = "webshop_transaction_actions"
 
-    class Status(enum.Enum):
+    class Status(str, enum.Enum):
         completed = "completed"
         pending = "pending"
         cancelled = "cancelled"
@@ -200,7 +200,7 @@ class GiftCard(Base):
 
     __tablename__ = "webshop_gift_card"
 
-    class Status(enum.Enum):
+    class Status(str, enum.Enum):
         valid = "valid"
         used = "used"
         expired = "expired"

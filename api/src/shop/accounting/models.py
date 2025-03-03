@@ -22,7 +22,7 @@ class Aggregation(enum.Enum):
 class AccountingExport(Base):
     __tablename__ = "webshop_accounting_exports"
 
-    class Status(enum.Enum):
+    class Status(str, enum.Enum):
         completed = "completed"
         pending = "pending"
         failed = "failed"
