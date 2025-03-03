@@ -1,4 +1,6 @@
 import { useJson } from "Hooks/useJson";
+import useModel from "Hooks/useModel";
+import TransactionAction from "Models/TransactionAction";
 import React, { useMemo } from "react";
 import "react-day-picker/style.css";
 import { Link, useParams } from "react-router-dom";
@@ -31,6 +33,40 @@ type PendingActionsType = {
     created_at: string;
 };
 
+function PendingAction({ id }: { id: number }) {
+    const action = useModel(TransactionAction, id);
+    return (
+        <tr>
+            <td>{id}</td>
+            <td>{action.action_type}</td>
+            <td>{action.value}</td>
+        </tr>
+    );
+}
+
+function PendingActions({ ids }: { ids: number[] }) {
+    return (
+        <>
+            Följande sidoeffekter kommer att utföras framöver till följd av
+            tidigare genomförda köp:
+            <table className="uk-table uk-table-small uk-table-striped uk-table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Typ</th>
+                        <th>Antal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {ids.map((id) => (
+                        <PendingAction key={id} id={id} />
+                    ))}
+                </tbody>
+            </table>
+        </>
+    );
+}
+
 function MemberBoxSpans() {
     const { member_id } = useParams<{ member_id: string }>();
     const { data: pendingActions } = useJson<PendingActionsType[]>({
@@ -47,6 +83,9 @@ function MemberBoxSpans() {
             }),
         [member_id],
     );
+
+    const action_ids =
+        pendingActions === null ? [] : pendingActions.map((a) => a.action.id);
 
     const pendingLabaccessDays =
         pendingActions === null
@@ -74,6 +113,8 @@ function MemberBoxSpans() {
                 <b>{pendingLabaccessDays}</b> dagar labaccess kommer läggas till
                 vid en nyckelsynkronisering.
             </p>
+            <h2>Actions</h2>
+            <PendingActions ids={action_ids} />
             <hr />
             <MembershipPeriodsInput spans={collection} member_id={member_id} />
             <h2>Spans</h2>
