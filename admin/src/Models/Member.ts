@@ -83,4 +83,8 @@ export default class Member extends Base<Member> {
             this.email.includes(".")
         );
     }
+
+    override toString() {
+        return `#${this.member_number}: ${this.firstname} ${this.lastname}`;
+    }
 }

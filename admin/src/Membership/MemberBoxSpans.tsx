@@ -1,6 +1,7 @@
 import { useJson } from "Hooks/useJson";
 import useModel from "Hooks/useModel";
-import TransactionAction from "Models/TransactionAction";
+import Member from "Models/Member";
+import TransactionAction, { Status } from "Models/TransactionAction";
 import React, { useMemo } from "react";
 import "react-day-picker/style.css";
 import { Link, useParams } from "react-router-dom";
@@ -8,10 +9,10 @@ import CollectionTable from "../Components/CollectionTable";
 import DateShow from "../Components/DateShow";
 import DateTimeShow from "../Components/DateTimeShow";
 import Icon from "../Components/icons";
+import { confirmModal } from "../message";
 import Collection from "../Models/Collection";
 import { ActionTypes } from "../Models/ProductAction";
 import Span from "../Models/Span";
-import { confirmModal } from "../message";
 import MembershipPeriodsInput from "./MembershipPeriodsInput";
 
 const empty_title_with_nonzero_width = <>&nbsp;&nbsp;&nbsp;&nbsp;</>;
@@ -33,18 +34,57 @@ type PendingActionsType = {
     created_at: string;
 };
 
-function PendingAction({ id }: { id: number }) {
+function PendingAction({ id, member_id }: { id: number; member_id: string }) {
     const action = useModel(TransactionAction, id);
+    const member = useModel(Member, parseInt(member_id));
+
+    const removeItem = () => {
+        confirmModal(
+            <>
+                <h3>Do you want to cancel action #{id}</h3>
+                <p>Type: {action.action_type}</p>
+                <p>Value: {action.value}</p>
+                <p>Member {member.toString()}</p>
+                <ol>
+                    <li>
+                        ⚠️ You'll have to manually do the refund in Stripe for
+                        the transaction.
+                    </li>
+                    <li>⚠️ You cannot undo this action.</li>
+                </ol>
+            </>,
+        ).then(
+            () => {
+                action.status = Status.cancelled;
+                action.completed_at = new Date();
+                action.save();
+            },
+            () => {},
+        );
+    };
+
     return (
         <tr>
             <td>{id}</td>
             <td>{action.action_type}</td>
             <td>{action.value}</td>
+            <td>{action.status}</td>
+            <td>
+                <a onClick={removeItem} className="removebutton">
+                    <Icon icon="trash" />
+                </a>
+            </td>
         </tr>
     );
 }
 
-function PendingActions({ ids }: { ids: number[] }) {
+function PendingActions({
+    ids,
+    member_id,
+}: {
+    ids: number[];
+    member_id: string;
+}) {
     return (
         <>
             Följande sidoeffekter kommer att utföras framöver till följd av
@@ -55,11 +95,13 @@ function PendingActions({ ids }: { ids: number[] }) {
                         <th>ID</th>
                         <th>Typ</th>
                         <th>Antal</th>
+                        <th>Status</th>
+                        <th>{empty_title_with_nonzero_width}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {ids.map((id) => (
-                        <PendingAction key={id} id={id} />
+                        <PendingAction key={id} id={id} member_id={member_id} />
                     ))}
                 </tbody>
             </table>
@@ -114,7 +156,7 @@ function MemberBoxSpans() {
                 vid en nyckelsynkronisering.
             </p>
             <h2>Actions</h2>
-            <PendingActions ids={action_ids} />
+            <PendingActions ids={action_ids} member_id={member_id} />
             <hr />
             <MembershipPeriodsInput spans={collection} member_id={member_id} />
             <h2>Spans</h2>
