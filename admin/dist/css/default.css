@@ -380,3 +380,7 @@ button > svg {
         flex-shrink: 0;
     }
 }
+
+.removebutton {
+    color: #a00000;
+}
