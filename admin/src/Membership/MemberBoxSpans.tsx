@@ -1,7 +1,7 @@
 import { useJson } from "Hooks/useJson";
 import useModel from "Hooks/useModel";
 import Member from "Models/Member";
-import TransactionAction, { Status } from "Models/TransactionAction";
+import TransactionAction from "Models/TransactionAction";
 import React, { useMemo } from "react";
 import "react-day-picker/style.css";
 import { Link, useParams } from "react-router-dom";
@@ -54,10 +54,9 @@ function PendingAction({ id, member_id }: { id: number; member_id: string }) {
                 </ol>
             </>,
         ).then(
-            () => {
-                action.status = Status.cancelled;
-                action.completed_at = new Date();
-                action.save();
+            async () => {
+                await action.del();
+                action.refresh();
             },
             () => {},
         );

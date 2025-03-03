@@ -102,7 +102,7 @@ service.entity_routes(
     path="/transaction_action",
     entity=transaction_action_entity,
     permission_read=WEBSHOP,
-    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
 )
 
 service.related_entity_routes(

@@ -1,5 +1,9 @@
+from datetime import datetime, timezone
+
 from membership.models import Member
+from service.db import db_session
 from service.entity import ASC, DESC, Entity, ExpandField
+from service.error import BadRequest, NotFound
 
 from shop.models import (
     GiftCard,
@@ -43,6 +47,23 @@ product_entity = OrderedEntity(
 )
 
 
+class TransactionActionEntity(Entity):
+    def delete(self, entity_id, commit=True):
+        entity = db_session.get(self.model, entity_id)
+        if not entity:
+            raise NotFound("Could not find any entity with specified parameters.")
+
+        if entity.status is not TransactionAction.Status.pending:
+            raise BadRequest("Cannot delete a transaction action that is not pending.")
+
+        entity.status = TransactionAction.Status.cancelled
+        entity.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        db_session.commit()
+
+        return self.to_obj(entity)
+
+
 product_action_entity = Entity(ProductAction)
 
 
@@ -68,7 +89,7 @@ transaction_content_entity = Entity(
 )
 
 
-transaction_action_entity = Entity(
+transaction_action_entity = TransactionActionEntity(
     TransactionAction,
     default_sort_column=None,
 )
