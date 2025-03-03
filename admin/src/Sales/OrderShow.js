@@ -2,15 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Currency from "../Components/Currency";
-import useMember from "../Hooks/useMember";
+import useModel from "../Hooks/useModel";
 import Collection from "../Models/Collection";
+import Member from "../Models/Member";
 import Order from "../Models/Order";
 import OrderAction from "../Models/OrderAction";
 import OrderRow from "../Models/OrderRow";
 import { dateTimeToStr } from "../utils";
 
 const MemberInfo = ({ id }) => {
-    const member = useMember(id);
+    const member = useModel(Member, id);
 
     return (
         <Link to={`/membership/members/${id}`}>
