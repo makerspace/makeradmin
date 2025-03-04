@@ -40,6 +40,7 @@ def pending_actions(member_id: Optional[int] = None) -> List[Any]:
             "action": {
                 "action": action.action_type,
                 "value": action.value,
+                "id": action.id,
             },
             "member_id": transaction.member_id,
             "created_at": transaction.created_at.isoformat(),

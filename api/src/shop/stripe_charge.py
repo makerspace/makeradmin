@@ -23,7 +23,7 @@ def raise_from_stripe_invalid_request_error(e: InvalidRequestError) -> Never:
 
 
 def create_stripe_charge(transaction: Transaction, card_source_id: str) -> stripe.Charge:
-    if transaction.status != Transaction.PENDING:
+    if transaction.status != Transaction.Status.pending:
         raise InternalServerError(
             f"unexpected status of transaction",
             log=f"transaction {transaction.id} has unexpected status {transaction.status}",

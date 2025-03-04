@@ -127,7 +127,7 @@ def diff_transactions_and_completed_payments(
     completed_payments = completed_payments.copy()  # TODO improve this and remove pop
 
     for transaction in transactions:
-        if transaction.status != Transaction.COMPLETED:
+        if transaction.status != Transaction.Status.completed:
             continue
         if transaction.id not in completed_payments:
             unmatched_data.append((transaction, None))

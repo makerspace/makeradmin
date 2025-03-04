@@ -15,7 +15,7 @@ class ShopDataTest(FlaskTestBase):
         transaction = self.db.create_transaction(
             member_id=member.member_id,
             amount=Decimal("50"),
-            status=shop.models.Transaction.PENDING,
+            status=shop.models.Transaction.Status.pending,
         )
         pending = shop.models.StripePending(
             transaction_id=transaction.id,

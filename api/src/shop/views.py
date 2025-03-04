@@ -98,6 +98,13 @@ service.entity_routes(
     permission_delete=WEBSHOP_EDIT,
 )
 
+service.entity_routes(
+    path="/transaction_action",
+    entity=transaction_action_entity,
+    permission_read=WEBSHOP,
+    permission_delete=WEBSHOP_EDIT,
+)
+
 service.related_entity_routes(
     path="/product/<int:related_entity_id>/actions",
     entity=product_action_entity,

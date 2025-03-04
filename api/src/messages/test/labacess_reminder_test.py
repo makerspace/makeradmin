@@ -163,7 +163,7 @@ class Test(ShopTestMixin, FlaskTestBase):
             member_id=member.member_id,
             purchase=Purchase(cart=cart, expected_sum=str(expected_sum), stripe_payment_method_id="not_used"),
         )
-        transaction.status = Transaction.COMPLETED
+        transaction.status = Transaction.Status.completed
         db_session.add(transaction)
         db_session.flush()
 

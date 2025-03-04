@@ -1,22 +1,20 @@
 import PropTypes from "prop-types";
 import React, { createContext } from "react";
 import { useParams } from "react-router";
-import useMember from "../Hooks/useMember";
+import useModel from "../Hooks/useModel";
+import Member from "../Models/Member";
 import { NavItem } from "../nav";
 
 export const MemberContext = createContext(null);
 
 function MemberBox({ children }) {
     const { member_id } = useParams();
-    const member = useMember(member_id);
+    const member = useModel(Member, member_id);
 
     return (
         <MemberContext.Provider value={member}>
             <div>
-                <h2>
-                    Medlem #{member.member_number}: {member.firstname}{" "}
-                    {member.lastname}
-                </h2>
+                <h2>Medlem {member.toString()}</h2>
 
                 <ul className="uk-tab">
                     <NavItem

@@ -98,7 +98,7 @@ def get_source_transaction(source_id: str) -> Optional[Transaction]:
 def commit_transaction_to_db(member_id: int, total_amount: Decimal, contents: List[TransactionContent]) -> Transaction:
     """Save as new transaction with transaction content in db and return it transaction."""
 
-    transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
+    transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.Status.pending)
 
     db_session.add(transaction)
     db_session.flush()
@@ -119,7 +119,7 @@ def commit_transaction_to_db(member_id: int, total_amount: Decimal, contents: Li
             {
                 "content_id": content.id,
                 "count": content.count,
-                "pending": TransactionAction.PENDING,
+                "pending": TransactionAction.Status.pending,
                 "product_id": content.product_id,
             },
         )
@@ -128,7 +128,7 @@ def commit_transaction_to_db(member_id: int, total_amount: Decimal, contents: Li
 
 
 def commit_fail_transaction(transaction: Transaction) -> None:
-    transaction.status = Transaction.FAILED
+    transaction.status = Transaction.Status.failed
     db_session.add(transaction)
     db_session.flush()
 
@@ -145,8 +145,8 @@ def pending_actions_query(member_id: Optional[int] = None, transaction: Optional
         db_session.query(TransactionAction, TransactionContent, Transaction)
         .join(TransactionAction.content)
         .join(TransactionContent.transaction)
-        .filter(TransactionAction.status == TransactionAction.PENDING)
-        .filter(Transaction.status == Transaction.COMPLETED)
+        .filter(TransactionAction.status == TransactionAction.Status.pending)
+        .filter(Transaction.status == Transaction.Status.completed)
     )
 
     if transaction:
@@ -175,7 +175,7 @@ def pending_action_value_sum(member_id: int, action_type: str) -> int:
 
 
 def complete_pending_action(action: TransactionAction) -> None:
-    action.status = TransactionAction.COMPLETED
+    action.status = TransactionAction.Status.completed
     action.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db_session.add(action)
     db_session.flush()
@@ -277,9 +277,9 @@ def create_transaction(member_id: int, purchase: Purchase) -> Transaction:
 
 
 def complete_transaction(transaction: Transaction) -> None:
-    assert transaction.status == Transaction.PENDING
+    assert transaction.status == Transaction.Status.pending
 
-    transaction.status = Transaction.COMPLETED
+    transaction.status = Transaction.Status.completed
     db_session.add(transaction)
     db_session.flush()
     logger.info(

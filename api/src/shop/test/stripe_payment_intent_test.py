@@ -48,7 +48,7 @@ class StripePaymentIntentTest(FlaskTestBase):
         stripe_intent = pay_with_stripe(transaction, payment_method.id, False, is_test=True)
 
         assert stripe_intent.status == PaymentIntentStatus.SUCCEEDED
-        assert transaction.status == Transaction.COMPLETED
+        assert transaction.status == Transaction.Status.completed
         assert stripe_intent.amount == convert_to_stripe_amount(transaction.amount)
         assert stripe_intent.currency == CURRENCY
         stripe_pending = db_session.query(StripePending).filter(StripePending.transaction_id == transaction.id).one()
