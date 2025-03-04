@@ -86,10 +86,14 @@ function PendingActions({
     ids: number[];
     member_id: string;
 }) {
+    if (ids.length === 0) {
+        return <>✅ Inga åtgärder väntar på att utföras.</>;
+    }
+
     return (
         <>
-            Följande sidoeffekter kommer att utföras framöver till följd av
-            tidigare genomförda köp:
+            Följande åtgärder kommer att utföras framöver till följd av tidigare
+            genomförda köp:
             <table className="uk-table uk-table-small uk-table-striped uk-table-hover">
                 <thead>
                     <tr>
