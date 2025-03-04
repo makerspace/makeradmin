@@ -155,13 +155,13 @@ function MemberBoxSpans() {
 
     return (
         <div className="uk-margin-top">
+            <h2>Actions</h2>
+            <PendingActions ids={action_ids} member_id={member_id} />
             <h2>Medlemsperioder</h2>
             <p>
                 <b>{pendingLabaccessDays}</b> dagar labaccess kommer läggas till
                 vid en nyckelsynkronisering.
             </p>
-            <h2>Actions</h2>
-            <PendingActions ids={action_ids} member_id={member_id} />
             <hr />
             <MembershipPeriodsInput spans={collection} member_id={member_id} />
             <h2>Spans</h2>
