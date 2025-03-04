@@ -17,7 +17,7 @@ from shop.accounting.export import (
     export_accounting,
     transaction_fees_to_transaction_with_accounting,
 )
-from shop.accounting.models import AccountingExport, Aggregation, Status
+from shop.accounting.models import AccountingExport, Aggregation
 from shop.completed_payment import CompletedPayment
 from shop.models import (
     Product,
@@ -78,7 +78,7 @@ class ExportTest(FlaskTestBase):
 
         do_export(accounting_export)
 
-        self.assertEqual(accounting_export.status, Status.completed)
+        self.assertEqual(accounting_export.status, AccountingExport.Status.completed)
         self.assertEqual(accounting_export.content, accounting_info)
 
 

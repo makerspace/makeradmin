@@ -3,7 +3,8 @@ import Select from "react-select";
 import UIkit from "uikit";
 import Icon from "../Components/icons";
 import { get, post } from "../gateway";
-import useMember from "../Hooks/useMember";
+import useModel from "../Hooks/useModel";
+import Member from "../Models/Member";
 
 function create_option(label) {
     return { label: label, value: label };
@@ -165,7 +166,7 @@ function Field({ label, value }) {
 }
 
 function Signer({ member_id }) {
-    const member = useMember(member_id);
+    const member = useModel(Member, member_id);
 
     return (
         <>
@@ -176,11 +177,7 @@ function Signer({ member_id }) {
                 id="signer"
                 className="uk-input uk-width-1-1"
                 disabled
-                value={
-                    member
-                        ? `#${member.member_number}: ${member.firstname} ${member.lastname}`
-                        : `${member_id}`
-                }
+                value={member ? member.toString() : `${member_id}`}
             />
         </>
     );

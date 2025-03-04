@@ -66,8 +66,12 @@ class AccountingDifferenceTest(FlaskTestBase):
             self.completed_payments[transaction.id] = payment
 
         # Add some failed transactions that should be ignored by the diff
-        self.db.create_transaction(member_id=self.member.member_id, amount=Decimal("50"), status=Transaction.PENDING)
-        self.db.create_transaction(member_id=self.member.member_id, amount=Decimal("20"), status=Transaction.FAILED)
+        self.db.create_transaction(
+            member_id=self.member.member_id, amount=Decimal("50"), status=Transaction.Status.pending
+        )
+        self.db.create_transaction(
+            member_id=self.member.member_id, amount=Decimal("20"), status=Transaction.Status.failed
+        )
         self.transactions = db_session.query(Transaction).all()
 
     def test_diff_transactions_and_completed_payments_no_diff(self) -> None:
@@ -91,7 +95,7 @@ class AccountingDifferenceTest(FlaskTestBase):
 
     def test_diff_transactions_and_completed_payments_extra_makeradmin(self) -> None:
         extra_transaction = self.db.create_transaction(
-            member_id=self.member.member_id, amount=50, status=Transaction.COMPLETED
+            member_id=self.member.member_id, amount=50, status=Transaction.Status.completed
         )
         self.transactions.append(extra_transaction)
         random.shuffle(self.transactions)

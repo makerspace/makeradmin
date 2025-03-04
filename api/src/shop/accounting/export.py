@@ -16,7 +16,7 @@ from shop.accounting.accounting import (
     diff_transactions_and_completed_payments,
     split_transactions_over_accounts,
 )
-from shop.accounting.models import AccountingExport, Aggregation, Status
+from shop.accounting.models import AccountingExport, Aggregation
 from shop.accounting.sie_file import get_sie_string
 from shop.accounting.verification import create_verificatons
 from shop.completed_payment import CompletedPayment, get_completed_payments_from_stripe
@@ -62,7 +62,7 @@ def export_accounting(start_date: datetime, end_date: datetime, aggregation: Agg
         .filter(
             Transaction.created_at >= start_date.astimezone(utc_zone),
             Transaction.created_at < end_date.astimezone(utc_zone),
-            Transaction.status == Transaction.COMPLETED,
+            Transaction.status == Transaction.Status.completed,
         )
         .outerjoin(TransactionContent)
         .all()
@@ -91,11 +91,11 @@ def export_accounting(start_date: datetime, end_date: datetime, aggregation: Agg
 
 
 def do_export(export: AccountingExport) -> None:
-    if export.status not in (Status.pending, Status.failed):
+    if export.status not in (AccountingExport.Status.pending, AccountingExport.Status.failed):
         raise ValueError(f"Export with id {export.id} is not pending or failed")
 
     export.content = None
-    export.status = Status.pending
+    export.status = AccountingExport.Status.pending
 
     zone = get_makerspace_local_timezone()
     start_dt = datetime.combine(export.start_date, datetime.min.time(), tzinfo=zone)
@@ -104,10 +104,10 @@ def do_export(export: AccountingExport) -> None:
     try:
         accounting_info = export_accounting(start_dt, end_dt, export.aggregation, export.signer)
         export.content = accounting_info
-        export.status = Status.completed
+        export.status = AccountingExport.Status.completed
     except Exception as e:
         export.content = str(e)
-        export.status = Status.failed
+        export.status = AccountingExport.Status.failed
         logger.exception(f"Failed to export accounting for {export}")
 
     db_session.commit()

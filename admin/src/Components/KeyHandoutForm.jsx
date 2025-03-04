@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { renderToString } from "react-dom/server";
 import { Prompt } from "react-router";
 import UIkit from "uikit";
 import { get, post } from "../gateway";
@@ -89,21 +88,19 @@ function DateView(props) {
 function MembershipAgreementSign({ member, has_signed }) {
     function prompt_lab_contract_not_signed() {
         return UIkit.modal.confirm(
-            renderToString(
-                <div>
-                    <p>
-                        Är du säker på {member.firstname} {member.lastname} inte
-                        har skrivit på ett labbavtal?
-                    </p>
-                    <p>
-                        Labbavtalet mottogs{" "}
-                        <strong>
-                            {dateTimeToStr(member.labaccess_agreement_at)}
-                        </strong>
-                        .{" "}
-                    </p>
-                </div>,
-            ),
+            <div>
+                <p>
+                    Är du säker på {member.firstname} {member.lastname} inte har
+                    skrivit på ett labbavtal?
+                </p>
+                <p>
+                    Labbavtalet mottogs{" "}
+                    <strong>
+                        {dateTimeToStr(member.labaccess_agreement_at)}
+                    </strong>
+                    .{" "}
+                </p>
+            </div>,
         );
     }
 

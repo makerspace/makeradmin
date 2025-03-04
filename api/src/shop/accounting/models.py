@@ -13,12 +13,6 @@ class Base(DeclarativeBase):
     pass
 
 
-class Status(enum.Enum):
-    completed = "completed"
-    pending = "pending"
-    failed = "failed"
-
-
 class Aggregation(enum.Enum):
     year = "year"
     month = "month"
@@ -27,6 +21,11 @@ class Aggregation(enum.Enum):
 
 class AccountingExport(Base):
     __tablename__ = "webshop_accounting_exports"
+
+    class Status(str, enum.Enum):
+        completed = "completed"
+        pending = "pending"
+        failed = "failed"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     signer_member_id: Mapped[int] = mapped_column(Integer, ForeignKey(Member.member_id))

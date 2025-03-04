@@ -2,21 +2,17 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Currency from "../Components/Currency";
-import useMember from "../Hooks/useMember";
+import useModel from "../Hooks/useModel";
 import Collection from "../Models/Collection";
+import Member from "../Models/Member";
 import Order from "../Models/Order";
-import OrderAction from "../Models/OrderAction";
 import OrderRow from "../Models/OrderRow";
+import TransactionAction from "../Models/TransactionAction";
 import { dateTimeToStr } from "../utils";
 
 const MemberInfo = ({ id }) => {
-    const member = useMember(id);
-
-    return (
-        <Link to={`/membership/members/${id}`}>
-            #{member.member_number}: {member.firstname} {member.lastname}
-        </Link>
-    );
+    const member = useModel(Member, id);
+    return <Link to={`/membership/members/${id}`}>{member.toString()}</Link>;
 };
 
 const OrderShow = ({ match }) => {
@@ -33,10 +29,10 @@ const OrderShow = ({ match }) => {
             }),
         [id],
     );
-    const orderActions = useMemo(
+    const actions = useMemo(
         () =>
             new Collection({
-                type: OrderAction,
+                type: TransactionAction,
                 url: `/webshop/transaction/${id}/actions`,
                 pageSize: 0,
             }),
@@ -55,8 +51,6 @@ const OrderShow = ({ match }) => {
             unsubscribe();
         };
     }, [order]);
-
-    const member_info = memberId && <MemberInfo id={memberId} />;
 
     let status_badge = null;
     switch (order.status) {
@@ -98,7 +92,7 @@ const OrderShow = ({ match }) => {
                 </h2>
                 <div>
                     <h3>Medlem</h3>
-                    {member_info}
+                    {memberId && <MemberInfo id={memberId} />}
                 </div>
             </div>
             <div className="uk-margin-top">
@@ -137,11 +131,12 @@ const OrderShow = ({ match }) => {
                 <h3>Ordereffekter</h3>
                 <CollectionTable
                     emptyMessage="Listan är tom"
-                    collection={orderActions}
+                    collection={actions}
                     columns={[
                         { title: "Orderrad" },
                         { title: "Åtgärd" },
                         { title: "Antal", class: "uk-text-right" },
+                        { title: "Status" },
                         { title: "Utförd", class: "uk-text-right" },
                     ]}
                     rowComponent={({ item }) => (
@@ -149,10 +144,13 @@ const OrderShow = ({ match }) => {
                             <td>{item.id}</td>
                             <td>{item.action_type}</td>
                             <td className="uk-text-right">{item.value}</td>
+                            <td>
+                                {item.statusEmoji()} {item.status}
+                            </td>
                             <td className="uk-text-right">
                                 {item.completed_at
                                     ? dateTimeToStr(item.completed_at)
-                                    : "pending"}
+                                    : null}
                             </td>
                         </tr>
                     )}
