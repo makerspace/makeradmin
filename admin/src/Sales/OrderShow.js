@@ -12,12 +12,7 @@ import { dateTimeToStr } from "../utils";
 
 const MemberInfo = ({ id }) => {
     const member = useModel(Member, id);
-
-    return (
-        <Link to={`/membership/members/${id}`}>
-            #{member.member_number}: {member.firstname} {member.lastname}
-        </Link>
-    );
+    return <Link to={`/membership/members/${id}`}>{member.toString()}</Link>;
 };
 
 const OrderShow = ({ match }) => {

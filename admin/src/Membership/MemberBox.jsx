@@ -14,10 +14,7 @@ function MemberBox({ children }) {
     return (
         <MemberContext.Provider value={member}>
             <div>
-                <h2>
-                    Medlem #{member.member_number}: {member.firstname}{" "}
-                    {member.lastname}
-                </h2>
+                <h2>Medlem {member.toString()}</h2>
 
                 <ul className="uk-tab">
                     <NavItem
