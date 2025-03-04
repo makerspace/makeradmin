@@ -6,8 +6,8 @@ import useModel from "../Hooks/useModel";
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
 import Order from "../Models/Order";
-import OrderAction from "../Models/OrderAction";
 import OrderRow from "../Models/OrderRow";
+import TransactionAction from "../Models/TransactionAction";
 import { dateTimeToStr } from "../utils";
 
 const MemberInfo = ({ id }) => {
@@ -34,10 +34,10 @@ const OrderShow = ({ match }) => {
             }),
         [id],
     );
-    const orderActions = useMemo(
+    const actions = useMemo(
         () =>
             new Collection({
-                type: OrderAction,
+                type: TransactionAction,
                 url: `/webshop/transaction/${id}/actions`,
                 pageSize: 0,
             }),
@@ -138,11 +138,12 @@ const OrderShow = ({ match }) => {
                 <h3>Ordereffekter</h3>
                 <CollectionTable
                     emptyMessage="Listan är tom"
-                    collection={orderActions}
+                    collection={actions}
                     columns={[
                         { title: "Orderrad" },
                         { title: "Åtgärd" },
                         { title: "Antal", class: "uk-text-right" },
+                        { title: "Status" },
                         { title: "Utförd", class: "uk-text-right" },
                     ]}
                     rowComponent={({ item }) => (
@@ -150,10 +151,11 @@ const OrderShow = ({ match }) => {
                             <td>{item.id}</td>
                             <td>{item.action_type}</td>
                             <td className="uk-text-right">{item.value}</td>
+                            <td>{item.status}</td>
                             <td className="uk-text-right">
                                 {item.completed_at
                                     ? dateTimeToStr(item.completed_at)
-                                    : "pending"}
+                                    : null}
                             </td>
                         </tr>
                     )}
