@@ -26,4 +26,15 @@ export default class TransactionAction extends Base<TransactionAction> {
             deleted_at: null,
         },
     };
+
+    statusEmoji(): string {
+        switch (this.status) {
+            case Status.pending:
+                return "⏳";
+            case Status.completed:
+                return "✅";
+            case Status.cancelled:
+                return "❌";
+        }
+    }
 }

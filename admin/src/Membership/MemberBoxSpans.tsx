@@ -67,7 +67,9 @@ function PendingAction({ id, member_id }: { id: number; member_id: string }) {
             <td>{id}</td>
             <td>{action.action_type}</td>
             <td>{action.value}</td>
-            <td>{action.status}</td>
+            <td>
+                {action.statusEmoji()} {action.status}
+            </td>
             <td>
                 <a onClick={removeItem} className="removebutton">
                     <Icon icon="trash" />
