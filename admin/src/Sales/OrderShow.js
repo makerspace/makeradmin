@@ -52,8 +52,6 @@ const OrderShow = ({ match }) => {
         };
     }, [order]);
 
-    const member_info = memberId && <MemberInfo id={memberId} />;
-
     let status_badge = null;
     switch (order.status) {
         case "completed":
@@ -94,7 +92,7 @@ const OrderShow = ({ match }) => {
                 </h2>
                 <div>
                     <h3>Medlem</h3>
-                    {member_info}
+                    {memberId && <MemberInfo id={memberId} />}
                 </div>
             </div>
             <div className="uk-margin-top">
