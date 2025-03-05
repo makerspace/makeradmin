@@ -26,7 +26,6 @@ from shop.stripe_payment_intent import (
 )
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, retry
 from shop.transactions import PaymentFailed
-from stripe import CardError
 from subscriptions_test import FakeCardPmToken, attach_and_set_payment_method
 from test_aid.systest_config import STRIPE_PRIVATE_KEY
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
@@ -79,7 +78,10 @@ class StripeChargeTest(FlaskTestBase):
 
             assert len(filtered_charges) == len(test_transactions)
 
-            if all(charge.balance_transaction is not None for charge in filtered_charges.values()):
+            if all(
+                charge.balance_transaction is not None and charge.payment_intent is not None
+                for charge in filtered_charges.values()
+            ):
                 break
             else:
                 # Wait for a second until stripe has generated the balance transactions
@@ -100,6 +102,9 @@ class StripeChargeTest(FlaskTestBase):
             assert math.isclose(
                 transaction_fee, estimated_transaction_fee, abs_tol=test_transaction.amount * Decimal("0.025")
             )
+            payment_intent = charge.payment_intent
+            assert isinstance(payment_intent, stripe.PaymentIntent)
+            assert payment_intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value] == str(transaction_id)
         assert len(test_transactions) == 0
 
     def test_get_charge_with_declined_card(self) -> None:
