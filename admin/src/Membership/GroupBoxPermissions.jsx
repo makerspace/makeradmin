@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import Select from "react-select";
 import * as _ from "underscore";
@@ -14,15 +14,16 @@ const GroupBoxPermissions = () => {
     const [selectedOption, setSelectedOption] = useState(null);
     const [options, setOptions] = useState([]);
 
-    const collectionRef = useRef(
-        new Collection({
-            type: Permission,
-            url: `/membership/group/${group_id}/permissions`,
-            idListName: "permissions",
-            pageSize: 0,
-        }),
+    const collection = useMemo(
+        () =>
+            new Collection({
+                type: Permission,
+                url: `/membership/group/${group_id}/permissions`,
+                idListName: "permissions",
+                pageSize: 0,
+            }),
+        [group_id],
     );
-    const collection = collectionRef.current;
 
     const filterOptions = (allOptions) => {
         const existing = new Set((collection.items || []).map((i) => i.id));
@@ -45,7 +46,7 @@ const GroupBoxPermissions = () => {
         return () => {
             unsubscribe();
         };
-    }, []);
+    }, [collection]);
 
     const selectOption = (permission) => {
         setSelectedOption(permission);
