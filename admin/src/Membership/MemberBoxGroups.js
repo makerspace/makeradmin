@@ -28,25 +28,23 @@ function MemberBoxGroups() {
 
     const [items, setItems] = useState([]);
     const [options, setOptions] = useState([]);
-    const [showOptions, setShowOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
 
     useEffect(() => {
-        get({ url: "/membership/group" }).then((data) => {
-            const updatedOptions = data.data;
+        get({ url: "/membership/group" }).then(({ data: updatedOptions }) => {
             setOptions(updatedOptions);
-            setShowOptions(filterOptions(items, updatedOptions));
         });
+    }, []);
 
+    useEffect(() => {
         const unsubscribe = collection.subscribe(({ items: newItems }) => {
             setItems(newItems || []);
-            setShowOptions(filterOptions(newItems || [], options));
         });
 
         return () => {
             unsubscribe();
         };
-    }, []);
+    }, [collection]);
 
     const selectOption = (group) => {
         setSelectedOption(group);
@@ -60,6 +58,8 @@ function MemberBoxGroups() {
         });
     };
 
+    const options_to_show_in_dropdown = filterOptions(items, options);
+
     return (
         <div>
             <div className="uk-margin-top uk-form-stacked">
@@ -71,7 +71,7 @@ function MemberBoxGroups() {
                         name="group"
                         className="uk-width-1-1"
                         tabIndex={1}
-                        options={showOptions}
+                        options={options_to_show_in_dropdown}
                         value={selectedOption}
                         getOptionValue={(g) => g.group_id}
                         getOptionLabel={(g) => g.title}
