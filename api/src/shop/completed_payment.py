@@ -1,30 +1,27 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from decimal import Decimal
-from enum import Enum
 from logging import getLogger
 from typing import Dict, List, Optional
 
-import stripe
 from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
-from service.config import debug_mode
+from service.config import debug_mode, get_payment_provider
 from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
 from stripe import CardError, Charge, InvalidRequestError, PaymentIntent, StripeError
 
+from shop.accounting.accounting import (
+    AccountingError,
+    diff_transactions_and_completed_payments,
+)
 from shop.models import Transaction
 from shop.stripe_charge import get_stripe_charges
 from shop.stripe_constants import (
     CURRENCY,
     MakerspaceMetadataKeys,
-    PaymentIntentNextActionType,
-    PaymentIntentStatus,
-    SetupFutureUsage,
 )
-from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, replace_default_payment_method, retry
-from shop.transactions import PaymentFailed, commit_fail_transaction, payment_success
+from shop.stripe_util import convert_from_stripe_amount, retry
 
 logger = getLogger("makeradmin")
 
@@ -65,13 +62,24 @@ def convert_completed_stripe_charges_to_payments(
     return payments
 
 
-def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+def get_completed_payments(
+    start_date: datetime, end_date: datetime, transactions: List[Transaction]
+) -> Dict[int, CompletedPayment]:
+    if debug_mode() or get_payment_provider() is None:
+        completed_payments = get_completed_payments_from_transactions(transactions)
+    elif get_payment_provider() == "stripe":
+        completed_payments = get_completed_payments_from_stripe(start_date, end_date)
+        diff = diff_transactions_and_completed_payments(transactions, completed_payments)
+        if len(diff) > 0:
+            raise AccountingError(f"Transactions and completed payments do not match, {diff}")
+    else:
+        raise InternalServerError(f"Unknown payment provider: {get_payment_provider()}")
+
+    return completed_payments
+
+
+def get_completed_payments_from_transactions(transactions: List[Transaction]) -> Dict[int, CompletedPayment]:
     payments: Dict[int, CompletedPayment] = {}
-    transactions = (
-        db_session.query(Transaction)
-        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
-        .all()
-    )
     for transaction in transactions:
         if transaction.status != Transaction.COMPLETED:
             continue
@@ -79,18 +87,12 @@ def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> 
             transaction_id=transaction.id,
             amount=transaction.amount,
             charge_created=transaction.created_at,
-            fee=Decimal(str(round(transaction.amount * Decimal(0.03), 2))),
+            fee=Decimal(0),
         )
     return payments
 
 
 def get_completed_payments_from_stripe(start_date: datetime, end_date: datetime) -> Dict[int, CompletedPayment]:
-    if debug_mode():
-        logger.warning(
-            "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"
-        )
-        return create_fake_completed_payments_from_db(start_date, end_date)
-
     try:
         stripe_charges = get_stripe_charges(start_date, end_date)
     except StripeError as e:

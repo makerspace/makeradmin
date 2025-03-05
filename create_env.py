@@ -60,6 +60,7 @@ config = {
     "ELKS46_API_USER": "",
     "ELKS46_API_KEY": "",
     "MAKERSPACE_LOCAL_TIMEZONE": makerspace_local_timezone,
+    "PAYMENT_PROVIDER": "None",
 }
 
 whitelist = ["COMPOSE_PROJECT_NAME"]

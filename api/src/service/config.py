@@ -37,6 +37,7 @@ default = Dict(
         ELKS46_API_KEY="",
         HOST_PUBLIC="",
         MAKERSPACE_LOCAL_TIMEZONE="Europe/Stockholm",
+        PAYMENT_PROVIDER=None,
         STRIPE_PRIVATE_KEY=None,
         STRIPE_SIGNING_SECRET=None,
         STRIPE_CURRENCY=None,
@@ -107,3 +108,7 @@ def get_makerspace_local_timezone() -> ZoneInfo:
 
 def debug_mode() -> bool:
     return config.get("DEV_RUN") == "true"
+
+
+def get_payment_provider() -> str:
+    return config.get("PAYMENT_PROVIDER")

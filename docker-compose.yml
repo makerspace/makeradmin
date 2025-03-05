@@ -61,6 +61,7 @@ services:
       FIRSTRUN_AUTO_ADMIN_EMAIL:
       FIRSTRUN_AUTO_ADMIN_PASSWORD:
       MAKERSPACE_LOCAL_TIMEZONE:
+      PAYMENT_PROVIDER:
 
   email-dispatcher:
     image: makeradmin/api:1.0

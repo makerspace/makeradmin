@@ -15,7 +15,7 @@ from membership.models import Member
 from service.db import db_session
 from shop.completed_payment import (
     convert_completed_stripe_charges_to_payments,
-    create_fake_completed_payments_from_db,
+    get_completed_payments_from_transactions,
 )
 from shop.models import StripePending, Transaction
 from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys, PaymentIntentStatus
@@ -74,7 +74,7 @@ class CompletedPaymentTest(FlaskTestBase):
                 1701966186 + (transaction_id * 10000), tz=timezone.utc
             )
 
-    def test_create_fake_completed_payments_from_db(self) -> None:
+    def test_get_completed_payments_from_transactions(self) -> None:
         number_of_transactions = 3
 
         member = self.db.create_member()
@@ -97,7 +97,7 @@ class CompletedPaymentTest(FlaskTestBase):
             created_at=end_date + timedelta(days=1),
         )
 
-        fake_completed = create_fake_completed_payments_from_db(start_date, end_date)
+        fake_completed = get_completed_payments_from_transactions(start_date, end_date)
 
         assert len(fake_completed) == number_of_transactions
         for i in range(number_of_transactions):

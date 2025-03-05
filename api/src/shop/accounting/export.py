@@ -7,19 +7,16 @@ from basic_types.time_period import TimePeriod
 from membership.models import Member
 from service.config import get_makerspace_local_timezone
 from service.db import db_session
-from service.error import InternalServerError
 from zoneinfo import ZoneInfo
 
 from shop.accounting.accounting import (
-    AccountingError,
     TransactionWithAccounting,
-    diff_transactions_and_completed_payments,
     split_transactions_over_accounts,
 )
 from shop.accounting.models import AccountingExport, Aggregation, Status
 from shop.accounting.sie_file import get_sie_string
 from shop.accounting.verification import create_verificatons
-from shop.completed_payment import CompletedPayment, get_completed_payments_from_stripe
+from shop.completed_payment import CompletedPayment, get_completed_payments
 from shop.models import (
     Transaction,
     TransactionAccount,
@@ -56,7 +53,7 @@ def export_accounting(start_date: datetime, end_date: datetime, aggregation: Agg
     logger.info(
         f"Exporting accounting from {start_date} ({start_date.astimezone(utc_zone)}) to {end_date} ({end_date.astimezone(utc_zone)}) with signer member number {signer.member_number}"
     )
-    completed_payments = get_completed_payments_from_stripe(start_date, end_date)
+
     transactions = (
         db_session.query(Transaction)
         .filter(
@@ -68,15 +65,7 @@ def export_accounting(start_date: datetime, end_date: datetime, aggregation: Agg
         .all()
     )
 
-    for transaction in transactions:
-        logger.info(f"Transaction: {transaction.id}")
-
-    for payment in completed_payments.values():
-        logger.info(f"Payment: {payment.transaction_id}")
-
-    diff = diff_transactions_and_completed_payments(transactions, completed_payments)
-    if len(diff) > 0:
-        raise AccountingError(f"Transactions and completed payments do not match, {diff}")
+    completed_payments = get_completed_payments(start_date, end_date, transactions)
 
     transactions_with_accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
 
