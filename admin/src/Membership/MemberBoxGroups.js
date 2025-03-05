@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import Select from "react-select";
 import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
@@ -13,14 +13,17 @@ const filterOptions = (items, options) => {
     return options.filter((o) => !current.has(o.group_id));
 };
 
-function MemberBoxGroups(props) {
-    const collectionRef = useRef(
-        new Collection({
-            type: Group,
-            url: `/membership/member/${props.match.params.member_id}/groups`,
-            idListName: "groups",
-            pageSize: 0,
-        }),
+function MemberBoxGroups() {
+    const { member_id } = useParams();
+    const collection = useMemo(
+        () =>
+            new Collection({
+                type: Group,
+                url: `/membership/member/${member_id}/groups`,
+                pageSize: 0,
+                idListName: "groups",
+            }),
+        [member_id],
     );
 
     const [items, setItems] = useState([]);
@@ -35,12 +38,10 @@ function MemberBoxGroups(props) {
             setShowOptions(filterOptions(items, updatedOptions));
         });
 
-        const unsubscribe = collectionRef.current.subscribe(
-            ({ items: newItems }) => {
-                setItems(newItems || []);
-                setShowOptions(filterOptions(newItems || [], options));
-            },
-        );
+        const unsubscribe = collection.subscribe(({ items: newItems }) => {
+            setItems(newItems || []);
+            setShowOptions(filterOptions(newItems || [], options));
+        });
 
         return () => {
             unsubscribe();
@@ -54,7 +55,7 @@ function MemberBoxGroups(props) {
             return;
         }
 
-        collectionRef.current.add(new Group(group)).then(() => {
+        collection.add(new Group(group)).then(() => {
             setSelectedOption(null);
         });
     };
@@ -81,7 +82,7 @@ function MemberBoxGroups(props) {
             <div className="uk-margin-top">
                 <CollectionTable
                     emptyMessage="Inte med i några grupper"
-                    collection={collectionRef.current}
+                    collection={collection}
                     columns={[
                         { title: "Titel", sort: "title" },
                         { title: "Antal medlemmar" },
@@ -97,9 +98,7 @@ function MemberBoxGroups(props) {
                             <td>{item.num_members}</td>
                             <td>
                                 <a
-                                    onClick={() =>
-                                        collectionRef.current.remove(item)
-                                    }
+                                    onClick={() => collection.remove(item)}
                                     className="removebutton"
                                 >
                                     <Icon icon="trash" />

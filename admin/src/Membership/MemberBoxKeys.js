@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
@@ -41,13 +41,15 @@ const Row = (collection) => (props) => {
 function MemberBoxKeys() {
     const { member_id } = useParams();
 
-    const collectionRef = useRef(
-        new Collection({
-            type: Key,
-            url: `/membership/member/${member_id}/keys`,
-            idListName: "keys",
-            pageSize: 0,
-        }),
+    const collection = useMemo(
+        () =>
+            new Collection({
+                type: Key,
+                url: `/membership/member/${member_id}/keys`,
+                idListName: "keys",
+                pageSize: 0,
+            }),
+        [member_id],
     );
 
     const [key, setKey] = useState(new Key({ member_id }));
@@ -67,7 +69,7 @@ function MemberBoxKeys() {
         key.save().then(() => {
             const newKey = new Key({ member_id: member_id });
             setKey(newKey);
-            collectionRef.current.fetch();
+            collection.fetch();
         });
     };
 
@@ -123,8 +125,8 @@ function MemberBoxKeys() {
             <div className="uk-margin-top">
                 <CollectionTable
                     emptyMessage="Inga nycklar för medlemmen"
-                    rowComponent={Row(collectionRef.current, member_id)}
-                    collection={collectionRef.current}
+                    rowComponent={Row(collection, member_id)}
+                    collection={collection}
                     columns={columns}
                 />
             </div>

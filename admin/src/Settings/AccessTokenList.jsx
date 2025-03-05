@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useMemo } from "react";
 import auth from "../auth";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
@@ -7,11 +7,11 @@ import AccessToken from "../Models/AccessToken";
 import Collection from "../Models/Collection";
 
 export default function AccessTokenList() {
-    const collection = useRef(new Collection({ type: AccessToken }));
+    const collection = useMemo(() => new Collection({ type: AccessToken }), []);
 
     return (
         <CollectionTable
-            collection={collection.current}
+            collection={collection}
             columns={[
                 { title: "" },
                 { title: "Access token" },
