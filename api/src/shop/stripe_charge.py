@@ -22,38 +22,6 @@ def raise_from_stripe_invalid_request_error(e: InvalidRequestError) -> Never:
     raise PaymentFailed(log=f"stripe charge failed: {str(e)}", level=EXCEPTION)
 
 
-def create_stripe_charge(transaction: Transaction, card_source_id: str) -> stripe.Charge:
-    if transaction.status != Transaction.Status.pending:
-        raise InternalServerError(
-            f"unexpected status of transaction",
-            log=f"transaction {transaction.id} has unexpected status {transaction.status}",
-        )
-
-    stripe_amount = convert_to_stripe_amount(transaction.amount)
-
-    try:
-        return retry(
-            lambda: stripe.Charge.create(
-                amount=stripe_amount,
-                currency=CURRENCY,
-                description=f"charge for transaction id {transaction.id}",
-                metadata={
-                    MakerspaceMetadataKeys.TRANSACTION_IDS.value: transaction.id,
-                },
-                source=card_source_id,
-            )
-        )
-    except InvalidRequestError as e:
-        raise_from_stripe_invalid_request_error(e)
-
-    except CardError as e:
-        error = e.json_body.get("error", {})
-        raise PaymentFailed(message=error.get("message"), log=f"stripe charge failed: {str(error)}")
-
-    except StripeError as e:
-        raise InternalServerError(log=f"stripe charge failed (possibly temporarily): {str(e)}")
-
-
 def charge_transaction(transaction: Transaction, charge: stripe.Charge) -> None:
     if ChargeStatus(charge.status) != ChargeStatus.SUCCEEDED:
         raise InternalServerError(
@@ -65,7 +33,7 @@ def charge_transaction(transaction: Transaction, charge: stripe.Charge) -> None:
 
 
 def get_stripe_charges(start_date: datetime, end_date: datetime) -> List[stripe.Charge]:
-    expand = ["data.balance_transaction"]
+    expand = ["data.balance_transaction", "data.payment_intent"]
     created = {
         "gte": int(start_date.astimezone(ZoneInfo("UTC")).timestamp()),
         "lt": int(end_date.astimezone(ZoneInfo("UTC")).timestamp()),

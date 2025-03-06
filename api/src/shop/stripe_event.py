@@ -20,7 +20,7 @@ from shop.models import (
     TransactionAction,
     TransactionContent,
 )
-from shop.stripe_charge import charge_transaction, create_stripe_charge
+from shop.stripe_charge import charge_transaction
 from shop.stripe_constants import (
     STRIPE_CURRENTY_BASE,
     STRIPE_SIGNING_SECRET,
@@ -67,14 +67,15 @@ def stripe_charge_event(subtype: EventSubtype, event: stripe.Event) -> None:
 
     if subtype == EventSubtype.SUCCEEDED:
         charge_transaction(transaction, charge)
-
     elif subtype == EventSubtype.FAILED:
         commit_fail_transaction(transaction)
         logger.info(f"charge failed for transaction {transaction.id}, {charge.failure_message}")
+    else:
+        raise IgnoreEvent(f"charge event subtype {subtype} for transaction {transaction.id}")
 
 
 def stripe_source_event(subtype: EventSubtype, event: stripe.Event) -> None:
-    pass
+    raise IgnoreEvent(f"source event subtype {subtype}")
 
 
 def stripe_payment_intent_event(subtype: EventSubtype, event: stripe.Event) -> None:
@@ -226,7 +227,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
         # The user will be notified by Stripe if this happens.
         # This can be configured at https://dashboard.stripe.com/settings/billing/automatic
         # It should also be configured to automatically cancel the subscription after some failed attempts.
-        pass
+        logger.info(f"Payment failed for invoice {event['id']}, probably subscription related.")
     elif subtype == EventSubtype.CREATED:
         # If subscriptions were to start immediately after a user action,
         # this would be a good time to finalize draft invoices and pay them immediately.
@@ -245,7 +246,9 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
         # - if the invoice is not in draft state, ignore it.
         # - finalize the invoice
         # - pay the invoice
-        pass
+        logger.info(f"Created invoice {event['id']}")
+    else:
+        raise IgnoreEvent(f"invoice event subtype {subtype}")
 
 
 def stripe_customer_event(event_subtype: EventSubtype, event: stripe.Event) -> None:
