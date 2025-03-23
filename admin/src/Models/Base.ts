@@ -71,9 +71,10 @@ export default class Base<T extends object> {
     }
 
     // Reset to empty/data state.
-    reset(data: Partial<T> | null) {
+    reset(raw_data: Partial<T> | null) {
         const model = (this.constructor as any).model;
-        if (data) {
+        if (raw_data) {
+            const data = this.deserialize(raw_data as T);
             this.unsaved = {};
             this.saved = Object.assign(deepcopy(model.attributes), data);
         } else {
