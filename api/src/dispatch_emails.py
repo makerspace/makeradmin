@@ -7,7 +7,7 @@ from urllib.parse import quote_plus
 
 import requests
 from core.auth import create_access_token
-from membership.membership import get_members_and_membership
+from membership.membership import get_members_and_membership, get_membership_summaries
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
@@ -100,13 +100,13 @@ def send_messages(key: Optional[str], domain: str, sender: str, to_override: Opt
             logger.error(f"failed to send {message.id} to {to}: {response.content.decode('utf-8')}")
 
 
-def already_sent_message(template: MessageTemplate, member: Member, days: int) -> bool:
+def already_sent_message(template: MessageTemplate, member_id: int, days: int) -> bool:
     """True if a message has been sent with the given template to the member in the last #days days"""
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     reminder_sent = (
         db_session.query(Message)
         .filter(
-            Message.member == member,
+            Message.member_id == member_id,
             Message.template == template.value,
             now - timedelta(days=days) < Message.created_at,
         )
@@ -142,7 +142,7 @@ def labaccess_reminder() -> None:
             continue
 
         # Don't send a reminder if we sent a reminder the last 28 days.
-        if already_sent_message(MessageTemplate.LABACCESS_REMINDER, member, LABACCESS_REMINDER_GRACE_PERIOD):
+        if already_sent_message(MessageTemplate.LABACCESS_REMINDER, member.member_id, LABACCESS_REMINDER_GRACE_PERIOD):
             continue
 
         already_purchased = (
@@ -172,11 +172,15 @@ def labaccess_reminder() -> None:
 def membership_reminder() -> None:
     now = datetime.now(timezone.utc).replace(tzinfo=None).date()
 
-    members, memberships = get_members_and_membership()
-    members = list(members)
+    t0 = time.time()
+    member_ids = db_session.scalars(select(Member.member_id).filter(Member.deleted_at == None)).all()
+
+    memberships = get_membership_summaries(member_ids)
+    t1 = time.time()
+    logger.info(f"get_members_and_membership took {t1 - t0:.2f}s")
     end_date_reminder_target = now + timedelta(days=MEMBERSHIP_REMINDER_DAYS_BEFORE)
 
-    for member, membership in zip(members, memberships):
+    for member_id, membership in zip(member_ids, memberships):
         if membership.membership_end is None:
             # Not a member
             continue
@@ -192,13 +196,14 @@ def membership_reminder() -> None:
             continue
 
         # Don't send a reminder if we sent a reminder the last 28 days.
-        if already_sent_message(MessageTemplate.MEMBERSHIP_REMINDER, member, MEMBERSHIP_REMINDER_GRACE_PERIOD):
+        if already_sent_message(MessageTemplate.MEMBERSHIP_REMINDER, member_id, MEMBERSHIP_REMINDER_GRACE_PERIOD):
             continue
 
         already_purchased = (
-            pending_action_value_sum(member_id=member.member_id, action_type=ProductAction.ADD_MEMBERSHIP_DAYS) > 0
+            pending_action_value_sum(member_id=member_id, action_type=ProductAction.ADD_MEMBERSHIP_DAYS) > 0
         )
 
+        member = db_session.get_one(Member, member_id)
         already_purchased |= member.stripe_membership_subscription_id is not None
 
         if already_purchased:
@@ -358,8 +363,8 @@ if __name__ == "__main__":
             description="Dispatch emails in db send queue.", formatter_class=ArgumentDefaultsHelpFormatter
         )
 
-        parser.add_argument("--sleep", default=4, help="Sleep time (in seconds) between doing ant work.")
-        parser.add_argument("--limit", default=10, help="Max messages to send every time checking for messages.")
+        parser.add_argument("--sleep", default=1, help="Sleep time (in seconds) between doing ant work.")
+        parser.add_argument("--limit", default=4, help="Max messages to send every time checking for messages.")
 
         args = parser.parse_args()
 
@@ -372,19 +377,21 @@ if __name__ == "__main__":
         domain = config.get("MAILGUN_DOMAIN")
         sender = config.get("MAILGUN_FROM")
         to_override = config.get("MAILGUN_TO_OVERRIDE")
-        last_quiz_check = time.time()
+        last_reminder_check = 0.0
 
         while True:
             sleep(args.sleep)
             try:
-                labaccess_reminder()
-                membership_reminder()
-                if time.time() - last_quiz_check > 20:
-                    # This check is kinda slow (takes maybe 100 ms)
-                    # so don't do it as often. It's not time critical anyway.
-                    last_quiz_check = time.time()
+                if time.time() - last_reminder_check > 60 * 60:
+                    # These checks are kinda slow (takes a few hundred ms)
+                    # so don't do them as often. They are not time critical anyway.
+                    last_reminder_check = time.time()
+                    logger.info("checking for reminders to send")
+                    labaccess_reminder()
+                    membership_reminder()
                     quiz_reminders()
-                db_session.commit()
+
+                    db_session.commit()
                 send_messages(key, domain, sender, to_override, args.limit)
                 db_session.commit()
             except DatabaseError as e:
