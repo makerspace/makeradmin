@@ -958,8 +958,7 @@ type ABState = {
 const abStateFromSeed = (seed: number): ABState => {
     return {
         oldpage: false,
-        registration_base_membership_type:
-            seed % 2 === 0 ? "oneyear" : "subscription",
+        registration_base_membership_type: "oneyear",
         registration_base_membership_only_plan_enabled: true,
         price_grouping: hash(seed + 1) % 2 === 0 ? "separate" : "combined", // 1/2 of users will see the base membership price separately like "200 + 375 kr", instead of combined like "575 kr"
     };
