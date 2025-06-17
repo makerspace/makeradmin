@@ -90,7 +90,6 @@ const GroupBoxDoorAccess = () => {
                 accessy_asset_publication_guid: item.publication.id,
             });
             await access.save();
-            // await collection.add(access);
             setSelectedOption(null);
             await collection.fetch();
             await post({
@@ -163,7 +162,9 @@ const GroupBoxDoorAccess = () => {
                                         className="accessy-asset-img-thumbnail"
                                         src={
                                             config.apiBasePath +
-                                            `/accessy/image/${p.asset.images[0].thumbnailId}`
+                                            `/accessy/image/${
+                                                p.asset.images[0]!.thumbnailId
+                                            }`
                                         }
                                     />
                                 ) : null}
