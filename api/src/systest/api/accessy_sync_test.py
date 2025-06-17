@@ -24,10 +24,13 @@ class Test(ApiTest):
         self.assertEqual(Diff(item_adds=[m1_phone]), diff)
 
         diff = calculate_diff(wanted={m1_phone: m1_both.groups}, actual={}, skip_attributes_for_added_items=False)
+        diff.attribute_adds.sort()
         self.assertEqual(
             Diff(
                 item_adds=[m1_phone],
-                attribute_adds=[(m1_phone, ACCESSY_SPECIAL_LABACCESS_GROUP), (m1_phone, ACCESSY_LABACCESS_GROUP)],
+                attribute_adds=sorted(
+                    [(m1_phone, ACCESSY_SPECIAL_LABACCESS_GROUP), (m1_phone, ACCESSY_LABACCESS_GROUP)]
+                ),
             ),
             diff,
         )
