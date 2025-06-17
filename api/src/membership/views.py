@@ -35,7 +35,7 @@ from membership.membership import (
     get_members_and_membership,
     get_membership_summary,
 )
-from membership.models import Group, Key, Member, Permission, Span, group_permission, member_group
+from membership.models import Group, GroupDoorAccess, Key, Member, Permission, Span, group_permission, member_group
 
 member_entity = MemberEntity(
     Member,
@@ -83,6 +83,9 @@ key_entity = Entity(
     expand_fields={"member": ExpandField(Key.member, [Member.member_number, Member.firstname, Member.lastname])},
 )
 
+group_door_access_entity = Entity(
+    GroupDoorAccess,
+)
 
 service.entity_routes(
     path="/member",
@@ -197,6 +200,15 @@ service.related_entity_routes(
     permission_remove=PERMISSION_MANAGE,
 )
 
+service.related_entity_routes(
+    path="/group/<int:related_entity_id>/door_access_permissions",
+    entity=group_door_access_entity,
+    relation=OrmSingeRelation("door_access_permissions", "group_id"),
+    permission_list=PERMISSION_VIEW,
+    permission_add=None,
+    permission_remove=None,
+)
+
 service.entity_routes(
     path="/permission",
     entity=permission_entity,
@@ -227,4 +239,14 @@ service.entity_routes(
     permission_create=KEYS_EDIT,
     permission_update=KEYS_EDIT,
     permission_delete=KEYS_EDIT,
+)
+
+service.entity_routes(
+    path="/group_door_access_permissions",
+    entity=group_door_access_entity,
+    permission_list=GROUP_VIEW,
+    permission_read=GROUP_VIEW,
+    permission_create=GROUP_EDIT,
+    permission_update=GROUP_EDIT,
+    permission_delete=GROUP_EDIT,
 )

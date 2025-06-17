@@ -384,3 +384,9 @@ button > svg {
 .removebutton {
     color: #a00000;
 }
+
+.accessy-asset-img-thumbnail {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+}

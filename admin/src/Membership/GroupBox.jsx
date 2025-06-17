@@ -40,6 +40,12 @@ function GroupBox(props) {
                     >
                         Behörigheter
                     </NavItem>
+                    <NavItem
+                        icon={null}
+                        to={`/membership/groups/${group_id}/doors`}
+                    >
+                        Dörråtkomst
+                    </NavItem>
                 </ul>
                 {props.children}
             </div>

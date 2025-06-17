@@ -3,7 +3,7 @@ from functools import partial, wraps
 from typing import Any, Callable, List, Optional, Tuple
 
 import pymysql
-from flask import Blueprint, g, jsonify
+from flask import Blueprint, Response, g, jsonify
 from flask import typing as ft
 from pymysql.constants.ER import BAD_NULL_ERROR, DUP_ENTRY
 from sqlalchemy.exc import IntegrityError
@@ -89,7 +89,9 @@ class InternalService(Blueprint):
 
                     data = f(*args, **kwargs)
 
-                    if flat_return:
+                    if isinstance(data, Response):
+                        result = data
+                    elif flat_return:
                         result = jsonify({**data, "status": status}), code
                     else:
                         result = jsonify({"status": status, "data": data}), code
