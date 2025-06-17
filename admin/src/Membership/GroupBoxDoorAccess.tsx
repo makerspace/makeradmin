@@ -143,6 +143,10 @@ const GroupBoxDoorAccess = () => {
     return (
         <div>
             <div className="uk-margin-top uk-form-stacked">
+                <p>
+                    All members of this group will get access to the following
+                    Accessy assets if they have active labaccess.
+                </p>
                 <label className="uk-form-label" htmlFor="asset">
                     Lägg till tillgång
                 </label>
