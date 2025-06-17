@@ -22,6 +22,7 @@ def score_members_by_amount_purchased(
         .where(Product.id.in_(product_ids))
         .where(Transaction.created_at >= start if start is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
         .where(Transaction.created_at < end if end is not None else sqlalchemy.cast(True, sqlalchemy.Boolean))
+        .where(Transaction.status == Transaction.Status.completed)
         .order_by(func.sum(TransactionContent.amount).desc())
         .limit(limit)
         .group_by(Member.member_id)
