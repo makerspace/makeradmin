@@ -136,7 +136,7 @@ class GroupDoorAccess(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     group_id: Mapped[int] = mapped_column(Integer, ForeignKey("membership_groups.group_id"))
-    accessy_asset_publication_guid: Mapped[str] = mapped_column(String(64))
+    accessy_asset_publication_guid: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     deleted_at: Mapped[Optional[datetime]]
