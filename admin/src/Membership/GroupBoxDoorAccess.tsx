@@ -43,6 +43,7 @@ const GroupBoxDoorAccess = () => {
         useState<AccessyAssetWithPublication | null>(null);
     const [options, setOptions] = useState<AccessyAssetWithPublication[]>([]);
     const [items, setItems] = useState<GroupDoorAccess[]>([]);
+    const [loading, setLoading] = useState(true);
     const filteredOptions = useMemo(() => {
         return options.filter((option) => {
             return !items.some(
@@ -67,6 +68,7 @@ const GroupBoxDoorAccess = () => {
     useEffect(() => {
         get({ url: "/accessy/assets" }).then(({ data }) => {
             setOptions(data);
+            setLoading(false);
         });
     }, []);
 
@@ -119,7 +121,9 @@ const GroupBoxDoorAccess = () => {
                     ))}
                 </td>
                 <td>
-                    {asset !== undefined ? asset.asset.name : "Unknown Asset"}
+                    {asset !== undefined
+                        ? asset.asset.name
+                        : `Unknown Asset - ${item.accessy_asset_publication_guid}`}
                 </td>
                 <td>
                     <a
@@ -179,6 +183,11 @@ const GroupBoxDoorAccess = () => {
                         )}
                         onChange={(p) => selectOption(p)}
                         isDisabled={!filteredOptions.length}
+                        placeholder={
+                            !loading && options.length == 0
+                                ? "Inga Accessy-tillgångar hittades"
+                                : "Välj tillgång"
+                        }
                     />
                 </div>
             </div>
@@ -186,6 +195,7 @@ const GroupBoxDoorAccess = () => {
                 <CollectionTable
                     emptyMessage="Gruppen ger inga extra rättigheter att öppna dörrar"
                     rowComponent={Row}
+                    loading={loading}
                     collection={collection}
                     columns={columns}
                 />

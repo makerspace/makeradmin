@@ -243,7 +243,7 @@ def accessy_webhook() -> str:
 @service.route("/assets", method=GET, permission=GROUP_VIEW)
 def get_assets() -> list[AccessyAssetWithPublication]:
     if accessy_session is None:
-        raise UnprocessableEntity("Accessy session not initialized")
+        return []
 
     return accessy_session.get_asset_publications()
 
