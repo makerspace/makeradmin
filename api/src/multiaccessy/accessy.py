@@ -295,7 +295,11 @@ class AccessySession:
         r = requests.request(
             "GET", ACCESSY_URL + f"/fs/download/{image_id}", headers={"Authorization": f"Bearer {self.session_token}"}
         )
-        return Response(r.content, headers=r.headers, status=r.status_code)
+        res = Response(r.content, headers=r.headers, status=r.status_code)
+        res.cache_control.max_age = 86400  # Cache for 1 day
+        res.cache_control.public = True  # Allow public caching
+        res.cache_control.immutable = True  # Response will not change
+        return res
 
     def get_member_id_from_accessy_id(self, accessy_id: UUID) -> Optional[int]:
         if accessy_id in self._accessy_id_to_member_id_cache:
