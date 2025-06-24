@@ -209,11 +209,12 @@ class AccessyAccessPermissionGroup(DataClassJsonMixin):
 class AccessyAccessPermission(DataClassJsonMixin):
     id: UUID
     createdAt: str
-    membership: UUID
-    accessPermissionGroup: UUID
     assetPublication: UUID
-    delegatorComment: str
-    requesterComment: str
+    membership: Optional[UUID] = None  # Not set for group permissions, I suppose?
+    accessPermissionGroup: Optional[UUID] = None  # Not set for member permissions, I suppose?
+    delegatorComment: Optional[str] = None
+    requesterComment: Optional[str] = None
+    constraints: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -309,7 +310,7 @@ class AccessySession:
         else:
             return None
 
-    def get_all_members(self) -> list[AccessyMember]:
+    def get_all_members(self, groups_of_interest: List[UUID]) -> list[AccessyMember]:
         """Get a list of all Accessy members in the ORG with GROUPS (lab and special)"""
 
         def fill_in_group_affiliation_and_membership_id(members: list[AccessyMember], group: UUID) -> None:
@@ -343,7 +344,7 @@ class AccessySession:
             for item in org_members
         ]
 
-        for group in [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP]:
+        for group in groups_of_interest:
             fill_in_group_affiliation_and_membership_id(members, group)
 
         for m in members:

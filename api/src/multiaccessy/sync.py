@@ -133,7 +133,7 @@ def calculate_diff(
     return diff
 
 
-def sync_groups(today: date) -> Dict[int, str]:
+def sync_groups() -> Dict[int, str]:
     assert accessy_session is not None, "Accessy session must be initialized before syncing groups"
 
     if ACCESSY_LABACCESS_GROUP is None or ACCESSY_SPECIAL_LABACCESS_GROUP is None:
@@ -218,6 +218,8 @@ def sync(today: Optional[date] = None, member_id: Optional[int] = None) -> None:
     if not today:
         today = date.today()
 
+    group_ids_to_accessy_guids = sync_groups()
+
     # If a specific member is given, sync only that member,
     # otherwise sync all members
     if member_id is not None:
@@ -229,9 +231,10 @@ def sync(today: Optional[date] = None, member_id: Optional[int] = None) -> None:
         accessy_member = accessy_session.get_org_user_from_phone(member.phone)
         actual_members = [accessy_member] if accessy_member is not None else []
     else:
-        actual_members = accessy_session.get_all_members()
+        actual_members = accessy_session.get_all_members(
+            [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP] + list(group_ids_to_accessy_guids.values())
+        )
 
-    group_ids_to_accessy_guids = sync_groups(today)
     pending_invites = accessy_session.get_pending_invitations(after_date=today - timedelta(days=7))
     wanted_members = get_wanted_access(
         today, member_id=member_id, group_ids_to_accessy_guids=group_ids_to_accessy_guids
