@@ -9,7 +9,6 @@ from membership.membership import get_members_and_membership, get_membership_sum
 from membership.models import Group, GroupDoorAccess, Member, Span
 from service.db import db_session
 from sqlalchemy import select
-from sqlalchemy.orm import contains_eager
 
 from multiaccessy.accessy import (
     ACCESSY_LABACCESS_GROUP,
