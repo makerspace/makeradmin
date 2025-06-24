@@ -769,7 +769,7 @@ class AccessySession:
         if not ACCESSY_DO_MODIFY:
             raise ModificationsDisabledError()
         data = self.__post(
-            f"/asset/admin/organization/{self.organization_id()}/access-permission-group",
+            f"/asset/admin/access-permission-group",
             json={
                 "name": name,
                 "description": description,
