@@ -771,10 +771,10 @@ class AccessySession:
         data = self.__post(
             f"/asset/admin/access-permission-group",
             json={
+                "organization": self.organization_id(),
                 "name": name,
                 "description": description,
                 "constraints": {},
-                "childConstraints": False,
             },
         )
         return AccessyAccessPermissionGroup.from_dict(data)
