@@ -1,18 +1,26 @@
 from dataclasses import dataclass
 from datetime import date, datetime
 from logging import getLogger
-from typing import Any, Optional, cast
+from typing import Any, Optional, Tuple, cast
 
 from dataclasses_json import DataClassJsonMixin
-from flask import request
-from service.api_definition import POST, PUBLIC
+from flask import Response, request
+from service.api_definition import GET, GROUP_VIEW, PERMISSION_MANAGE, POST, PUBLIC
 from service.db import db_session
 from service.error import UnprocessableEntity
 
 from multiaccessy import service
 from multiaccessy.models import PhysicalAccessEntry
 
-from .accessy import UUID, AccessyWebhookEventType, accessy_session
+from . import sync as syncer
+from .accessy import (
+    UUID,
+    AccessyAsset,
+    AccessyAssetPublication,
+    AccessyAssetWithPublication,
+    AccessyWebhookEventType,
+    accessy_session,
+)
 
 logger = getLogger("makeradmin")
 
@@ -212,7 +220,7 @@ def handle_event(event: AccessyWebhookEvent) -> None:
 
 
 @service.route("/event", method=POST, permission=PUBLIC)
-def accessy_webhook() -> None:
+def accessy_webhook() -> str:
     if accessy_session is None:
         raise UnprocessableEntity("Accessy session not initialized")
 
@@ -227,6 +235,31 @@ def accessy_webhook() -> None:
         if event is not None:
             logger.info(f"Received accessy event: {event.to_dict()}")
             handle_event(event)
-        return None
+        return "ok"
     else:
         raise UnprocessableEntity("Invalid signature")
+
+
+@service.route("/assets", method=GET, permission=GROUP_VIEW)
+def get_assets() -> list[AccessyAssetWithPublication]:
+    if accessy_session is None:
+        return []
+
+    return accessy_session.get_asset_publications()
+
+
+@service.route("/sync", method=POST, permission=PERMISSION_MANAGE)
+def sync() -> str:
+    syncer.sync()
+    return "ok"
+
+
+@service.route("/image/<image_id>", method=GET, permission=PUBLIC)
+def image(image_id: str) -> Response:
+    """
+    Proxy an image from Accessy.
+    """
+    if accessy_session is None:
+        raise UnprocessableEntity("Accessy session not initialized")
+
+    return accessy_session.get_image_blob(image_id)

@@ -6,11 +6,12 @@ from enum import Enum
 from logging import getLogger
 from random import random
 from time import sleep
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import requests
 from dataclasses_json import DataClassJsonMixin
+from flask import Response
 from membership.models import Member
 from NamedAtomicLock import NamedAtomicLock
 from service.config import config
@@ -21,6 +22,10 @@ logger = getLogger("accessy")
 
 
 class AccessyError(RuntimeError):
+    pass
+
+
+class ModificationsDisabledError(Exception):
     pass
 
 
@@ -191,6 +196,68 @@ class AccessyUserMembership(DataClassJsonMixin):
     roles: list[str]
 
 
+@dataclass
+class AccessyAccessPermissionGroup(DataClassJsonMixin):
+    id: UUID
+    name: str
+    description: str
+    constraints: dict[str, Any]
+    childConstraints: bool
+
+
+@dataclass
+class AccessyAccessPermission(DataClassJsonMixin):
+    id: UUID
+    createdAt: str
+    membership: UUID
+    accessPermissionGroup: UUID
+    assetPublication: UUID
+    delegatorComment: str
+    requesterComment: str
+
+
+@dataclass
+class AccessyImage(DataClassJsonMixin):
+    id: UUID
+    imageId: UUID
+    thumbnailId: UUID
+    size: int
+    width: int
+    height: int
+
+
+@dataclass
+class AccessyAsset(DataClassJsonMixin):
+    id: UUID
+    createdAt: str
+    updatedAt: str
+    name: str
+    description: str
+    position2d: dict[str, Any]  # Placeholder for 2D position data
+    additionalDeviceAuthentication: str  # e.g., "NONE"
+    address: dict[str, Any]  # Placeholder for address data
+    images: List[AccessyImage]  # List of image URLs or identifiers
+    category: str  # e.g., "CHARGING_STATION"
+    allowGuestAccess: bool
+    status: str  # e.g., "OK"
+
+
+@dataclass
+class AccessyAssetPublication(DataClassJsonMixin):
+    id: UUID
+    fromOrganization: UUID
+    toOrganization: UUID
+    listingState: str  # e.g., "UNLISTED"
+    possibleListingStates: list[str]  # e.g., ["UNLISTED"]
+    fromOrganizationName: str
+
+
+@dataclass
+class AccessyAssetWithPublication(DataClassJsonMixin):
+    asset: AccessyAsset
+    publication: AccessyAssetPublication
+
+
 class AccessySession:
     def __init__(self) -> None:
         self.session_token: str | None = None
@@ -198,6 +265,7 @@ class AccessySession:
         self._organization_id: str | None = None
         self._all_webhooks: Optional[List[AccessyWebhook]] = None
         self._accessy_id_to_member_id_cache: dict[str, int] = {}
+        self._accessy_asset_id_to_publication_cache: dict[UUID, AccessyAssetPublication] = {}
 
     #################
     # Class methods
@@ -220,6 +288,13 @@ class AccessySession:
     #################
     # Public methods
     #################
+
+    def get_image_blob(self, image_id: str) -> Response:
+        self.__ensure_token()
+        r = requests.request(
+            "GET", ACCESSY_URL + f"/fs/download/{image_id}", headers={"Authorization": f"Bearer {self.session_token}"}
+        )
+        return Response(r.content, headers=r.headers, status=r.status_code)
 
     def get_member_id_from_accessy_id(self, accessy_id: UUID) -> Optional[int]:
         if accessy_id in self._accessy_id_to_member_id_cache:
@@ -661,6 +736,94 @@ class AccessySession:
             f"Registered Accessy webhook at {destinationURL}. There are currently {len(self._all_webhooks)} webhooks: {self._all_webhooks}"
         )
 
+    def get_assets(self) -> list[AccessyAsset]:
+        """Get all assets in the organization."""
+        return [
+            AccessyAsset.from_dict(d)
+            for d in self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/asset")
+        ]
+
+    def get_asset_publication_from_asset_id(self, asset_id: UUID) -> AccessyAssetPublication:
+        """Get the asset publication for a specific asset ID."""
+        if asset_id in self._accessy_asset_id_to_publication_cache:
+            return self._accessy_asset_id_to_publication_cache[asset_id]
+
+        data = self._get(f"/asset/admin/organization/{self.organization_id()}/asset/{asset_id}/asset-publication")
+        publication = AccessyAssetPublication.from_dict(data)
+        self._accessy_asset_id_to_publication_cache[asset_id] = publication
+        return publication
+
+    def get_asset_publications(self) -> list[AccessyAssetWithPublication]:
+        """Get all asset publications in the organization."""
+        assets = self.get_assets()
+        return [
+            AccessyAssetWithPublication(
+                asset,
+                self.get_asset_publication_from_asset_id(asset.id),
+            )
+            for asset in assets
+        ]
+
+    def create_access_permission_group(self, name: str, description: str) -> AccessyAccessPermissionGroup:
+        """Create a new access permission group."""
+        if not ACCESSY_DO_MODIFY:
+            raise ModificationsDisabledError()
+        data = self.__post(
+            f"/asset/admin/organization/{self.organization_id()}/access-permission-group",
+            json={
+                "name": name,
+                "description": description,
+                "constraints": {},
+                "childConstraints": False,
+            },
+        )
+        return AccessyAccessPermissionGroup.from_dict(data)
+
+    def delete_access_permission_group(self, group_id: UUID) -> None:
+        """Delete an access permission group."""
+        self.__delete(
+            f"/asset/admin/access-permission-group/{group_id}",
+            err_msg=f"Failed to delete access permission group with ID {group_id}",
+        )
+
+    def get_access_permission_groups(self) -> list[AccessyAccessPermissionGroup]:
+        """Get all access permission groups for the organization."""
+        return [
+            AccessyAccessPermissionGroup.from_dict(d)
+            for d in self._get_json_paginated(
+                f"/asset/admin/organization/{self.organization_id()}/access-permission-group"
+            )
+        ]
+
+    def delete_access_permission(self, permission_id: UUID) -> None:
+        """Delete an access permission."""
+        self.__delete(
+            f"/asset/admin/access-permission/{permission_id}",
+            err_msg=f"Failed to delete access permission with ID {permission_id}",
+        )
+
+    def create_access_permission_for_group(
+        self,
+        asset_permission_group_id: UUID,
+        asset_publication_id: UUID,
+    ) -> AccessyAccessPermission:
+        """Create a new access permission for a specific group."""
+        data = self.__post(
+            f"/asset/admin/access-permission-group/{asset_permission_group_id}/access-permission",
+            json={
+                "assetPublication": asset_publication_id,
+                "constraints": {},
+            },
+        )
+        return AccessyAccessPermission.from_dict(data)
+
+    def get_access_permissions(self, group_id: UUID) -> list[AccessyAccessPermission]:
+        """Get all access permissions for a specific access permission group."""
+        return [
+            AccessyAccessPermission.from_dict(d)
+            for d in self._get_json_paginated(f"/asset/admin/access-permission-group/{group_id}/access-permission")
+        ]
+
 
 accessy_session = AccessySession() if AccessySession.is_env_configured() else None
 
@@ -669,8 +832,11 @@ ERROR_NOT_CONFIGURED = 1
 
 
 def register_accessy_webhook() -> bool:
-    HOST_BACKEND: str = config.get("HOST_BACKEND").strip()
-    webhook_url: str = f"{HOST_BACKEND}/accessy/event"
+    HOST_BACKEND: str | None = config.get("HOST_BACKEND")
+    if HOST_BACKEND is None:
+        logger.warning("HOST_BACKEND is not configured. Skipping accessy webhook registration.")
+        return False
+    webhook_url: str = f"{HOST_BACKEND.strip()}/accessy/event"
     if accessy_session is None:
         logger.warning(f"Accessy not configured. Skipping accessy webhook registration.")
         return False

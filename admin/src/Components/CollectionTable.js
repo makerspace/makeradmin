@@ -25,7 +25,10 @@ const CollectionTable = (props) => {
         emptyMessage,
         className,
         onPageNav,
+        loading: loadingProp,
     } = props;
+
+    const effectivelyLoading = loading || loadingProp;
 
     useEffect(() => {
         const unsubscribe = collection.subscribe(({ page: p, items: i }) => {
@@ -170,7 +173,7 @@ const CollectionTable = (props) => {
                 <table
                     className={
                         "uk-table uk-table-small uk-table-striped uk-table-hover" +
-                        (loading ? " backboneTableLoading" : "")
+                        (effectivelyLoading ? " backboneTableLoading" : "")
                     }
                 >
                     <thead>
@@ -178,7 +181,7 @@ const CollectionTable = (props) => {
                     </thead>
                     <tbody>{rows}</tbody>
                 </table>
-                {loading ? (
+                {effectivelyLoading ? (
                     <div className="loadingOverlay">
                         <div className="loadingWrapper">
                             <span>

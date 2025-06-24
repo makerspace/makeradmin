@@ -82,7 +82,6 @@ function MembershipPeriodsInput({ spans, member_id }) {
             post({
                 url: `/webshop/member/${member_id}/ship_labaccess_orders`,
                 headers: { "Content-Type": "application/json" },
-                payload: {},
                 expectedDataStatus: "ok",
             });
         });

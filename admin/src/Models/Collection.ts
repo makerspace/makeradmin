@@ -10,7 +10,7 @@ import { get, post } from "../gateway";
 // idListName: used for add and remove if collection supports it by pushing id list to to <url>/remove or <url>/add,
 //             this could be simpler if server handled removes in a better way
 export default class Collection<T extends { saved: { [key: string]: any } }> {
-    type: { new (data?: T | null): T; model: { root: string } };
+    type: { new (data?: T | null): T; model: { root?: string } };
     pageSize: number;
     url: string;
     idListName: string | null;
@@ -47,7 +47,7 @@ export default class Collection<T extends { saved: { [key: string]: any } }> {
         filter_out_value = null,
         includeDeleted = false,
     }: {
-        type: { new (data?: T | null): T; model: { root: string } };
+        type: { new (data?: T | null): T; model: { root?: string } };
         pageSize?: number;
         expand?: string | null;
         sort?: { key?: string; order?: string };
@@ -61,7 +61,12 @@ export default class Collection<T extends { saved: { [key: string]: any } }> {
     }) {
         this.type = type;
         this.pageSize = pageSize;
-        this.url = url || type.model.root;
+        this.url = url || type.model.root || "";
+        if (this.url == "") {
+            throw new Error(
+                `Collection for ${this.type.constructor.name} does not have a valid URL.`,
+            );
+        }
         this.idListName = idListName;
 
         this.items = null;
@@ -84,7 +89,7 @@ export default class Collection<T extends { saved: { [key: string]: any } }> {
     // Subscribe to data from server {items, page}, returns function for unsubscribing.
     subscribe(
         callback: (data: {
-            items: any[];
+            items: T[];
             page: { index: number; count: number };
         }) => void,
     ) {
@@ -124,10 +129,15 @@ export default class Collection<T extends { saved: { [key: string]: any } }> {
     }
 
     // Remove an item from this collection.
-    remove(item: { id: number }) {
+    remove(item: { id: number | null }) {
         if (!this.idListName) {
             throw new Error(
                 `Container for ${this.type.constructor.name} does not support remove.`,
+            );
+        }
+        if (item.id === null) {
+            throw new Error(
+                `Cannot remove item with null ID from ${this.type.constructor.name} collection.`,
             );
         }
 
@@ -139,7 +149,7 @@ export default class Collection<T extends { saved: { [key: string]: any } }> {
     }
 
     // Add an item to this collection.
-    add(item: { id: number }) {
+    add(item: { id: number | null }) {
         if (!this.idListName) {
             throw new Error(
                 `Container for ${this.type.constructor.name} does not support add.`,

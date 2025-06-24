@@ -131,6 +131,22 @@ Group.num_members = column_property(
 )
 
 
+class GroupDoorAccess(Base):
+    __tablename__ = "membership_group_door_access"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    group_id: Mapped[int] = mapped_column(Integer, ForeignKey("membership_groups.group_id"))
+    accessy_asset_publication_guid: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]]
+
+    group: Mapped[Group] = relationship(Group, backref="door_access", cascade_backrefs=False)
+
+    def __repr__(self) -> str:
+        return f"GroupDoorAccess(group_id={self.group_id}, door_guid={self.accessy_asset_publication_guid})"
+
+
 class Permission(Base):
     __tablename__ = "membership_permissions"
 

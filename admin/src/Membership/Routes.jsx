@@ -3,6 +3,7 @@ import { Route, Switch } from "react-router-dom";
 import { defaultSubpageRoute } from "../Components/Routes";
 import GroupAdd from "./GroupAdd";
 import GroupBox from "./GroupBox";
+import GroupBoxDoorAccess from "./GroupBoxDoorAccess";
 import GroupBoxEditInfo from "./GroupBoxEditInfo";
 import GroupBoxMembers from "./GroupBoxMembers";
 import GroupBoxPermissions from "./GroupBoxPermissions";
@@ -36,6 +37,7 @@ const Group = ({ match: { path } }) => (
                 path={`${path}/permissions`}
                 component={GroupBoxPermissions}
             />
+            <Route path={`${path}/doors`} component={GroupBoxDoorAccess} />
         </Switch>
     </GroupBox>
 );
