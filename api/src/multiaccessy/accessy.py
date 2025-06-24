@@ -299,6 +299,8 @@ class AccessySession:
         res.cache_control.max_age = 86400  # Cache for 1 day
         res.cache_control.public = True  # Allow public caching
         res.cache_control.immutable = True  # Response will not change
+        res.cache_control.no_cache = False
+        res.cache_control.no_store = False
         return res
 
     def get_member_id_from_accessy_id(self, accessy_id: UUID) -> Optional[int]:
