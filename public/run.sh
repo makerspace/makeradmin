@@ -59,6 +59,5 @@ fi
 # The gthread worker class should help with this, but it doesn't always seem to work for some reason.
 # However running the servers behind nginx (and using the sync class) resolves all problems
 # as nginx handles all the persistent connections.
-# --log-level=DEBUG
 echo "starting gunicorn"
-exec gunicorn $GUNICORN_FLAGS --access-logfile - --log-level debug --error-logfile - --worker-class sync --chdir src --workers=$GUNICORN_WORKERS -b :$GUNICORN_PORT public:app
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --log-level info --error-logfile - --worker-class sync --chdir src --workers=$GUNICORN_WORKERS -b :$GUNICORN_PORT public:app

@@ -14,4 +14,4 @@ echo "initializing and migrating db"
 python3 ./init_db.py
 
 echo "starting gunicorn"
-exec gunicorn ${GUNICORN_FLAGS} --access-logfile - --log-level debug --error-logfile - --worker-class sync --workers=${GUNICORN_WORKERS} -b :80 api:app
+exec gunicorn ${GUNICORN_FLAGS} --access-logfile - --log-level info --error-logfile - --worker-class sync --workers=${GUNICORN_WORKERS} -b :80 api:app
