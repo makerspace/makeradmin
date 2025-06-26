@@ -6,6 +6,7 @@ import DatePeriodInput, {
 import { useJson } from "Hooks/useJson";
 import { usePeriod } from "Hooks/usePeriod";
 import React, { useEffect } from "react";
+import { formatUtcDate, parseUtcDate } from "utils";
 
 type ActivityEntry = {
     date: string; // YYYY-MM-DD
@@ -138,14 +139,17 @@ export const PhysicalAccessLogGraph = ({
             // that the data is daily and display the data as such.
             // However, if the days just happened to be spaced one week apart,
             // then it might incorrectly think the data is weekly.
-            if (grouping === TimeGrouping.Day) {
+            if (grouping === TimeGrouping.Day && activity.length > 0) {
                 // Add missing days
                 // Only non-zero entries will be included in the response
-                while (activity.length > 0) {
+                while (true) {
                     const last = activity[activity.length - 1]!;
-                    const next = new Date(last.date);
-                    next.setDate(next.getDate() + 1);
-                    const nextStr = next.toISOString().substring(0, 10);
+                    // Note: Important to do this in UTC, as otherwise we can get
+                    // edge cases when winter/summer time switches where this
+                    // would not advance the date correctly.
+                    const next = parseUtcDate(last.date)!;
+                    next.setUTCDate(next.getUTCDate() + 1);
+                    const nextStr = formatUtcDate(next);
                     if (nextStr < entry.date) {
                         activity.push({
                             date: nextStr,
