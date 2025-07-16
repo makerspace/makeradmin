@@ -5,7 +5,7 @@ import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";
 import Icon from "../Components/icons";
-import { get } from "../gateway";
+import { get, post } from "../gateway";
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
 
@@ -26,7 +26,15 @@ const Row = (collection) => (props) => {
             </td>
             <td>
                 <a
-                    onClick={() => collection.remove(item)}
+                    onClick={async () => {
+                        await collection.remove(item);
+
+                        // Changing group membership may require us to sync door permissions
+                        await post({
+                            url: `/accessy/sync`,
+                            expectedDataStatus: "ok",
+                        });
+                    }}
                     className="removebutton"
                 >
                     <Icon icon="trash" />
@@ -62,16 +70,22 @@ export default function GroupBoxMembers() {
     }, []);
 
     const selectOption = useCallback(
-        (member) => {
+        async (member) => {
             setSelectedOption(member);
 
             if (_.isEmpty(member)) {
                 return;
             }
 
-            collection
-                .add(new Member(member))
-                .then(() => setSelectedOption(null));
+            await collection.add(new Member(member));
+
+            setSelectedOption(null);
+
+            // Changing group membership may require us to sync door permissions
+            await post({
+                url: `/accessy/sync`,
+                expectedDataStatus: "ok",
+            });
         },
         [collection],
     );
