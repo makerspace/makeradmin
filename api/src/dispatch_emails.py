@@ -7,8 +7,7 @@ from urllib.parse import quote_plus
 
 import requests
 from core.auth import create_access_token
-from membership.membership import (get_members_and_membership,
-                                   get_membership_summaries)
+from membership.membership import get_members_and_membership, get_membership_summaries
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
