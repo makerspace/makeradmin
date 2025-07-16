@@ -43,6 +43,8 @@ COPY run.sh /work/run.sh
 
 RUN npm exec sass scss/style.scss static/style.css
 
+RUN npm exec tsx scripts/build_locales.ts
+
 ARG DEV_BUILD
 
 RUN test "$DEV_BUILD" = "true" || npm run build
