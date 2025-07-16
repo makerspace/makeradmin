@@ -238,9 +238,9 @@ class AccessyAsset(DataClassJsonMixin):
     additionalDeviceAuthentication: str  # e.g., "NONE"
     address: dict[str, Any]  # Placeholder for address data
     images: List[AccessyImage]  # List of image URLs or identifiers
-    category: str  # e.g., "CHARGING_STATION"
     allowGuestAccess: bool
     status: str  # e.g., "OK"
+    category: Optional[str] = None  # e.g., "CHARGING_STATION"
 
 
 @dataclass
