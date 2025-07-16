@@ -12,7 +12,7 @@
         renewal: "SHOULD NOT BE VISIBLE {{price}}",
     },
     single_membership_year: {
-        summary: "Makerspace Access",
+        summary: "Base Membership",
         renewal: "SHOULD NOT BE VISIBLE {{price}}",
     },
     access_starter_pack: {
