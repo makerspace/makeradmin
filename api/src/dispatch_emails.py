@@ -7,7 +7,8 @@ from urllib.parse import quote_plus
 
 import requests
 from core.auth import create_access_token
-from membership.membership import get_members_and_membership, get_membership_summaries
+from membership.membership import (get_members_and_membership,
+                                   get_membership_summaries)
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
@@ -291,7 +292,9 @@ def quiz_reminders() -> None:
                 member_id=member.member_id, remaining_questions=total_quiz_questions, correctly_answered_questions=0
             )
 
-        if quiz_member.remaining_questions > 0:
+        # Don't bother members who have answered all questions correctly
+        # Or if we have added just a few questions to the quiz after they finished it.
+        if quiz_member.remaining_questions > 2:
             member_data = id_to_member.get(member.member_id)
             assert member_data is not None
             member, membership = member_data
