@@ -36,4 +36,4 @@ if [ -n "$WAIT_FOR_DEBUGGER" ]; then
     wait_for_debugger_flags="-m debugpy --listen 0.0.0.0:5678 --wait-for-client"
 fi
 
-python3 $wait_for_debugger_flags -m pytest --color=yes . --workers ${TEST_PARALELLISM} -ra
+python3 $wait_for_debugger_flags -m pytest --color=yes . -n ${TEST_PARALELLISM} -ra
