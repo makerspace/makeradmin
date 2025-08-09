@@ -381,7 +381,11 @@ const TermsAndConditions = ({
             <p>
                 <b>{t("terms.understandingPledge")}...</b>
             </p>
-            <ol className="rules-list">{t("terms.understanding")}</ol>
+            <ol className="rules-list">
+                {t("terms.understanding").map((v) => (
+                    <li>{v}</li>
+                ))}
+            </ol>
 
             <RuleCheckbox
                 rule={t("terms.accept")}
