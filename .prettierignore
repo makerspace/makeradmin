@@ -8,6 +8,7 @@
 /public/ts/locales.ts
 /public/static/js
 /admin/dist
+/public/ts/generated_locales
 
 # Jinja2 templates do not work well for some reason
 /api/src/templates/

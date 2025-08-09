@@ -312,4 +312,7 @@ execSync(`npx prettier --write ${localeTypeDefinitionOutput}`);
 
 // Make file world writable to avoid permission issues
 // where git outside the docker container cannot access it.
+for (const [, p] of exportedLocales) {
+    fs.chmodSync(p, 0o666);
+}
 fs.chmodSync(localeTypeDefinitionOutput, 0o666);

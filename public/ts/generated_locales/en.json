@@ -1,7 +1,7 @@
 {
     "brand": {
-        "makerspace_name": "Stockholm&nbsp;Makerspace",
-        "billing_address": "Stockholm&nbsp;Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm"
+        "makerspace_name": "Stockholm Makerspace",
+        "billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm"
     },
     "change_phone": {
         "new_number_prompt": "New phone number",
