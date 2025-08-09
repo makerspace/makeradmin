@@ -672,8 +672,8 @@ const Success = ({ member }: { member: member_t }) => {
                     onClick={tick}
                 >
                     {t("success.steps.joinSlackButton")}
-                </a>
-                {t("success.steps.joinSlackWhy")}
+                </a>{" "}
+                {t("success.steps.joinSlackWhy")}{" "}
                 <a target="_blank" href={URL_SLACK_HELP}>
                     <i>{t("success.steps.joinSlackWhatIsThis")}</i>
                 </a>
