@@ -200,6 +200,8 @@ if (!fs.existsSync(outputPath)) {
             force: true,
         });
     }
+} else {
+    fs.mkdirSync(outputPath);
 }
 const exportedLocales: [string, string][] = [];
 for (const o of output) {
