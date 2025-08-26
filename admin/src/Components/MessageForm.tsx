@@ -13,7 +13,7 @@ type GroupOption = {
     type: "group";
     label: string;
     value: string;
-}
+};
 
 const groupOption = (d: Group): GroupOption => {
     const id = d.id;
@@ -31,14 +31,14 @@ type MemberOption = {
     type: "member";
     label: string;
     value: string;
-}
+};
 
 type CombinedOption = {
-    type: "combined",
-    label: string,
-    value: string,
-    inner: (MemberOption | GroupOption)[],
-}
+    type: "combined";
+    label: string;
+    value: string;
+    inner: (MemberOption | GroupOption)[];
+};
 
 const memberOption = (d: Member): MemberOption => {
     const id = d.member_id;
@@ -52,9 +52,19 @@ const memberOption = (d: Member): MemberOption => {
     };
 };
 
-const MessageForm = ({ message, onSave, recipientSelect }: { message: Message, onSave: ()=>void, recipientSelect: boolean }) => {
+const MessageForm = ({
+    message,
+    onSave,
+    recipientSelect,
+}: {
+    message: Message;
+    onSave: () => void;
+    recipientSelect: boolean;
+}) => {
     const [sendDisabled, setSendDisabled] = useState(true);
-    const [recipients, setRecipients] = useState<(MemberOption | GroupOption)[]>([]);
+    const [recipients, setRecipients] = useState<
+        (MemberOption | GroupOption)[]
+    >([]);
     const [bodyLength, setBodyLength] = useState(message.body.length);
     const memberCache = React.useRef(new Map<number, Member>()).current;
 
@@ -70,7 +80,9 @@ const MessageForm = ({ message, onSave, recipientSelect }: { message: Message, o
     useEffect(() => {
         const unsubscribe = message.subscribe(() => {
             setSendDisabled(!message.canSave());
-            setRecipients(message.recipients as any as (MemberOption | GroupOption)[]);
+            setRecipients(
+                message.recipients as any as (MemberOption | GroupOption)[],
+            );
             setBodyLength(message.body.length);
         });
 
@@ -79,7 +91,12 @@ const MessageForm = ({ message, onSave, recipientSelect }: { message: Message, o
         };
     }, [message]);
 
-    const loadOptions = (inputValue: string, callback: (options: (MemberOption | GroupOption | CombinedOption)[]) => void) => {
+    const loadOptions = (
+        inputValue: string,
+        callback: (
+            options: (MemberOption | GroupOption | CombinedOption)[],
+        ) => void,
+    ) => {
         const intListMatch = inputValue.match(/^(\d+[\s,]*)+$/);
         if (intListMatch) {
             const ids = inputValue
@@ -87,12 +104,12 @@ const MessageForm = ({ message, onSave, recipientSelect }: { message: Message, o
                 .map((v) => parseInt(v, 10))
                 .filter((v) => !isNaN(v));
             if (ids.length > 0) {
-                Promise.all(ids.map(getMember)).then(members => {
+                Promise.all(ids.map(getMember)).then((members) => {
                     const options = members.map(memberOption);
                     callback([
                         {
                             type: "combined",
-                            label: `${options.map(o => o.label).join(", ")}`,
+                            label: `${options.map((o) => o.label).join(", ")}`,
                             value: "combined-" + ids.join("-"),
                             inner: options,
                         },
@@ -119,12 +136,18 @@ const MessageForm = ({ message, onSave, recipientSelect }: { message: Message, o
                     sort_order: "asc",
                 },
             }),
-        ]).then(([{ data: groups }, { data: members }]: [{ data: Group[] }, { data: Member[] }]) =>
-            callback(
-                groups
-                    .map((d) => groupOption(d) as GroupOption | MemberOption)
-                    .concat(members.map((d) => memberOption(d))),
-            ),
+        ]).then(
+            ([{ data: groups }, { data: members }]: [
+                { data: Group[] },
+                { data: Member[] },
+            ]) =>
+                callback(
+                    groups
+                        .map(
+                            (d) => groupOption(d) as GroupOption | MemberOption,
+                        )
+                        .concat(members.map((d) => memberOption(d))),
+                ),
         );
     };
 
@@ -141,7 +164,10 @@ const MessageForm = ({ message, onSave, recipientSelect }: { message: Message, o
                         Mottagare
                     </label>
                     <div className="uk-form-controls">
-                        <Async<(MemberOption | GroupOption | CombinedOption), true>
+                        <Async<
+                            MemberOption | GroupOption | CombinedOption,
+                            true
+                        >
                             name="recipients"
                             isMulti
                             placeholder="Type to search for member or group"
@@ -151,7 +177,7 @@ const MessageForm = ({ message, onSave, recipientSelect }: { message: Message, o
                             value={recipients}
                             onChange={(values) => {
                                 const flattened = values.flatMap((v) =>
-                                    v.type === "combined" ? v.inner : v
+                                    v.type === "combined" ? v.inner : v,
                                 );
                                 message.recipients = flattened;
                                 setRecipients(flattened);
