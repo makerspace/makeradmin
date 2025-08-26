@@ -231,7 +231,11 @@ class Entity:
             query = relation.filter(query, related_entity_id)
 
         if search_column is not None and search_column not in self.search_columns:
-            raise UnprocessableEntity(f"Search column '{search_column}' not allowed. Allowed values are {self.search_columns}", fields="search_column", what=BAD_VALUE)
+            raise UnprocessableEntity(
+                f"Search column '{search_column}' not allowed. Allowed values are {self.search_columns}",
+                fields="search_column",
+                what=BAD_VALUE,
+            )
 
         search_columns = self.search_columns if search_column is None else [search_column]
 
