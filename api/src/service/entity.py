@@ -218,6 +218,7 @@ class Entity:
         related_entity_id=None,
         include_deleted=Arg(boolean, required=False),
         search_column=Arg(str, required=False),
+        regex=Arg(boolean, required=False),
     ):
         query = db_session.query(self.model)
 
@@ -241,7 +242,11 @@ class Entity:
 
         if search:
             for term in search.split():
-                expression = or_(*[self.columns[column_name].like(f"%{term}%") for column_name in search_columns])
+                if regex:
+                    expression = or_(*[self.columns[column_name].regexp_match(term) for column_name in search_columns])
+                else:
+                    expression = or_(*[self.columns[column_name].like(f"%{term}%") for column_name in search_columns])
+
                 query = query.filter(expression)
 
         if expand:

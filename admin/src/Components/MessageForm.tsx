@@ -87,7 +87,7 @@ const MessageForm = ({
             options: (MemberOption | GroupOption | CombinedOption)[],
         ) => void,
     ) => {
-        const intListMatch = inputValue.match(/^\s*(\d+[\s,]*)+\s*$/);
+        const intListMatch = inputValue.match(/^\s*(\d\d\d\d+[\s,]*)+\s*$/);
         if (intListMatch) {
             const ids = inputValue
                 .split(/[\s,]+/)
@@ -97,21 +97,27 @@ const MessageForm = ({
                 get({
                     url: "/membership/member",
                     params: {
-                        search: ids.join(" "),
+                        search: ids.join("|"),
                         search_column: "member_number",
                         sort_by: "member_number",
                         sort_order: "asc",
+                        regex: true,
                     },
                 }).then(({ data: members }: { data: Member[] }) => {
+                    members = members.filter(m => !recipients.some(r => r.id === m.member_id));
                     const options = members.map(memberOption);
-                    callback([
-                        {
-                            type: "combined",
-                            label: `${options.map((o) => o.label).join(", ")}`,
-                            value: "combined-" + ids.join("-"),
-                            inner: options,
-                        },
-                    ]);
+                    if (options.length > 0) {
+                        callback([
+                            {
+                                type: "combined",
+                                label: `${options.map((o) => o.label).join(", ")}`,
+                                value: "combined-" + ids.join("-"),
+                                inner: options,
+                            },
+                        ]);
+                    } else {
+                        callback([]);
+                    }
                 });
                 return;
             }
