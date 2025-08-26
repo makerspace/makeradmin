@@ -5,10 +5,12 @@ import Date from "../Components/DateShow";
 import Icon from "../Components/icons";
 import SearchBox from "../Components/SearchBox";
 import Collection from "../Models/Collection";
-import CollectionNavigation, { CollectionNavigationProps } from "../Models/CollectionNavigation";
+import CollectionNavigation, {
+    CollectionNavigationProps,
+} from "../Models/CollectionNavigation";
 import Member from "../Models/Member";
 
-const Row = (props: { item: Member, deleteItem: (item: Member) => void }) => {
+const Row = (props: { item: Member; deleteItem: (item: Member) => void }) => {
     const { item, deleteItem } = props;
     return (
         <tr>
@@ -40,13 +42,15 @@ class MemberCollection extends Collection<Member> {
         // then search only for member numbers instead of doing a full search.
         // This makes the search much more precise when searching for member numbers.
         if (params.search) {
-            const intListMatch = params.search.match(/^\s*(\d\d\d\d+[\s,]*)+\s*$/);
+            const intListMatch = params.search.match(
+                /^\s*(\d\d\d\d+[\s,]*)+\s*$/,
+            );
             if (intListMatch) {
                 const ids = params.search
                     .split(/[\s,]+/)
                     .map((v) => parseInt(v, 10))
                     .filter((v) => !isNaN(v));
-                
+
                 return {
                     ...params,
                     regex: true,
