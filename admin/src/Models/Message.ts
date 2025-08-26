@@ -47,7 +47,7 @@ export default class Message extends Base<Message> {
         );
     }
 
-    statusText(message: Message): string {
+    static statusText(message: Message): string {
         switch (message.status) {
             case "queued":
                 return "Queued";
