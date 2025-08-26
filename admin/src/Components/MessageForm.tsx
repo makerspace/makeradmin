@@ -66,16 +66,6 @@ const MessageForm = ({
         (MemberOption | GroupOption)[]
     >([]);
     const [bodyLength, setBodyLength] = useState(message.body.length);
-    const memberCache = React.useRef(new Map<number, Member>()).current;
-
-    const getMember = async (id: number): Promise<Member> => {
-        if (memberCache.has(id)) {
-            return memberCache.get(id)!;
-        }
-        const { data } = await get({ url: `/membership/member/${id}` });
-        memberCache.set(id, data);
-        return data;
-    };
 
     useEffect(() => {
         const unsubscribe = message.subscribe(() => {
@@ -97,14 +87,22 @@ const MessageForm = ({
             options: (MemberOption | GroupOption | CombinedOption)[],
         ) => void,
     ) => {
-        const intListMatch = inputValue.match(/^(\d+[\s,]*)+$/);
+        const intListMatch = inputValue.match(/^\s*(\d+[\s,]*)+\s*$/);
         if (intListMatch) {
             const ids = inputValue
                 .split(/[\s,]+/)
                 .map((v) => parseInt(v, 10))
                 .filter((v) => !isNaN(v));
             if (ids.length > 0) {
-                Promise.all(ids.map(getMember)).then((members) => {
+                get({
+                    url: "/membership/member",
+                    params: {
+                        search: ids.join(" "),
+                        search_column: "member_number",
+                        sort_by: "member_number",
+                        sort_order: "asc",
+                    },
+                }).then(({ data: members }: { data: Member[] }) => {
                     const options = members.map(memberOption);
                     callback([
                         {

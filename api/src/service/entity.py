@@ -217,6 +217,7 @@ class Entity:
         relation=None,
         related_entity_id=None,
         include_deleted=Arg(boolean, required=False),
+        search_column=Arg(str, required=False),
     ):
         query = db_session.query(self.model)
 
@@ -229,9 +230,14 @@ class Entity:
         if relation and related_entity_id:
             query = relation.filter(query, related_entity_id)
 
+        if search_column is not None and search_column not in self.search_columns:
+            raise UnprocessableEntity(f"Search column '{search_column}' not allowed. Allowed values are {self.search_columns}", fields="search_column", what=BAD_VALUE)
+
+        search_columns = self.search_columns if search_column is None else [search_column]
+
         if search:
             for term in search.split():
-                expression = or_(*[self.columns[column_name].like(f"%{term}%") for column_name in self.search_columns])
+                expression = or_(*[self.columns[column_name].like(f"%{term}%") for column_name in search_columns])
                 query = query.filter(expression)
 
         if expand:
