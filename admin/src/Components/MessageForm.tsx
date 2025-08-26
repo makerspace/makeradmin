@@ -104,13 +104,17 @@ const MessageForm = ({
                         regex: true,
                     },
                 }).then(({ data: members }: { data: Member[] }) => {
-                    members = members.filter(m => !recipients.some(r => r.id === m.member_id));
+                    members = members.filter(
+                        (m) => !recipients.some((r) => r.id === m.member_id),
+                    );
                     const options = members.map(memberOption);
                     if (options.length > 0) {
                         callback([
                             {
                                 type: "combined",
-                                label: `${options.map((o) => o.label).join(", ")}`,
+                                label: `${options
+                                    .map((o) => o.label)
+                                    .join(", ")}`,
                                 value: "combined-" + ids.join("-"),
                                 inner: options,
                             },
