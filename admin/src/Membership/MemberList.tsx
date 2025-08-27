@@ -57,6 +57,7 @@ class MemberCollection extends Collection<Member> {
                     search: ids.join("|"),
                     search_column: "member_number",
                     sort_by: "member_number",
+                    page_size: 1000,
                 };
             }
         }

@@ -101,6 +101,7 @@ const MessageForm = ({
                         search_column: "member_number",
                         sort_by: "member_number",
                         sort_order: "asc",
+                        page_size: 1000,
                         regex: true,
                     },
                 }).then(({ data: members }: { data: Member[] }) => {
