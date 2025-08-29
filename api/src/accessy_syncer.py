@@ -65,8 +65,6 @@ def main():
         engine = create_mysql_engine(**get_mysql_config())
         session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-        logger.info(f"running syncer command {args.command}")
-
         match args.command:
             case x if x == COMMAND_SHIP:
                 ship_orders()

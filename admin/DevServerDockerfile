@@ -20,4 +20,5 @@ COPY  ./dist/ /work/dist
 
 EXPOSE 80
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "--silent", "dev"]
+

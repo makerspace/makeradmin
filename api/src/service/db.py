@@ -17,10 +17,8 @@ class SessionFactoryWrapper:
 
     def init_with_engine(self, engine):
         if self.session_factory is None:
-            logger.info(f"initializing session factory with engine {engine}")
             self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         else:
-            logger.info(f"reinitializing session factory with engine {engine}")
             self.session_factory.configure(bind=engine)
 
     def __call__(self, *args, **kwargs):
@@ -41,9 +39,11 @@ def shutdown_session(exception=None):
 def create_mysql_engine(
     host=None, port=None, db=None, user=None, pwd=None, timeout=240, isolation_level="REPEATABLE_READ"
 ):
-    logger.info(f"waiting for db to respond at {host}:{port}")
-    if not wait_for(lambda: can_connect(host, port), timeout=timeout, interval=0.5):
-        raise Exception(f"could not connect to db at {host}:{port} in {timeout} seconds")
+    # Skip wait log message if we can connect immediately
+    if not wait_for(lambda: can_connect(host, port), timeout=2, interval=0.5):
+        logger.info(f"waiting for db to respond at {host}:{port}")
+        if not wait_for(lambda: can_connect(host, port), timeout=timeout - 2, interval=0.5):
+            raise Exception(f"could not connect to db at {host}:{port} in {timeout} seconds")
 
     engine = create_engine(
         f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}", pool_recycle=1800, isolation_level=isolation_level

@@ -120,7 +120,10 @@ def run_migrations(session_factory):
         applied = {i: Migration(i, n) for i, n in session.execute(text("SELECT id, name FROM migrations ORDER BY ID"))}
         session.commit()
 
-        logger.info(f"{len(migrations) - len(applied)} migrations to apply, {len(applied)} migrations already applied")
+        if len(migrations) - len(applied) > 0:
+            logger.info(
+                f"{len(migrations) - len(applied)} migrations to apply, {len(applied)} migrations already applied"
+            )
 
         for i, migration in enumerate(migrations, start=1):
             try:

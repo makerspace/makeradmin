@@ -7,28 +7,27 @@ GUNICORN_WORKERS=4
 
 function watch_sass() {
     cmd="npm exec sass scss/style.scss static/style.css"
-    echo "starting sass watch process"
+    echo "Watching SASS stylesheets for changes..."
     $cmd || true
     while inotifywait -qq -r -e modify,create,delete scss; do
-        echo "updating stylesheets"
+        echo "Updating stylesheets"
         sleep 0.1
         $cmd || true
     done
 }
 
 function watch_locales() {
-    echo "starting locales watch process"
+    echo "Watching locales for changes..."
     cmd="npx tsx scripts/build_locales.ts"
     $cmd || true
     while inotifywait -qq -r -e modify,create,delete ts/locales; do
-        echo "updating locales"
+        echo "Updating locales"
         sleep 0.05
         $cmd || true
     done
 }
 
 if [ "$DEV_RUN" = "true" ]; then
-        echo "running app in devel mode"
         STATIC_PREFIX_HASH=""
         export STATIC_PREFIX_HASH
 
@@ -46,7 +45,7 @@ if [ "$DEV_RUN" = "true" ]; then
         watch_locales &
 
         # Run webpack dev server.
-        npm run dev &
+        npm run --silent dev &
 else
     # Calculates a hash based on the hash of every file here
     STATIC_PREFIX_HASH="_$(find . -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -c 1-6)"
@@ -59,5 +58,5 @@ fi
 # The gthread worker class should help with this, but it doesn't always seem to work for some reason.
 # However running the servers behind nginx (and using the sync class) resolves all problems
 # as nginx handles all the persistent connections.
-echo "starting gunicorn"
 exec gunicorn $GUNICORN_FLAGS --access-logfile - --log-level info --error-logfile - --worker-class sync --chdir src --workers=$GUNICORN_WORKERS -b :$GUNICORN_PORT public:app
+gunicorn $GUNICORN_FLAGS --access-logfile - --log-level info --error-logfile - --worker-class sync --chdir src --workers=$GUNICORN_WORKERS -b :$GUNICORN_PORT public:app

@@ -13,7 +13,7 @@ run: .env
 	$(COMPOSE) up
 
 dev: .env
-	$(DEV_COMPOSE) up --build
+	COMPOSE_MENU=false $(DEV_COMPOSE) up --build
 
 test-clean: .env
 	$(TEST_COMPOSE) down -v --remove-orphans || true

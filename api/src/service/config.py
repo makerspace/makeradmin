@@ -1,26 +1,11 @@
-from logging import INFO
+from logging import DEBUG, INFO, NOTSET
+from typing import Any
 
 from dotenv import dotenv_values, find_dotenv
 from rocky.config import Config, Dict, Env
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from service.logging import logger
-
-
-class DotEnvFile(Dict):
-    """Config reader to read from docker .env file."""
-
-    def __init__(self, name=None, **kwargs):
-        filename = find_dotenv()
-        if not filename:
-            logger.info("could not find .env file, skipping")
-            env: Dict[str, str] = {}
-        else:
-            logger.info(f"loading .env file from {filename}")
-            env = dotenv_values()
-
-        super().__init__(env, name=name or filename, **kwargs)
-
 
 default = Dict(
     name="default",
@@ -52,9 +37,17 @@ default = Dict(
     ),
 )
 env = Env()
-dot_env = DotEnvFile()
 
-config = Config(env, dot_env, default, log_level=INFO)
+dot_env_filename = find_dotenv()
+
+sources = [("env", env)]
+if dot_env_filename:
+    dotenv = dotenv_values(dot_env_filename)
+    dotenv["name"] = dot_env_filename
+    sources.append((".env file at " + dot_env_filename, dotenv))
+
+logger.info("Config sources: " + ", ".join(x[0] for x in sources))
+config = Config(*[x[1] for x in sources], default, log_level=NOTSET)
 
 
 def get_mysql_config() -> dict[str, str | int]:

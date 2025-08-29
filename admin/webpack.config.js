@@ -102,6 +102,9 @@ module.exports = (env, args) => {
                     webSocketURL: "http://localhost:8009",
                 },
             },
+            infrastructureLogging: {
+                level: "error",
+            },
         });
     }
 

@@ -71,6 +71,9 @@ module.exports = (env, args) => {
                     "/shop": "http://localhost:81",
                 },
             },
+            infrastructureLogging: {
+                level: "error",
+            },
         });
     }
 
