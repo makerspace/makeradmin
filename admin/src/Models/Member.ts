@@ -16,7 +16,7 @@ export default class Member extends Base<Member> {
     address_zipcode!: number | null;
     address_city!: string;
     address_country!: string;
-    labaccess_agreement_at!: Date | null;
+    labaccess_agreement_at!: string | null;
     pending_activation!: boolean;
     price_level!: string;
 

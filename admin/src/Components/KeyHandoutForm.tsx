@@ -1,8 +1,9 @@
+import Member from "Models/Member";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Prompt } from "react-router";
-import UIkit from "uikit";
+import { throttle } from "underscore";
 import { get, post } from "../gateway";
-import { notifySuccess } from "../message";
+import { confirmModal, notifySuccess } from "../message";
 import Collection from "../Models/Collection";
 import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import Span, { filterCategory } from "../Models/Span";
@@ -10,7 +11,7 @@ import { dateTimeToStr, parseUtcDate, utcToday } from "../utils";
 import Icon from "./icons";
 import TextInput from "./TextInput";
 
-function last_span_enddate(spans, category) {
+function last_span_enddate(spans: Span[], category: string) {
     const last_span = filterCategory(spans, category).splice(-1)[0];
     if (last_span) {
         return last_span.enddate;
@@ -18,11 +19,16 @@ function last_span_enddate(spans, category) {
     return null;
 }
 
-function isAccessValid(date) {
-    return date && parseUtcDate(date) >= utcToday();
+function isAccessValid(date: string | null) {
+    return date && parseUtcDate(date)! >= utcToday();
 }
 
-function DateView(props) {
+function DateView(props: {
+    date: string | null;
+    placeholder: string;
+    title: string;
+    pending?: string;
+}) {
     const is_valid = isAccessValid(props.date);
     let status, text;
 
@@ -85,9 +91,9 @@ function DateView(props) {
     );
 }
 
-function MembershipAgreementSign({ member, has_signed }) {
+function MembershipAgreementSign({ member }: { member: Member }) {
     function prompt_lab_contract_not_signed() {
-        return UIkit.modal.confirm(
+        return confirmModal(
             <div>
                 <p>
                     Är du säker på {member.firstname} {member.lastname} inte har
@@ -96,7 +102,7 @@ function MembershipAgreementSign({ member, has_signed }) {
                 <p>
                     Labbavtalet mottogs{" "}
                     <strong>
-                        {dateTimeToStr(member.labaccess_agreement_at)}
+                        {dateTimeToStr(member.labaccess_agreement_at!)}
                     </strong>
                     .{" "}
                 </p>
@@ -118,8 +124,8 @@ function MembershipAgreementSign({ member, has_signed }) {
                         style={{ verticalAlign: "middle" }}
                         className="uk-checkbox"
                         type="checkbox"
-                        tabIndex="1"
-                        checked={has_signed}
+                        tabIndex={1}
+                        checked={member.labaccess_agreement_at !== null}
                         onChange={(e) => {
                             if (e.target.checked) {
                                 member.labaccess_agreement_at =
@@ -132,7 +138,7 @@ function MembershipAgreementSign({ member, has_signed }) {
                         }}
                     />{" "}
                     &nbsp; Signerat labbmedlemsavtal mottaget
-                    {has_signed
+                    {member.labaccess_agreement_at !== null
                         ? " " + dateTimeToStr(member.labaccess_agreement_at)
                         : ""}
                     .
@@ -142,9 +148,9 @@ function MembershipAgreementSign({ member, has_signed }) {
     );
 }
 
-function KeyHandoutForm(props) {
+function KeyHandoutForm(props: { member: Member }) {
     const { member } = props;
-    const [can_save_member, setCanSaveMember] = useState(false);
+    const [can_save_member, setCanSaveMember] = useState<boolean>(false);
     const [pending_labaccess_days, setPendingLabaccessDays] = useState("?");
     const [labaccess_enddate, setLabaccessEnddate] = useState("");
     const [membership_enddate, setMembershipEnddate] = useState("");
@@ -153,7 +159,7 @@ function KeyHandoutForm(props) {
     const [accessy_groups, setAccessyGroups] = useState([]);
     const [accessy_pending_invites, setAccessyPendingInvites] = useState(0);
 
-    const unsubscribe = useRef([]);
+    const unsubscribe = useRef<(() => void)[]>([]);
     const spanCollection = useMemo(
         () =>
             new Collection({
@@ -187,11 +193,17 @@ function KeyHandoutForm(props) {
         return get({
             url: `/membership/member/${member.id}/pending_actions`,
         }).then((r) => {
-            const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
-                if (value.action.action === ADD_LABACCESS_DAYS)
-                    return acc + value.action.value;
-                return acc;
-            }, 0);
+            const sum_pending_labaccess_days = r.data.reduce(
+                (
+                    acc: number,
+                    value: { action: { action: string; value: number } },
+                ) => {
+                    if (value.action.action === ADD_LABACCESS_DAYS)
+                        return acc + value.action.value;
+                    return acc;
+                },
+                0,
+            );
             setPendingLabaccessDays(sum_pending_labaccess_days);
         });
     };
@@ -200,7 +212,13 @@ function KeyHandoutForm(props) {
         unsubscribe.current.push(
             member.subscribe(() => setCanSaveMember(member.canSave())),
         );
-        unsubscribe.current.push(member.subscribe(() => fetchAccessyStatus()));
+        // Fetch accessy status when the member data changes, as we could have done something like add the member to a group.
+        // However, avoid fetching too frequently (it will otherwise fetch a few times at page load).
+        unsubscribe.current.push(
+            member.subscribe(
+                throttle(fetchAccessyStatus, 500, { trailing: false }),
+            ),
+        );
         unsubscribe.current.push(
             spanCollection.subscribe(({ items }) => {
                 setLabaccessEnddate(last_span_enddate(items, "labaccess"));
@@ -212,7 +230,6 @@ function KeyHandoutForm(props) {
         );
 
         fetchPendingLabaccess();
-        fetchAccessyStatus();
 
         return () => {
             unsubscribe.current.forEach((u) => u());
@@ -246,25 +263,21 @@ function KeyHandoutForm(props) {
             color = "uk-button-primary";
         }
 
-        const on_click = (e) => {
+        const on_click = async (e: React.MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
-            save()
-                .then(() =>
-                    post({
-                        url: `/webshop/member/${member.id}/ship_labaccess_orders`,
-                        expectedDataStatus: "ok",
-                    }),
-                )
-                .then(() => fetchPendingLabaccess())
-                .then(() => spanCollection.fetch())
-                .then(() => fetchAccessyStatus())
-                .then(() => {
-                    if (accessy_in_org) {
-                        notifySuccess("Medlem redan i Makerspace Accessy org");
-                    } else {
-                        notifySuccess("Accessy invite skickad");
-                    }
-                });
+            await save();
+            await post({
+                url: `/webshop/member/${member.id}/ship_labaccess_orders`,
+                expectedDataStatus: "ok",
+            });
+            await fetchPendingLabaccess();
+            await spanCollection.fetch();
+            await fetchAccessyStatus();
+            if (accessy_in_org) {
+                notifySuccess("Medlem redan i Makerspace Accessy org");
+            } else {
+                notifySuccess("Accessy invite skickad");
+            }
             return false;
         };
 
@@ -273,7 +286,7 @@ function KeyHandoutForm(props) {
                 className={"uk-button uk-float-right " + color}
                 title={tooltip}
                 style={{ marginRight: "10px" }}
-                tabIndex="1"
+                tabIndex={1}
                 onClick={on_click}
             >
                 <Icon icon="save" /> Spara, lägg till labaccess och skicka
@@ -328,7 +341,7 @@ function KeyHandoutForm(props) {
                     <TextInput
                         model={member}
                         icon="birthdaycake"
-                        tabIndex="1"
+                        tabIndex={1}
                         name="civicregno"
                         title="Personnummer"
                         placeholder="YYYYMMDD-XXXX"
@@ -348,7 +361,7 @@ function KeyHandoutForm(props) {
                             model={member}
                             icon="at"
                             name="email"
-                            tabIndex="1"
+                            tabIndex={1}
                             type="email"
                             title="Epost"
                         />
@@ -358,7 +371,7 @@ function KeyHandoutForm(props) {
                             model={member}
                             icon="phone"
                             name="phone"
-                            tabIndex="1"
+                            tabIndex={1}
                             type="tel"
                             title="Telefonnummer"
                         />
@@ -368,7 +381,7 @@ function KeyHandoutForm(props) {
                             model={member}
                             icon="home"
                             name="address_zipcode"
-                            tabIndex="1"
+                            tabIndex={1}
                             type="number"
                             title="Postnummer"
                         />
@@ -398,6 +411,7 @@ function KeyHandoutForm(props) {
                         <DateView
                             title="Specialaccess"
                             date={special_enddate}
+                            placeholder="Ingen tidigare specialaccess finns registrerad"
                         />
                     ) : null}
                 </div>
@@ -411,7 +425,7 @@ function KeyHandoutForm(props) {
             <div style={{ paddingBottom: "4em" }}>
                 <button
                     className="uk-button uk-button-primary uk-float-right"
-                    tabIndex="2"
+                    tabIndex={2}
                     title="Spara ändringar"
                     disabled={!can_save_member}
                 >
@@ -436,10 +450,7 @@ function KeyHandoutForm(props) {
                         return false;
                     }}
                 >
-                    <MembershipAgreementSign
-                        member={member}
-                        has_signed={has_signed}
-                    />
+                    <MembershipAgreementSign member={member} />
                     {has_signed ? section2andon : ""}
                 </form>
             </div>

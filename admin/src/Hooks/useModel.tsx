@@ -16,7 +16,7 @@ export default function useModel<M extends Base<M>>(
         return () => {
             unsubscribe();
         };
-    }, [id]);
+    }, [model, id]);
 
     return instance;
 }

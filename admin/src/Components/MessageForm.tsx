@@ -200,7 +200,6 @@ const MessageForm = ({
                 model={message}
                 name="subject"
                 title="Ärende"
-                onChange={() => setBodyLength(message.body.length)}
             />
             <Textarea
                 model={message}

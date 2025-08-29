@@ -5,10 +5,14 @@ import useModel from "../Hooks/useModel";
 import Member from "../Models/Member";
 import { NavItem } from "../nav";
 
-export const MemberContext = createContext(null);
+export const MemberContext = createContext<Member | null>(null);
 
-function MemberBox({ children }) {
-    const { member_id } = useParams();
+function MemberBox({ children }: { children: React.ReactNode }) {
+    const { member_id: member_id_str } = useParams<{ member_id: string }>();
+    const member_id = parseInt(member_id_str, 10);
+    if (Number.isNaN(member_id)) {
+        return null;
+    }
     const member = useModel(Member, member_id);
 
     return (

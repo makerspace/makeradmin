@@ -1,16 +1,34 @@
-import classNames from "classnames/bind";
+import classNames from "classnames";
 import React, { useEffect, useState } from "react";
 import * as _ from "underscore";
-import Icon from "./icons";
+import Icon, { IconProps } from "./icons";
 
-const TextInput = (props) => {
+const TextInput = ({
+    model,
+    name,
+    title,
+    icon,
+    disabled,
+    placeholder,
+    tabIndex,
+    type,
+    autoComplete = "off",
+}: {
+    model: any;
+    name: string;
+    title?: string;
+    icon?: IconProps["icon"];
+    disabled?: boolean;
+    placeholder?: string;
+    tabIndex?: number;
+    type?: string;
+    autoComplete?: string;
+}) => {
     const [value, setValue] = useState(null);
     const [selected, setSelected] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
 
     useEffect(() => {
-        const { model, name } = props;
-
         const handleModelChange = () => {
             setValue(model[name] === "" ? null : model[name]);
             setIsDirty(model.isDirty(name));
@@ -21,19 +39,7 @@ const TextInput = (props) => {
         return () => {
             unsubscribe();
         };
-    }, [props.model, props.name]);
-
-    const {
-        model,
-        name,
-        title,
-        icon,
-        disabled,
-        placeholder,
-        tabIndex,
-        type,
-        autoComplete,
-    } = props;
+    }, [model, name]);
 
     const classes = classNames(name, {
         "form-row": true,
@@ -78,10 +84,6 @@ const TextInput = (props) => {
             )}
         </div>
     );
-};
-
-TextInput.defaultProps = {
-    autoComplete: "off",
 };
 
 export default TextInput;
