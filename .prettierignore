@@ -3,6 +3,11 @@
 
 # Generated files
 **/package-lock.json
+/public/ts/generated_locales
+/public/ts/locales.ts
 
 # Jinja2 templates do not work well for some reason
 /api/src/templates/
+
+# Sql files in root folder (likely db dumps)
+*.sql
