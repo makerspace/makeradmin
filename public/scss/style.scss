@@ -1,9 +1,6 @@
-@import "include-media";
-$breakpoints: (
-    phone: 320px,
-    tablet: 800px,
-    desktop: 1024px,
-);
+@use "sass:color";
+@use "include-media";
+include-media.$breakpoints: (phone: 320px, tablet: 800px, desktop: 1024px);
 
 $primary-color: #333;
 
@@ -63,20 +60,19 @@ body {
     display: flex;
     flex-direction: row;
     min-height: 100%;
-
-    @include media("<=tablet") {
-        flex-direction: column;
-    }
-
     color: $primary-color;
     justify-content: center;
+
+    @include include-media.media("<=tablet") {
+        flex-direction: column;
+    }
 }
 
 #left-sidebar {
     flex: 0 0 auto;
     padding: 10px;
 
-    @include media(">tablet") {
+    @include include-media.media(">tablet") {
         width: 250px;
 
         // Designed using: https://shadows.brumm.af/
@@ -97,7 +93,7 @@ body {
         }
     }
 
-    @include media("<=tablet") {
+    @include include-media.media("<=tablet") {
         .sidebar-fixed-content {
             width: 100%;
             text-align: center;
@@ -151,7 +147,7 @@ body {
         opacity: 0.5;
     }
 
-    @include media("<=tablet") {
+    @include include-media.media("<=tablet") {
         .sidebar-buy-btn {
             display: block;
             position: fixed;
@@ -283,7 +279,7 @@ body {
     margin-bottom: 2px;
     overflow: hidden;
 
-    @include media("<=tablet") {
+    @include include-media.media("<=tablet") {
         border-bottom: 1px solid #676768;
     }
 
@@ -295,7 +291,7 @@ body {
         min-width: 0px;
     }
 
-    @include media("<=tablet") {
+    @include include-media.media("<=tablet") {
         .number-add {
             display: none;
         }
@@ -604,12 +600,11 @@ form input.readonly-input {
     flex-direction: row;
     justify-content: center;
     margin-bottom: 60px;
+    flex: 1 1 auto;
 
-    @include media(">tablet") {
+    @include include-media.media(">tablet") {
         padding-top: 100px;
     }
-
-    flex: 1 1 auto;
 }
 
 .content-centering {
@@ -624,7 +619,7 @@ form input.readonly-input {
     margin-left: auto;
     margin-right: auto;
 
-    @include media(">550px") {
+    @include include-media.media(">550px") {
         margin-top: 100px;
         margin-bottom: 50px;
     }
@@ -678,7 +673,10 @@ form input.readonly-input {
     }
 
     a.receipt-header:hover {
-        background: saturate(darken(#469abe, 5%), 12%);
+        background: color.adjust(
+            color.adjust(#469abe, $lightness: -5%),
+            $saturation: 12%
+        );
     }
 
     .receipt-items {
@@ -697,7 +695,10 @@ form input.readonly-input {
     }
 
     a.receipt-header:hover {
-        background: saturate(darken(#be9a46, 5%), 12%);
+        background: color.adjust(
+            color.adjust(#be9a46, $lightness: -5%),
+            $saturation: 12%
+        );
     }
 
     .receipt-items {
@@ -716,7 +717,10 @@ form input.readonly-input {
     }
 
     a.receipt-header:hover {
-        background: saturate(darken(#be4646, 5%), 12%);
+        background: color.adjust(
+            color.adjust(#be4646, $lightness: -5%),
+            $saturation: 12%
+        );
     }
 
     .receipt-items {
@@ -841,13 +845,12 @@ form input.readonly-input {
     padding-top: 0px;
     padding: 0px;
     margin-bottom: 0px;
+    color: white;
 
-    @include media(">550px") {
+    @include include-media.media(">550px") {
         border-radius: 5px;
         box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.2);
     }
-
-    color: white;
 
     #images {
         background: white;
@@ -986,7 +989,7 @@ form input.readonly-input {
     a {
         display: inline-block;
         color: white;
-        background: transparentize(#4699be, 0.3);
+        background: color.adjust(#4699be, $alpha: -0.3);
         transition: 100ms background;
         border-radius: 5px;
         flex: 1 1 0;
@@ -1020,7 +1023,7 @@ form input.readonly-input {
     }
 
     .product-delete {
-        @include media("<=550px") {
+        @include include-media.media("<=550px") {
             display: none;
         }
     }
@@ -1144,13 +1147,12 @@ $palette-red: $palette4;
     box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     padding: 50px;
+    justify-content: start;
+    flex-direction: column;
 
     @media screen and (max-width: 900px) {
         padding: 20px;
     }
-
-    justify-content: start;
-    flex-direction: column;
 
     .quiz-embed {
         display: flex;
@@ -1244,7 +1246,7 @@ $palette-red: $palette4;
 
         &.question-option-correct {
             color: white;
-            border: 1px solid darken($palette-green, 0.1);
+            border: 1px solid color.adjust($palette-green, $lightness: -1%);
             background: $palette-green;
         }
 
@@ -1254,13 +1256,13 @@ $palette-red: $palette4;
 
         &.question-option-selected.question-option-correct {
             color: white;
-            border: 1px solid darken($palette-green, 0.1);
+            border: 1px solid color.adjust($palette-green, $lightness: -1%);
             background: $palette-green;
         }
 
         &.question-option-selected.question-option-incorrect {
             color: white;
-            border: 1px solid darken($palette-red, 0.1);
+            border: 1px solid color.adjust($palette-red, $lightness: -1%);
             background: $palette-red;
         }
     }
@@ -1452,7 +1454,10 @@ $palette-red: $palette4;
         }
 
         &:hover .course-completed {
-            background: saturate(darken(#68be46, 5%), 12%);
+            background: color.adjust(
+                color.adjust(#68be46, $lightness: -5%),
+                $saturation: 12%
+            );
         }
 
         .course-not-completed {
@@ -1462,11 +1467,14 @@ $palette-red: $palette4;
         }
 
         &:hover {
-            background: darken(#fff, 2%);
+            background: color.adjust(#fff, $lightness: -2%);
         }
 
         &:hover .course-not-completed {
-            background: saturate(darken(#469abe, 5%), 12%);
+            background: color.adjust(
+                color.adjust(#469abe, $lightness: -5%),
+                $saturation: 12%
+            );
         }
 
         .course-not-completed > div,
@@ -1514,6 +1522,9 @@ $palette-red: $palette4;
     min-height: 100%;
     box-sizing: border-box;
     padding-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
     .content-wrapper {
         max-width: 800px;
@@ -1536,10 +1547,6 @@ $palette-red: $palette4;
     .StripeElement {
         margin: 0px 16px;
     }
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 
     h1 {
         font-weight: bold;
@@ -1656,15 +1663,14 @@ $palette-red: $palette4;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            color: white;
+            padding: 20px;
 
             @media screen and (width > $break-large) {
                 // To make all plans the same height on larger screens where the plans are shown side-by-side
                 height: 102px;
                 box-sizing: border-box;
             }
-
-            color: white;
-            padding: 20px;
 
             .abovePrice,
             .belowPrice {
@@ -1771,17 +1777,29 @@ $palette-red: $palette4;
     input[type="submit"].flow-button {
         // Required for progress spinner
         position: relative;
+        border: none;
+        background: #fff;
+        color: rgb(104, 104, 104);
+        border-bottom: 2px solid #b6b6b6;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 20px;
+        margin-left: 16px;
+        margin-right: 16px;
+        margin-top: 16px;
+        margin-bottom: 16px;
+        transition: 50ms background-color;
+        cursor: pointer;
+        text-decoration: none; // Remove underline from links
+        font-family: inherit; // Disable the browser's own font-family for buttons
+        line-height: normal; // Reset line-height to normal, as it otherwise differs between 'a' and 'button' tags
+        text-align: center;
 
         .uk-spinner {
             position: absolute;
             left: 16px;
             top: 7px;
         }
-
-        border: none;
-        background: #fff;
-        color: rgb(104, 104, 104);
-        border-bottom: 2px solid #b6b6b6;
 
         &:hover:not(:disabled),
         &:active:not(:disabled) {
@@ -1800,20 +1818,6 @@ $palette-red: $palette4;
                 color: white;
             }
         }
-
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-size: 20px;
-        margin-left: 16px;
-        margin-right: 16px;
-        margin-top: 16px;
-        margin-bottom: 16px;
-        transition: 50ms background-color;
-        cursor: pointer;
-        text-decoration: none; // Remove underline from links
-        font-family: inherit; // Disable the browser's own font-family for buttons
-        line-height: normal; // Reset line-height to normal, as it otherwise differs between 'a' and 'button' tags
-        text-align: center;
 
         &:disabled {
             background-color: #a7a7a7;
@@ -1929,6 +1933,13 @@ $palette-red: $palette4;
     border-radius: 4px;
     margin-bottom: 6px;
     margin-top: 6px;
+    box-shadow:
+        0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
+        0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
+        0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
+        0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
+        0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
+        0px 4px 10px rgba(0, 0, 0, 0.07);
 
     @media screen and (width > $break-medium) {
         align-self: stretch;
@@ -1963,14 +1974,6 @@ $palette-red: $palette4;
         background-color: $makerspace-orange-dark2;
         font-size: 1.2em;
     }
-
-    box-shadow:
-        0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
-        0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
-        0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
-        0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
-        0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
-        0px 4px 10px rgba(0, 0, 0, 0.07);
 }
 
 .small-print {
