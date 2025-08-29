@@ -218,6 +218,10 @@ def handle_event(event: AccessyWebhookEvent) -> None:
         )
         db_session.commit()
 
+    if isinstance(event, AccessyWebhookEventMembership_Created):
+        # Expire the cache if an invitation was likely used
+        accessy_session._pending_invitations_cache_expires_at = datetime.min
+
 
 @service.route("/event", method=POST, permission=PUBLIC)
 def accessy_webhook() -> str:

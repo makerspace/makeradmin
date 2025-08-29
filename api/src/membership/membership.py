@@ -1,4 +1,5 @@
 import logging
+import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
@@ -202,28 +203,35 @@ def add_membership_days(
     return get_membership_summary(member_id)
 
 
-def get_access_summary(member_id: int):
+@dataclass
+class AccessSummary:
+    in_org: bool
+    pending_invite_count: int
+    access_permission_group_names: list[str]
+
+
+def get_access_summary(member_id: int) -> AccessSummary:
     from multiaccessy.accessy import accessy_session
 
-    dummy_accessy_summary = dict(in_org=False, pending_invite_count=0, access_permission_group_names=[])
     if accessy_session is None:
-        logger.warning("No accessy session, using dummy accessy summary.")
-        return dummy_accessy_summary
-    member: Member | None = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
+        return AccessSummary(in_org=False, pending_invite_count=0, access_permission_group_names=[])
+
+    member: Member | None = db_session.query(Member).get(member_id)
     if member is None:
         raise NotFound("Member does not exist")
 
     msisdn: str | None = member.phone
     if msisdn is not None:
         pending_invite_count = sum(1 for no in accessy_session.get_pending_invitations() if no == msisdn)
-        groups = accessy_session.get_user_groups(msisdn)
-        in_org = accessy_session.is_in_org(msisdn)
+        accessy_member = accessy_session.get_org_user_from_phone(msisdn)
+        in_org = accessy_member is not None
+        groups = list(accessy_member.groups) if accessy_member is not None else []
     else:
         pending_invite_count = 0
         groups = []
         in_org = False
 
-    return dict(
+    return AccessSummary(
         in_org=in_org,
         pending_invite_count=pending_invite_count,
         access_permission_group_names=groups,

@@ -2,7 +2,7 @@ import flask_cors
 from flask import Flask, jsonify
 from flask.wrappers import Response as FlaskResponse
 from membership.permissions import register_permissions
-from multiaccessy.accessy import register_accessy_webhook
+from multiaccessy.accessy import initialize_accessy
 from service.api_definition import ALL_PERMISSIONS
 from service.config import config, debug_mode, get_mysql_config
 from service.db import create_mysql_engine, populate_fields_by_index, shutdown_session
@@ -80,7 +80,7 @@ if are_stripe_keys_set():
 
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)
-register_accessy_webhook()
+initialize_accessy()
 
 
 @app.route("/")

@@ -6,9 +6,11 @@ from enum import Enum
 from logging import getLogger
 from random import random
 from time import sleep
-from typing import Any, List, Optional, Tuple, Union
-from urllib.parse import urlparse
+from typing import Any, Callable, List, Optional, Tuple, Union
+from urllib.parse import quote_plus, urlparse
 
+import gevent
+import gevent.lock
 import requests
 from dataclasses_json import DataClassJsonMixin
 from flask import Response
@@ -22,7 +24,11 @@ logger = getLogger("accessy")
 
 
 class AccessyError(RuntimeError):
-    pass
+    status_code: int | None = None
+
+    def __init__(self, message: str, status_code: int | None = None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class ModificationsDisabledError(Exception):
@@ -48,6 +54,7 @@ def request(
     json: dict[str, Any] | DataClassJsonMixin | None = None,
     max_tries: int = 8,
     err_msg: Optional[str] = None,
+    accepted_error_codes: list[int] | None = None,
 ) -> Any:
     headers = {}
     if token:
@@ -72,9 +79,12 @@ def request(
             continue
 
         if not response.ok:
-            msg = f"got an error in the response for {response.request.path_url}, {response.text=}, {response.status_code=}: {err_msg or ''}"
-            logger.error(msg)
-            raise AccessyError(msg)
+            if accepted_error_codes and response.status_code in accepted_error_codes:
+                pass
+            else:
+                msg = f"got an error in the response for {response.request.path_url}, {response.text=}, {response.status_code=}: {err_msg or ''}"
+                logger.error(msg)
+            raise AccessyError(msg, response.status_code)
 
         try:
             return response.json()
@@ -259,6 +269,34 @@ class AccessyAssetWithPublication(DataClassJsonMixin):
     publication: AccessyAssetPublication
 
 
+@dataclass
+class AccessyPendingInvitation(DataClassJsonMixin):
+    recipientMsisdn: MSISDN
+    createdAt: str
+    status: str
+
+
+PENDING_INVITATIONS_CACHE_DURATION = timedelta(hours=3)
+
+
+def synchronized(func: Callable) -> Callable:
+    """Use a semaphore to avoid multiple gevent threads from running
+    this function at the same time.
+
+    Note: multiple gunicorn workers may still run it at the same time.
+    """
+    mutex = gevent.lock.BoundedSemaphore()
+
+    def inner(*args: Any, **kwargs: Any) -> Any:
+        mutex.acquire()
+        try:
+            return func(*args, **kwargs)
+        finally:
+            mutex.release()
+
+    return inner
+
+
 class AccessySession:
     def __init__(self) -> None:
         self.session_token: str | None = None
@@ -267,6 +305,8 @@ class AccessySession:
         self._all_webhooks: Optional[List[AccessyWebhook]] = None
         self._accessy_id_to_member_id_cache: dict[str, int] = {}
         self._accessy_asset_id_to_publication_cache: dict[UUID, AccessyAssetPublication] = {}
+        self._pending_invitations_cache: list[AccessyPendingInvitation] = list()
+        self._pending_invitations_cache_expires_at: datetime = datetime.min
 
     #################
     # Class methods
@@ -378,11 +418,8 @@ class AccessySession:
         if accessy_member is None:
             return False
 
-        membership_ids = self._get_membership_ids_in_group(access_group_id)
-        for id_ in membership_ids:
-            if id_ == accessy_member.membership_id:
-                return True
-        return False
+        membership_ids = [m.id for m in self._get_users_in_access_group(access_group_id)]
+        return accessy_member.membership_id in membership_ids
 
     def remove_from_org(self, member: AccessyMember) -> None:
         self.__delete(f"/org/admin/organization/{self.organization_id()}/user/{member.user_id}")
@@ -410,6 +447,7 @@ class AccessySession:
         self, phone_numbers: Iterable[MSISDN], access_group_ids: Iterable[UUID] = [], message_to_user: str = ""
     ) -> None:
         """Invite a list of phone numbers to a list of groups"""
+        self.session_token_token_expires_at = datetime.min  # Force refresh
         self.__post(
             f"/org/admin/organization/{self.organization_id()}/invitation",
             json=dict(
@@ -423,19 +461,35 @@ class AccessySession:
 
     def get_pending_invitations(self, after_date: Optional[date] = None) -> Iterable[MSISDN]:
         """Get all pending invitations after a specific date (including)."""
-        if not self.has_authentication():
-            return set()
 
-        data = self._get(f"/org/admin/organization/{self.organization_id()}/invitation")
+        # We use a cache, since pending invitations are accessed on the member page,
+        # and we want to keep that responsive
+        if datetime.now() > self._pending_invitations_cache_expires_at:
+            self.refresh_pending_invitations()
+
         pending_invitations = set()
-        for inv in data:
-            recipient = inv["recipientMsisdn"]
-            invitation_date = fromisoformat(inv["createdAt"]).date()
-            is_pending = inv["status"] == "PENDING"
+        for inv in self._pending_invitations_cache:
+            recipient = inv.recipientMsisdn
+            invitation_date = fromisoformat(inv.createdAt).date()
+            is_pending = inv.status == "PENDING"
 
             if is_pending and (after_date is None or invitation_date >= after_date):
                 pending_invitations.add(recipient)
+
         return pending_invitations
+
+    @synchronized
+    def refresh_pending_invitations(self) -> None:
+        if self.has_authentication():
+            data = [
+                AccessyPendingInvitation.from_dict(x)
+                for x in self._get(f"/org/admin/organization/{self.organization_id()}/invitation")
+            ]
+        else:
+            data = []
+
+        self._pending_invitations_cache = data
+        self._pending_invitations_cache_expires_at = datetime.now() + PENDING_INVITATIONS_CACHE_DURATION
 
     def organization_id(self) -> str:
         if self._organization_id:
@@ -444,29 +498,11 @@ class AccessySession:
         assert self._organization_id is not None
         return self._organization_id
 
-    def get_user_groups(self, phone_number: MSISDN) -> list[str]:
-        """Get all of the groups of a member"""
-        if not self.has_authentication():
-            return []
-
-        accessy_member = self._get_org_user_from_phone(phone_number)
-        if accessy_member is None:
-            return []
-
-        org_groups = (d["id"] for d in self._get_organization_groups())
-
-        group_descriptions = []
-        for group_id in org_groups:
-            membership_ids = self._get_membership_ids_in_group(group_id)
-            if accessy_member.membership_id in membership_ids:
-                group_descriptions.append(self._get_group_description(group_id))
-
-        return group_descriptions
-
     ################################################
     # Internal methods
     ################################################
 
+    @synchronized
     def __ensure_token(self) -> None:
         if not self.has_authentication():
             return
@@ -490,9 +526,7 @@ class AccessySession:
 
             self.session_token = data["access_token"]
             self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
-            logger.info(
-                f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}"
-            )
+            logger.info(f"accessy session token refreshed")
 
         if not self._organization_id:
             data = request(
@@ -508,12 +542,13 @@ class AccessySession:
                     logger.warning("API key has several memberships. This is probably an error...")
 
             self._organization_id = data[0]["organizationId"]
-            logger.info(f"fetched accessy organization_id {self._organization_id}")
 
-    def _get(self, path: str, err_msg: str | None = None) -> Any:
+    def _get(self, path: str, err_msg: str | None = None, accepted_error_codes: list[int] | None = None) -> Any:
         self.__ensure_token()
         if self.session_token:
-            return request("get", path, token=self.session_token, err_msg=err_msg)
+            return request(
+                "get", path, token=self.session_token, err_msg=err_msg, accepted_error_codes=accepted_error_codes
+            )
         logger.info(f"NO ACCESSY SESSION TOKEN (ID or CLIENT not configured), skipping get from {path=}")
         return {}
 
@@ -598,7 +633,7 @@ class AccessySession:
         ]
 
     def _get_users_in_access_group(self, access_group_id: UUID) -> list[AccessyUserMembership]:
-        """Get all user ID:s in a specific access group"""
+        """Get each membership for a specific group"""
         return [
             AccessyUserMembership.from_dict(d)
             for d in self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
@@ -609,12 +644,6 @@ class AccessySession:
         return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/access-permission-group")
         # {"items": [{"id":<uuid>, "name":<string>, "description":<string>, constraints: <object>, childConstraints: <bool>}],"totalItems":2,"pageSize":25,"pageNumber":0,"totalPages":1}
 
-    def _get_membership_ids_in_group(self, group_id: UUID) -> list[UUID]:
-        """Get each membership for a specific group"""
-        return [
-            d["id"] for d in self._get_json_paginated(f"/asset/admin/access-permission-group/{group_id}/membership")
-        ]
-
     def _get_group_description(self, group_id: UUID) -> str:
         """Get a description for a group ID"""
         name = self._get(f"/asset/admin/access-permission-group/{group_id}")["name"]
@@ -624,7 +653,7 @@ class AccessySession:
     def _user_id_to_accessy_member(self, user_id: UUID) -> AccessyMember | None:
         """Convert an Accessy User ID to an AccessyMember object"""
 
-        APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
+        APPLICATION_PHONE_NUMBER = "APPLICATION_PHONE"  # Sentinel phone number for applications
 
         def fill_user_details(user: AccessyMember) -> None:
             data = self.get_user_details(user_id)
@@ -673,15 +702,22 @@ class AccessySession:
         self, phone_number: MSISDN, users_in_org: list[dict] | None = None
     ) -> Union[None, AccessyMember]:
         """Get a AccessyMember from a phone number (if in org). Groups are not set."""
-        if users_in_org is None:
-            users_in_org = self._get_users_org()
-
-        for item in users_in_org:
-            if item.get("msisdn", None) == phone_number:
-                user_id = item["id"]
-                return self._user_id_to_accessy_member(user_id)
-        else:
-            return None
+        encoded_phone = quote_plus(phone_number)
+        try:
+            membership = AccessyUserMembership.from_dict(
+                self._get(
+                    f"/asset/application/organization/{self.organization_id()}/membership/find-by-msisdn?msisdn={encoded_phone}",
+                    accepted_error_codes=[404],
+                )
+            )
+            member = self._user_id_to_accessy_member(membership.userId)
+            if member is not None:
+                member.membership_id = membership.id
+            return member
+        except AccessyError as e:
+            if e.status_code == 404:
+                return None
+            raise
 
     def list_webhooks(self) -> list[AccessyWebhook]:
         hooks = self._get(f"/subscription/{self.organization_id()}/webhook")
@@ -837,6 +873,27 @@ accessy_session = AccessySession() if AccessySession.is_env_configured() else No
 
 STATUS_OK = 0
 ERROR_NOT_CONFIGURED = 1
+
+
+def initialize_accessy() -> None:
+    register_accessy_webhook()
+    if accessy_session is not None:
+        gevent.spawn(lambda: accessy_background_task(accessy_session))
+
+
+def accessy_background_task(accessy_session: AccessySession) -> None:
+    # Sleep a random amount of time, to avoid different workers being too correlated in when they run
+    sleep(random() * 30)
+    while True:
+        try:
+            if (
+                datetime.now() + (PENDING_INVITATIONS_CACHE_DURATION / 2)
+                > accessy_session._pending_invitations_cache_expires_at
+            ):
+                accessy_session.refresh_pending_invitations()
+        except Exception as e:
+            logger.error(f"Error in accessy background task: {e}")
+        sleep(5 * 60)  # Run every 5 minutes
 
 
 def register_accessy_webhook() -> bool:
