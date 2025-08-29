@@ -321,7 +321,10 @@ $im-no-media-expressions: ("screen", "portrait", "landscape") !default;
 ///
 @function get-expression-value($expression, $operator) {
     $operator-index: string.index($expression, $operator);
-    $value: string.slice($expression, $operator-index + string.length($operator));
+    $value: string.slice(
+        $expression,
+        $operator-index + string.length($operator)
+    );
 
     @if map.has-key($breakpoints, $value) {
         $value: map.get($breakpoints, $value);
@@ -441,7 +444,8 @@ $im-no-media-expressions: ("screen", "portrait", "landscape") !default;
     @for $i from 1 through string.length($value) {
         $character: string.slice($value, $i, $i);
 
-        @if not(list.index(map.keys($numbers), $character) or $character == ".") {
+        @if not(list.index(map.keys($numbers), $character) or $character == ".")
+        {
             @return to-length(
                 if($minus, -$result, $result),
                 string.slice($value, $i)

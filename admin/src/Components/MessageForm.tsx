@@ -196,11 +196,7 @@ const MessageForm = ({
                 </div>
             )}
 
-            <TextInput
-                model={message}
-                name="subject"
-                title="Ärende"
-            />
+            <TextInput model={message} name="subject" title="Ärende" />
             <Textarea
                 model={message}
                 name="body"
