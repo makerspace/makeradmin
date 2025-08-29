@@ -15,6 +15,7 @@ import {
     ToPayPreview,
     createPaymentMethod,
     createStripeCardInput,
+    initializeStripe,
     pay,
 } from "./payment_common";
 import { translateUnit } from "./translations";
@@ -345,6 +346,10 @@ export async function activateSubscription(
     const currentMemberships: SubscriptionType[] = [];
     if (membership.membership_active) currentMemberships.push("membership");
     if (membership.labaccess_active) currentMemberships.push("labaccess");
+
+    if (initializeStripe() === null) {
+        return null;
+    }
 
     const stripe = createStripeCardInput();
 

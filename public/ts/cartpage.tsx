@@ -14,8 +14,8 @@ import {
     StripeCardInput,
     createStripeCardInput,
     initializeStripe,
+    isStripeConfigured,
     pay,
-    stripe,
 } from "./payment_common";
 import { Sidebar } from "./sidebar";
 declare var UIkit: any;
@@ -131,6 +131,16 @@ const PaymentButton = ({
     }
 
     const [inProgress, setInProgress] = useState(false);
+
+    if (!isStripeConfigured()) {
+        return (
+            <p>
+                Stripe is not configured. Please contact the site administrator.
+            </p>
+        );
+    }
+
+    const stripe = initializeStripe()!;
     const paymentConfig = pay_config();
     const element = useMemo(() => createStripeCardInput(), []);
     const { t } = useTranslation("payment");

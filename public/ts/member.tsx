@@ -28,6 +28,7 @@ import {
     RelevantProducts,
     extractRelevantProducts,
     initializeStripe,
+    isStripeConfigured,
 } from "./payment_common";
 import { Sidebar } from "./sidebar";
 import {
@@ -1244,7 +1245,7 @@ function MemberPage({
                                 productData={productData}
                                 pending_labaccess_days={pending_labaccess_days}
                             />
-                            <Billing />
+                            {isStripeConfigured() && <Billing />}
                         </>
                     ) : (
                         <>
@@ -1283,7 +1284,7 @@ function MemberPage({
 
 common.documentLoaded().then(() => {
     common.addSidebarListeners();
-    initializeStripe();
+    if (isStripeConfigured()) initializeStripe();
 
     const apiBasePath = window.apiBasePath;
     const root = document.querySelector("#root") as HTMLElement;

@@ -15,34 +15,44 @@ import { UnitNames } from "./translations";
 
 declare var UIkit: any;
 
-export var stripe: stripe.Stripe;
+export var stripe: stripe.Stripe | null = null;
 var card: stripe.elements.Element;
 var spinner: any;
 var payButton: HTMLInputElement;
 var errorElement: any;
 
-export function initializeStripe() {
-    // Create a Stripe client.
-    if (!window.stripeKey) {
-        UIkit.modal.alert(
-            jsx_to_string(
-                <>
-                    <h2>Stripe configuration missing</h2>
-                    <p>You need to set the Stripe keys in your .env file</p>
-                </>,
-            ),
-            {
-                timeout: 0,
-                status: "danger",
-            },
-        );
-        return; // Exit early since otherwise the call below will crash.
-    }
+export function isStripeConfigured() {
+    return !!window.stripeKey;
+}
 
-    stripe = Stripe(window.stripeKey);
+export function initializeStripe(): stripe.Stripe | null {
+    if (stripe == null) {
+        // Create a Stripe client.
+        if (!isStripeConfigured()) {
+            UIkit.modal.alert(
+                jsx_to_string(
+                    <>
+                        <h2>Stripe configuration missing</h2>
+                        <p>You need to set the Stripe keys in your .env file</p>
+                    </>,
+                ),
+                {
+                    timeout: 0,
+                    status: "danger",
+                },
+            );
+            return null; // Exit early since otherwise the call below will crash.
+        }
+
+        stripe = Stripe(window.stripeKey);
+    }
+    return stripe;
 }
 
 export function mountStripe() {
+    const stripe = initializeStripe();
+    if (!stripe) return;
+
     // Create an instance of Elements.
     const elements = stripe.elements({ locale: "sv" });
     // Custom styling can be passed to options when creating an Element.
@@ -368,6 +378,9 @@ export const StripeCardInput = ({
 };
 
 export const createStripeCardInput = () => {
+    const stripe = initializeStripe();
+    if (!stripe) throw new Error("Stripe not initialized");
+
     // Create an instance of Elements.
     const elements = stripe.elements({ locale: "sv" });
     // Custom styling can be passed to options when creating an Element.
@@ -583,6 +596,9 @@ export async function createPaymentMethod(
     element: stripe.elements.Element,
     memberInfo: member_t,
 ): Promise<stripe.paymentMethod.PaymentMethod | null> {
+    const stripe = initializeStripe();
+    if (!stripe) return null;
+
     const result = await stripe.createPaymentMethod("card", element, {
         billing_details: {
             name: `${memberInfo.firstname} ${memberInfo.lastname}`,
@@ -642,6 +658,9 @@ export async function handleStripeSetupIntent<
     T extends { setup_intent_id: string | null },
     R extends SetupIntentResponse,
 >(endpoint: string, data: T): Promise<R> {
+    const stripe = initializeStripe();
+    if (stripe == null) throw new Error("Stripe not initialized");
+
     while (true) {
         let res: ServerResponse<R>;
         try {
@@ -696,6 +715,9 @@ export async function negotiatePayment<
     data: T,
     options: { loginToken?: string } = {},
 ): Promise<R> {
+    const stripe = initializeStripe();
+    if (stripe == null) throw new Error("Stripe not initialized");
+
     while (true) {
         let res: ServerResponse<R>;
         try {
