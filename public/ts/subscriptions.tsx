@@ -348,7 +348,7 @@ export async function activateSubscription(
     if (membership.labaccess_active) currentMemberships.push("labaccess");
 
     if (initializeStripe() === null) {
-        return null;
+        return;
     }
 
     const stripe = createStripeCardInput();
