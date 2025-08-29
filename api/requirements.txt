@@ -3,6 +3,7 @@ flask
 flask_cors
 sqlalchemy~=2.0.0
 gunicorn
+gunicorn[gevent]
 rocky>=1,<2
 PyMySQL
 requests
