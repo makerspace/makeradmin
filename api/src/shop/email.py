@@ -9,7 +9,7 @@ from service.util import date_to_str
 from shop.models import Transaction
 
 
-def send_membership_updated_email(member_id: int, extended_days: int, end_date: date) -> None:
+def send_membership_extended_email(member_id: int, extended_days: int, end_date: date) -> None:
     member = db_session.get(Member, member_id)
 
     send_message(

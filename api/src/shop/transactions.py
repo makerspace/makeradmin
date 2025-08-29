@@ -31,7 +31,7 @@ from sqlalchemy.sql import func
 
 from shop.email import (
     send_labaccess_extended_email,
-    send_membership_updated_email,
+    send_membership_extended_email,
     send_new_member_email,
     send_receipt_email,
 )
@@ -51,6 +51,12 @@ from shop.stripe_util import convert_to_stripe_amount
 
 # If false, labaccess is synced to accessy once per week
 LABACCESS_SHIPS_IMMEDIATELY_ON_PURCHASE = True
+
+# If true, disables sending the first email about a member's membership being extended.
+# This is to avoid information overload in a new member. They will already
+# get the welcome email, and that one's much more important that they read.
+DISABLE_FIRST_BASE_MEMBERSHIP_EXTENSION_EMAIL = True
+DISABLE_FIRST_LABACCESS_EXTENSION_EMAIL = True
 
 logger = getLogger("makeradmin")
 
@@ -203,6 +209,9 @@ def ship_add_labaccess_action(
         )
         return
 
+    # Check if the member has ever had labaccess before
+    is_first_extension_time = not any(span.type == Span.LABACCESS for span in transaction.member.spans)
+
     assert transaction.created_at is not None
     earliest_start_date = max(current_time, transaction.created_at.astimezone(timezone.utc))
     labaccess_end = add_membership_days(
@@ -222,7 +231,10 @@ def ship_add_labaccess_action(
     # Note: passing earliest_start_date here is important during tests which use a simulated time
     activate_paused_labaccess_subscription(transaction.member_id, earliest_start_date)
     complete_pending_action(action)
-    send_labaccess_extended_email(transaction.member_id, days_to_add, labaccess_end)
+
+    if not (DISABLE_FIRST_BASE_MEMBERSHIP_EXTENSION_EMAIL and is_first_extension_time):
+        send_labaccess_extended_email(transaction.member_id, days_to_add, labaccess_end)
+
     if not skip_ensure_accessy:
         ensure_accessy_labaccess(member_id=transaction.member_id)
 
@@ -232,6 +244,9 @@ def ship_add_membership_action(action: TransactionAction, transaction: Transacti
     assert days_to_add is not None
     assert transaction.created_at is not None
     assert transaction.member_id is not None, "Trying to ship membership action for a transaction without a member_id"
+
+    # Check if the member has ever had membership before
+    is_first_extension_time = not any(span.type == Span.MEMBERSHIP for span in transaction.member.spans)
 
     membership_end = add_membership_days(
         transaction.member_id,
@@ -245,7 +260,9 @@ def ship_add_membership_action(action: TransactionAction, transaction: Transacti
     assert membership_end
 
     complete_pending_action(action)
-    send_membership_updated_email(transaction.member_id, days_to_add, membership_end)
+
+    if not (DISABLE_FIRST_BASE_MEMBERSHIP_EXTENSION_EMAIL and is_first_extension_time):
+        send_membership_extended_email(transaction.member_id, days_to_add, membership_end)
 
 
 def send_price_level_email(member: Member) -> None:
