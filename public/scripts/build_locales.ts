@@ -190,13 +190,23 @@ for (const locale of locales) {
     output.push(parseLocale(locale, schema));
 }
 
-fs.rmSync(outputPath, { recursive: true, force: true });
-fs.mkdirSync(outputPath);
+if (!fs.existsSync(outputPath)) {
+    fs.mkdirSync(outputPath, { recursive: true });
+} else {
+    // Keep directory to preserve permissions
+    for (const file of fs.readdirSync(outputPath)) {
+        fs.rmSync(path.join(outputPath, file), {
+            recursive: true,
+            force: true,
+        });
+    }
+}
 const exportedLocales: [string, string][] = [];
 for (const o of output) {
     const p = `${outputPath}/${o.name}.json`;
     exportedLocales.push([o.name, p]);
     fs.writeFileSync(p, JSON.stringify(o.merged, null, 4) + "\n");
+    fs.chmodSync(p, 0o666);
 }
 fs.writeFileSync(
     outputPath + "/DO_NOT_EDIT.md",
@@ -299,3 +309,7 @@ fs.writeFileSync(localeTypeDefinitionOutput, t + "\n" + t2);
 
 // Invoke prettier
 execSync(`npx prettier --write ${localeTypeDefinitionOutput}`);
+
+// Make file world writable to avoid permission issues
+// where git outside the docker container cannot access it.
+fs.chmodSync(localeTypeDefinitionOutput, 0o666);
