@@ -53,6 +53,7 @@ from shop.stripe_constants import MakerspaceMetadataKeys as MSMetaKeys
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.stripe_product_price import get_and_sync_stripe_product_and_prices
+from shop.stripe_setup import are_stripe_keys_set
 from shop.stripe_util import are_metadata_dicts_equivalent, convert_from_stripe_amount, retry
 
 
@@ -501,6 +502,9 @@ def list_subscriptions(member_id: int) -> List[SubscriptionInfo]:
     member = db_session.get(Member, member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
+
+    if not are_stripe_keys_set():
+        return []
 
     stripe_customer = get_and_sync_stripe_customer(member, test_clock=None)
     if stripe_customer is None:
