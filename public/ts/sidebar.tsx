@@ -114,6 +114,9 @@ export const Sidebar = ({
                     <NavItem url="/shop/member/courses" icon="star">
                         {t("courses")}
                     </NavItem>
+                    <NavItem url="http://wiki.makerspace.se" icon="world">
+                        {t("wiki")}
+                    </NavItem>
                     <NavItem url="/shop/member/licenses" icon="tag">
                         {t("licenses")}
                     </NavItem>
