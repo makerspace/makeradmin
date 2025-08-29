@@ -3,6 +3,8 @@ const { merge } = require("webpack-merge");
 const webpack = require("webpack");
 
 module.exports = (env, args) => {
+    watch_or_server_mode = !!env["WEBPACK_WATCH"] || !!env["WEBPACK_SERVE"];
+
     const commonSettings = {
         context: path.resolve(__dirname),
         entry: {
@@ -47,6 +49,8 @@ module.exports = (env, args) => {
         },
 
         plugins: [],
+
+        stats: watch_or_server_mode ? "errors-warnings" : "normal",
     };
 
     if (args.mode === "development") {

@@ -3,6 +3,7 @@ const { merge } = require("webpack-merge");
 const webpack = require("webpack");
 
 module.exports = (env, args) => {
+    watch_or_server_mode = !!env["WEBPACK_WATCH"] || !!env["WEBPACK_SERVE"];
     let src = path.resolve(__dirname, "src");
 
     // Get git info from command line
@@ -81,6 +82,8 @@ module.exports = (env, args) => {
                 __BUILD_DATE__: JSON.stringify(buildDate),
             }),
         ],
+
+        stats: watch_or_server_mode ? "errors-warnings" : "normal",
     };
 
     if (args.mode === "development") {
