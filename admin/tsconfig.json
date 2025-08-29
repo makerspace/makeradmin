@@ -21,7 +21,7 @@
         "sourceMap": true,
         "moduleResolution": "node",
         "module": "esnext",
-        "jsx": "react",
+        "jsx": "react-jsx",
         "allowJs": true,
         // Treat files as modules even if it doesn't use import/export
         "moduleDetection": "auto",
