@@ -1,17 +1,14 @@
 services:
   db2:
-    image: mysql:8.0.33@sha256:ea68e51ffe9b96fef6076f1218af11301aeaf13c6201e0ec9aaef5791d5ddc5d
-    # The lumen library seems to use an older mysql client which is not able to connect if mysql uses the newer caching_sha2_password authentication plugin.
-    # Therefore we need to override the mysql starting command to set a config option to use the older password authentication plugin.
-    # We need to call the entrypoint script manually because that one will also initialize the database, if one doesn't already exist.
-    command: bash -c "chmod -R 0777 /var/www/html/storage/logs && exec bash ./entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+    image: mysql:9.4.0-oraclelinux9@sha256:439bfb4044dc59ade76c4e5c4065c02e5ba4d4007db32c40ac58d55c03069916
+    command: --log_error_verbosity=2 # errors and warnings
     volumes:
       - dbdata:/var/lib/mysql
       - ./data/mysql_conf:/etc/mysql/conf.d
       - ./logs/mysql:/var/www/html/storage/logs
     environment:
-      # Note: the config only seems to be updated when the container is initially created.
-      # If the db config needs to be changed then the db image and volume needs to be destroyed first.
+      # Note: the config is only updated when the container is initially created.
+      # If the db config needs to be changed then the db volume needs to be destroyed first.
       MYSQL_DATABASE: "${MYSQL_DB}"
       MYSQL_ROOT_HOST: "db2"
       MYSQL_USER: "${MYSQL_USER}"
