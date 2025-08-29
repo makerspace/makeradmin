@@ -5,8 +5,6 @@ from dotenv import dotenv_values, find_dotenv
 from rocky.config import Config, Dict, Env
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from service.logging import logger
-
 default = Dict(
     name="default",
     src=dict(
@@ -34,6 +32,7 @@ default = Dict(
         ACCESSY_LABACCESS_GROUP=None,
         ACCESSY_SPECIAL_LABACCESS=None,
         ACCESSY_DO_MODIFY="false",  # Do perform modify operations to Accessy, default is to log only, useful when developing.
+        LOG_DIR="logs",
     ),
 )
 env = Env()
@@ -46,7 +45,6 @@ if dot_env_filename:
     dotenv["name"] = dot_env_filename
     sources.append((".env file at " + dot_env_filename, dotenv))
 
-logger.info("Config sources: " + ", ".join(x[0] for x in sources))
 config = Config(*[x[1] for x in sources], default, log_level=NOTSET)
 
 

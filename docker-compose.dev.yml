@@ -3,12 +3,12 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - logs:/var/www/html/storage/logs
+      - ./logs/db:/var/www/html/storage/logs
 
   api:
     volumes:
       - ./api/src:/work/src
-      - logs:/work/logs
+      - ./logs/api:/work/logs
     ports:
       - "8010:80"
     environment:
@@ -18,12 +18,12 @@ services:
   email-dispatcher:
     volumes:
       - ./api/src:/work/src
-      - email_dispatcher_logs:/work/logs
+      - ./logs/email_dispatcher:/work/logs
 
   accessy-syncer:
     volumes:
       - ./api/src:/work/src
-      - accessy_syncer_logs:/work/logs
+      - ./logs/accessy_syncer:/work/logs
 
   public:
     build:
@@ -46,8 +46,3 @@ services:
     volumes:
       - ./admin/src:/work/src
       - ./admin/dist:/work/dist
-
-volumes:
-  logs:
-  accessy_syncer_logs:
-  email_dispatcher_logs:
