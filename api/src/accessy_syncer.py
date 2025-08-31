@@ -1,6 +1,9 @@
+import signal
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
+from threading import Event
+from typing import Any
 
 import schedule
 from multiaccessy.sync import sync
@@ -15,8 +18,18 @@ COMMAND_SCHEDULED = "sheduled"
 COMMAND_SHIP = "ship"
 COMMAND_SYNC = "sync"
 
+exit = Event()
 
-def scheduled_ship():
+
+def handle_signal(signum: int, frame: Any) -> None:
+    exit.set()
+
+
+for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+    signal.signal(sig, handle_signal)
+
+
+def scheduled_ship() -> None:
     logger.info("shipping orders")
     try:
         ship_orders()
@@ -28,7 +41,7 @@ def scheduled_ship():
     logger.info("finished shipping orders")
 
 
-def scheduled_sync():
+def scheduled_sync() -> None:
     logger.info("syncing accessy")
     try:
         sync()
@@ -40,12 +53,12 @@ def scheduled_sync():
     logger.info("finished syncing accessy")
 
 
-def daily_job():
+def daily_job() -> None:
     scheduled_ship()
     scheduled_sync()
 
 
-def main():
+def main() -> None:
     with log_exception(status=1), stoppable():
         parser = ArgumentParser(
             description="Sync accessy and ship labaccess orders.", formatter_class=ArgumentDefaultsHelpFormatter
@@ -77,9 +90,9 @@ def main():
             case x if x == COMMAND_SCHEDULED:
                 schedule.every().day.at("04:00").do(daily_job)
 
-                while True:
-                    time.sleep(1)
+                while not exit.is_set():
                     schedule.run_pending()
+                    exit.wait(5)
 
             case _:
                 raise Exception(f"unknown command {args.command}")

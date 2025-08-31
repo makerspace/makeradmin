@@ -1,8 +1,10 @@
+import signal
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime, timedelta, timezone
+from threading import Event
 from time import sleep
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import quote_plus
 
 import requests
@@ -23,6 +25,16 @@ from shop.transactions import pending_action_value_sum
 from sqlalchemy import func, select
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
+
+exit = Event()
+
+
+def handle_signal(signum: int, frame: Any) -> None:
+    exit.set()
+
+
+for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+    signal.signal(sig, handle_signal)
 
 LABACCESS_REMINDER_DAYS_BEFORE = 20
 LABACCESS_REMINDER_GRACE_PERIOD = 28
@@ -381,8 +393,10 @@ if __name__ == "__main__":
         to_override = config.get("MAILGUN_TO_OVERRIDE")
         last_reminder_check = 0.0
 
-        while True:
-            sleep(args.sleep)
+        # Don't send emails immediately, to avoid clobbering up the logs
+        exit.wait(2)
+
+        while not exit.is_set():
             try:
                 if time.time() - last_reminder_check > 60 * 60:
                     # These checks are kinda slow (takes a few hundred ms)
@@ -400,3 +414,5 @@ if __name__ == "__main__":
                 logger.warning(f"failed to do db query. ignoring: {e}")
             finally:
                 db_session.remove()
+
+            exit.wait(args.sleep)

@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
 
-echo "starting emaildispather"
-python3 ./dispatch_emails.py
+echo "starting emaildispatcher"
+exec python3 ./dispatch_emails.py
