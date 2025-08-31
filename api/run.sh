@@ -10,6 +10,11 @@ if [ "$DEV_RUN" = "true" ]; then
     GUNICORN_WORKERS="2"
 fi
 
+if [ "$TEST" = "true" ]; then
+    echo "running in test mode"
+    GUNICORN_WORKERS="2"
+fi
+
 echo "initializing and migrating db"
 python3 ./init_db.py
 
