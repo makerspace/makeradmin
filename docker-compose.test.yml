@@ -6,11 +6,10 @@ services:
       - "3307:3306"
 
   api:
-    volumes:
-      - logs:/work/logs
     environment:
       TEST: "true"
       TEST_SERVICE_TOKEN:
+      LOG_DIR: "" # Disable persistent logs for tests
 
   public:
     environment:
@@ -76,6 +75,7 @@ services:
       ACCESSY_SPECIAL_LABACCESS_GROUP: "00000000-0000-0000-0000-000000000001"
       PYTEST_ADDOPTS:
       WAIT_FOR_DEBUGGER:
+      LOG_DIR: "" # Disable persistent logs for tests
 
 volumes:
   logs:
