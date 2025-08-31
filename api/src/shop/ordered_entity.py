@@ -13,21 +13,17 @@ class OrderedEntity(Entity):
     can solve it with a trigger or like this using an explicit mysql lock.
     """
 
-    def create(self, data=None, commit=True):
+    def create(self, data: dict | None = None, commit: bool = True) -> dict:
         if data is None:
             data = request.json or {}
 
-        (status,) = db_session.execute(text("SELECT GET_LOCK('display_order', 20)")).fetchone()
-        if not status:
-            raise InternalServerError("Failed to create, try again later.", log="failed to aquire display_order lock")
+        # Lock the rows for update to prevent race conditions
+        max_display_order = db_session.query(func.max(self.model.display_order)).with_for_update().scalar()
+        if data.get("display_order") is None:
+            data["display_order"] = (max_display_order or 0) + 1
         try:
-            if data.get("display_order") is None:
-                data["display_order"] = (db_session.query(func.max(self.model.display_order)).scalar() or 0) + 1
             obj = self.to_obj(self._create_internal(data, commit=commit))
             return obj
         except Exception:
-            # Rollback session if anything went wrong or we can't release the lock.
             db_session.rollback()
             raise
-        finally:
-            db_session.execute(text("DO RELEASE_LOCK('display_order')"))
