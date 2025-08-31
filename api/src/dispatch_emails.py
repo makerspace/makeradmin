@@ -388,6 +388,9 @@ if __name__ == "__main__":
         logger.info(f"checking for emails to send every {args.sleep} seconds, limit is {args.limit}")
 
         key = config.get("MAILGUN_KEY", log_value=False)
+        if key is not None and key.strip() == "":
+            key = None
+
         domain = config.get("MAILGUN_DOMAIN")
         sender = config.get("MAILGUN_FROM")
         to_override = config.get("MAILGUN_TO_OVERRIDE")
