@@ -39,9 +39,9 @@ basicConfig(
 for handler in logging.root.handlers:
     handler.setFormatter(CustomFormatter())
 
-# Parent dir because the docker container runs with 'src' as the work directory
 logs_dir = config.get("LOG_DIR")
 if logs_dir:
+    # Parent dir because the docker container runs with 'src' as the work directory
     log_dir = os.path.join("..", logs_dir)
     if not os.path.isdir(log_dir):
         print(f"Expected logs directory ({os.path.abspath(log_dir)}) to exist")

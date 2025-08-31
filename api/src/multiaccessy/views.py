@@ -5,6 +5,7 @@ from typing import Any, Optional, Tuple, cast
 
 from dataclasses_json import DataClassJsonMixin
 from flask import Response, request
+from redis_cache import redis_connection
 from service.api_definition import GET, GROUP_VIEW, PERMISSION_MANAGE, POST, PUBLIC
 from service.db import db_session
 from service.error import UnprocessableEntity
@@ -14,6 +15,7 @@ from multiaccessy.models import PhysicalAccessEntry
 
 from . import sync as syncer
 from .accessy import (
+    PENDING_INVITATIONS_CACHE_KEY,
     UUID,
     AccessyAsset,
     AccessyAssetPublication,
@@ -219,8 +221,9 @@ def handle_event(event: AccessyWebhookEvent) -> None:
         db_session.commit()
 
     if isinstance(event, AccessyWebhookEventMembership_Created):
-        # Expire the cache if an invitation was likely used
-        accessy_session._pending_invitations_cache_expires_at = datetime.min
+        # Expire the cache if an invitation was likely used.
+        # TODO: Not quite sure if this happens when an invitation is created or accepted, though.
+        redis_connection.delete(PENDING_INVITATIONS_CACHE_KEY)
 
 
 @service.route("/event", method=POST, permission=PUBLIC)

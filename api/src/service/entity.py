@@ -202,7 +202,7 @@ class Entity:
 
         return {k: self.cols_to_model[k](v) for k, v in obj.items() if k in self.cols_to_model}
 
-    def to_obj(self, entity):
+    def to_obj(self, entity) -> dict:
         """Convert model to json compatible object."""
         return {k: conv(getattr(entity, k, None)) for k, conv in self.cols_to_obj.items()}
 

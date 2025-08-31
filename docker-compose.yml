@@ -26,6 +26,7 @@ services:
       - ./data/licenses:/work/data/licenses
     depends_on:
       - db2
+      - redis
     networks:
       - makeradmin
     environment:
@@ -58,7 +59,16 @@ services:
       FIRSTRUN_AUTO_ADMIN_EMAIL:
       FIRSTRUN_AUTO_ADMIN_PASSWORD:
       MAKERSPACE_LOCAL_TIMEZONE:
-
+  redis:
+    # Use redis as a cross-worker cache
+    # This instance does NOT persist any data if the container is rebuilt.
+    # Actually persistent data should be stored in the database.
+    # This is used for things like accessy session keys and various accessy caches (cause accessy is slooow)
+    image: redis:alpine@sha256:987c376c727652f99625c7d205a1cba3cb2c53b92b0b62aade2bd48ee1593232
+    command:
+      - "--loglevel warning"
+    networks:
+      - makeradmin
   email-dispatcher:
     image: makeradmin/api:1.0
     build:

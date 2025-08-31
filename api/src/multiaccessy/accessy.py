@@ -9,16 +9,16 @@ from time import sleep
 from typing import Any, Callable, List, Optional, Tuple, Union
 from urllib.parse import quote_plus, urlparse
 
-import gevent
-import gevent.lock
 import requests
 from dataclasses_json import DataClassJsonMixin
 from flask import Response
 from membership.models import Member
 from NamedAtomicLock import NamedAtomicLock
+from redis_cache import redis_connection
 from service.config import config
 from service.db import db_session
 from service.entity import fromisoformat
+from service.error import Forbidden
 
 logger = getLogger("accessy")
 
@@ -45,6 +45,16 @@ ACCESSY_CLIENT_ID: str = config.get("ACCESSY_CLIENT_ID")
 ACCESSY_LABACCESS_GROUP: str = config.get("ACCESSY_LABACCESS_GROUP")
 ACCESSY_SPECIAL_LABACCESS_GROUP: str = config.get("ACCESSY_SPECIAL_LABACCESS_GROUP")
 ACCESSY_DO_MODIFY: bool = config.get("ACCESSY_DO_MODIFY", default="false").lower() == "true"
+
+# This mapping should be stable.
+# An accessy user will not suddenly become associated with another makerspace member.
+ACCESSY_ID_TO_MEMBER_ID_CACHE_DURATION = timedelta(days=30)
+# This mapping should be stable.
+ACCESSY_ASSET_ID_TO_PUBLICATION_CACHE_DURATION = timedelta(hours=24)
+PENDING_INVITATIONS_CACHE_DURATION = timedelta(hours=3)
+PENDING_INVITATIONS_CACHE_KEY = "accessy_pending_invitations"
+
+ACCESSY_IMAGE_CACHE_DURATION = timedelta(hours=24)
 
 
 def request(
@@ -79,10 +89,10 @@ def request(
             continue
 
         if not response.ok:
+            msg = f"got an error in the response for {response.request.path_url}, {response.text=}, {response.status_code=}: {err_msg or ''}"
             if accepted_error_codes and response.status_code in accepted_error_codes:
                 pass
             else:
-                msg = f"got an error in the response for {response.request.path_url}, {response.text=}, {response.status_code=}: {err_msg or ''}"
                 logger.error(msg)
             raise AccessyError(msg, response.status_code)
 
@@ -276,37 +286,11 @@ class AccessyPendingInvitation(DataClassJsonMixin):
     status: str
 
 
-PENDING_INVITATIONS_CACHE_DURATION = timedelta(hours=3)
-
-
-def synchronized(func: Callable) -> Callable:
-    """Use a semaphore to avoid multiple gevent threads from running
-    this function at the same time.
-
-    Note: multiple gunicorn workers may still run it at the same time.
-    """
-    mutex = gevent.lock.BoundedSemaphore()
-
-    def inner(*args: Any, **kwargs: Any) -> Any:
-        mutex.acquire()
-        try:
-            return func(*args, **kwargs)
-        finally:
-            mutex.release()
-
-    return inner
-
-
 class AccessySession:
     def __init__(self) -> None:
-        self.session_token: str | None = None
         self.session_token_token_expires_at: datetime | None = None
         self._organization_id: str | None = None
         self._all_webhooks: Optional[List[AccessyWebhook]] = None
-        self._accessy_id_to_member_id_cache: dict[str, int] = {}
-        self._accessy_asset_id_to_publication_cache: dict[UUID, AccessyAssetPublication] = {}
-        self._pending_invitations_cache: list[AccessyPendingInvitation] = list()
-        self._pending_invitations_cache_expires_at: datetime = datetime.min
 
     #################
     # Class methods
@@ -331,28 +315,48 @@ class AccessySession:
     #################
 
     def get_image_blob(self, image_id: str) -> Response:
-        self.__ensure_token()
-        r = requests.request(
-            "GET", ACCESSY_URL + f"/fs/download/{image_id}", headers={"Authorization": f"Bearer {self.session_token}"}
-        )
-        res = Response(r.content, headers=r.headers, status=r.status_code)
-        res.cache_control.max_age = 86400  # Cache for 1 day
-        res.cache_control.public = True  # Allow public caching
-        res.cache_control.immutable = True  # Response will not change
-        res.cache_control.no_cache = None  # Do not force revalidation
-        res.cache_control.no_store = False  # Allow caching
-        res.cache_control.must_revalidate = False  # Allow using cache if connection fails
+        token = self.__session_token()
+        if token is None:
+            raise Forbidden("Accessy session token is missing")
+
+        cache_key = f"accessy_image_blob:{image_id}"
+        cached_blob = redis_connection.get(cache_key)
+        if cached_blob is None:
+            r = requests.request(
+                "GET", ACCESSY_URL + f"/fs/download/{image_id}", headers={"Authorization": f"Bearer {token}"}
+            )
+            # Store image blob in redis cache
+            if r.status_code == 200 and r.content:
+                redis_connection.set(cache_key, r.content, ex=ACCESSY_IMAGE_CACHE_DURATION)
+
+            cached_blob = r.content
+
+        res = Response(cached_blob, status=200)
+        res.cache_control.max_age = redis_connection.ttl(
+            cache_key
+        )  # Allow browser to cache until the redis key expires
+        res.cache_control.public = True
+        res.cache_control.immutable = True
+        res.cache_control.no_cache = None
+        res.cache_control.no_store = False
+        res.cache_control.must_revalidate = False
         return res
 
     def get_member_id_from_accessy_id(self, accessy_id: UUID) -> Optional[int]:
-        if accessy_id in self._accessy_id_to_member_id_cache:
-            return self._accessy_id_to_member_id_cache[accessy_id]
+        cache_key = f"accessy_id_to_member_id_cache:{accessy_id}"
+        cached = redis_connection.get(cache_key)
+        if cached is not None:
+            return int(cached)
 
         user_details = self.get_user_details(accessy_id)
 
         member = db_session.query(Member).filter(Member.phone == user_details.msisdn).first()
         if member is not None:
-            self._accessy_id_to_member_id_cache[accessy_id] = member.member_id
+            redis_connection.set(
+                cache_key,
+                member.member_id,
+                ex=ACCESSY_ID_TO_MEMBER_ID_CACHE_DURATION,
+            )
             return member.member_id
         else:
             return None
@@ -447,7 +451,7 @@ class AccessySession:
         self, phone_numbers: Iterable[MSISDN], access_group_ids: Iterable[UUID] = [], message_to_user: str = ""
     ) -> None:
         """Invite a list of phone numbers to a list of groups"""
-        self.session_token_token_expires_at = datetime.min  # Force refresh
+        redis_connection.delete(PENDING_INVITATIONS_CACHE_KEY)  # Force refresh
         self.__post(
             f"/org/admin/organization/{self.organization_id()}/invitation",
             json=dict(
@@ -464,11 +468,14 @@ class AccessySession:
 
         # We use a cache, since pending invitations are accessed on the member page,
         # and we want to keep that responsive
-        if datetime.now() > self._pending_invitations_cache_expires_at:
-            self.refresh_pending_invitations()
+        cached = redis_connection.get(PENDING_INVITATIONS_CACHE_KEY)
+        if cached is not None:
+            all_pending_invitations = AccessyPendingInvitation.schema(many=True).loads(cached)
+        else:
+            all_pending_invitations = self.refresh_pending_invitations()
 
         pending_invitations = set()
-        for inv in self._pending_invitations_cache:
+        for inv in all_pending_invitations:
             recipient = inv.recipientMsisdn
             invitation_date = fromisoformat(inv.createdAt).date()
             is_pending = inv.status == "PENDING"
@@ -478,23 +485,27 @@ class AccessySession:
 
         return pending_invitations
 
-    @synchronized
-    def refresh_pending_invitations(self) -> None:
-        if self.has_authentication():
-            data = [
-                AccessyPendingInvitation.from_dict(x)
-                for x in self._get(f"/org/admin/organization/{self.organization_id()}/invitation")
-            ]
-        else:
-            data = []
+    def refresh_pending_invitations(self) -> List[AccessyPendingInvitation]:
+        if not self.has_authentication():
+            return []
 
-        self._pending_invitations_cache = data
-        self._pending_invitations_cache_expires_at = datetime.now() + PENDING_INVITATIONS_CACHE_DURATION
+        all_pending_invitations = [
+            AccessyPendingInvitation.from_dict(x)
+            for x in self._get(f"/org/admin/organization/{self.organization_id()}/invitation")
+        ]
+        redis_connection.set(
+            PENDING_INVITATIONS_CACHE_KEY,
+            AccessyPendingInvitation.schema(many=True).dumps(all_pending_invitations),
+            ex=PENDING_INVITATIONS_CACHE_DURATION,
+        )
+        logger.info(f"Refreshed pending invitations cache with {len(all_pending_invitations)} invitations")
+
+        return all_pending_invitations
 
     def organization_id(self) -> str:
         if self._organization_id:
             return self._organization_id
-        self.__ensure_token()
+        self.__ensure_organization_id()
         assert self._organization_id is not None
         return self._organization_id
 
@@ -502,17 +513,26 @@ class AccessySession:
     # Internal methods
     ################################################
 
-    @synchronized
-    def __ensure_token(self) -> None:
+    def __session_token(self) -> str | None:
         if not self.has_authentication():
-            return
+            return None
 
-        if (
-            not self.session_token
-            or self.session_token_token_expires_at is None
-            or datetime.now(timezone.utc).replace(tzinfo=None) > self.session_token_token_expires_at
-        ):
-            now = datetime.now(timezone.utc).replace(tzinfo=None)
+        cache_key = "accessy_session_token"
+        cached = redis_connection.get(cache_key)
+        if cached is not None:
+            return cached.decode("utf-8")
+
+        session_token_refresh_lock = NamedAtomicLock("makeradmin_accessy_session_token_refresh_lock", maxLockAge=60 * 5)
+        if not session_token_refresh_lock.acquire(15):
+            raise TimeoutError("Could not acquire lock to refresh accessy session token")
+
+        try:
+            # Check cache again after aquiring the lock
+            cached = redis_connection.get(cache_key)
+            if cached is not None:
+                logger.info("Got cached key after aquiring lock")
+                return cached.decode("utf-8")
+
             data = request(
                 "post",
                 "/auth/oauth/token",
@@ -524,38 +544,43 @@ class AccessySession:
                 },
             )
 
-            self.session_token = data["access_token"]
-            self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
+            token = data["access_token"]
+            assert isinstance(token, str)
+            redis_connection.set(cache_key, token, ex=timedelta(milliseconds=int(data["expires_in"]) - 10000))
             logger.info(f"accessy session token refreshed")
+            return token
+        finally:
+            session_token_refresh_lock.release()
 
-        if not self._organization_id:
-            data = request(
-                "get",
-                "/asset/user/organization-membership",
-                token=self.session_token,
-            )
+    def __ensure_organization_id(self) -> None:
+        if self._organization_id:
+            return
 
-            match len(data):
-                case 0:
-                    raise AccessyError("The API key does not have a corresponding organization membership")
-                case l if l > 1:
-                    logger.warning("API key has several memberships. This is probably an error...")
+        data = request(
+            "get",
+            "/asset/user/organization-membership",
+            token=self.__session_token(),
+        )
 
-            self._organization_id = data[0]["organizationId"]
+        match len(data):
+            case 0:
+                raise AccessyError("The API key does not have a corresponding organization membership")
+            case l if l > 1:
+                logger.warning("API key has several memberships. This is probably an error...")
+
+        self._organization_id = data[0]["organizationId"]
 
     def _get(self, path: str, err_msg: str | None = None, accepted_error_codes: list[int] | None = None) -> Any:
-        self.__ensure_token()
-        if self.session_token:
-            return request(
-                "get", path, token=self.session_token, err_msg=err_msg, accepted_error_codes=accepted_error_codes
-            )
+        token = self.__session_token()
+        if token:
+            return request("get", path, token=token, err_msg=err_msg, accepted_error_codes=accepted_error_codes)
         logger.info(f"NO ACCESSY SESSION TOKEN (ID or CLIENT not configured), skipping get from {path=}")
         return {}
 
     def __delete(self, path: str, err_msg: str | None = None, force_allow_modify: bool = False) -> Any:
-        self.__ensure_token()
-        if (ACCESSY_DO_MODIFY or force_allow_modify) and self.session_token:
-            return request("delete", path, token=self.session_token, err_msg=err_msg)
+        token = self.__session_token()
+        if (ACCESSY_DO_MODIFY or force_allow_modify) and token:
+            return request("delete", path, token=token, err_msg=err_msg)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping delete to {path=}")
 
     def __post(
@@ -565,17 +590,17 @@ class AccessySession:
         json: dict[str, Any] | DataClassJsonMixin | None = None,
         force_allow_modify: bool = False,
     ) -> Any:
-        self.__ensure_token()
-        if (ACCESSY_DO_MODIFY or force_allow_modify) and self.session_token:
-            return request("post", path, token=self.session_token, err_msg=err_msg, json=json)
+        token = self.__session_token()
+        if (ACCESSY_DO_MODIFY or force_allow_modify) and token:
+            return request("post", path, token=token, err_msg=err_msg, json=json)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping post to {path=}")
 
     def __put(
         self, path: str, err_msg: str | None = None, json: dict[str, Any] | DataClassJsonMixin | None = None
     ) -> Any:
-        self.__ensure_token()
-        if ACCESSY_DO_MODIFY and self.session_token:
-            return request("put", path, token=self.session_token, err_msg=err_msg, json=json)
+        token = self.__session_token()
+        if ACCESSY_DO_MODIFY and token:
+            return request("put", path, token=token, err_msg=err_msg, json=json)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping put to {path=}")
 
     def _get_json_paginated(self, url: str, msg: str | None = None) -> list[Any]:
@@ -789,12 +814,18 @@ class AccessySession:
 
     def get_asset_publication_from_asset_id(self, asset_id: UUID) -> AccessyAssetPublication:
         """Get the asset publication for a specific asset ID."""
-        if asset_id in self._accessy_asset_id_to_publication_cache:
-            return self._accessy_asset_id_to_publication_cache[asset_id]
+        cache_key = f"accessy_asset_id_to_publication:{asset_id}"
+        cached = redis_connection.get(cache_key)
+        if cached is not None:
+            return AccessyAssetPublication.from_json(cached)
 
         data = self._get(f"/asset/admin/organization/{self.organization_id()}/asset/{asset_id}/asset-publication")
         publication = AccessyAssetPublication.from_dict(data)
-        self._accessy_asset_id_to_publication_cache[asset_id] = publication
+        redis_connection.set(
+            cache_key,
+            AccessyAssetPublication.to_json(publication),
+            ex=ACCESSY_ASSET_ID_TO_PUBLICATION_CACHE_DURATION,
+        )
         return publication
 
     def get_asset_publications(self) -> list[AccessyAssetWithPublication]:
@@ -877,23 +908,6 @@ ERROR_NOT_CONFIGURED = 1
 
 def initialize_accessy() -> None:
     register_accessy_webhook()
-    if accessy_session is not None:
-        gevent.spawn(lambda: accessy_background_task(accessy_session))
-
-
-def accessy_background_task(accessy_session: AccessySession) -> None:
-    # Sleep a random amount of time, to avoid different workers being too correlated in when they run
-    sleep(random() * 30)
-    while True:
-        try:
-            if (
-                datetime.now() + (PENDING_INVITATIONS_CACHE_DURATION / 2)
-                > accessy_session._pending_invitations_cache_expires_at
-            ):
-                accessy_session.refresh_pending_invitations()
-        except Exception as e:
-            logger.error(f"Error in accessy background task: {e}")
-        sleep(5 * 60)  # Run every 5 minutes
 
 
 def register_accessy_webhook() -> bool:

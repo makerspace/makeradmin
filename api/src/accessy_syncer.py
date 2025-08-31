@@ -7,6 +7,7 @@ from threading import Event
 from typing import Any
 
 import schedule
+from multiaccessy.accessy import accessy_session
 from multiaccessy.sync import sync
 from rocky.process import log_exception, stoppable
 from service.config import get_mysql_config
@@ -60,6 +61,13 @@ def daily_job() -> None:
     scheduled_sync()
 
 
+def hourly_job() -> None:
+    if accessy_session is not None:
+        # Refresh the pending invitations cache regularly to avoid slowing down
+        # any user-facing pages that rely on it
+        accessy_session.refresh_pending_invitations()
+
+
 def main() -> None:
     with log_exception(status=1), stoppable():
         parser = ArgumentParser(
@@ -91,6 +99,7 @@ def main() -> None:
 
             case x if x == COMMAND_SCHEDULED:
                 schedule.every().day.at("04:00").do(daily_job)
+                schedule.every().hour.do(hourly_job)
 
                 while not exit.is_set():
                     schedule.run_pending()

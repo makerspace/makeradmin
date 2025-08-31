@@ -3,11 +3,11 @@ flask
 flask_cors
 sqlalchemy~=2.0.0
 gunicorn
-gunicorn[gevent]
 cryptography
 rocky>=1,<2
 PyMySQL
 requests
+redis
 python-dotenv
 bcrypt
 stripe==7.8.2
@@ -22,6 +22,7 @@ types-python-dateutil
 types-requests
 types-markdown
 types-PyMySQL
+types-redis
 markdown
 NamedAtomicLock
 dataclasses_json
