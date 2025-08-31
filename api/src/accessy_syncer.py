@@ -2,6 +2,7 @@ import signal
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
+from logging import getLogger
 from threading import Event
 from typing import Any
 
@@ -10,9 +11,10 @@ from multiaccessy.sync import sync
 from rocky.process import log_exception, stoppable
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session
-from service.logging import logger
 from shop.transactions import ship_orders
 from sqlalchemy.orm import sessionmaker
+
+logger = getLogger("accessy-syncer")
 
 COMMAND_SCHEDULED = "sheduled"
 COMMAND_SHIP = "ship"

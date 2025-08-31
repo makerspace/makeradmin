@@ -2,15 +2,17 @@ from dataclasses import dataclass, field
 from datetime import date as datetime_date
 from datetime import datetime, timedelta
 from enum import Enum
+from logging import getLogger
 from typing import Any, List, Literal, Optional, Sequence, Tuple, cast
 
 import sqlalchemy
 from dataclasses_json import DataClassJsonMixin, config
 from multiaccessy.models import PhysicalAccessEntry
 from service.db import db_session
-from service.logging import logger
 from service.util import date_to_str, format_datetime
 from sqlalchemy import ColumnElement, Date, distinct, func, select, text
+
+logger = getLogger("statistics")
 
 
 @dataclass

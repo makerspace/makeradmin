@@ -2,6 +2,7 @@ import signal
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime, timedelta, timezone
+from logging import getLogger
 from threading import Event
 from time import sleep
 from typing import Any, Optional
@@ -18,7 +19,6 @@ from quiz.views import QuizMemberStat, quiz_member_answer_stats
 from rocky.process import log_exception, stoppable
 from service.config import config, get_mysql_config, get_public_url
 from service.db import create_mysql_engine, db_session
-from service.logging import logger
 from shop.models import ProductAction
 from shop.shop_data import pending_actions
 from shop.transactions import pending_action_value_sum
@@ -26,6 +26,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
 
+logger = getLogger("email-dispatcher")
 exit = Event()
 
 

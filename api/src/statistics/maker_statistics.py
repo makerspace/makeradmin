@@ -3,6 +3,7 @@ import math
 import time
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
+from logging import getLogger
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, cast
 
 import sqlalchemy
@@ -11,11 +12,12 @@ from membership.membership import get_members_and_membership, get_membership_sum
 from membership.models import Member, Span
 from quiz.models import QuizAnswer, QuizQuestion, QuizQuestionOption
 from service.db import db_session
-from service.logging import logger
 from service.util import format_datetime
 from shop.entities import category_entity, product_entity
 from shop.models import Product, ProductCategory, Transaction, TransactionContent
 from sqlalchemy import ColumnElement, Date, func, select, text
+
+logger = getLogger("statistics")
 
 
 def spans_by_date(span_type: str) -> List[Tuple[str, int]]:

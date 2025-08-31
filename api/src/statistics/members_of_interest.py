@@ -1,6 +1,7 @@
 import time
 from dataclasses import dataclass
 from datetime import datetime
+from logging import getLogger
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import sqlalchemy
@@ -8,9 +9,10 @@ from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
 from multiaccessy.models import PhysicalAccessEntry
 from service.db import db_session
-from service.logging import logger
 from shop.models import Product, ProductCategory, Transaction, TransactionContent
 from sqlalchemy import desc, distinct, func, select
+
+logger = getLogger("statistics")
 
 
 def score_members_by_amount_purchased(
