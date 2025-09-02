@@ -1,0 +1,1 @@
+ALTER TABLE `membership_members` MODIFY COLUMN `price_level` ENUM('normal', 'low_income_discount', 'awl_discount') NOT NULL DEFAULT 'normal';
