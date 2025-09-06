@@ -3,26 +3,21 @@ from datetime import date, datetime
 from logging import getLogger
 from typing import Any, Optional, Tuple, cast
 
+from accessy_syncer import deferred_sync
 from dataclasses_json import DataClassJsonMixin
 from flask import Response, request
+from multiaccessy import service
+from multiaccessy.models import PhysicalAccessEntry
 from redis_cache import redis_connection
-from service.api_definition import GET, GROUP_VIEW, PERMISSION_MANAGE, POST, PUBLIC
+from service.api_definition import (GET, GROUP_VIEW, PERMISSION_MANAGE, POST,
+                                    PUBLIC)
 from service.db import db_session
 from service.error import UnprocessableEntity
 
-from multiaccessy import service
-from multiaccessy.models import PhysicalAccessEntry
-
 from . import sync as syncer
-from .accessy import (
-    PENDING_INVITATIONS_CACHE_KEY,
-    UUID,
-    AccessyAsset,
-    AccessyAssetPublication,
-    AccessyAssetWithPublication,
-    AccessyWebhookEventType,
-    accessy_session,
-)
+from .accessy import (PENDING_INVITATIONS_CACHE_KEY, UUID, AccessyAsset,
+                      AccessyAssetPublication, AccessyAssetWithPublication,
+                      AccessyWebhookEventType, accessy_session)
 
 logger = getLogger("makeradmin")
 
@@ -163,6 +158,9 @@ class AccessyWebhookEventGuestDoorEntry(AccessyWebhookEvent):
 
     assetId: UUID
 
+@dataclass
+class AccessyWebhookEventOrganization_Invitation_Deleted(AccessyWebhookEvent):
+    pass
 
 event_types = {
     AccessyWebhookEventType.ASSET_OPERATION_INVOKED: AccessyWebhookEventAsset_Operation_Invoked,
@@ -177,7 +175,7 @@ event_types = {
     AccessyWebhookEventType.MEMBERSHIP_REQUEST_DENIED: AccessyWebhookEventMembership_Request_Denied,
     AccessyWebhookEventType.MEMBERSHIP_ROLE_ADDED: AccessyWebhookEventMembership_Role_Added,
     AccessyWebhookEventType.MEMBERSHIP_ROLE_REMOVED: AccessyWebhookEventMembership_Role_Removed,
-    # AccessyWebhookEventType.ORGANIZATION_INVITATION_DELETED: AccessyWebhookEventOrganization_Invitation_Deleted,
+    AccessyWebhookEventType.ORGANIZATION_INVITATION_DELETED: AccessyWebhookEventOrganization_Invitation_Deleted,
 }
 
 
@@ -191,7 +189,7 @@ def decode_event(event_type_str: str, data: Any) -> Optional[AccessyWebhookEvent
             logger.error(f"Failed to decode event: {data} with error: {e}")
             return None
     else:
-        logger.warning(f"Unknown event type: {event_type}")
+        logger.warning(f"Unknown event type: {event_type}: {data}")
         return None
 
 
@@ -219,11 +217,15 @@ def handle_event(event: AccessyWebhookEvent) -> None:
             )
         )
         db_session.commit()
-
-    if isinstance(event, AccessyWebhookEventMembership_Created):
+    elif isinstance(event, AccessyWebhookEventMembership_Created):
         # Expire the cache if an invitation was likely used.
         # TODO: Not quite sure if this happens when an invitation is created or accepted, though.
         redis_connection.delete(PENDING_INVITATIONS_CACHE_KEY)
+    elif isinstance(event, AccessyWebhookEventOrganization_Invitation_Deleted):
+        redis_connection.delete(PENDING_INVITATIONS_CACHE_KEY)  # Force refresh
+        # This likely happens because a user reset their account.
+        # Immediately to an accessy sync to send out new invitations, if necessary.
+        deferred_sync()
 
 
 @service.route("/event", method=POST, permission=PUBLIC)
@@ -240,7 +242,7 @@ def accessy_webhook() -> str:
     if accessy_session.is_valid_webhook_signature(signature):
         event = decode_event(event_type_str, request.json)
         if event is not None:
-            logger.info(f"Received accessy event: {event.to_dict()}")
+            logger.info(f"Received accessy event {event_type_str}: {event.to_dict()}")
             handle_event(event)
         return "ok"
     else:

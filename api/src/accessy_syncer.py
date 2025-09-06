@@ -14,14 +14,23 @@ from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session
 from shop.transactions import ship_orders
 from sqlalchemy.orm import sessionmaker
-
+from redis_cache import redis_connection
 logger = getLogger("accessy-syncer")
 
 COMMAND_SCHEDULED = "sheduled"
 COMMAND_SHIP = "ship"
 COMMAND_SYNC = "sync"
 
+REDIS_COMMAND_QUEUE = "accessy_commands"
 exit = Event()
+
+
+def deferred_sync() -> None:
+    '''Enqueue a sync command to be run by the main loop.'''
+    # Only push if the command is not already in the queue
+    if redis_connection.lpos(REDIS_COMMAND_QUEUE, COMMAND_SYNC.encode("utf-8")) is None:
+        logger.info("Enqueuing deferred sync command")
+        redis_connection.rpush(REDIS_COMMAND_QUEUE, COMMAND_SYNC.encode("utf-8"))
 
 
 def handle_signal(signum: int, frame: Any) -> None:
@@ -67,6 +76,21 @@ def hourly_job() -> None:
         # any user-facing pages that rely on it
         accessy_session.refresh_pending_invitations()
 
+def run_queued_commands() -> None:
+    try:
+        command = redis_connection.lpop(REDIS_COMMAND_QUEUE)
+        if command is not None:
+            command = command.decode("utf-8")
+            logger.info(f"Running deferred command from queue: {command}")
+            match command:
+                case COMMAND_SYNC:
+                    sync()
+                case COMMAND_SHIP:
+                    ship_orders()
+                case _:
+                    logger.warning(f"unknown command from queue: {command}")
+    except Exception as e:
+        logger.exception(f"error processing command queue: {e}")
 
 def main() -> None:
     with log_exception(status=1), stoppable():
@@ -103,6 +127,7 @@ def main() -> None:
 
                 while not exit.is_set():
                     schedule.run_pending()
+                    run_queued_commands()
                     exit.wait(5)
 
             case _:
