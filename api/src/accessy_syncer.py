@@ -85,9 +85,9 @@ def run_queued_commands() -> None:
             command = command.decode("utf-8")
             logger.info(f"Running deferred command from queue: {command}")
             match command:
-                case COMMAND_SYNC:
+                case x if x == COMMAND_SYNC:
                     sync()
-                case COMMAND_SHIP:
+                case x if x == COMMAND_SHIP:
                     ship_orders()
                 case _:
                     logger.warning(f"unknown command from queue: {command}")
