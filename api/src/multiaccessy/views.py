@@ -6,18 +6,24 @@ from typing import Any, Optional, Tuple, cast
 from accessy_syncer import deferred_sync
 from dataclasses_json import DataClassJsonMixin
 from flask import Response, request
-from multiaccessy import service
-from multiaccessy.models import PhysicalAccessEntry
 from redis_cache import redis_connection
-from service.api_definition import (GET, GROUP_VIEW, PERMISSION_MANAGE, POST,
-                                    PUBLIC)
+from service.api_definition import GET, GROUP_VIEW, PERMISSION_MANAGE, POST, PUBLIC
 from service.db import db_session
 from service.error import UnprocessableEntity
 
+from multiaccessy import service
+from multiaccessy.models import PhysicalAccessEntry
+
 from . import sync as syncer
-from .accessy import (PENDING_INVITATIONS_CACHE_KEY, UUID, AccessyAsset,
-                      AccessyAssetPublication, AccessyAssetWithPublication,
-                      AccessyWebhookEventType, accessy_session)
+from .accessy import (
+    PENDING_INVITATIONS_CACHE_KEY,
+    UUID,
+    AccessyAsset,
+    AccessyAssetPublication,
+    AccessyAssetWithPublication,
+    AccessyWebhookEventType,
+    accessy_session,
+)
 
 logger = getLogger("makeradmin")
 
@@ -158,9 +164,11 @@ class AccessyWebhookEventGuestDoorEntry(AccessyWebhookEvent):
 
     assetId: UUID
 
+
 @dataclass
 class AccessyWebhookEventOrganization_Invitation_Deleted(AccessyWebhookEvent):
     pass
+
 
 event_types = {
     AccessyWebhookEventType.ASSET_OPERATION_INVOKED: AccessyWebhookEventAsset_Operation_Invoked,

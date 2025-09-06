@@ -9,12 +9,13 @@ from typing import Any
 import schedule
 from multiaccessy.accessy import accessy_session
 from multiaccessy.sync import sync
+from redis_cache import redis_connection
 from rocky.process import log_exception, stoppable
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session
 from shop.transactions import ship_orders
 from sqlalchemy.orm import sessionmaker
-from redis_cache import redis_connection
+
 logger = getLogger("accessy-syncer")
 
 COMMAND_SCHEDULED = "sheduled"
@@ -26,7 +27,7 @@ exit = Event()
 
 
 def deferred_sync() -> None:
-    '''Enqueue a sync command to be run by the main loop.'''
+    """Enqueue a sync command to be run by the main loop."""
     # Only push if the command is not already in the queue
     if redis_connection.lpos(REDIS_COMMAND_QUEUE, COMMAND_SYNC.encode("utf-8")) is None:
         logger.info("Enqueuing deferred sync command")
@@ -76,6 +77,7 @@ def hourly_job() -> None:
         # any user-facing pages that rely on it
         accessy_session.refresh_pending_invitations()
 
+
 def run_queued_commands() -> None:
     try:
         command = redis_connection.lpop(REDIS_COMMAND_QUEUE)
@@ -91,6 +93,7 @@ def run_queued_commands() -> None:
                     logger.warning(f"unknown command from queue: {command}")
     except Exception as e:
         logger.exception(f"error processing command queue: {e}")
+
 
 def main() -> None:
     with log_exception(status=1), stoppable():
