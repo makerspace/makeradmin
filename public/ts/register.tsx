@@ -768,6 +768,7 @@ const Success = ({ member }: { member: member_t }) => {
                     firstName: member.firstname,
                     lastName: member.lastname,
                     email: member.email,
+                    smsReminderNumber: member.phone,
                 }}
             />
         </>
