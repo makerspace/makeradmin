@@ -22,6 +22,8 @@ module.exports = (env, args) => {
             licenses: "./ts/licenses.tsx",
             courses: "./ts/courses.tsx",
             reset_password: "./ts/reset_password.tsx",
+            labels: "./ts/labels.tsx",
+            label: "./ts/label.tsx",
         },
 
         output: {

@@ -45,6 +45,49 @@
         "receipt_has_been_sent": "A receipt has also been sent via email.",
         "receipt_not_found": "Could not find this receipt"
     },
+    "labels": {
+        "page_title": "Memberbooth Labels",
+        "label_type": {
+            "TemporaryStorageLabel": "Temp",
+            "BoxLabel": "Box",
+            "FireSafetyLabel": "Dangerous",
+            "Printer3DLabel": "Filament",
+            "NameTag": "Name tag",
+            "MeetupNameTag": "Meetup name tag",
+            "DryingLabel": "Drying"
+        },
+        "expires": "Valid until",
+        "expired": "Expired",
+        "delete_label": "Delete label",
+        "delete_label_confirm": "Delete?",
+        "delete_failed": "Failed to delete label",
+        "expiring_soon": "Expiring soon",
+        "active_labels": "Active labels",
+        "expired_labels": "Expired labels",
+        "no_labels_uploaded": "No labels here yet",
+        "relative_expiry": {
+            "in_minutes": "Expires in {{count}} minutes",
+            "minutes_ago": "Expired {{count}} minutes ago",
+            "in_hours": "Expires in {{count}} hours",
+            "hours_ago": "Expired {{count}} hours ago",
+            "in_days": "Expires in {{count}} days",
+            "days_ago": "Expired {{count}} days ago",
+            "now": "Expired just now",
+            "date_future": "Expires {{date}}",
+            "date_past": "Expired {{date}}"
+        },
+        "relative_drying": {
+            "in_minutes": "Dry in {{count}} minutes",
+            "minutes_ago": "Dried {{count}} minutes ago",
+            "in_hours": "Dry in {{count}} hours",
+            "hours_ago": "Dried {{count}} hours ago",
+            "in_days": "Dry in {{count}} days",
+            "days_ago": "Dried {{count}} days ago",
+            "now": "Dried just now",
+            "date_future": "Dries {{date}}",
+            "date_past": "Dried {{date}}"
+        }
+    },
     "login": {
         "title": "Log in",
         "magic_link_sent": "An email has been sent with a link that you can use to log in",
@@ -340,7 +383,8 @@
         "courses": "Courses",
         "licenses": "Licenses and discounts",
         "wiki": "Wiki",
-        "pay": "Pay"
+        "pay": "Pay",
+        "labels": "Labels"
     },
     "special_products": {
         "labaccess_subscription": {

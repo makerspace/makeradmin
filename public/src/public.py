@@ -64,14 +64,15 @@ def purchase_history():
     return render_template("history.html")
 
 
-@shop.route("/member/courses")
-def courses():
-    return render_template("courses.html")
+# # Legacy route
+# @shop.route("/member/courses")
+# def courses():
+#     return render_template("courses.html")
 
-
-@shop.route("/member/licenses")
-def licenses():
-    return render_template("licenses.html")
+# # Legacy route
+# @shop.route("/member/licenses")
+# def licenses():
+#     return render_template("licenses.html")
 
 
 @shop.route("/product/<product_id>")
@@ -113,6 +114,24 @@ def quiz_backwards_compatibility():
     return redirect(member.url("/quiz/1"))
 
 
+# Legacy route
+@shop.route("/member/courses")  # Legacy route
+@member.route("/courses")
+def courses():
+    return render_template("courses.html")
+
+
+@shop.route("/member/licenses")  # Legacy route
+@member.route("/licenses")
+def licenses():
+    return render_template("licenses.html")
+
+
+@member.route("/labels")
+def labels():
+    return render_template("labels.html")
+
+
 @member.route("/change_phone")
 def change_phone():
     return render_template("change_phone.html")
@@ -123,11 +142,20 @@ def reset_password():
     return render_template("reset_password.html")
 
 
+label = Section("label")
+
+
+@label.route("/<int:label_id>")
+def label_detail(label_id: int):
+    return render_template("label.html")
+
+
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
 
 app.register_blueprint(shop)
 app.register_blueprint(member)
+app.register_blueprint(label)
 
 
 @app.route("/static/product_images/<path:path>")

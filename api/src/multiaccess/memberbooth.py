@@ -1,33 +1,61 @@
+from dataclasses import dataclass
 from logging import getLogger
 
+import serde
+from dataclasses_json import DataClassJsonMixin
 from membership.member_auth import verify_password
-from membership.membership import get_membership_summary
+from membership.membership import MembershipData, get_membership_summary
 from membership.models import Key, Member
+from serde import InternalTagging
+from service.config import get_public_url
 from service.db import db_session
 from service.error import NotFound
+
+from multiaccess.labal_data import LabelType
+from multiaccess.models import MemberboothLabel
 
 logger = getLogger("makeradmin")
 
 
-def member_to_response_object(member: Member):
-    return {
-        "member_id": member.member_id,
-        "member_number": member.member_number,
-        "firstname": member.firstname,
-        "lastname": member.lastname,
-        "end_date": max((span.enddate for span in member.spans)).isoformat() if len(member.spans) > 0 else None,
-        "keys": [{"key_id": key.key_id, "rfid_tag": key.tagid} for key in member.keys],
-    }
+@dataclass
+class MemberboothKeyInfo(DataClassJsonMixin):
+    key_id: int
+    rfid_tag: str | None
 
 
-def memberbooth_response_object(member: Member, membership_data):
-    response = member_to_response_object(member)
-    del response["end_date"]
-    response["membership_data"] = membership_data.as_json()
-    return response
+@dataclass
+class MemberboothMemberInfo(DataClassJsonMixin):
+    member_id: int
+    member_number: int
+    firstname: str
+    lastname: str | None
+    keys: list[MemberboothKeyInfo]
+    membership_data: MembershipData
 
 
-def tag_to_memberinfo(tagid: str):
+@serde.serde(tagging=InternalTagging("type"))
+class UploadedLabel:
+    public_url: str
+    label: LabelType
+
+
+@serde.serde(tagging=InternalTagging("type"))
+class UploadLabelRequest:
+    label: LabelType
+
+
+def memberbooth_response_object(member: Member, membership_data: MembershipData) -> MemberboothMemberInfo:
+    return MemberboothMemberInfo(
+        member_id=member.member_id,
+        member_number=member.member_number,
+        firstname=member.firstname,
+        lastname=member.lastname,
+        keys=[MemberboothKeyInfo(key_id=key.key_id, rfid_tag=key.tagid) for key in member.keys],
+        membership_data=membership_data,
+    )
+
+
+def tag_to_memberinfo(tagid: str) -> MemberboothMemberInfo | None:
     key = (
         db_session.query(Key)
         .join(Key.member)
@@ -46,7 +74,7 @@ def tag_to_memberinfo(tagid: str):
     return memberbooth_response_object(key.member, membership_data)
 
 
-def pin_login_to_memberinfo(member_number: int, pin_code_or_password: str):
+def pin_login_to_memberinfo(member_number: int, pin_code_or_password: str) -> MemberboothMemberInfo:
     member = (
         db_session.query(Member)
         .filter(Member.member_number == member_number)
@@ -73,7 +101,7 @@ def pin_login_to_memberinfo(member_number: int, pin_code_or_password: str):
     return memberbooth_response_object(member, membership_data)
 
 
-def member_number_to_memberinfo(member_number: int):
+def member_number_to_memberinfo(member_number: int) -> MemberboothMemberInfo | None:
     member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).first()
 
     if not member:
@@ -81,3 +109,63 @@ def member_number_to_memberinfo(member_number: int):
 
     membership_data = get_membership_summary(member.member_id)
     return memberbooth_response_object(member, membership_data)
+
+
+def get_label_public_url(label_id: int) -> str:
+    return get_public_url("/label/") + str(label_id)
+
+
+@serde.serde(tagging=InternalTagging("type"))
+class LabelWrapper:
+    label: LabelType
+
+    @staticmethod
+    def from_dict(value: dict) -> "LabelWrapper":
+        value = {"label": value}  # wrap, to handle unions properly
+        data = serde.from_dict(LabelWrapper, value)
+        return data
+
+    def to_dict(self) -> dict:
+        label_data = serde.to_dict(self)
+        label_data = label_data["label"]  # unwrap
+        return label_data
+
+
+def create_label(data: UploadLabelRequest) -> UploadedLabel:
+    member = (
+        db_session.query(Member)
+        .filter(Member.member_number == data.label.base.member_number, Member.deleted_at.is_(None))
+        .first()
+    )
+    if not member:
+        raise NotFound(f"Member with number {data.label.base.member_number} not found.")
+
+    db_label = MemberboothLabel(
+        id=data.label.base.id,
+        member_id=member.member_id,
+        data=LabelWrapper(label=data.label).to_dict(),
+    )
+    db_session.add(db_label)
+    db_session.flush()
+    return UploadedLabel(public_url=get_label_public_url(db_label.id), label=data.label)
+
+
+def get_member_labels(member_id: int) -> list[UploadedLabel]:
+    member = db_session.get(Member, member_id)
+    if not member:
+        raise NotFound(f"Member with id {member_id} not found.")
+
+    labels = (
+        db_session.query(MemberboothLabel)
+        .filter(MemberboothLabel.member_id == member_id, MemberboothLabel.deleted_at.is_(None))
+        .order_by(MemberboothLabel.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for label in labels:
+        data_dict: dict = label.data  # type: ignore
+        data = LabelWrapper.from_dict(data_dict)  # validate
+        result.append(UploadedLabel(public_url=get_label_public_url(label.id), label=data.label))
+
+    return result

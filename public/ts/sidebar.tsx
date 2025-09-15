@@ -1,18 +1,22 @@
 import { ComponentChildren } from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import Cart from "./cart";
-import { logout } from "./common";
+import { logout, UNAUTHORIZED } from "./common";
 import { useTranslation } from "./i18n";
+import { expiredRecently, expiresSoon, UploadedLabel } from "./label_common";
+import { LoadCurrentLabels } from "./member_common";
 import { ProductData } from "./payment_common";
 
 const NavItem = ({
     url,
     icon,
     children,
+    dot = null,
 }: {
     url: string;
     icon: string;
     children: ComponentChildren;
+    dot?: "warning" | "danger" | null;
 }) => {
     let path = location.pathname.trim();
     if (path.endsWith("/")) {
@@ -23,6 +27,9 @@ const NavItem = ({
         <li className={url === path ? "active" : ""}>
             <a href={url}>
                 <span uk-icon={icon}></span> {children}
+                {dot !== null && (
+                    <span className={`sidebar-dot sidebar-dot-${dot}`}></span>
+                )}
             </a>
         </li>
     );
@@ -55,6 +62,32 @@ export const Sidebar = ({
             window.removeEventListener("resize", checkSidebarHeight);
         };
     }, []);
+
+    const [labels, setLabels] = useState<UploadedLabel[]>([]);
+
+    useEffect(() => {
+        LoadCurrentLabels()
+            .then(setLabels)
+            .catch((e) => {
+                if (e.status === UNAUTHORIZED) {
+                    // User is just not logged in, ignore
+                } else {
+                    console.error("Failed to load labels for sidebar", e);
+                }
+            });
+    }, []);
+
+    const labelDot = useMemo(() => {
+        if (labels.some((label) => expiredRecently(new Date(), label.label))) {
+            return "danger";
+        } else if (
+            labels.some((label) => expiresSoon(new Date(), label.label))
+        ) {
+            return "warning";
+        } else {
+            return null;
+        }
+    }, [labels]);
 
     let path = location.pathname.trim();
     if (path.endsWith("/")) {
@@ -111,13 +144,16 @@ export const Sidebar = ({
                     <NavItem url="/shop/member/history" icon="history">
                         {t("purchase_history")}
                     </NavItem>
-                    <NavItem url="/shop/member/courses" icon="star">
+                    <NavItem url="/member/courses" icon="star">
                         {t("courses")}
+                    </NavItem>
+                    <NavItem url="/member/labels" icon="tag" dot={labelDot}>
+                        {t("labels")}
                     </NavItem>
                     <NavItem url="http://wiki.makerspace.se" icon="world">
                         {t("wiki")}
                     </NavItem>
-                    <NavItem url="/shop/member/licenses" icon="tag">
+                    <NavItem url="/member/licenses" icon="tag">
                         {t("licenses")}
                     </NavItem>
                     <li>

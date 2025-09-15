@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
 
+from dataclasses_json import DataClassJsonMixin
 from service.api_definition import NOT_UNIQUE
 from service.db import db_session
 from service.error import NotFound, PreconditionFailed, UnprocessableEntity
@@ -16,7 +17,7 @@ logger = logging.getLogger("makeradmin")
 
 
 @dataclass(frozen=True)
-class MembershipData:
+class MembershipData(DataClassJsonMixin):
     membership_end: Optional[date]
     membership_active: bool
     labaccess_end: Optional[date]

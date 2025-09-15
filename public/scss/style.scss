@@ -1,5 +1,8 @@
 @use "sass:color";
 @use "include-media";
+// Bebas Neue font for label printing
+@import url("https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap");
+
 include-media.$breakpoints: (phone: 320px, tablet: 800px, desktop: 1024px);
 
 $primary-color: #333;
@@ -126,6 +129,23 @@ body {
 
         a {
             color: #fff;
+        }
+    }
+
+    .sidebar-dot {
+        display: inline-block;
+        margin-left: 6px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        vertical-align: middle;
+
+        &.sidebar-dot-warning {
+            background: #faa05a;
+        }
+
+        &.sidebar-dot-danger {
+            background: #f0506e;
         }
     }
 
@@ -989,15 +1009,15 @@ form input.readonly-input {
     a {
         display: inline-block;
         color: white;
-        background: color.adjust(#4699be, $alpha: -0.3);
-        transition: 100ms background;
+        background-color: color.adjust(#4699be, $alpha: -0.3);
+        transition: 100ms background-color;
         border-radius: 5px;
         flex: 1 1 0;
         margin-bottom: 5px;
         padding: 6px 10px 6px 10px;
 
         &:hover {
-            background: #4699be;
+            background-color: #4699be;
             text-decoration: none;
         }
     }
@@ -2037,4 +2057,199 @@ $palette-red: $palette4;
 
 code {
     white-space: preserve !important;
+}
+
+.uk-list {
+    .label-active,
+    .label-expired {
+        display: flex;
+        min-height: 50px;
+
+        color: #333;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        overflow: hidden;
+        text-decoration: none;
+        background: white;
+        transition: 100ms background-color;
+
+        // Designed using: https://shadows.brumm.af/
+        box-shadow:
+            0px 0.1px 0.3px rgba(0, 0, 0, 0.034),
+            0px 0.3px 0.7px rgba(0, 0, 0, 0.048),
+            0px 0.5px 1.3px rgba(0, 0, 0, 0.06),
+            0px 0.9px 2.2px rgba(0, 0, 0, 0.072),
+            0px 1.7px 4.2px rgba(0, 0, 0, 0.086),
+            0px 4px 10px rgba(0, 0, 0, 0.12);
+
+        a {
+            box-sizing: border-box;
+            align-self: stretch;
+            flex-grow: 1;
+            flex-shrink: 1;
+            flex-basis: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 20px;
+            padding-right: 5px;
+            color: black;
+
+            &:hover {
+                background: color.adjust(#fff, $lightness: -6%);
+                text-decoration: none;
+            }
+        }
+
+        .label-type {
+            flex-shrink: 0;
+            flex-grow: 0;
+        }
+
+        .label-description {
+            text-wrap: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            flex-shrink: 1;
+        }
+    }
+
+    .label-expired {
+        background-color: #333;
+        color: white;
+
+        a {
+            color: white;
+            &:hover {
+                background: color.adjust(#333, $lightness: -6%);
+            }
+        }
+    }
+
+    .label-expiring-soon {
+        background-color: #faa05a;
+        color: white;
+
+        a {
+            color: white;
+            &:hover {
+                background: color.adjust(#faa05a, $lightness: -6%);
+            }
+        }
+    }
+
+    .label-expired-recently {
+        background-color: #f0506e;
+        color: white;
+
+        a {
+            color: white;
+            &:hover {
+                background: color.adjust(#f0506e, $lightness: -6%);
+            }
+        }
+
+        .uk-button-danger {
+            background-color: color.adjust(#f0506e, $lightness: -20%);
+        }
+    }
+}
+
+.uk-button.confirm-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    flex-shrink: 0;
+    border: none;
+
+    span {
+        max-width: 0;
+        opacity: 0;
+        margin-right: 0px;
+        outline: none;
+        transition:
+            max-width 100ms,
+            opacity 100ms,
+            margin-right 100ms,
+            background-color 100ms;
+    }
+
+    &.confirm {
+        margin-left: 5px;
+    }
+
+    &.confirm span {
+        max-width: 80px;
+        opacity: 1;
+        margin-right: 5px;
+    }
+}
+
+.label-print-tempstorage {
+    font-family: "Bebas Neue", Arial, sans-serif;
+    --scale: 1;
+    width: calc(500px * var(--scale));
+    padding: calc(20px * var(--scale)) calc(40px * var(--scale));
+    background: #fff;
+    color: #000;
+    text-align: left;
+    box-sizing: border-box;
+    border: calc(4px * var(--scale)) solid black;
+    border-radius: calc(20px * var(--scale));
+    text-wrap: nowrap;
+    line-height: 1;
+}
+
+.label-print-qr {
+    width: calc((500px - 40px - 40px) * var(--scale));
+    height: calc((500px - 40px - 40px) * var(--scale));
+    background: #eee;
+    box-sizing: border-box;
+    border-radius: calc(10px * var(--scale));
+    margin-top: calc(20px * var(--scale));
+    margin-bottom: calc(20px * var(--scale));
+}
+
+.fit-label {
+    font-size: 36px;
+    margin-bottom: calc((-0.2em) + (20px * var(--scale)));
+    margin-top: calc(-0.15em + 20px * var(--scale));
+}
+
+.fit-label-wrap {
+    word-break: break-word;
+    text-wrap: wrap;
+}
+
+#label-page {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+
+    .label-expiring-soon {
+        border-color: #faa05a;
+
+        .label-expires-at {
+            color: #faa05a;
+        }
+    }
+
+    .label-expired,
+    .label-expired-recently {
+        border-color: #f0506e;
+
+        .label-expires-at {
+            color: #f0506e;
+        }
+    }
 }

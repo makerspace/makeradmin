@@ -1,4 +1,5 @@
 import * as common from "./common";
+import { UploadedLabel } from "./label_common";
 
 export type date_t = string;
 
@@ -74,5 +75,11 @@ export async function LoadCurrentAccessInfo(): Promise<access_t> {
             window.apiBasePath + "/member/current/access",
             null,
         )
+    ).data;
+}
+
+export async function LoadCurrentLabels(): Promise<UploadedLabel[]> {
+    return (
+        await common.ajax("GET", `${window.apiBasePath}/member/current/labels`)
     ).data;
 }

@@ -92,7 +92,7 @@ class Arg:
     each argument from url parameters, then post form data, then json body. If a value is found it will be converted
     through a conversion function."""
 
-    def __init__(self, converter, required=True):
+    def __init__(self, converter: type, required: bool = True):
         """
         :param converter converter function from string for the arg, any exception will render a 400 response
         :param required set to true if this is a required arg
@@ -100,7 +100,7 @@ class Arg:
         self.converter = converter
         self.required = required
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return False
 
     @staticmethod

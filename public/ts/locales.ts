@@ -45,6 +45,52 @@ export type LOCALE_SCHEMA = {
       | "receipt_has_been_sent"
       | "receipt_not_found",
   ) => string;
+  labels: ((
+    key:
+      | "page_title"
+      | "label_type.TemporaryStorageLabel"
+      | "label_type.BoxLabel"
+      | "label_type.FireSafetyLabel"
+      | "label_type.Printer3DLabel"
+      | "label_type.NameTag"
+      | "label_type.MeetupNameTag"
+      | "label_type.DryingLabel"
+      | "expires"
+      | "expired"
+      | "delete_label"
+      | "delete_label_confirm"
+      | "delete_failed"
+      | "expiring_soon"
+      | "active_labels"
+      | "expired_labels"
+      | "no_labels_uploaded"
+      | "relative_expiry.now"
+      | "relative_drying.now",
+  ) => string) &
+    ((
+      key:
+        | "relative_expiry.in_minutes"
+        | "relative_expiry.minutes_ago"
+        | "relative_expiry.in_hours"
+        | "relative_expiry.hours_ago"
+        | "relative_expiry.in_days"
+        | "relative_expiry.days_ago"
+        | "relative_drying.in_minutes"
+        | "relative_drying.minutes_ago"
+        | "relative_drying.in_hours"
+        | "relative_drying.hours_ago"
+        | "relative_drying.in_days"
+        | "relative_drying.days_ago",
+      args: { count: string | number },
+    ) => string) &
+    ((
+      key:
+        | "relative_expiry.date_future"
+        | "relative_expiry.date_past"
+        | "relative_drying.date_future"
+        | "relative_drying.date_past",
+      args: { date: string | number },
+    ) => string);
   login: ((
     key:
       | "title"
@@ -298,7 +344,8 @@ export type LOCALE_SCHEMA = {
       | "courses"
       | "licenses"
       | "wiki"
-      | "pay",
+      | "pay"
+      | "labels",
   ) => string;
   special_products: ((
     key:
@@ -368,6 +415,52 @@ export type LOCALE_SCHEMA_GLOBAL = ((
       | "history:thank_you_for_your_purchase"
       | "history:receipt_has_been_sent"
       | "history:receipt_not_found",
+  ) => string) &
+  ((
+    key:
+      | "labels:page_title"
+      | "labels:label_type.TemporaryStorageLabel"
+      | "labels:label_type.BoxLabel"
+      | "labels:label_type.FireSafetyLabel"
+      | "labels:label_type.Printer3DLabel"
+      | "labels:label_type.NameTag"
+      | "labels:label_type.MeetupNameTag"
+      | "labels:label_type.DryingLabel"
+      | "labels:expires"
+      | "labels:expired"
+      | "labels:delete_label"
+      | "labels:delete_label_confirm"
+      | "labels:delete_failed"
+      | "labels:expiring_soon"
+      | "labels:active_labels"
+      | "labels:expired_labels"
+      | "labels:no_labels_uploaded"
+      | "labels:relative_expiry.now"
+      | "labels:relative_drying.now",
+  ) => string) &
+  ((
+    key:
+      | "labels:relative_expiry.in_minutes"
+      | "labels:relative_expiry.minutes_ago"
+      | "labels:relative_expiry.in_hours"
+      | "labels:relative_expiry.hours_ago"
+      | "labels:relative_expiry.in_days"
+      | "labels:relative_expiry.days_ago"
+      | "labels:relative_drying.in_minutes"
+      | "labels:relative_drying.minutes_ago"
+      | "labels:relative_drying.in_hours"
+      | "labels:relative_drying.hours_ago"
+      | "labels:relative_drying.in_days"
+      | "labels:relative_drying.days_ago",
+    args: { count: string | number },
+  ) => string) &
+  ((
+    key:
+      | "labels:relative_expiry.date_future"
+      | "labels:relative_expiry.date_past"
+      | "labels:relative_drying.date_future"
+      | "labels:relative_drying.date_past",
+    args: { date: string | number },
   ) => string) &
   ((
     key:
@@ -630,7 +723,8 @@ export type LOCALE_SCHEMA_GLOBAL = ((
       | "sidebar:courses"
       | "sidebar:licenses"
       | "sidebar:wiki"
-      | "sidebar:pay",
+      | "sidebar:pay"
+      | "sidebar:labels",
   ) => string) &
   ((
     key:

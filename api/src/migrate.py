@@ -126,9 +126,12 @@ def run_migrations(session_factory):
             )
 
         for i, migration in enumerate(migrations, start=1):
+            if i != migration.id:
+                raise Exception(f"migrations should be numbered in sequence {migration.name} was not")
+
+        for i, migration in enumerate(migrations, start=1):
             try:
-                if i != migration.id:
-                    raise Exception(f"migrations should be numbered in sequence {migration.name} was not")
+                assert i == migration.id
 
                 if migration.id in applied:
                     continue
