@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS `memberbooth_labels` (
 CREATE TABLE IF NOT EXISTS `memberbooth_labels_actions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `label_id` bigint(20) unsigned NOT NULL,
-  `action_member_id` int(10) unsigned NOT NULL,
-  `session_token` varchar(32) NOT NULL,
+  `action_member_id` int(10) unsigned,
+  `session_token` varchar(32),
   `action` ENUM('observed','reported','cleaned_away') NOT NULL,
   `message` TEXT DEFAULT NULL,
   `image` BLOB DEFAULT NULL,

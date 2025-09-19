@@ -44,6 +44,32 @@ export type access_t = {
     access_permission_group_names: string[];
 };
 
+export type Permission =
+    | "member_view"
+    | "member_create"
+    | "member_edit"
+    | "member_delete"
+    | "group_view"
+    | "group_create"
+    | "member_edit"
+    | "group_delete"
+    | "group_member_view"
+    | "group_member_add"
+    | "group_member_remove"
+    | "permission_view"
+    | "permission_manage"
+    | "span_view"
+    | "span_manage"
+    | "keys_view"
+    | "keys_edit"
+    | "message_send"
+    | "message_view"
+    | "webshop"
+    | "webshop_edit"
+    | "webshop_admin"
+    | "quiz_edit"
+    | "memberbooth";
+
 export async function LoadCurrentMemberInfo(): Promise<
     member_t & { has_password: boolean }
 > {
@@ -82,4 +108,16 @@ export async function LoadCurrentLabels(): Promise<UploadedLabel[]> {
     return (
         await common.ajax("GET", `${window.apiBasePath}/member/current/labels`)
     ).data;
+}
+
+export async function LoadCurrentPermissions(): Promise<Permission[]> {
+    return await common
+        .ajax("GET", window.apiBasePath + "/member/current/permissions", null)
+        .then((x) => x.data.permissions)
+        .catch((err) => {
+            if (err.status === common.UNAUTHORIZED) {
+                return [];
+            }
+            throw err;
+        });
 }

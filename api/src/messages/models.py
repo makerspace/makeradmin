@@ -29,6 +29,16 @@ class MessageTemplate(enum.Enum):
     NEW_LOW_INCOME_MEMBER = "new_low_income_member"
     GIFT_CARD_PURCHASE = "gift_card_purchase"
     UPDATED_MEMBER_INFO = "updated_member_info"
+    MEMBERBOOTH_LABEL_REPORT = "memberbooth_label_report"
+    MEMBERBOOTH_LABEL_CLEANED_AWAY = "memberbooth_label_cleaned_away"
+    MEMBERBOOTH_LABEL_REPORT_SMS = "memberbooth_label_report_sms"
+    MEMBERBOOTH_LABEL_CLEANED_AWAY_SMS = "memberbooth_label_cleaned_away_sms"
+    MEMBERBOOTH_LABEL_EXPIRED = "memberbooth_label_expired"
+    MEMBERBOOTH_LABEL_EXPIRING_SOON = "memberbooth_label_expiring_soon"
+    MEMBERBOOTH_BOX_CLEANED_AWAY = "memberbooth_box_cleaned_away"
+    MEMBERBOOTH_BOX_CLEANED_AWAY_SMS = "memberbooth_box_cleaned_away_sms"
+    MEMBERBOOTH_BOX_EXPIRED = "memberbooth_box_expired"
+    MEMBERBOOTH_BOX_EXPIRING_SOON = "memberbooth_box_expiring_soon"
 
 
 class Message(Base):

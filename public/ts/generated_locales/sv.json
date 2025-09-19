@@ -62,6 +62,8 @@
         "delete_label_confirm": "Radera?",
         "delete_failed": "Misslyckades med att ta bort etikett",
         "expiring_soon": "Går snart ut",
+        "active_labels": "Aktiva etiketter",
+        "expired_labels": "Utgångna etiketter",
         "no_labels_uploaded": "Inga etiketter här ännu",
         "relative_expiry": {
             "in_minutes": "Går ut om {{count}} minuter",
@@ -84,6 +86,53 @@
             "now": "Torr nu",
             "date_future": "Torr {{date}}",
             "date_past": "Torkade {{date}}"
+        },
+        "relative_generic": {
+            "in_minutes": "Om {{count}} minuter",
+            "minutes_ago": "För {{count}} minuter sedan",
+            "in_hours": "Om {{count}} timmar",
+            "hours_ago": "För {{count}} timmar sedan",
+            "in_days": "Om {{count}} dagar",
+            "days_ago": "För {{count}} dagar sedan",
+            "now": "Just nu",
+            "date_future": "{{date}}",
+            "date_past": "{{date}}"
+        },
+        "actions": {
+            "title": "Åtgärder",
+            "submitted_successfully": "Etiketten skickades in",
+            "failed_to_submit": "Misslyckades med att skicka in etikett",
+            "report": "Rapportera",
+            "terminate": "Avsluta",
+            "report_label": "Rapportera etikett",
+            "terminate_label": "Avsluta etikett",
+            "can_terminate_after_observation": "Inte skannad efter utgång, kan inte rensas bort ännu.",
+            "can_terminate_in": "Kan rensas bort {{duration}}",
+            "write_a_message": "Skriv ett meddelande",
+            "change_photo": "Byt foto",
+            "add_photo": "Lägg till foto",
+            "submit": "Skicka",
+            "cancel": "Avbryt"
+        },
+        "messages": {
+            "title": "Meddelanden",
+            "status": {
+                "queued": "Väntar",
+                "sent": "Skickat",
+                "failed": "Misslyckades"
+            },
+            "template": {
+                "memberbooth_label_report": "Rapporterad",
+                "memberbooth_label_cleaned_away": "Bortrensad",
+                "memberbooth_label_report_sms": "Rapporterad (SMS)",
+                "memberbooth_label_cleaned_away_sms": "Bortrensad (SMS)",
+                "memberbooth_label_expired": "Utgången",
+                "memberbooth_label_expiring_soon": "Går snart ut",
+                "memberbooth_box_cleaned_away": "Låda bortrensad",
+                "memberbooth_box_cleaned_away_sms": "Låda bortrensad (SMS)",
+                "memberbooth_box_expired": "Låda utgången",
+                "memberbooth_box_expiring_soon": "Låda går snart ut"
+            }
         }
     },
     "login": {

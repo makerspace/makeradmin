@@ -65,7 +65,35 @@ export type LOCALE_SCHEMA = {
       | "expired_labels"
       | "no_labels_uploaded"
       | "relative_expiry.now"
-      | "relative_drying.now",
+      | "relative_drying.now"
+      | "relative_generic.now"
+      | "actions.title"
+      | "actions.submitted_successfully"
+      | "actions.failed_to_submit"
+      | "actions.report"
+      | "actions.terminate"
+      | "actions.can_terminate_after_observation"
+      | "actions.report_label"
+      | "actions.terminate_label"
+      | "actions.write_a_message"
+      | "actions.change_photo"
+      | "actions.add_photo"
+      | "actions.submit"
+      | "actions.cancel"
+      | "messages.title"
+      | "messages.status.queued"
+      | "messages.status.sent"
+      | "messages.status.failed"
+      | "messages.template.memberbooth_label_report"
+      | "messages.template.memberbooth_label_cleaned_away"
+      | "messages.template.memberbooth_label_report_sms"
+      | "messages.template.memberbooth_label_cleaned_away_sms"
+      | "messages.template.memberbooth_label_expired"
+      | "messages.template.memberbooth_label_expiring_soon"
+      | "messages.template.memberbooth_box_cleaned_away"
+      | "messages.template.memberbooth_box_cleaned_away_sms"
+      | "messages.template.memberbooth_box_expired"
+      | "messages.template.memberbooth_box_expiring_soon",
   ) => string) &
     ((
       key:
@@ -80,7 +108,13 @@ export type LOCALE_SCHEMA = {
         | "relative_drying.in_hours"
         | "relative_drying.hours_ago"
         | "relative_drying.in_days"
-        | "relative_drying.days_ago",
+        | "relative_drying.days_ago"
+        | "relative_generic.in_minutes"
+        | "relative_generic.minutes_ago"
+        | "relative_generic.in_hours"
+        | "relative_generic.hours_ago"
+        | "relative_generic.in_days"
+        | "relative_generic.days_ago",
       args: { count: string | number },
     ) => string) &
     ((
@@ -88,8 +122,14 @@ export type LOCALE_SCHEMA = {
         | "relative_expiry.date_future"
         | "relative_expiry.date_past"
         | "relative_drying.date_future"
-        | "relative_drying.date_past",
+        | "relative_drying.date_past"
+        | "relative_generic.date_future"
+        | "relative_generic.date_past",
       args: { date: string | number },
+    ) => string) &
+    ((
+      key: "actions.can_terminate_in",
+      args: { duration: string | number },
     ) => string);
   login: ((
     key:
@@ -436,7 +476,35 @@ export type LOCALE_SCHEMA_GLOBAL = ((
       | "labels:expired_labels"
       | "labels:no_labels_uploaded"
       | "labels:relative_expiry.now"
-      | "labels:relative_drying.now",
+      | "labels:relative_drying.now"
+      | "labels:relative_generic.now"
+      | "labels:actions.title"
+      | "labels:actions.submitted_successfully"
+      | "labels:actions.failed_to_submit"
+      | "labels:actions.report"
+      | "labels:actions.terminate"
+      | "labels:actions.can_terminate_after_observation"
+      | "labels:actions.report_label"
+      | "labels:actions.terminate_label"
+      | "labels:actions.write_a_message"
+      | "labels:actions.change_photo"
+      | "labels:actions.add_photo"
+      | "labels:actions.submit"
+      | "labels:actions.cancel"
+      | "labels:messages.title"
+      | "labels:messages.status.queued"
+      | "labels:messages.status.sent"
+      | "labels:messages.status.failed"
+      | "labels:messages.template.memberbooth_label_report"
+      | "labels:messages.template.memberbooth_label_cleaned_away"
+      | "labels:messages.template.memberbooth_label_report_sms"
+      | "labels:messages.template.memberbooth_label_cleaned_away_sms"
+      | "labels:messages.template.memberbooth_label_expired"
+      | "labels:messages.template.memberbooth_label_expiring_soon"
+      | "labels:messages.template.memberbooth_box_cleaned_away"
+      | "labels:messages.template.memberbooth_box_cleaned_away_sms"
+      | "labels:messages.template.memberbooth_box_expired"
+      | "labels:messages.template.memberbooth_box_expiring_soon",
   ) => string) &
   ((
     key:
@@ -451,7 +519,13 @@ export type LOCALE_SCHEMA_GLOBAL = ((
       | "labels:relative_drying.in_hours"
       | "labels:relative_drying.hours_ago"
       | "labels:relative_drying.in_days"
-      | "labels:relative_drying.days_ago",
+      | "labels:relative_drying.days_ago"
+      | "labels:relative_generic.in_minutes"
+      | "labels:relative_generic.minutes_ago"
+      | "labels:relative_generic.in_hours"
+      | "labels:relative_generic.hours_ago"
+      | "labels:relative_generic.in_days"
+      | "labels:relative_generic.days_ago",
     args: { count: string | number },
   ) => string) &
   ((
@@ -459,8 +533,14 @@ export type LOCALE_SCHEMA_GLOBAL = ((
       | "labels:relative_expiry.date_future"
       | "labels:relative_expiry.date_past"
       | "labels:relative_drying.date_future"
-      | "labels:relative_drying.date_past",
+      | "labels:relative_drying.date_past"
+      | "labels:relative_generic.date_future"
+      | "labels:relative_generic.date_past",
     args: { date: string | number },
+  ) => string) &
+  ((
+    key: "labels:actions.can_terminate_in",
+    args: { duration: string | number },
   ) => string) &
   ((
     key:

@@ -18,10 +18,13 @@ from membership.membership import get_members_and_membership, get_membership_sum
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
+from multiaccess.labal_data import BoxLabel, DryingLabel, FireSafetyLabel, LabelType, TemporaryStorageLabel
+from multiaccess.memberbooth import LabelWrapper, get_label_public_url
+from multiaccess.models import MemberboothLabelAction
 from quiz.models import QuizQuestion, QuizQuestionOption
 from quiz.views import QuizMemberStat, quiz_member_answer_stats
 from rocky.process import log_exception, stoppable
-from service.config import config, get_mysql_config, get_public_url
+from service.config import config, get_api_url, get_mysql_config, get_public_url
 from service.db import create_mysql_engine, db_session
 from shop.models import ProductAction
 from shop.shop_data import pending_actions
@@ -153,6 +156,324 @@ def already_sent_message(template: MessageTemplate, member_id: int, days: int) -
         .count()
     )
     return reminder_sent > 0
+
+
+def memberbooth_labels() -> None:
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # Define the time window for "recent" as the past two weeks
+
+    recent_window = now - timedelta(days=14)
+
+    # Organize actions by label and type. More recent of the same type overwrites older ones.
+    # label_actions: dict[
+    #     int, dict[Literal["observed"] | Literal["reported"] | Literal["cleaned_away"], MemberboothLabelAction | None]
+    # ] = defaultdict(lambda: {"observed": None, "reported": None, "cleaned_away": None})
+    # for ac in recent_actions:
+    #     label_actions[ac.label_id][ac.action] = ac
+
+    # Helper to check if a message was already sent for a label recently
+    def already_sent_for_label(template: MessageTemplate, member_id: int, label_id: int) -> bool:
+        return (
+            db_session.query(Message)
+            .filter(
+                Message.member_id == member_id,  # Purely a performance optimization
+                Message.template == template.value,
+                Message.created_at >= recent_window,
+            )
+            .join(MemberboothLabelAction, MemberboothLabelAction.id == Message.associated_id)
+            .filter(MemberboothLabelAction.label_id == label_id)
+            .count()
+            > 0
+        )
+
+    recent_actions = (
+        db_session.query(MemberboothLabelAction)
+        .filter(
+            MemberboothLabelAction.created_at >= recent_window,
+            MemberboothLabelAction.action != "observed",
+        )
+        .join(
+            Message,
+            (Message.associated_id == MemberboothLabelAction.id)
+            & (
+                Message.template.in_(
+                    [
+                        MessageTemplate.MEMBERBOOTH_LABEL_REPORT.value,
+                        MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY.value,
+                        MessageTemplate.MEMBERBOOTH_LABEL_REPORT_SMS.value,
+                        MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY_SMS.value,
+                    ]
+                )
+            ),
+            isouter=True,
+        )
+        .filter(Message.id.is_(None))  # No message sent yet
+        .order_by(MemberboothLabelAction.created_at.asc())
+        .all()
+    )
+
+    def get_common_kws(label_action: MemberboothLabelAction, member: Member, deserialized_label: LabelType) -> dict:
+        membership_summary = get_membership_summary(member.member_id)
+
+        thing_name = "item"
+        thing_name_sv = "sak"
+        expires_at: date | None = None
+        if isinstance(deserialized_label, BoxLabel):
+            thing_name = "lab storage box"
+            thing_name_sv = "labblåda"
+            expires_at = (
+                membership_summary.effective_labaccess_end + timedelta(days=45)
+                if membership_summary.effective_labaccess_end is not None
+                else None
+            )
+        elif isinstance(deserialized_label, TemporaryStorageLabel):
+            desc = deserialized_label.description
+            if len(desc) > 23:
+                desc = desc[:20] + "..."
+            thing_name = f"item with the label '{desc}'"
+            thing_name_sv = f"sak med etiketten '{desc}'"
+            expires_at = deserialized_label.expires_at
+        elif isinstance(deserialized_label, FireSafetyLabel):
+            thing_name = f"item in the fire safety cabinett"
+            thing_name_sv = f"sak i brandsäkra skåpet"
+            expires_at = deserialized_label.expires_at
+        elif isinstance(deserialized_label, DryingLabel):
+            thing_name = f"item that was left to dry"
+            thing_name_sv = f"sak som lämnades för att torka"
+            expires_at = deserialized_label.expires_at.date()
+
+        days_after_expiration = (now.date() - expires_at).days if expires_at is not None else None
+        days_to_expiration = (expires_at - now.date()).days if expires_at is not None else None
+
+        common_kws: dict[str, Any] = dict(
+            label=deserialized_label,
+            thing_name=thing_name,
+            thing_name_sv=thing_name_sv,
+            expires_at=expires_at,
+            days_after_expiration=days_after_expiration,
+            days_to_expiration=days_to_expiration,
+            labaccess_end_date=membership_summary.effective_labaccess_end,
+            days_after_labaccess_expiration=(
+                (now.date() - membership_summary.effective_labaccess_end).days
+                if membership_summary.effective_labaccess_end is not None
+                else "∞"
+            ),
+            label_type=str(type(deserialized_label)),
+            label_url=get_label_public_url(label_action.label_id),
+            image_url=get_api_url(f"/multiaccess/memberbooth/label_action/{label_action.id}/image")
+            if label_action.image
+            else None,
+        )
+        return common_kws
+
+    # Cases:
+    # 1. Notification that a non-deleted label is about to expire
+    # 2. Notification that an expired label has been observed
+    # 3. Notification that a label has been reported
+    # 4. Notification that a label has been cleaned away
+
+    for action in recent_actions:
+        label = action.label
+        deserialized_label = LabelWrapper.from_dict(label.data).label  # type: ignore
+        member = db_session.get(Member, label.member_id)
+        assert member is not None
+        common_kws = get_common_kws(action, member, deserialized_label)
+
+        action_author = db_session.get(Member, action.action_member_id)
+        assert action_author is not None, f"action {action.id} has no valid action_member_id {action.action_member_id}"
+        # logger.info(
+        #     f"Processing label {label_id} with obs={obs}, rep={rep}, clean={clean}, deserialized_label={deserialized_label}"
+        # )
+
+        if action.action == "reported":
+            for tp, sms in [
+                (MessageTemplate.MEMBERBOOTH_LABEL_REPORT, False),
+                (MessageTemplate.MEMBERBOOTH_LABEL_REPORT_SMS, True),
+            ]:
+                logger.info(f"Sending message {tp} for label {label.id} to member {member.member_id}")
+                send_message(
+                    associated_id=action.id,
+                    template=tp,
+                    member=member,
+                    db_session=db_session,
+                    action=action,
+                    action_author_name=f"{action_author.firstname} {action_author.lastname}",
+                    sms=sms,
+                    **common_kws,
+                )
+        elif action.action == "cleaned_away":
+            tps = [
+                (MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY, False),
+                (MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY_SMS, True),
+            ]
+            if isinstance(deserialized_label, BoxLabel):
+                tps = [
+                    (MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY, False),
+                    (MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY_SMS, True),
+                ]
+            for tp, sms in tps:
+                logger.info(f"Sending message {tp} for label {label.id} to member {member.member_id}")
+                send_message(
+                    associated_id=action.id,
+                    template=tp,
+                    member=member,
+                    db_session=db_session,
+                    action=action,
+                    sms=sms,
+                    **common_kws,
+                )
+        else:
+            assert False, f"unknown action {action.action}"
+
+    # Get all recent actions for observations, reports, and cleanings
+    # Get recent observations, but exclude those where a non-observation action (e.g. "reported", "cleaned_away")
+    # was taken for the same label within a few days of the observation.
+    non_obs_alias = MemberboothLabelAction.__table__.alias("non_obs")
+
+    recent_observations = (
+        db_session.query(MemberboothLabelAction)
+        .filter(
+            MemberboothLabelAction.created_at >= recent_window,
+            # Don't send messages for very recent observations, to allow time for the member to e.g. report after an observation
+            MemberboothLabelAction.created_at < now - timedelta(minutes=5),
+            MemberboothLabelAction.action == "observed",
+            ~db_session.query(non_obs_alias.c.id)
+            .filter(
+                non_obs_alias.c.label_id == MemberboothLabelAction.label_id,
+                non_obs_alias.c.action != "observed",
+                non_obs_alias.c.created_at > MemberboothLabelAction.created_at - timedelta(days=1),
+                non_obs_alias.c.created_at <= MemberboothLabelAction.created_at + timedelta(days=1),
+            )
+            .exists(),
+        )
+        .order_by(MemberboothLabelAction.created_at.asc())
+        .all()
+    )
+
+    # Map label_id to the most recent observation
+    observations: dict[int, MemberboothLabelAction] = {}
+    for obs in recent_observations:
+        observations[obs.label_id] = obs
+
+    # Send messages for recent observations (no recent report/cleaning, and not already sent)
+    for label_id, action in observations.items():
+        label = action.label
+        deserialized_label = LabelWrapper.from_dict(label.data).label  # type: ignore
+        member = db_session.get(Member, label.member_id)
+        assert member is not None
+        common_kws = get_common_kws(action, member, deserialized_label)
+        expires_at = common_kws["expires_at"]
+        assert expires_at is None or isinstance(expires_at, date)
+
+        # logger.info(
+        #     f"Processing label {label_id} with obs={obs}, rep={rep}, clean={clean}, deserialized_label={deserialized_label}"
+        # )
+
+        if (
+            isinstance(deserialized_label, TemporaryStorageLabel)
+            or isinstance(deserialized_label, FireSafetyLabel)
+            or isinstance(deserialized_label, BoxLabel)
+        ):
+            assert expires_at is not None
+            if expires_at < now.date() + timedelta(days=14):
+                # Expired or about to expire soon
+                if expires_at < now.date():
+                    # Expired
+                    tp = (
+                        MessageTemplate.MEMBERBOOTH_BOX_EXPIRED
+                        if isinstance(deserialized_label, BoxLabel)
+                        else MessageTemplate.MEMBERBOOTH_LABEL_EXPIRED
+                    )
+                    if not already_sent_for_label(tp, member.member_id, label_id):
+                        send_message(
+                            associated_id=action.id,
+                            template=tp,
+                            member=member,
+                            db_session=db_session,
+                            action=obs,
+                            **common_kws,
+                        )
+                else:
+                    # About to expire
+                    tp = (
+                        MessageTemplate.MEMBERBOOTH_BOX_EXPIRING_SOON
+                        if isinstance(deserialized_label, BoxLabel)
+                        else MessageTemplate.MEMBERBOOTH_LABEL_EXPIRING_SOON
+                    )
+                    if not already_sent_for_label(tp, member.member_id, label_id):
+                        send_message(
+                            associated_id=action.id,
+                            template=tp,
+                            member=member,
+                            db_session=db_session,
+                            action=obs,
+                            **common_kws,
+                        )
+
+    # Check all labels created in the past 90 days for upcoming expiration
+    ninety_days_ago = now - timedelta(days=90)
+    two_weeks_from_now = now.date() + timedelta(days=14)
+
+    recent_labels = (
+        db_session.query(MemberboothLabelAction)
+        .filter(
+            MemberboothLabelAction.action == "observed",
+            MemberboothLabelAction.created_at >= ninety_days_ago,
+        )
+        .order_by(MemberboothLabelAction.created_at.desc())
+        .all()
+    )
+
+    for action in recent_labels:
+        label_id = action.label_id
+        label = action.label
+        deserialized_label = LabelWrapper.from_dict(label.data).label  # type: ignore
+
+        # Only consider TemporaryStorageLabel or FireSafetyLabel
+        if not isinstance(deserialized_label, (TemporaryStorageLabel, FireSafetyLabel)):
+            continue
+
+        expires_at = deserialized_label.expires_at
+        if expires_at is None:
+            continue
+
+        # Only consider labels expiring within the next two weeks and not already expired
+        if now.date() < expires_at <= two_weeks_from_now:
+            # Get the member and check if they have active labaccess
+            member = db_session.get(Member, label.member_id)
+            assert member is not None
+
+            # Check if a message was already sent for this label
+            if already_sent_for_label(MessageTemplate.MEMBERBOOTH_LABEL_EXPIRING_SOON, member.member_id, label_id):
+                continue
+
+            membership_summary = get_membership_summary(member.member_id)  # to ensure membership data is loaded
+            if not membership_summary.effective_labaccess_active:
+                continue
+
+            elif isinstance(deserialized_label, TemporaryStorageLabel):
+                desc = deserialized_label.description
+                if len(desc) > 23:
+                    desc = desc[:20] + "..."
+                thing_name = f"item with the label '{desc}'"
+                thing_name_sv = f"sak med etiketten '{desc}'"
+                expires_at = deserialized_label.expires_at
+            elif isinstance(deserialized_label, FireSafetyLabel):
+                thing_name = f"item in the fire safety cabinett"
+                thing_name_sv = f"sak i brandsäkra skåpet"
+                expires_at = deserialized_label.expires_at
+            else:
+                assert False
+
+            send_message(
+                template=MessageTemplate.MEMBERBOOTH_LABEL_EXPIRING_SOON,
+                member=member,
+                db_session=db_session,
+                label=deserialized_label,
+                thing_name=thing_name,
+                thing_name_sv=thing_name_sv,
+            )
 
 
 def labaccess_reminder() -> None:
@@ -439,6 +760,8 @@ if __name__ == "__main__":
                     quiz_reminders()
 
                     db_session.commit()
+
+                memberbooth_labels()
                 send_messages(key, domain, sender, to_override, args.limit)
                 db_session.commit()
             except DatabaseError as e:

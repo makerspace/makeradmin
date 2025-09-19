@@ -31,6 +31,8 @@ class MemberboothLabel(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=False)
     member_id: Mapped[int] = mapped_column(Integer, ForeignKey(Member.member_id), nullable=False)
+
+    # Serialized LabelType
     data: Mapped[JSON] = mapped_column(JSON, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
@@ -48,7 +50,7 @@ class MemberboothLabelAction(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, nullable=False)
     label_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(MemberboothLabel.id), nullable=False)
-    action_member_id: Mapped[int] = mapped_column(Integer, ForeignKey(Member.member_id), nullable=False)
+    action_member_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(Member.member_id), nullable=False)
     session_token: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     action: Mapped[Literal["observed", "reported", "cleaned_away"]] = mapped_column(
         Enum("observed", "reported", "cleaned_away", name="memberbooth_label_action_enum"), nullable=False

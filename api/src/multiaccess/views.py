@@ -1,15 +1,36 @@
-from datetime import datetime, timezone
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from io import BytesIO
 from logging import getLogger
+from typing import Literal
 
+import flask
 import serde
 import serde.json
-from flask import g, request
-from service.api_definition import DELETE, GET, MEMBER_EDIT, MEMBERBOOTH, POST, PUBLIC, USER, Arg, symbol
+from dataclasses_json import DataClassJsonMixin
+from flask import Response, g, redirect, request
+from messages.models import Message, MessageTemplate
+from messages.views import message_entity
+from PIL import Image
+from service.api_definition import (
+    DELETE,
+    GET,
+    MEMBER_EDIT,
+    MEMBERBOOTH,
+    MESSAGE_SEND,
+    MESSAGE_VIEW,
+    POST,
+    PUBLIC,
+    USER,
+    Arg,
+    symbol,
+)
 from service.db import db_session
 from service.error import BadRequest, Forbidden, NotFound
 from sqlalchemy import select
+from werkzeug.wrappers.request import FileStorage
 
-from multiaccess import service
+from multiaccess import service, short_url_service
 from multiaccess.box_terminator import box_terminator_boxes, box_terminator_nag, box_terminator_validate
 from multiaccess.labal_data import LabelType
 from multiaccess.memberbooth import (
@@ -18,11 +39,12 @@ from multiaccess.memberbooth import (
     UploadLabelRequest,
     create_label,
     get_label_public_url,
+    get_label_qr_code_url,
     member_number_to_memberinfo,
     pin_login_to_memberinfo,
     tag_to_memberinfo,
 )
-from multiaccess.models import MemberboothLabel
+from multiaccess.models import MemberboothLabel, MemberboothLabelAction
 
 logger = getLogger("memberbooth")
 
@@ -74,12 +96,18 @@ def memberbooth_get_label(id: int) -> dict:
     data_dict: dict = label.data  # type: ignore
     data = LabelWrapper.from_dict(data_dict)  # validate
 
-    return serde.to_dict(UploadedLabel(public_url=get_label_public_url(label.id), label=data.label))
+    return serde.to_dict(
+        UploadedLabel(
+            public_url=get_label_public_url(label.id),
+            public_observation_url=get_label_qr_code_url(label.id),
+            label=data.label,
+        )
+    )
 
 
 # Note: All labels are public. This is by design, as they are in any case printed and put on physical objects.
 @service.route("/memberbooth/label/<int:id>", method=DELETE, permission=USER)
-def memberbooth_delete_label(id: int) -> None:
+def memberbooth_delete_label(id: int) -> Response:
     label = db_session.execute(
         select(MemberboothLabel).where(MemberboothLabel.id == id, MemberboothLabel.deleted_at.is_(None))
     ).scalar_one_or_none()
@@ -92,6 +120,158 @@ def memberbooth_delete_label(id: int) -> None:
 
     label.deleted_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db_session.flush()
+    return Response(status=204)
+
+
+@service.route("/memberbooth/label/<int:id>/message", method=GET, permission=USER)
+def memberbooth_label_related_messages(id: int) -> list[dict]:
+    label = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
+
+    if label is None:
+        raise NotFound()
+
+    label_message_types = [
+        MessageTemplate.MEMBERBOOTH_LABEL_REPORT,
+        MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY,
+        MessageTemplate.MEMBERBOOTH_LABEL_REPORT_SMS,
+        MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY_SMS,
+        MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY,
+        MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY_SMS,
+        MessageTemplate.MEMBERBOOTH_LABEL_EXPIRED,
+        MessageTemplate.MEMBERBOOTH_LABEL_EXPIRING_SOON,
+        MessageTemplate.MEMBERBOOTH_BOX_EXPIRED,
+        MessageTemplate.MEMBERBOOTH_BOX_EXPIRING_SOON,
+    ]
+
+    q = (
+        select(Message)
+        .join(MemberboothLabelAction, MemberboothLabelAction.id == Message.associated_id)
+        .where(
+            Message.template.in_([v.value for v in label_message_types]),
+            MemberboothLabelAction.label_id == id,
+        )
+        .order_by(Message.created_at.desc())
+    )
+
+    if MESSAGE_VIEW not in g.permissions:
+        # Only allow access to messages to the member themselves
+        q = q.where(Message.member_id == g.user_id)
+
+    messages = db_session.execute(q).scalars().all()
+
+    return [message_entity.to_obj(message) for message in messages]
+
+
+@dataclass
+class LabelActionResponse(DataClassJsonMixin):
+    id: int
+
+
+# This route is used by QR codes on labels. Scanning one should automatically register an observation, and then redirect to the public label URL.
+@short_url_service.route("/<int:id>", method=GET, permission=PUBLIC)
+def memberbooth_label_qrcode(id: int) -> Response:
+    try:
+        memberbooth_label_action(id, action="observed")
+    except NotFound:
+        # If the label does not exist, we still want to redirect to the public URL
+        pass
+    return flask.make_response(redirect(get_label_public_url(id), code=302))
+
+
+@service.route("/memberbooth/label/<int:id>/report", method=POST, permission=MESSAGE_SEND)
+def memberbooth_report_label(id: int) -> dict:
+    return memberbooth_label_action(
+        id, action="reported", message=request.form.get("message"), image=request.files.get("image")
+    )
+
+
+@service.route("/memberbooth/label/<int:id>/terminate", method=POST, permission=MESSAGE_SEND)
+def memberbooth_terminate_label(id: int) -> dict:
+    return memberbooth_label_action(
+        id, action="cleaned_away", message=request.form.get("message"), image=request.files.get("image")
+    )
+
+
+def memberbooth_label_action(
+    id: int,
+    action: Literal["reported"] | Literal["cleaned_away"] | Literal["observed"],
+    message: str | None = None,
+    image: FileStorage | None = None,
+) -> dict:
+    if not message and action == "reported":
+        raise BadRequest("Message is required.")
+
+    label = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
+
+    if label is None:
+        raise NotFound()
+    if label.deleted_at is not None:
+        # A report, observation or cleaning means that the label still exists
+        # So if it had been deleted, un-delete it
+        label.deleted_at = None
+        db_session.add(label)
+        db_session.flush()
+
+    if image:
+        img = image.read()
+        # Resize image to at most 1000 pixels in width or height to avoid taking up too much space.
+        img_io = BytesIO(img)
+        with Image.open(img_io) as im:
+            im.thumbnail((1000, 1000), Image.Resampling.BILINEAR)
+            out_io = BytesIO()
+            im.save(out_io, format="webp")
+            img = out_io.getvalue()
+    else:
+        img = None
+
+    db_action = MemberboothLabelAction(
+        label_id=id,
+        action_member_id=g.user_id,
+        session_token=g.session_token,
+        action=action,
+        message=message,
+        image=img,
+    )
+
+    # Remove previous action of the same type for this label within the last 5 minutes.
+    # This avoids putting e.g. multiple observations in the database if someone scans the QR code multiple times.
+    # This is not strictly necessary to handle (the emailing code already deduplicates emails), but it keeps the database cleaner.
+    five_minutes_ago = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=5)
+    prev_action = (
+        db_session.execute(
+            select(MemberboothLabelAction)
+            .where(
+                MemberboothLabelAction.label_id == id,
+                MemberboothLabelAction.action == action,
+                MemberboothLabelAction.created_at >= five_minutes_ago,
+            )
+            .order_by(MemberboothLabelAction.created_at.desc())
+        )
+        .scalars()
+        .first()
+    )
+    if prev_action:
+        db_session.delete(prev_action)
+
+    db_session.add(db_action)
+    db_session.flush()
+
+    return LabelActionResponse(id=db_action.id).to_dict()
+
+
+# Links to these images are included in emails sent out to members, so they need to be public.
+@service.route("/memberbooth/label_action/<int:id>/image", method=GET, permission=PUBLIC)
+def memberbooth_label_action_image(id: int) -> Response:
+    action = db_session.execute(
+        select(MemberboothLabelAction).where(MemberboothLabelAction.id == id)
+    ).scalar_one_or_none()
+
+    if action is None:
+        raise NotFound()
+    if action.image is None:
+        raise NotFound()
+
+    return Response(action.image, mimetype="image/webp")
 
 
 @service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)

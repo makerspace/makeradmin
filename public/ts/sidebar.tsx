@@ -78,10 +78,14 @@ export const Sidebar = ({
     }, []);
 
     const labelDot = useMemo(() => {
-        if (labels.some((label) => expiredRecently(new Date(), label.label))) {
+        if (
+            labels.some((label) =>
+                expiredRecently(new Date(), label.label, null),
+            )
+        ) {
             return "danger";
         } else if (
-            labels.some((label) => expiresSoon(new Date(), label.label))
+            labels.some((label) => expiresSoon(new Date(), label.label, null))
         ) {
             return "warning";
         } else {

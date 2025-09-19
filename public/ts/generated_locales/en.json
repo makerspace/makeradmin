@@ -86,6 +86,53 @@
             "now": "Dried just now",
             "date_future": "Dries {{date}}",
             "date_past": "Dried {{date}}"
+        },
+        "relative_generic": {
+            "in_minutes": "In {{count}} minutes",
+            "minutes_ago": "{{count}} minutes ago",
+            "in_hours": "In {{count}} hours",
+            "hours_ago": "{{count}} hours ago",
+            "in_days": "In {{count}} days",
+            "days_ago": "{{count}} days ago",
+            "now": "Just now",
+            "date_future": "{{date}}",
+            "date_past": "{{date}}"
+        },
+        "actions": {
+            "title": "Actions",
+            "submitted_successfully": "Label submitted successfully",
+            "failed_to_submit": "Failed to submit label",
+            "report": "Report",
+            "terminate": "Terminate",
+            "can_terminate_in": "Can terminate {{duration}}",
+            "can_terminate_after_observation": "Not scanned after expiry, cannot be cleaned away yet.",
+            "report_label": "Report label",
+            "terminate_label": "Terminate label",
+            "write_a_message": "Write a message",
+            "change_photo": "Change photo",
+            "add_photo": "Add photo",
+            "submit": "Submit",
+            "cancel": "Cancel"
+        },
+        "messages": {
+            "title": "Messages",
+            "status": {
+                "queued": "Pending",
+                "sent": "Sent",
+                "failed": "Failed"
+            },
+            "template": {
+                "memberbooth_label_report": "Reported",
+                "memberbooth_label_cleaned_away": "Cleaned away",
+                "memberbooth_label_report_sms": "Reported (SMS)",
+                "memberbooth_label_cleaned_away_sms": "Cleaned away (SMS)",
+                "memberbooth_label_expired": "Expired",
+                "memberbooth_label_expiring_soon": "Expiring soon",
+                "memberbooth_box_cleaned_away": "Box cleaned away",
+                "memberbooth_box_cleaned_away_sms": "Box cleaned away (SMS)",
+                "memberbooth_box_expired": "Box expired",
+                "memberbooth_box_expiring_soon": "Box expiring soon"
+            }
         }
     },
     "login": {

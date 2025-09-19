@@ -24,6 +24,9 @@ services = (
     Instance(path="/messages", service=messages.service),
     Instance(path="/statistics", service=statistics.service),
     Instance(path="/multiaccess", service=multiaccess.service),
+    Instance(
+        path="/L/", service=multiaccess.short_url_service
+    ),  # Shorthand URL service for QR codes. Must stay uppercase
     Instance(path="/quiz", service=quiz.service),
     Instance(path="/accessy", service=multiaccessy.service),
     Instance(path="/box_terminator", service=box_terminator.service),

@@ -7,7 +7,7 @@ from membership.member_auth import verify_password
 from membership.membership import MembershipData, get_membership_summary
 from membership.models import Key, Member
 from serde import InternalTagging
-from service.config import get_public_url
+from service.config import get_api_url, get_public_url
 from service.db import db_session
 from service.error import NotFound
 
@@ -35,7 +35,10 @@ class MemberboothMemberInfo(DataClassJsonMixin):
 
 @serde.serde(tagging=InternalTagging("type"))
 class UploadedLabel:
+    # Public url that can be used to view the given label
     public_url: str
+    # Public url that will register an observation of the label, and then redirect to public_url. Used for QR codes.
+    public_observation_url: str
     label: LabelType
 
 
@@ -115,6 +118,13 @@ def get_label_public_url(label_id: int) -> str:
     return get_public_url("/label/") + str(label_id)
 
 
+def get_label_qr_code_url(label_id: int) -> str:
+    # Use short URL service for QR codes, to make them easier to scan.
+    # The host and protocol can always be made uppercase, and we make sure to handle an uppercase path too.
+    # QR codes encode uppercase alphanumeric characters with fewer bits.
+    return get_api_url(f"/L/{label_id}").upper().replace("HTTPS://", "HTTP://")
+
+
 @serde.serde(tagging=InternalTagging("type"))
 class LabelWrapper:
     label: LabelType
@@ -147,7 +157,11 @@ def create_label(data: UploadLabelRequest) -> UploadedLabel:
     )
     db_session.add(db_label)
     db_session.flush()
-    return UploadedLabel(public_url=get_label_public_url(db_label.id), label=data.label)
+    return UploadedLabel(
+        public_url=get_label_public_url(db_label.id),
+        public_observation_url=get_label_qr_code_url(db_label.id),
+        label=data.label,
+    )
 
 
 def get_member_labels(member_id: int) -> list[UploadedLabel]:
@@ -166,6 +180,12 @@ def get_member_labels(member_id: int) -> list[UploadedLabel]:
     for label in labels:
         data_dict: dict = label.data  # type: ignore
         data = LabelWrapper.from_dict(data_dict)  # validate
-        result.append(UploadedLabel(public_url=get_label_public_url(label.id), label=data.label))
+        result.append(
+            UploadedLabel(
+                public_url=get_label_public_url(label.id),
+                public_observation_url=get_label_qr_code_url(label.id),
+                label=data.label,
+            )
+        )
 
     return result
