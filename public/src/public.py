@@ -199,5 +199,6 @@ def context():
             api_base_url=api_base_url,
             stripe_public_key=os.environ.get("STRIPE_PUBLIC_KEY", ""),
             host_public=host_public,
+            host_frontend=os.environ.get("HOST_FRONTEND", ""),
         ),
     )
