@@ -5,7 +5,7 @@ import { JSX } from "preact/jsx-runtime";
 import Cart, { useCart } from "./cart";
 import { show_phone_number_dialog } from "./change_phone";
 import * as common from "./common";
-import { UNAUTHORIZED, get_error } from "./common";
+import { UNAUTHORIZED, get_error, url } from "./common";
 import * as login from "./login";
 
 import { Trans } from "react-i18next";
@@ -69,7 +69,7 @@ type membership_info_t = {
     active: boolean;
 };
 
-const webshop_url = `${window.location.origin}/shop`;
+const webshop_url = url("/shop");
 
 function get_random_pin_code(numbers: number): string {
     return Math.random().toString(10).substr(2, numbers);

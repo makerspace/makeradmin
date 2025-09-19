@@ -7,6 +7,8 @@ declare global {
         stripeKey: string;
         apiBasePath: string;
         hostAdminFrontend: string;
+        hostPublicFrontend: string;
+        basePath: string;
         staticBasePath: string;
         productId: number;
         transactionId: number;
@@ -241,9 +243,16 @@ export function removeToken() {
 
 export function logout() {
     removeToken();
-    window.location.href = "/";
+    window.location.href = url("/");
 }
 
 export function login(token: string) {
     localStorage.setItem("token", token);
+}
+
+export function url(path: string) {
+    if (!path.startsWith("/")) {
+        return path;
+    }
+    return `${window.basePath}${path}`;
 }

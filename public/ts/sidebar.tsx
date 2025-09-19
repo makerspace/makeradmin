@@ -1,7 +1,7 @@
 import { ComponentChildren } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import Cart from "./cart";
-import { logout, UNAUTHORIZED } from "./common";
+import { logout, UNAUTHORIZED, url } from "./common";
 import { useTranslation } from "./i18n";
 import { expiredRecently, expiresSoon, UploadedLabel } from "./label_common";
 import { LoadCurrentLabels } from "./member_common";
@@ -109,13 +109,13 @@ export const Sidebar = ({
                     src={`${window.staticBasePath}/images/logo-transparent-500px-300x210.png`}
                 />
                 <ul className="uk-nav uk-nav-default">
-                    <NavItem url="/member" icon="user">
+                    <NavItem url={url("/member")} icon="user">
                         {t("member")}
                     </NavItem>
-                    <NavItem url="/shop" icon="cart">
+                    <NavItem url={url("/shop")} icon="cart">
                         {t("shop")}
                     </NavItem>
-                    {(path === "/shop" || path === "/shop/cart") &&
+                    {(path === url("/shop") || path === url("/shop/cart")) &&
                         cart !== null && (
                             <ul id="categories" className="uk-nav-sub">
                                 {cart.productData.categories
@@ -128,7 +128,9 @@ export const Sidebar = ({
                                     .map((category) => (
                                         <li>
                                             <a
-                                                href={`/shop/#category${category.id}`}
+                                                href={url(
+                                                    `/shop/#category${category.id}`,
+                                                )}
                                                 uk-scroll={path === "/shop"}
                                             >
                                                 <span uk-icon="tag"></span>{" "}
@@ -145,19 +147,23 @@ export const Sidebar = ({
                                 </NavItem>
                             </ul>
                         )}
-                    <NavItem url="/shop/member/history" icon="history">
+                    <NavItem url={url("/shop/member/history")} icon="history">
                         {t("purchase_history")}
                     </NavItem>
-                    <NavItem url="/member/courses" icon="star">
+                    <NavItem url={url("/member/courses")} icon="star">
                         {t("courses")}
                     </NavItem>
-                    <NavItem url="/member/labels" icon="tag" dot={labelDot}>
+                    <NavItem
+                        url={url("/member/labels")}
+                        icon="tag"
+                        dot={labelDot}
+                    >
                         {t("labels")}
                     </NavItem>
                     <NavItem url="http://wiki.makerspace.se" icon="world">
                         {t("wiki")}
                     </NavItem>
-                    <NavItem url="/member/licenses" icon="tag">
+                    <NavItem url={url("/member/licenses")} icon="tag">
                         {t("licenses")}
                     </NavItem>
                     <li>
@@ -178,7 +184,7 @@ export const Sidebar = ({
                                 cart.cart.items.length === 0 ? "cart-empty" : ""
                             }`}
                         >
-                            <a href="/shop/cart">
+                            <a href={url("/shop/cart")}>
                                 <span uk-icon="cart"></span> {t("pay")}
                                 <span id="cart-sum">
                                     {Cart.formatCurrency(

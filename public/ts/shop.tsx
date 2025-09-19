@@ -2,6 +2,7 @@ import { render } from "preact";
 import { useState } from "preact/hooks";
 import Cart, { useCart } from "./cart";
 import * as common from "./common";
+import { url } from "./common";
 import { useTranslation } from "./i18n";
 import * as login from "./login";
 import { LoadCurrentMemberInfo } from "./member_common";
@@ -109,13 +110,13 @@ const ProductItem = ({
     return (
         <div className="product-container">
             <div class="product-image-container">
-                <a href={`product/${item.id}`}>
+                <a href={url(`product/${item.id}`)}>
                     <img src={image_url} alt={item.name} />
                 </a>
             </div>
             <div id={`product-${item.id}`} class="product">
                 <div class="product-line">
-                    <a class="product-title" href={`product/${item.id}`}>
+                    <a class="product-title" href={url(`product/${item.id}`)}>
                         {item.name}
                     </a>
                     <span class="product-price">

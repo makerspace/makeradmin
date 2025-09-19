@@ -2,6 +2,7 @@ import os
 import sys
 from logging import INFO, basicConfig, getLogger
 from typing import Any
+from urllib.parse import urlparse
 
 import flask
 from flask import Blueprint, Flask, redirect, send_from_directory, url_for
@@ -27,6 +28,10 @@ if banner:
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 HOST_PUBLIC = os.environ["HOST_PUBLIC"]
 
+# Handle hosting at a sub-path, e.g. "mytestserver.com/makerspace/"
+parsed_host_public = urlparse(HOST_PUBLIC)
+HOST_PUBLIC_PATH = parsed_host_public.path.rstrip("/")
+
 
 class Section(Blueprint):
     def __init__(self, name):
@@ -34,7 +39,7 @@ class Section(Blueprint):
         self.context_processor(lambda: dict(url=self.url))
 
     def url(self, path):
-        return f"/{self.name}{path}"
+        return f"{HOST_PUBLIC_PATH}/{self.name}{path}"
 
     def route(self, path, **kwargs):
         return super().route(self.url(path), **kwargs)
@@ -46,8 +51,8 @@ def render_template(path: str, **kwargs: Any) -> str:
         path,
         banner=banner,
         sidebar_additional_classes=sidebar_additional_classes,
-        # Note: Using fully-qualified URL to avoid issues where HOST_PUBLIC contains a path (e.g. mytestserver.com/makerspace/)
-        STATIC=f"{HOST_PUBLIC}/static{static_hash}",
+        BASE_PATH=HOST_PUBLIC_PATH,
+        STATIC=f"{HOST_PUBLIC_PATH}/static{static_hash}",
         **kwargs,
     )
 
