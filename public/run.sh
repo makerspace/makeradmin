@@ -5,14 +5,20 @@ GUNICORN_FLAGS=""
 GUNICORN_PORT=80
 GUNICORN_WORKERS=4
 
+function patch_css_static_prefix() {
+    sed -i "s|{{STATIC}}/|/static$STATIC_PREFIX_HASH/|g" static/style.css
+}
+
 function watch_sass() {
     cmd="npm exec sass scss/style.scss static/style.css"
     echo "Watching SASS stylesheets for changes..."
     $cmd || true
+    patch_css_static_prefix
     while inotifywait -qq -r -e modify,create,delete scss; do
         echo "Updating stylesheets"
         sleep 0.1
         $cmd || true
+        patch_css_static_prefix
     done
 }
 
@@ -51,6 +57,9 @@ else
     STATIC_PREFIX_HASH="_$(find . -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -c 1-6)"
     export STATIC_PREFIX_HASH
     echo "Prefix hash $STATIC_PREFIX_HASH"
+
+    # Update the static prefix in the CSS file.
+    patch_css_static_prefix
 fi
 
 # Note: for some reason the workers seem to sometimes get blocked by persistent connections

@@ -24,6 +24,8 @@ if banner:
     # Set the sidebar to not to use fixed positioning if there is a banner because otherwise the sidebar may end up below the banner, esp. on mobile devices
     sidebar_additional_classes = "sidebar-banner-adjust"
 
+static_hash = os.environ["STATIC_PREFIX_HASH"]
+
 
 class Section(Blueprint):
     def __init__(self, name):
@@ -38,7 +40,14 @@ class Section(Blueprint):
 
 
 def render_template(path: str, **kwargs: Any) -> str:
-    return flask.render_template(path, banner=banner, sidebar_additional_classes=sidebar_additional_classes, **kwargs)
+    assert "STATIC" not in kwargs
+    return flask.render_template(
+        path,
+        banner=banner,
+        sidebar_additional_classes=sidebar_additional_classes,
+        STATIC=f"/static{static_hash}",
+        **kwargs,
+    )
 
 
 shop = Section("shop")
@@ -150,17 +159,24 @@ def label_detail(label_id: int):
     return render_template("label.html")
 
 
-static_hash = os.environ["STATIC_PREFIX_HASH"]
-app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
+app = Flask(__name__, static_folder=None)
+
+
+@app.route(f"/static{static_hash}/<path:filepath>")
+def serve_static(filepath: str) -> flask.Response:
+    response = send_from_directory("../static", filepath)
+
+    # During development, the hash is empty to disable caching
+    if static_hash != "":
+        # Cache static files for some time. We use a prefix hash, so caching indefinitely is quite fine.
+        response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24 * 30}, immutable"
+        response.headers["Vary"] = "Accept-Encoding"
+    return response
+
 
 app.register_blueprint(shop)
 app.register_blueprint(member)
 app.register_blueprint(label)
-
-
-@app.route("/static/product_images/<path:path>")
-def product_image(path):
-    return send_from_directory("../static/product_images", path)
 
 
 @app.route("/")

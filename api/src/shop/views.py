@@ -288,6 +288,8 @@ def public_image(image_id: int) -> Response:
     response = make_response(image.data)
     response.headers.set("Content-Type", image.type)
     response.headers.set("Max-Age", "36000")
+    response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24 * 7}"
+    response.headers["Vary"] = "Accept-Encoding"
     return response
 
 
