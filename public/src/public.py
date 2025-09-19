@@ -47,7 +47,7 @@ class Section(Blueprint):
         return f"{HOST_PUBLIC_PATH}/{self.name}{path}"
 
     def route(self, path: str, **kwargs: Any):
-        return super().route(f"{self.name}{path}", **kwargs)
+        return super().route(f"/{self.name}{path}", **kwargs)
 
 
 def render_template(path: str, **kwargs: Any) -> str:
