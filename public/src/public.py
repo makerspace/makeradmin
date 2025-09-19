@@ -39,15 +39,15 @@ STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "")
 
 
 class Section(Blueprint):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__(name, name)
         self.context_processor(lambda: dict(url=self.url))
 
-    def url(self, path):
+    def url(self, path: str) -> str:
         return f"{HOST_PUBLIC_PATH}/{self.name}{path}"
 
-    def route(self, path, **kwargs):
-        return super().route(self.url(path), **kwargs)
+    def route(self, path: str, **kwargs: Any):
+        return super().route(f"{self.name}{path}", **kwargs)
 
 
 def render_template(path: str, **kwargs: Any) -> str:
