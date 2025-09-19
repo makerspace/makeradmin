@@ -197,4 +197,4 @@ app.register_blueprint(label)
 
 @app.route("/")
 def root():
-    return redirect(HOST_PUBLIC_PATH + url_for("member.show_member"))
+    return redirect(member.url("/"))

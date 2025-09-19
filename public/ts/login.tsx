@@ -46,7 +46,7 @@ export function login_via_password(
             if (data !== null) {
                 let r = data as ServerResponse<any> & { access_token: string };
                 common.login(r.access_token);
-                window.location.replace(redirect || "/");
+                window.location.replace(redirect || url("/"));
             }
         });
 }
