@@ -1,13 +1,13 @@
 <link rel="icon" href="{{ STATIC }}/favicon.png" type="image/x-icon" />
 <script>
-    window.stripeKey = "{{ meta.stripe_public_key }}";
-    window.apiBasePath = "{{ meta.api_base_url }}";
-    window.hostAdminFrontend = "{{ meta.host_frontend }}";
+    window.stripeKey = "{{ stripe_public_key }}";
+    window.apiBasePath = "{{ api_base_url }}";
+    window.hostAdminFrontend = "{{ host_frontend }}";
     window.staticBasePath = "{{ STATIC }}";
     window.basePath = "{{ BASE_PATH }}";
 </script>
 <script
     defer
-    data-domain="{{ meta.host_public.replace('https://', '').replace('http://', '') }}"
+    data-domain="{{ DOMAIN_PUBLIC }}"
     src="https://plausible.makerspace.se/js/script.tagged-events.js"
 ></script>

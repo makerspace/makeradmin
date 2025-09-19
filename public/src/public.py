@@ -27,10 +27,15 @@ if banner:
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 HOST_PUBLIC = os.environ["HOST_PUBLIC"]
+HOST_BACKEND = os.environ["HOST_BACKEND"]
+HOST_FRONTEND = os.environ["HOST_FRONTEND"]
 
 # Handle hosting at a sub-path, e.g. "mytestserver.com/makerspace/"
 parsed_host_public = urlparse(HOST_PUBLIC)
 HOST_PUBLIC_PATH = parsed_host_public.path.rstrip("/")
+DOMAIN_PUBLIC = parsed_host_public.netloc
+
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "")
 
 
 class Section(Blueprint):
@@ -52,7 +57,11 @@ def render_template(path: str, **kwargs: Any) -> str:
         banner=banner,
         sidebar_additional_classes=sidebar_additional_classes,
         BASE_PATH=HOST_PUBLIC_PATH,
+        DOMAIN_PUBLIC=DOMAIN_PUBLIC,
         STATIC=f"{HOST_PUBLIC_PATH}/static{static_hash}",
+        api_base_url=HOST_BACKEND,
+        stripe_public_key=STRIPE_PUBLIC_KEY,
+        host_frontend=HOST_FRONTEND,
         **kwargs,
     )
 
@@ -188,24 +197,4 @@ app.register_blueprint(label)
 
 @app.route("/")
 def root():
-    return redirect(url_for("member.show_member"))
-
-
-api_base_url = os.environ["HOST_BACKEND"]
-if not api_base_url.startswith("http"):
-    api_base_url = "https://" + api_base_url
-
-host_public = os.environ["HOST_PUBLIC"]
-
-
-@app.context_processor
-def context():
-    return dict(
-        STATIC=app.static_url_path,
-        meta=dict(
-            api_base_url=api_base_url,
-            stripe_public_key=os.environ.get("STRIPE_PUBLIC_KEY", ""),
-            host_public=host_public,
-            host_frontend=os.environ.get("HOST_FRONTEND", ""),
-        ),
-    )
+    return redirect(HOST_PUBLIC_PATH + url_for("member.show_member"))
