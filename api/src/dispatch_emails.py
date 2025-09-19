@@ -1,16 +1,20 @@
 import signal
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from datetime import datetime, timedelta, timezone
+from collections import defaultdict
+from datetime import date, datetime, timedelta, timezone
 from logging import getLogger
 from threading import Event
 from time import sleep
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 from urllib.parse import quote_plus
 
+import dispatch_sms
 import requests
+import serde
 from core.auth import create_access_token
-from membership.membership import get_members_and_membership, get_membership_summaries
+from dispatch_sms import send_sms
+from membership.membership import get_members_and_membership, get_membership_summaries, get_membership_summary
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
@@ -49,53 +53,63 @@ QUIZ_DAYS_BETWEEN_REMINDERS = 21
 warned_about_missing_key = False
 
 
-def send_messages(key: Optional[str], domain: str, sender: str, to_override: Optional[str], limit: int) -> None:
+class NoEmailAuthConfigured(Exception):
+    pass
+
+
+def send_messages(mailgun_key: Optional[str], domain: str, sender: str, to_override: Optional[str], limit: int) -> None:
     query = db_session.query(Message)
     query = query.filter(Message.status == Message.QUEUED)
     query = query.limit(limit)
 
-    if key is None:
-        messages = list(query)
-        global warned_about_missing_key
-        if len(messages) > 0 and not warned_about_missing_key:
-            warned_about_missing_key = True
-
-            for message in messages:
-                message.status = Message.FAILED
-                db_session.add(message)
-            db_session.commit()
-            logger.warning(f"No mailgun key found. Not sending {len(messages)} emails.")
-        return
+    skipped_emails = []
+    skipped_sms = []
 
     for message in query:
         to = message.recipient
         msg = f"sending {message.id} to {to}"
+        recipient_type = message.recipient_type
 
         if to_override:
             msg += f" (overriding to {to_override})"
             to = to_override
+            recipient_type = "email"
 
         msg += f": {message.subject}"
 
-        logger.info(msg)
+        try:
+            while True:
+                try:
+                    if recipient_type == "email":
+                        if mailgun_key is None:
+                            raise NoEmailAuthConfigured()
+                        response = requests.post(
+                            f"https://api.mailgun.net/v3/{domain}/messages",
+                            auth=("api", mailgun_key),
+                            data={
+                                "from": sender,
+                                "to": to,
+                                "subject": message.subject,
+                                "html": message.body,
+                            },
+                        )
+                    elif recipient_type == "sms":
+                        response = send_sms(to, message.body)
+                    else:
+                        assert False, f"unknown recipient type {recipient_type}"
+                    break
+                except requests.ConnectionError as e:
+                    # Can happen if e.g. the mailgun is down for a few seconds (which does happen!)
+                    logger.warning(f"Temporary connection error when sending email. Retrying in a few seconds: {e}\n")
+                    sleep(5)
+        except NoEmailAuthConfigured:
+            skipped_emails.append(message)
+            continue
+        except dispatch_sms.NoAuthConfigured:
+            skipped_sms.append(message)
+            continue
 
-        while True:
-            try:
-                response = requests.post(
-                    f"https://api.mailgun.net/v3/{domain}/messages",
-                    auth=("api", key),
-                    data={
-                        "from": sender,
-                        "to": to,
-                        "subject": message.subject,
-                        "html": message.body,
-                    },
-                )
-                break
-            except requests.ConnectionError as e:
-                # Can happen if e.g. the mailgun is down for a few seconds (which does happen!)
-                logger.warning(f"Temporary connection error when sending email. Retrying in a few seconds: {e}\n")
-                sleep(5)
+        logger.info(msg)
 
         if response.ok:
             message.status = Message.SENT
@@ -111,6 +125,19 @@ def send_messages(key: Optional[str], domain: str, sender: str, to_override: Opt
             db_session.commit()
 
             logger.error(f"failed to send {message.id} to {to}: {response.content.decode('utf-8')}")
+
+    if len(skipped_emails) > 0:
+        logger.warning(f"Skipped sending {len(skipped_emails)} emails because no Mailgun API key is configured.")
+        for message in skipped_emails:
+            message.status = Message.FAILED
+            db_session.add(message)
+        db_session.commit()
+    if len(skipped_sms) > 0:
+        logger.warning(f"Skipped sending {len(skipped_sms)} SMS because no 46elks authentication is configured.")
+        for message in skipped_sms:
+            message.status = Message.FAILED
+            db_session.add(message)
+        db_session.commit()
 
 
 def already_sent_message(template: MessageTemplate, member_id: int, days: int) -> bool:

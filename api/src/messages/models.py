@@ -41,14 +41,20 @@ class Message(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     subject: Mapped[str] = mapped_column(Text, nullable=False)
-    body: Mapped[Optional[str]] = mapped_column(Text)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
     member_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(Member.member_id))
-    recipient: Mapped[Optional[str]] = mapped_column(String(255))
+    recipient_type: Mapped[Literal["email", "sms"]] = mapped_column(Enum("email", "sms"), nullable=False)
+    recipient: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[STATUS] = mapped_column(Enum(QUEUED, SENT, FAILED), nullable=False)
     template: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+
+    # If this message was associated with some other object, this is the ID of that object
+    # This can for example be the ID of a memberbooth label.
+    # If the ID is used or not, and what it is, depends on the message template.
+    associated_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     member: Mapped[Optional[Member]] = relationship(Member)
 
