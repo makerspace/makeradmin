@@ -46,3 +46,5 @@ services:
     volumes:
       - ./admin/src:/work/src
       - ./admin/dist:/work/dist
+    environment:
+      DEV_RUN: "true"
