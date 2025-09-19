@@ -8,8 +8,23 @@ import CollectionNavigation from "../Models/CollectionNavigation";
 import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import Message from "../Models/Message";
 
+function truncate(input, n) {
+    if (input.length > n) {
+        return input.substring(0, n - 3) + "...";
+    }
+    return input;
+}
+
+function unescapeHtml(html) {
+    // Wow, such a silly solution
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
+
 const Row = (props) => {
     const { item } = props;
+
     return (
         <tr>
             <td>
@@ -22,7 +37,11 @@ const Row = (props) => {
                 </Link>
             </td>
             <td>
-                <Link to={"/messages/" + item.id}>{item.subject}</Link>
+                <Link to={"/messages/" + item.id}>
+                    {item.subject !== null && item.subject.length > 0
+                        ? item.subject
+                        : truncate(unescapeHtml(item.body), 80)}
+                </Link>
             </td>
         </tr>
     );
