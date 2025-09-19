@@ -95,7 +95,8 @@ module.exports = (env, args) => {
             plugins: [],
             devServer: {
                 host: "0.0.0.0",
-                port: "80",
+                allowedHosts: "all",
+                port: 80,
                 static: "./dist",
                 historyApiFallback: true,
                 client: {
