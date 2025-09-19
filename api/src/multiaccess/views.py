@@ -49,20 +49,27 @@ from multiaccess.models import MemberboothLabel, MemberboothLabelAction
 logger = getLogger("memberbooth")
 
 
-@service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)
-def memberbooth_tag(tagid: str = Arg(str)) -> dict | None:
+@service.route("/memberbooth/tag/<str:tagid>", method=GET, permission=MEMBERBOOTH)
+def memberbooth_tag(tagid: str) -> dict | None:
     r = tag_to_memberinfo(tagid)
     return r.to_dict() if r else None
 
 
-@service.route("/memberbooth/pin-login", method=GET, permission=MEMBERBOOTH)
-def memberbooth_pin_login(member_number: int = Arg(int), pin_code: str = Arg(str)) -> dict:
-    r = pin_login_to_memberinfo(member_number, pin_code)
+@dataclass
+class PinLoginRequest(DataClassJsonMixin):
+    member_number: int
+    pin_code: str
+
+
+@service.route("/memberbooth/pin-login", method=POST, permission=MEMBERBOOTH)
+def memberbooth_pin_login() -> dict:
+    request_data = PinLoginRequest.from_json(request.get_json())
+    r = pin_login_to_memberinfo(request_data.member_number, request_data.pin_code)
     return r.to_dict()
 
 
-@service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
-def memberbooth_member(member_number: int = Arg(int)) -> dict | None:
+@service.route("/memberbooth/member/<str:member_number>", method=GET, permission=MEMBERBOOTH)
+def memberbooth_member(member_number: int) -> dict | None:
     r = member_number_to_memberinfo(member_number)
     return r.to_dict() if r else None
 
