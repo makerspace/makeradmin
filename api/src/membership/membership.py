@@ -2,7 +2,7 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, TypeVar
 
 from dataclasses_json import DataClassJsonMixin
 from service.api_definition import NOT_UNIQUE
@@ -56,7 +56,7 @@ def get_membership_summary(member_id: int, at_date: Optional[date] = None) -> Me
     return get_membership_summaries([member_id], at_date)[0]
 
 
-def get_membership_summaries(member_ids: List[int], at_date: Optional[date] = None) -> List[MembershipData]:
+def get_membership_summaries(member_ids: Sequence[int], at_date: Optional[date] = None) -> List[MembershipData]:
     """Returns a list of MembershipData for each member in member_ids."""
 
     # Speed up the database query for the common special case that member_ids is a list with exactly 1 element.
