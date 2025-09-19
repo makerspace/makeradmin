@@ -138,7 +138,7 @@ export const Sidebar = ({
                                             </a>
                                         </li>
                                     ))}
-                                <NavItem url="/shop/cart" icon="cart">
+                                <NavItem url={url("/shop/cart")} icon="cart">
                                     {t("cart")} (
                                     {Cart.formatCurrency(
                                         cart.cart.sum(cart.productData.id2item),
