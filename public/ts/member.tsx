@@ -65,7 +65,7 @@ type template_strings_t = [
 ];
 
 type membership_info_t = {
-    enddate: date_t;
+    enddate: date_t | null;
     active: boolean;
 };
 
@@ -89,9 +89,8 @@ function Info({
     const millisecondsPerHour = 1000 * 3600;
     const millisecondsPerDay = millisecondsPerHour * 24;
 
-    const end = Date.parse(info.enddate) + millisecondsPerDay;
-
-    if (info.active) {
+    if (info.active && info.enddate) {
+        const end = Date.parse(info.enddate) + millisecondsPerDay;
         const remainingDays = Math.floor(
             (end - Date.now()) / millisecondsPerDay,
         );
@@ -152,9 +151,8 @@ function Info2({
     const millisecondsPerHour = 1000 * 3600;
     const millisecondsPerDay = millisecondsPerHour * 24;
 
-    const end = Date.parse(info.enddate) + millisecondsPerDay;
-
-    if (info.active) {
+    if (info.active && info.enddate) {
+        const end = Date.parse(info.enddate) + millisecondsPerDay;
         const remainingDays = Math.floor(
             (end - Date.now()) / millisecondsPerDay,
         );

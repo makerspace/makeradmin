@@ -20,11 +20,11 @@ export type member_t = {
 
 export type membership_t = {
     membership_active: boolean;
-    membership_end: date_t;
+    membership_end: date_t | null;
     labaccess_active: boolean;
-    labaccess_end: date_t;
+    labaccess_end: date_t | null;
     special_labaccess_active: boolean;
-    special_labaccess_end: date_t;
+    special_labaccess_end: date_t | null;
 };
 
 export type group_t = {
