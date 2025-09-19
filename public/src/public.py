@@ -25,6 +25,7 @@ if banner:
     sidebar_additional_classes = "sidebar-banner-adjust"
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
+HOST_PUBLIC = os.environ["HOST_PUBLIC"]
 
 
 class Section(Blueprint):
@@ -45,7 +46,8 @@ def render_template(path: str, **kwargs: Any) -> str:
         path,
         banner=banner,
         sidebar_additional_classes=sidebar_additional_classes,
-        STATIC=f"/static{static_hash}",
+        # Note: Using fully-qualified URL to avoid issues where HOST_PUBLIC contains a path (e.g. mytestserver.com/makerspace/)
+        STATIC=f"{HOST_PUBLIC}/static{static_hash}",
         **kwargs,
     )
 
