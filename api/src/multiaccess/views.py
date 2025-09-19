@@ -63,7 +63,7 @@ class PinLoginRequest(DataClassJsonMixin):
 
 @service.route("/memberbooth/pin-login", method=POST, permission=MEMBERBOOTH)
 def memberbooth_pin_login() -> dict:
-    request_data = PinLoginRequest.from_json(request.get_json())
+    request_data = PinLoginRequest.from_dict(request.get_json())
     r = pin_login_to_memberinfo(request_data.member_number, request_data.pin_code)
     return r.to_dict()
 
