@@ -49,7 +49,7 @@ from multiaccess.models import MemberboothLabel, MemberboothLabelAction
 logger = getLogger("memberbooth")
 
 
-@service.route("/memberbooth/tag/<str:tagid>", method=GET, permission=MEMBERBOOTH)
+@service.route("/memberbooth/tag/<string:tagid>", method=GET, permission=MEMBERBOOTH)
 def memberbooth_tag(tagid: str) -> dict | None:
     r = tag_to_memberinfo(tagid)
     return r.to_dict() if r else None
@@ -68,7 +68,7 @@ def memberbooth_pin_login() -> dict:
     return r.to_dict()
 
 
-@service.route("/memberbooth/member/<str:member_number>", method=GET, permission=MEMBERBOOTH)
+@service.route("/memberbooth/member/<string:member_number>", method=GET, permission=MEMBERBOOTH)
 def memberbooth_member(member_number: int) -> dict | None:
     r = member_number_to_memberinfo(member_number)
     return r.to_dict() if r else None
