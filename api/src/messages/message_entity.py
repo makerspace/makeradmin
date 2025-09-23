@@ -40,7 +40,14 @@ class MessageEntity(Entity):
 
         for member in members:
             message = self._create_internal(
-                {**data, "recipient": member.email, "member_id": member.member_id, "status": "queued"}, commit=False
+                {
+                    **data,
+                    "recipient": member.email,
+                    "member_id": member.member_id,
+                    "status": "queued",
+                    "recipient_type": "email",
+                },
+                commit=False,
             )
 
         if commit:

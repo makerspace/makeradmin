@@ -11,6 +11,7 @@ const MemberBoxMessages = () => {
     const [message] = useState(
         new Message({
             recipients: [{ type: "member", id: member_id }],
+            recipient_type: "email",
         }),
     );
 
