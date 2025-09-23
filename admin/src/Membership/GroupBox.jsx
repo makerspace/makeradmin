@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import GroupContext from "../Contexts/GroupContext";
 import Group from "../Models/Group";
 import { NavItem } from "../nav";
 
-function GroupBox(props) {
+function GroupBox() {
     const { group_id } = useParams();
     const group = useMemo(() => Group.get(group_id), [group_id]);
     const [title, setTitle] = useState("");
@@ -47,7 +47,7 @@ function GroupBox(props) {
                         Dörråtkomst
                     </NavItem>
                 </ul>
-                {props.children}
+                <Outlet />
             </div>
         </GroupContext.Provider>
     );

@@ -1,6 +1,6 @@
-import React from "react";
-import { Route, Switch } from "react-router-dom";
-import { defaultSubpageRoute } from "../Components/Routes";
+import React, { Children } from "react";
+import { Route, Routes } from "react-router-dom";
+import { RedirectToSubpage } from "../Components/Routes";
 import AccountingAccount from "./AccountingAccount";
 import AccountingBox from "./AccountingBox";
 import AccountingCostCenter from "./AccountingCostCenter";
@@ -15,40 +15,75 @@ import OrderShow from "./OrderShow";
 import ProductAdd from "./ProductAdd";
 import ProductEdit from "./ProductEdit";
 import ProductList from "./ProductList";
-const Accounting = ({ match: { path } }) => (
-    <AccountingBox>
-        <Switch>
-            {defaultSubpageRoute({ matchpath: path, subpage: "exporting" })}
-            <Route path={`${path}/exporting`} component={AccountingExport} />
-            <Route
-                path={`${path}/overview-product`}
-                component={AccountingProduct}
-            />
-            <Route path={`${path}/account`} component={AccountingAccount} />
-            <Route
-                path={`${path}/cost-center`}
-                component={AccountingCostCenter}
-            />
-        </Switch>
-    </AccountingBox>
-);
+import { Navigate } from "react-router-dom";
 
-export default ({ match }) => (
-    <Switch>
-        {defaultSubpageRoute({ matchpath: match.path, subpage: "order" })}
-        <Route path={`${match.path}/order`} exact component={OrderList} />
-        <Route path={`${match.path}/order/:id`} component={OrderShow} />
-        <Route
-            path={`${match.path}/gift-card`}
-            exact
-            component={GiftCardList}
-        />
-        <Route path={`${match.path}/gift-card/:id`} component={GiftCardShow} />
-        <Route path={`${match.path}/product`} exact component={ProductList} />
-        <Route path={`${match.path}/product/add`} component={ProductAdd} />
-        <Route path={`${match.path}/product/:id`} component={ProductEdit} />
-        <Route path={`${match.path}/category`} exact component={CategoryList} />
-        <Route path={`${match.path}/image`} exact component={ImageList} />
-        <Route path={`${match.path}/accounting`} component={Accounting} />
-    </Switch>
-);
+const routes = [
+    {
+        index: true,
+        element: <Navigate to="order" replace />,
+    },
+    {
+        path: "order",
+        element: <OrderList />,
+    },
+    {
+        path: "order/:id",
+        element: <OrderShow />,
+    },
+    {
+        path: "gift-card",
+        element: <GiftCardList />,
+    },
+    {
+        path: "gift-card/:id",
+        element: <GiftCardShow />,
+    },
+    {
+        path: "product",
+        element: <ProductList />,
+    },
+    {
+        path: "product/add",
+        element: <ProductAdd />,
+    },
+    {
+        path: "product/:id",
+        element: <ProductEdit />,
+    },
+    {
+        path: "category",
+        element: <CategoryList />,
+    },
+    {
+        path: "image",
+        element: <ImageList />,
+    },
+    {
+        path: "accounting/*",
+        element: <AccountingBox />,
+        children: [
+            {
+                index: true,
+                element: <RedirectToSubpage subpage="exporting" />,
+            },
+            {
+                path: "exporting",
+                element: <AccountingExport />,
+            },
+            {
+                path: "overview-product",
+                element: <AccountingProduct />,
+            },
+            {
+                path: "account",
+                element: <AccountingAccount />,
+            },
+            {
+                path: "cost-center",
+                element: <AccountingCostCenter />,
+            },
+        ],
+    },
+];
+
+export default routes;

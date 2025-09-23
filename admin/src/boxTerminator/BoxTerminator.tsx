@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { get } from "../gateway";
 import { showError } from "../message";
 import QrCodeScanner from "./QrCodeScanner";

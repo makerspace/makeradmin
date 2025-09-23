@@ -1,6 +1,6 @@
 import Member from "Models/Member";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Prompt } from "react-router";
+import { unstable_usePrompt } from "react-router";
 import { throttle } from "underscore";
 import { get, post } from "../gateway";
 import { confirmModal, notifySuccess } from "../message";
@@ -436,12 +436,13 @@ function KeyHandoutForm(props: { member: Member }) {
         </>
     );
 
+    unstable_usePrompt({
+        when: can_save_member,
+        message: "Du har inte sparat - vill du verkligen lämna sidan?",
+    });
+
     return (
         <>
-            <Prompt
-                when={can_save_member}
-                message="Du har inte sparat - vill du verkligen lämna sidan?"
-            ></Prompt>
             <div className="meep">
                 <form
                     onSubmit={(e) => {

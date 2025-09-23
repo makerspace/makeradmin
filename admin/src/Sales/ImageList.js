@@ -5,6 +5,7 @@ import SearchBox from "../Components/SearchBox";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import ProductImage from "../Models/ProductImage";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 
 class ImageList extends CollectionNavigation {
     constructor(props) {
@@ -113,4 +114,4 @@ class ImageList extends CollectionNavigation {
     }
 }
 
-export default ImageList;
+export default withCollectionNavigationProps(ImageList);

@@ -1,20 +1,18 @@
 import React from "react";
-import { RouteComponentProps, withRouter } from "react-router";
 import { Link } from "react-router-dom";
 import * as _ from "underscore";
 import auth from "../auth";
-import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
 import Icon from "./icons";
 
-class PasswordReset extends React.Component<RouteComponentProps> {
+class PasswordReset extends React.Component {
     input = React.createRef<HTMLInputElement>();
 
     submit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const password = this.input.current!.value;
         const tokens = new RegExp("^\\?reset_token=([^&]*)$").exec(
-            browserHistory.location.search,
+            window.location.search,
         );
         const token = tokens ? tokens[1] : "";
 
@@ -22,7 +20,7 @@ class PasswordReset extends React.Component<RouteComponentProps> {
             const error_message = response.data.error_message;
             if (_.isEmpty(error_message)) {
                 showSuccess("New password was successfully set!");
-                browserHistory.push("/");
+                window.location.href = "/";
             } else {
                 showError(error_message);
             }
@@ -81,4 +79,4 @@ class PasswordReset extends React.Component<RouteComponentProps> {
     }
 }
 
-export default withRouter(PasswordReset);
+export default PasswordReset;

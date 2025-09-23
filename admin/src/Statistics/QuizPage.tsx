@@ -33,7 +33,7 @@ export default () => {
                 sortedQuizzes
                     .filter((q) => q.deleted_at === null)
                     .map((quiz) => (
-                        <>
+                        <React.Fragment key={quiz.id}>
                             <h3>
                                 <Link
                                     className="uk-link uk-link-text"
@@ -44,9 +44,9 @@ export default () => {
                             </h3>
                             <QuizGraph quiz_id={quiz.id} />
                             <hr />
-                        </>
+                        </React.Fragment>
                     ))}
-            {isLoading && <div uk-spinner></div>}
+            {isLoading && <div uk-spinner="true"></div>}
         </div>
     );
 };

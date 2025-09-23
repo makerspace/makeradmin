@@ -1,7 +1,8 @@
 import React from "react";
 import { NavItem } from "../nav";
+import { Outlet } from "react-router";
 
-export default function AccountingBox({ children }) {
+export default function AccountingBox() {
     return (
         <div>
             <h2>Bokföring</h2>
@@ -17,7 +18,7 @@ export default function AccountingBox({ children }) {
                 </NavItem>
             </ul>
 
-            {children}
+            <Outlet />
         </div>
     );
 }

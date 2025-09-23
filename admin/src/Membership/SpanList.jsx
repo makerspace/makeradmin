@@ -6,6 +6,7 @@ import DateTimeShow from "../Components/DateTimeShow";
 import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import Span from "../Models/Span";
 import { confirmModal } from "../message";
 
@@ -93,4 +94,4 @@ class SpanList extends CollectionNavigation {
     }
 }
 
-export default SpanList;
+export default withCollectionNavigationProps(SpanList);

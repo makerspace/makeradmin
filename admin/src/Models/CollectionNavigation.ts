@@ -1,7 +1,11 @@
 import React from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-export type CollectionNavigationProps = RouteComponentProps;
+export type CollectionNavigationProps = {
+    location: ReturnType<typeof useLocation>;
+    navigate: ReturnType<typeof useNavigate>;
+    match: ReturnType<typeof useParams>;
+};
 export type CollectionNavigationState = { page: number; search: string };
 
 export default class CollectionNavigation<
@@ -35,8 +39,9 @@ export default class CollectionNavigation<
             this.params.set("page", this.state.page.toString());
         }
 
-        this.props.history.replace(
+        this.props.navigate(
             this.props.location.pathname + "?" + this.params.toString(),
+            { replace: true },
         );
     }
 
@@ -49,4 +54,22 @@ export default class CollectionNavigation<
         this.setState({ page: index }, this.setHistory);
         (this as any).collection.updatePage(index);
     }
+}
+
+export function withCollectionNavigationProps<P>(
+    Component: React.ComponentType<CollectionNavigationProps & P>,
+) {
+    return (props: Omit<P, keyof CollectionNavigationProps>) => {
+        const location = useLocation();
+        const navigate = useNavigate();
+        const params = useParams();
+        console.log(params);
+
+        return React.createElement(Component, {
+            ...(props as any),
+            location,
+            navigate,
+            match: { params: params },
+        });
+    };
 }

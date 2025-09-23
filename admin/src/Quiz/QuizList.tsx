@@ -1,9 +1,10 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
-import CollectionNavigation from "../Models/CollectionNavigation";
+import CollectionNavigation, {
+    withCollectionNavigationProps,
+} from "../Models/CollectionNavigation";
 import Quiz from "../Models/Quiz";
 
 class QuizList extends CollectionNavigation {
@@ -61,4 +62,4 @@ class QuizList extends CollectionNavigation {
     }
 }
 
-export default QuizList;
+export default withCollectionNavigationProps(QuizList);

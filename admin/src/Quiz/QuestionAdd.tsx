@@ -1,48 +1,37 @@
-import React from "react";
+import React, { useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import QuizQuestion from "../Models/QuizQuestion";
-import { browserHistory } from "../browser_history";
 import QuestionEditForm from "./QuestionEditForm";
 
-interface State {
-    question: null | QuizQuestion;
-}
+interface Props {}
 
-interface Props {
-    match: { params: { quiz_id: string } };
-}
+const QuestionAdd: React.FC<Props> = () => {
+    const { quiz_id } = useParams<{ quiz_id: string }>();
+    const navigate = useNavigate();
+    const questionRef = useRef(new QuizQuestion());
 
-class QuestionAdd extends React.Component<Props, State> {
-    question: QuizQuestion;
+    const save = async () => {
+        questionRef.current.quiz_id = parseInt(quiz_id!);
+        await questionRef.current.save();
+        navigate("/quiz/question/" + questionRef.current.id, { replace: true });
+    };
 
-    constructor(props: any) {
-        super(props);
-        this.question = new QuizQuestion();
-    }
+    const handleDelete = () => {
+        navigate(`/quiz/${quiz_id}`);
+    };
 
-    async save() {
-        this.question.quiz_id = parseInt(this.props.match.params.quiz_id);
-        await this.question.save();
-        browserHistory.replace("/quiz/question/" + this.question.id);
-    }
+    const handleNew = () => {
+        navigate(`/quiz/${quiz_id}/question/add`);
+    };
 
-    delete() {
-        browserHistory.push(`/quiz/${this.props.match.params.quiz_id}`);
-    }
-
-    override render() {
-        return (
-            <QuestionEditForm
-                question={this.question}
-                onSave={() => this.save()}
-                onDelete={() => this.delete()}
-                onNew={() => {
-                    browserHistory.push(
-                        `/quiz/${this.props.match.params.quiz_id}/question/add`,
-                    );
-                }}
-            />
-        );
-    }
-}
+    return (
+        <QuestionEditForm
+            question={questionRef.current}
+            onSave={save}
+            onDelete={handleDelete}
+            onNew={handleNew}
+        />
+    );
+};
 
 export default QuestionAdd;

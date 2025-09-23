@@ -1,6 +1,5 @@
 import React from "react";
-import { Route, Switch } from "react-router-dom";
-import { defaultSubpageRoute } from "../Components/Routes";
+import { RedirectToSubpage } from "../Components/Routes";
 import GroupAdd from "./GroupAdd";
 import GroupBox from "./GroupBox";
 import GroupBoxDoorAccess from "./GroupBoxDoorAccess";
@@ -27,88 +26,155 @@ import MemberList from "./MemberList";
 import SpanList from "./SpanList";
 import SpanShow from "./SpanShow";
 
-const Group = ({ match: { path } }) => (
-    <GroupBox>
-        <Switch>
-            {defaultSubpageRoute({ matchpath: path, subpage: "info" })}
-            <Route path={`${path}/info`} component={GroupBoxEditInfo} />
-            <Route path={`${path}/members`} component={GroupBoxMembers} />
-            <Route
-                path={`${path}/permissions`}
-                component={GroupBoxPermissions}
-            />
-            <Route path={`${path}/doors`} component={GroupBoxDoorAccess} />
-        </Switch>
-    </GroupBox>
-);
+const Group = {
+    path: ":group_id/*",
+    element: <GroupBox />,
+    children: [
+        {
+            index: true,
+            element: <RedirectToSubpage subpage={"info"} />,
+        },
+        {
+            path: "info",
+            element: <GroupBoxEditInfo />,
+        },
+        {
+            path: "members",
+            element: <GroupBoxMembers />,
+        },
+        {
+            path: "permissions",
+            element: <GroupBoxPermissions />,
+        },
+        {
+            path: "doors",
+            element: <GroupBoxDoorAccess />,
+        },
+    ],
+};
 
-const Groups = ({ match: { path } }) => (
-    <Switch>
-        <Route exact path={path} component={GroupList} />
-        <Route path={`${path}/add`} component={GroupAdd} />
-        <Route path={`${path}/:group_id`} component={Group} />
-    </Switch>
-);
+const Groups = {
+    path: "groups/*",
+    children: [
+        {
+            index: true,
+            element: <GroupList />,
+        },
+        {
+            path: "add",
+            element: <GroupAdd />,
+        },
+        Group,
+    ],
+};
 
-const Member = ({ match: { path } }) => (
-    <MemberBox>
-        <Switch>
-            {defaultSubpageRoute({ matchpath: path, subpage: "key-handout" })}
-            <Route path={`${path}/key-handout`} component={KeyHandout} />
-            <Route
-                path={`${path}/member-data`}
-                component={MemberBoxMemberData}
-            />
-            <Route path={`${path}/groups`} component={MemberBoxGroups} />
-            <Route path={`${path}/keys`} component={MemberBoxKeys} />
-            <Route
-                path={`${path}/permissions`}
-                component={MemberBoxPermissions}
-            />
-            <Route path={`${path}/orders`} component={MemberBoxOrders} />
-            <Route
-                path={`${path}/messages/new`}
-                component={MemberBoxNewMessage}
-            />
-            <Route path={`${path}/messages`} component={MemberBoxMessages} />
-            <Route path={`${path}/spans`} component={MemberBoxSpans} />
-            <Route
-                path={`${path}/statistics`}
-                component={MemberBoxStatistics}
-            />
-        </Switch>
-    </MemberBox>
-);
+const Member = {
+    path: ":member_id/*",
+    element: <MemberBox />,
+    children: [
+        {
+            index: true,
+            element: <RedirectToSubpage subpage={"key-handout"} />,
+        },
+        {
+            path: "key-handout",
+            element: <KeyHandout />,
+        },
+        {
+            path: "member-data",
+            element: <MemberBoxMemberData />,
+        },
+        {
+            path: "groups",
+            element: <MemberBoxGroups />,
+        },
+        {
+            path: "keys",
+            element: <MemberBoxKeys />,
+        },
+        {
+            path: "permissions",
+            element: <MemberBoxPermissions />,
+        },
+        {
+            path: "orders",
+            element: <MemberBoxOrders />,
+        },
+        {
+            path: "messages/new",
+            element: <MemberBoxNewMessage />,
+        },
+        {
+            path: "messages",
+            element: <MemberBoxMessages />,
+        },
+        {
+            path: "spans",
+            element: <MemberBoxSpans />,
+        },
+        {
+            path: "statistics",
+            element: <MemberBoxStatistics />,
+        },
+    ],
+};
 
-const Members = ({ match: { path } }) => (
-    <Switch>
-        <Route exact path={path} component={MemberList} />
-        <Route path={`${path}/add`} component={MemberAdd} />
-        <Route path={`${path}/:member_id`} component={Member} />
-    </Switch>
-);
+const Members = {
+    path: "members/*",
+    children: [
+        {
+            index: true,
+            element: <MemberList />,
+        },
+        {
+            path: "add",
+            element: <MemberAdd />,
+        },
+        Member,
+    ],
+};
 
-const Keys = ({ match: { path } }) => (
-    <Switch>
-        <Route exact path={path} component={KeyList} />
-        <Route path={`${path}/:key_id`} component={KeyEdit} />
-    </Switch>
-);
+const Keys = {
+    path: "keys/*",
+    children: [
+        {
+            index: true,
+            element: <KeyList />,
+        },
+        {
+            path: ":key_id/*",
+            element: <KeyEdit />,
+        },
+    ],
+};
 
-const Spans = ({ match: { path } }) => (
-    <Switch>
-        <Route exact path={path} component={SpanList} />
-        <Route path={`${path}/:span_id`} component={SpanShow} />
-    </Switch>
-);
+const Spans = {
+    path: "spans/*",
+    children: [
+        {
+            index: true,
+            element: <SpanList />,
+        },
+        {
+            path: ":span_id/*",
+            element: <SpanShow />,
+        },
+    ],
+};
 
-export default ({ match }) => (
-    <Switch>
-        {defaultSubpageRoute({ matchpath: match.path, subpage: "members" })}
-        <Route path={`${match.path}/members`} component={Members} />
-        <Route path={`${match.path}/groups`} component={Groups} />
-        <Route path={`${match.path}/keys`} component={Keys} />
-        <Route path={`${match.path}/spans`} component={Spans} />
-        <Route path={`${match.path}/export`} component={MemberExport} />
-    </Switch>
-);
+const routes = [
+    {
+        path: "",
+        element: <RedirectToSubpage subpage={"members"} />,
+    },
+    Members,
+    Groups,
+    Keys,
+    Spans,
+    {
+        path: "export",
+        element: <MemberExport />,
+    },
+];
+
+export default routes;

@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
 import auth from "../auth";
-import { browserHistory } from "../browser_history";
+import { useNavigate } from "react-router-dom";
 
 const Logout = () => {
+    const navigate = useNavigate();
     useEffect(() => {
         auth.logout();
-        browserHistory.push("/");
+        navigate.push("/");
     }, []);
 
     return <p>You are now logged out</p>;

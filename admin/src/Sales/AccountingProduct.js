@@ -8,6 +8,7 @@ import SearchBox from "../Components/SearchBox";
 import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import Product from "../Models/Product";
 import ProductAccountsCostCenters from "../Models/ProductAccountsCostCenters";
 import { get } from "../gateway";
@@ -533,4 +534,4 @@ class AccountingProduct extends CollectionNavigation {
     }
 }
 
-export default AccountingProduct;
+export default withCollectionNavigationProps(AccountingProduct);

@@ -5,6 +5,7 @@ import DateTimeShow from "../Components/DateTimeShow";
 import SearchBox from "../Components/SearchBox";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import Message from "../Models/Message";
 
 const Row = (props) => {
@@ -60,4 +61,4 @@ class MessageList extends CollectionNavigation {
     }
 }
 
-export default MessageList;
+export default withCollectionNavigationProps(MessageList);

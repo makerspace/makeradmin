@@ -1,5 +1,5 @@
 import type * as module_type from "html5-qrcode";
-import React, { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 type QrCodeScannerProps = {
     onSuccess: (qrCodeMessage: string) => void;

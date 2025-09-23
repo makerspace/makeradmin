@@ -5,6 +5,7 @@ import DateTimeShow from "../Components/DateTimeShow";
 import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import Message from "../Models/Message";
 
 const Row = (props) => {
@@ -70,4 +71,4 @@ class MemberBoxMessages extends CollectionNavigation {
     }
 }
 
-export default MemberBoxMessages;
+export default withCollectionNavigationProps(MemberBoxMessages);

@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import DateTimeInput from "../Components/DateTimeInput";
 import TextInput from "../Components/TextInput";
 import Textarea from "../Components/Textarea";
 import Icon from "../Components/icons";
 import useModel from "../Hooks/useModel";
 import Key from "../Models/Key";
-import { browserHistory } from "../browser_history";
 import { confirmModal } from "../message";
 
 function KeyEdit() {
     const { key_id } = useParams();
     const key = useModel(Key, key_id);
     const [saveDisabled, setSaveDisabled] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const unsubscribe = key.subscribe(() => {
@@ -30,10 +30,10 @@ function KeyEdit() {
         confirmModal(key.deleteConfirmMessage())
             .then(() => key.del())
             .then(() => {
-                browserHistory.push("/membership/keys/");
+                navigate("/membership/keys/");
             })
             .catch(() => null);
-    }, []);
+    }, [key, navigate]);
 
     return (
         <div>

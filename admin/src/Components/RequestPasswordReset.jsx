@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import auth from "../auth";
-import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
 import { CenteredForm } from "./CenteredForm";
 import Icon from "./icons";
+import { useNavigate } from "react-router-dom";
 
 const ResetPasswordForm = () => {
     const [userIdentification, setUserIdentification] = useState("");
+    const navigate = useNavigate();
 
     const handleInputChange = (e) => {
         setUserIdentification(e.target.value);
@@ -24,7 +25,7 @@ const ResetPasswordForm = () => {
             showSuccess(
                 "Link to password reset will be sent to your email shortly.",
             );
-            browserHistory.push("/");
+            navigate("/");
         });
     };
 

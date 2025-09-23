@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";
@@ -7,6 +6,7 @@ import SearchBox from "../Components/SearchBox";
 import Collection from "../Models/Collection";
 import CollectionNavigation, {
     CollectionNavigationProps,
+    withCollectionNavigationProps,
 } from "../Models/CollectionNavigation";
 import Member from "../Models/Member";
 
@@ -115,4 +115,4 @@ class MemberList extends CollectionNavigation {
     }
 }
 
-export default MemberList;
+export default withCollectionNavigationProps(MemberList);

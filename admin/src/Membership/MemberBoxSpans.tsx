@@ -2,7 +2,7 @@ import { useJson } from "Hooks/useJson";
 import useModel from "Hooks/useModel";
 import Member from "Models/Member";
 import TransactionAction from "Models/TransactionAction";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import "react-day-picker/style.css";
 import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
@@ -116,6 +116,9 @@ function PendingActions({
 
 function MemberBoxSpans() {
     const { member_id } = useParams<{ member_id: string }>();
+    if (member_id === undefined) {
+        return null;
+    }
     const { data: pendingActions } = useJson<PendingActionsType[]>({
         url: `/membership/member/${member_id}/pending_actions`,
     });

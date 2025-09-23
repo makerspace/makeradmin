@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Currency from "../Components/Currency";
 import useModel from "../Hooks/useModel";
@@ -15,8 +15,8 @@ const MemberInfo = ({ id }) => {
     return <Link to={`/membership/members/${id}`}>{member.toString()}</Link>;
 };
 
-const OrderShow = ({ match }) => {
-    const { id } = match.params;
+const OrderShow = () => {
+    const { id } = useParams();
 
     const order = useMemo(() => Order.get(id), [id]);
     const orderRows = useMemo(

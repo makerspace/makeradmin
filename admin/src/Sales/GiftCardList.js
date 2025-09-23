@@ -6,6 +6,7 @@ import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import SearchBox from "../Components/SearchBox";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 
 const Row = (props) => {
     const { item } = props;
@@ -63,4 +64,4 @@ class GiftCardList extends CollectionNavigation {
     }
 }
 
-export default GiftCardList;
+export default withCollectionNavigationProps(GiftCardList);

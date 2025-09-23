@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import GroupForm from "../Components/GroupForm";
 import GroupContext from "../Contexts/GroupContext";
 import { confirmModal } from "../message";
 
 const GroupBoxEditInfo = () => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const group = useContext(GroupContext);
 
     if (!group) {
@@ -21,7 +21,7 @@ const GroupBoxEditInfo = () => {
                     confirmModal(group.deleteConfirmMessage())
                         .then(() => group.del())
                         .then(() => {
-                            history.push("/membership/groups/");
+                            navigate("/membership/groups/");
                         })
                         .catch(() => null);
                 }}

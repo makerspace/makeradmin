@@ -5,6 +5,7 @@ import SearchBox from "../Components/SearchBox";
 import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import TransactionCostCenter from "../Models/TransactionCostCenter";
 
 class AccountingCostCenter extends CollectionNavigation {
@@ -125,4 +126,4 @@ class AccountingCostCenter extends CollectionNavigation {
     }
 }
 
-export default AccountingCostCenter;
+export default withCollectionNavigationProps(AccountingCostCenter);

@@ -1,11 +1,12 @@
 import React from "react";
 
-import { browserHistory } from "../browser_history";
 import GroupForm from "../Components/GroupForm";
 import Group from "../Models/Group";
+import { useNavigate } from "react-router";
 
 const GroupAdd = () => {
     const group = new Group();
+    const navigate = useNavigate();
 
     return (
         <div>
@@ -13,13 +14,11 @@ const GroupAdd = () => {
             <GroupForm
                 group={group}
                 onSave={() =>
-                    group
-                        .save()
-                        .then(() =>
-                            browserHistory.replace(
-                                "/membership/groups/" + group.id,
-                            ),
-                        )
+                    group.save().then(() =>
+                        navigate("/membership/groups/" + group.id, {
+                            replace: true,
+                        }),
+                    )
                 }
             />
         </div>

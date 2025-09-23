@@ -27,7 +27,7 @@
         "moduleDetection": "auto",
         // Disallow features that require cross-file awareness
         "isolatedModules": true,
-        "skipLibCheck": false,
+        "skipLibCheck": true,
         "outDir": "./dist"
     }
 }

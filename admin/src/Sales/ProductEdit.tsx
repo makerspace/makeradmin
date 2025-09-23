@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Product from "../Models/Product";
 
@@ -16,7 +16,7 @@ const ProductEdit = () => {
 
     const [product, setProduct] = useState<Product | null>(null);
 
-    const history = useHistory();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchedProduct = Product.getWithRelated(id) as Product;
@@ -36,7 +36,7 @@ const ProductEdit = () => {
                 .then(() => product.del())
 
                 .then(() => {
-                    history.push("/sales/product/");
+                    navigate("/sales/product/");
                 })
 
                 .catch(() => null);

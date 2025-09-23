@@ -1,15 +1,15 @@
-import PropTypes from "prop-types";
-import React, { createContext } from "react";
-import { useParams } from "react-router";
+import { createContext } from "react";
+import { Outlet, useParams } from "react-router";
 import useModel from "../Hooks/useModel";
 import Member from "../Models/Member";
 import { NavItem } from "../nav";
 
 export const MemberContext = createContext<Member | null>(null);
 
-function MemberBox({ children }: { children: React.ReactNode }) {
+function MemberBox() {
     const { member_id: member_id_str } = useParams<{ member_id: string }>();
-    const member_id = parseInt(member_id_str, 10);
+    const member_id =
+        member_id_str !== undefined ? parseInt(member_id_str, 10) : NaN;
     if (Number.isNaN(member_id)) {
         return null;
     }
@@ -55,14 +55,10 @@ function MemberBox({ children }: { children: React.ReactNode }) {
                         Statistik
                     </NavItem>
                 </ul>
-                {children}
+                <Outlet />
             </div>
         </MemberContext.Provider>
     );
 }
-
-MemberBox.propTypes = {
-    children: PropTypes.node,
-};
 
 export default MemberBox;

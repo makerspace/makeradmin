@@ -48,7 +48,9 @@ export const SideNav = ({ nav }) => {
     const location = useLocation();
     let activeItem = _.find(
         nav.items,
-        (i) => matchPath(location.pathname, i.target) !== null,
+        (i) =>
+            matchPath({ path: i.target, end: false }, location.pathname) !==
+            null,
     );
 
     if (!activeItem || _.isUndefined(activeItem.children)) {

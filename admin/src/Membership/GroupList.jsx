@@ -6,6 +6,7 @@ import Icon from "../Components/icons";
 import SearchBox from "../Components/SearchBox";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import Group from "../Models/Group";
 
 const Row = (props) => {
@@ -82,4 +83,4 @@ class GroupList extends CollectionNavigation {
     }
 }
 
-export default GroupList;
+export default withCollectionNavigationProps(GroupList);

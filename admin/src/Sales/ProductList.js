@@ -8,6 +8,7 @@ import SearchBox from "../Components/SearchBox";
 import { get } from "../gateway";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import Product from "../Models/Product";
 
 class ProductList extends CollectionNavigation {
@@ -122,4 +123,4 @@ class ProductList extends CollectionNavigation {
     }
 }
 
-export default ProductList;
+export default withCollectionNavigationProps(ProductList);

@@ -1,16 +1,17 @@
 import React from "react";
 import MemberForm from "../Components/MemberForm";
 import Member from "../Models/Member";
-import { browserHistory } from "../browser_history";
+import { useNavigate } from "react-router";
 
 function MemberAdd() {
     const member = new Member();
+    const navigate = useNavigate();
 
     const handleSave = () => {
         member
             .save()
             .then(() =>
-                browserHistory.replace("/membership/members/" + member.id),
+                navigate("/membership/members/" + member.id, { replace: true }),
             );
     };
 

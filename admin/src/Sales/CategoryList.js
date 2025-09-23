@@ -4,6 +4,7 @@ import Icon from "../Components/icons";
 import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import { withCollectionNavigationProps } from "../Models/CollectionNavigation";
 import Category from "../Models/ProductCategory";
 
 class CategoryList extends CollectionNavigation {
@@ -109,4 +110,4 @@ class CategoryList extends CollectionNavigation {
     }
 }
 
-export default CategoryList;
+export default withCollectionNavigationProps(CategoryList);

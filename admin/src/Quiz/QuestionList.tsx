@@ -1,10 +1,10 @@
-import React from "react";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import CollectionNavigation, {
     CollectionNavigationProps,
+    withCollectionNavigationProps,
 } from "../Models/CollectionNavigation";
 import QuizQuestion from "../Models/QuizQuestion";
 
@@ -75,5 +75,4 @@ export class QuestionList extends CollectionNavigation<QuestionListProps> {
     }
 }
 
-const QuestionListRouter = withRouter(QuestionList);
-export default QuestionListRouter;
+export default withCollectionNavigationProps(QuestionList);

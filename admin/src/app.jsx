@@ -6,18 +6,17 @@ UIkit.use(Icons);
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { Router } from "react-router";
-import { Route, Switch } from "react-router-dom";
+import { BrowserRouter, Outlet } from "react-router";
+import { Route, Routes } from "react-router-dom";
 import Page404 from "./Components/404";
 import Login from "./Components/Login";
 import Logout from "./Components/Logout";
 import PasswordReset from "./Components/PasswordReset";
 import RequestPasswordReset from "./Components/RequestPasswordReset";
 import auth from "./auth";
-import { browserHistory } from "./browser_history";
 import { Nav, SideNav } from "./nav";
 
-import { defaultSubpageRoute } from "./Components/Routes";
+import { RedirectToSubpage } from "./Components/Routes";
 import Membership from "./Membership/Routes";
 import Messages from "./Messages/Routes";
 import Quiz from "./Quiz/Routes";
@@ -25,6 +24,7 @@ import Sales from "./Sales/Routes";
 import Settings from "./Settings/Routes";
 import Statistics from "./Statistics/Routes";
 import BoxTerminator from "./boxTerminator/Routes";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const nav = {
     brand: "MakerAdmin",
@@ -182,78 +182,95 @@ const nav = {
         },
     ],
 };
-const App = () => {
+
+const ContentWrapper = () => {
     const [isLoggedIn, setIsLoggedIn] = React.useState(auth.isLoggedIn());
 
     React.useEffect(() => {
         auth.onChange = (status) => setIsLoggedIn(status);
     }, []);
 
+    console.log("AAAAA ", isLoggedIn);
+
+    if (!isLoggedIn) {
+        return <Login />;
+    }
+
     return (
-        <Router history={browserHistory}>
-            <Switch>
-                <Route path="/logout" component={Logout} />
-                <Route
-                    path="/request-password-reset"
-                    component={RequestPasswordReset}
-                />
-                <Route path="/password-reset" component={PasswordReset} />
-                <Route path="*">
-                    {isLoggedIn && (
-                        <div style={{ marginBottom: "2em" }}>
-                            <Nav nav={nav} className="uk-margin-top" />
-                            <div className="uk-container uk-margin-top">
-                                <div className="uk-grid">
-                                    <div className="uk-width-1-4@m">
-                                        <SideNav nav={nav} />
-                                    </div>
-                                    <div className="uk-width-3-4@m">
-                                        <Switch>
-                                            {defaultSubpageRoute({
-                                                matchpath: "",
-                                                subpage: "membership",
-                                            })}
-                                            <Route
-                                                path="/membership"
-                                                component={Membership}
-                                            />
-                                            <Route
-                                                path="/sales"
-                                                component={Sales}
-                                            />
-                                            <Route
-                                                path="/messages"
-                                                component={Messages}
-                                            />
-                                            <Route
-                                                path="/statistics"
-                                                component={Statistics}
-                                            />
-                                            <Route
-                                                path="/settings"
-                                                component={Settings}
-                                            />
-                                            <Route
-                                                path="/quiz"
-                                                component={Quiz}
-                                            />
-                                            <Route
-                                                path="/boxTerminator"
-                                                component={BoxTerminator}
-                                            />
-                                            <Route component={Page404} />
-                                        </Switch>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    {!isLoggedIn && <Login />}
-                </Route>
-            </Switch>
-        </Router>
+        <div style={{ marginBottom: "2em" }}>
+            <Nav nav={nav} className="uk-margin-top" />
+            <div className="uk-container uk-margin-top">
+                <div className="uk-grid">
+                    <div className="uk-width-1-4@m">
+                        <SideNav nav={nav} />
+                    </div>
+                    <div className="uk-width-3-4@m">
+                        <Outlet />
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
+
+const router = createBrowserRouter([
+    {
+        path: "/logout",
+        Component: Logout,
+    },
+    {
+        path: "/request-password-reset",
+        Component: RequestPasswordReset,
+    },
+    {
+        path: "/password-reset",
+        Component: PasswordReset,
+    },
+    {
+        path: "/*",
+        Component: ContentWrapper,
+        children: [
+            {
+                index: true,
+                Component: () => <RedirectToSubpage subpage={"membership"} />,
+            },
+            {
+                path: "membership/*",
+                children: Membership,
+            },
+            {
+                path: "sales/*",
+                children: Sales,
+            },
+            {
+                path: "messages/*",
+                children: Messages,
+            },
+            {
+                path: "statistics/*",
+                children: Statistics,
+            },
+            {
+                path: "settings/*",
+                children: Settings,
+            },
+            {
+                path: "quiz/*",
+                children: Quiz,
+            },
+            {
+                path: "boxTerminator/*",
+                children: BoxTerminator,
+            },
+            {
+                path: "*",
+                Component: Page404,
+            },
+        ],
+    },
+]);
+
+const App = () => <RouterProvider router={router} />;
 
 App.title = "MakerAdmin";
 

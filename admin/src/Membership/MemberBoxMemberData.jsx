@@ -1,11 +1,12 @@
 import React, { useContext } from "react";
-import { browserHistory } from "../browser_history";
 import MemberForm from "../Components/MemberForm";
 import { confirmModal } from "../message";
 import { MemberContext } from "./MemberBox";
+import { useNavigate } from "react-router";
 
 function MemberBoxMemberData() {
     const member = useContext(MemberContext);
+    const navigate = useNavigate();
 
     return (
         <div className="uk-margin-top">
@@ -18,7 +19,7 @@ function MemberBoxMemberData() {
                     return confirmModal(member.deleteConfirmMessage())
                         .then(() => member.del())
                         .then(() => {
-                            browserHistory.push("/membership/members/");
+                            navigate("/membership/members/");
                         })
                         .catch(() => null);
                 }}
