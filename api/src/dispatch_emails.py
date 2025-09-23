@@ -275,12 +275,8 @@ def memberbooth_labels() -> None:
         )
         return common_kws
 
-    # Cases:
-    # 1. Notification that a non-deleted label is about to expire
-    # 2. Notification that an expired label has been observed
-    # 3. Notification that a label has been reported
-    # 4. Notification that a label has been cleaned away
-
+    # Send messages for recent non-observation actions (if not already sent)
+    # E.g. if a label was reported or cleaned away.
     for action in recent_actions:
         label = action.label
         deserialized_label: LabelType = serde.from_dict(LabelTypeTagged, label.data)  # type: ignore
@@ -365,6 +361,7 @@ def memberbooth_labels() -> None:
         observations[obs.label_id] = obs
 
     # Send messages for recent observations (no recent report/cleaning, and not already sent)
+    # For example that a label is about to expire within a few weeks
     for label_id, action in observations.items():
         label = action.label
         deserialized_label: LabelType = serde.from_dict(LabelTypeTagged, label.data)  # type: ignore
@@ -373,10 +370,6 @@ def memberbooth_labels() -> None:
         common_kws = get_common_kws(action, member, deserialized_label)
         expires_at = common_kws["expires_at"]
         assert expires_at is None or isinstance(expires_at, date)
-
-        # logger.info(
-        #     f"Processing label {label_id} with obs={obs}, rep={rep}, clean={clean}, deserialized_label={deserialized_label}"
-        # )
 
         if (
             isinstance(deserialized_label, TemporaryStorageLabel)
