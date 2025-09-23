@@ -6,8 +6,6 @@ UIkit.use(Icons);
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Outlet } from "react-router";
-import { Route, Routes } from "react-router-dom";
 import Page404 from "./Components/404";
 import Login from "./Components/Login";
 import Logout from "./Components/Logout";
