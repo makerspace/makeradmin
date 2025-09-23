@@ -14,6 +14,8 @@ import RequestPasswordReset from "./Components/RequestPasswordReset";
 import auth from "./auth";
 import { Nav, SideNav } from "./nav";
 
+import { Outlet } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RedirectToSubpage } from "./Components/Routes";
 import Membership from "./Membership/Routes";
 import Messages from "./Messages/Routes";
@@ -22,7 +24,6 @@ import Sales from "./Sales/Routes";
 import Settings from "./Settings/Routes";
 import Statistics from "./Statistics/Routes";
 import BoxTerminator from "./boxTerminator/Routes";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const nav = {
     brand: "MakerAdmin",
