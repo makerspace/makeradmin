@@ -365,6 +365,7 @@ const ProductGraphByTime = <T,>({
 
         return () => {
             c.destroy();
+            render.cancel();
         };
     }, [container]);
 
@@ -567,6 +568,7 @@ const ProductGraphByTotal = <T,>({
 
         return () => {
             c.destroy();
+            render.cancel();
         };
     }, [container]);
 
