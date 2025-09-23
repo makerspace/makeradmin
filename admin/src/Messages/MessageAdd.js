@@ -2,15 +2,16 @@ import React, { useMemo } from "react";
 import MessageForm from "../Components/MessageForm";
 import Message from "../Models/Message";
 import { notifySuccess } from "../message";
+import { useNavigate } from "react-router";
 
-function MessageAdd(props) {
-    const { history } = props;
+function MessageAdd() {
+    const navigate = useNavigate();
 
     const message = useMemo(() => new Message(), []);
 
     const onSend = () => {
         message.save().then(() => {
-            history.push("/messages");
+            navigate("/messages");
             notifySuccess("Ditt meddelande har skickats");
         });
     };
