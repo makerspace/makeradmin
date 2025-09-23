@@ -1,33 +1,44 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
-    "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "exclude": ["node_modules", "dist"],
     "compilerOptions": {
+        "allowJs": true,
         "baseUrl": "./src",
-        "target": "es2019",
-        "lib": ["es5", "es6", "es2019", "dom"],
-        "strict": true,
+        "esModuleInterop": true,
         "exactOptionalPropertyTypes": true,
+        // Disallow features that require cross-file awareness
+        "isolatedModules": true,
+        "jsx": "react-jsx",
+        "lib": [
+            "es5",
+            "es6",
+            "es2019",
+            "dom"
+        ],
+        "module": "esnext",
+        // Treat files as modules even if it doesn't use import/export
+        "moduleDetection": "auto",
+        "moduleResolution": "node",
         "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
         "noImplicitOverride": true,
         "noImplicitReturns": true,
-        "noImplicitAny": true,
         "noPropertyAccessFromIndexSignature": true,
         "noUncheckedIndexedAccess": true,
         "noUnusedParameters": true,
-        "removeComments": true,
+        "outDir": "./dist",
         "preserveConstEnums": true,
-        "esModuleInterop": true,
-        "sourceMap": true,
-        "moduleResolution": "node",
-        "module": "esnext",
-        "jsx": "react-jsx",
-        "allowJs": true,
-        // Treat files as modules even if it doesn't use import/export
-        "moduleDetection": "auto",
-        // Disallow features that require cross-file awareness
-        "isolatedModules": true,
+        "removeComments": true,
         "skipLibCheck": true,
-        "outDir": "./dist"
-    }
+        "sourceMap": true,
+        "strict": true,
+        "target": "es2019"
+    },
+    "exclude": [
+        "node_modules",
+        "dist"
+    ],
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx"
+    ]
 }

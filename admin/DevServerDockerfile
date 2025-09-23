@@ -10,11 +10,12 @@ COPY ./webpack.config.js ./tsconfig.json ./package.json ./package-lock.json /wor
 
 WORKDIR /work
 
-RUN npm ci
+RUN npm ci --install-links=false
 
 COPY ./webpack.config.js /work/
 
 COPY  ./src/ /work/src
+COPY --from=frontend_common . /frontend_common
 
 COPY  ./dist/ /work/dist
 

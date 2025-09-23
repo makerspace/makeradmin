@@ -8,6 +8,7 @@ import * as common from "./common";
 import { UNAUTHORIZED, get_error, url } from "./common";
 import * as login from "./login";
 
+import { access_t, date_t, member_t, membership_t } from "frontend_common";
 import { Trans } from "react-i18next";
 import { Translator, useTranslation } from "./i18n";
 import {
@@ -15,10 +16,6 @@ import {
     LoadCurrentMemberGroups,
     LoadCurrentMemberInfo,
     LoadCurrentMembershipInfo,
-    access_t,
-    date_t,
-    member_t,
-    membership_t,
 } from "./member_common";
 import {
     FindWellKnownProduct,

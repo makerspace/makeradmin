@@ -1,3 +1,13 @@
+import {
+    DryingLabel,
+    FireSafetyLabel,
+    member_t,
+    membership_t,
+    Permission,
+    TemporaryStorageLabel,
+    TERMINATION_WARNING_DAYS_TO_CLEANOUT,
+    UploadedLabel,
+} from "frontend_common";
 import { render } from "preact";
 import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useRef, useState } from "preact/hooks";
@@ -6,23 +16,15 @@ import { NOT_FOUND, UNAUTHORIZED } from "./common";
 import { useTranslation } from "./i18n";
 import {
     dateToRelative,
-    DryingLabel,
     expiresSoon,
-    FireSafetyLabel,
     isExpired,
     labelExpiryDate,
-    TemporaryStorageLabel,
-    TERMINATION_WARNING_DAYS_TO_CLEANOUT,
-    UploadedLabel,
 } from "./label_common";
 import * as login from "./login";
 import {
     LoadCurrentMemberInfo,
     LoadCurrentMembershipInfo,
     LoadCurrentPermissions,
-    member_t,
-    membership_t,
-    Permission,
 } from "./member_common";
 import { Message, MessageTemplate } from "./message";
 import { NotFoundPage } from "./notfound";
@@ -427,11 +429,11 @@ const LabelActions = ({
                 >
                     {t("actions.report")}
                 </button>
-                <TerminationButton
+                {expiresAt && now.getTime() > expiresAt.getTime() && <TerminationButton
                     expiresAt={expiresAt}
                     firstCleanoutTime={firstCleanoutTime}
                     onClick={() => setModalOpen("terminate")}
-                />
+                />}
             </div>
             <div uk-modal className="uk-modal" ref={modalRef}>
                 <div className="uk-modal-dialog uk-modal-body">

@@ -1,9 +1,9 @@
+import { member_t, membership_t } from "frontend_common";
 import { render } from "preact";
 import { useState } from "preact/hooks";
 import Cart from "./cart";
 import { ajax, formatDate, show_error } from "./common";
 import { Translator, useTranslation } from "./i18n";
-import { member_t, membership_t } from "./member_common";
 import {
     Discount,
     FindWellKnownProduct,

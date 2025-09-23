@@ -1,9 +1,10 @@
+import { UploadedLabel } from "frontend_common";
 import { ComponentChildren } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import Cart from "./cart";
 import { logout, UNAUTHORIZED, url } from "./common";
 import { useTranslation } from "./i18n";
-import { expiredRecently, expiresSoon, UploadedLabel } from "./label_common";
+import { expiredRecently, expiresSoon } from "./label_common";
 import { LoadCurrentLabels } from "./member_common";
 import { ProductData } from "./payment_common";
 

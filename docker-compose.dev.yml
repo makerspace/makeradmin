@@ -30,11 +30,12 @@ services:
       args:
         DEV_BUILD: "true"
     ports:
-      - "8011:80"
+      - "9111:80"
     volumes:
       - ./public/ts:/work/ts
       - ./public/scss:/work/scss
       - ./public/src:/work/src
+      - ./frontend_common/src:/frontend_common/src
     environment:
       DEV_RUN: "true"
 
@@ -46,5 +47,6 @@ services:
     volumes:
       - ./admin/src:/work/src
       - ./admin/dist:/work/dist
+      - ./frontend_common/src:/frontend_common/src
     environment:
       DEV_RUN: "true"

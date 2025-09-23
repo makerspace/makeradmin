@@ -1,3 +1,4 @@
+import { member_t } from "frontend_common";
 import { ComponentChildren, JSX, render } from "preact";
 import {
     Dispatch,
@@ -13,7 +14,7 @@ import { show_phone_number_dialog } from "./change_phone";
 import * as common from "./common";
 import { ServerResponse, trackPlausible } from "./common";
 import { Translator, useTranslation } from "./i18n";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
+import { LoadCurrentMemberInfo } from "./member_common";
 import {
     calculateAmountToPay,
     createPaymentMethod,

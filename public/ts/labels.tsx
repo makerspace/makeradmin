@@ -1,3 +1,4 @@
+import { member_t, membership_t, UploadedLabel } from "frontend_common";
 import { render } from "preact";
 import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useMemo, useState } from "preact/hooks";
@@ -10,15 +11,12 @@ import {
     expiredRecently,
     expiresSoon,
     isExpired,
-    UploadedLabel,
 } from "./label_common";
 import * as login from "./login";
 import {
     LoadCurrentLabels,
     LoadCurrentMemberInfo,
     LoadCurrentMembershipInfo,
-    member_t,
-    membership_t,
 } from "./member_common";
 import { Sidebar } from "./sidebar";
 declare var UIkit: any;

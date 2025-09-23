@@ -131,6 +131,8 @@ services:
       - "./.webshop_product_images:/work/static/product_images"
     build:
       context: ./public
+      additional_contexts:
+        frontend_common: ./frontend_common
     environment:
       APIGATEWAY: "api"
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
@@ -147,6 +149,8 @@ services:
     image: makeradmin/admin:1.0
     build:
       context: ./admin
+      additional_contexts:
+        frontend_common: ./frontend_common
     environment:
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
       VIRTUAL_HOST: "${HOST_FRONTEND}"

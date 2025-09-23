@@ -39,7 +39,7 @@ jobs:
           cache: "npm"
       - name: Install packages
         run: |
-          npm ci
+          npm ci --install-links=false
       - name: Check formatting
         run: |
           npx prettier --check .

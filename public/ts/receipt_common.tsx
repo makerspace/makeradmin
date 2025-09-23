@@ -1,7 +1,7 @@
+import { member_t } from "frontend_common";
 import Cart from "./cart";
 import { url } from "./common";
 import { useTranslation } from "./i18n";
-import { member_t } from "./member_common";
 import { Transaction, TransactionItem } from "./payment_common";
 
 function format_receipt_status(transaction_status: string) {
