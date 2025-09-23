@@ -453,8 +453,6 @@ function addMemberDistribution(
         return values;
     };
 
-    console.log(toPoints(labaccess));
-
     const labels = [];
     for (let i = 0; i < labaccess.length; i++) {
         labels.push("" + (i + 1));
@@ -914,8 +912,6 @@ async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
         .size([width, height])
         .nodeAlign(sankeyLeft);
 
-    console.log(sankeyF);
-
     // Constructs a new Sankey generator with the default settings.
     sankeyF
         .nodeId((d) => d.id)
@@ -927,9 +923,6 @@ async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
     }
 
     const generated = sankeyF(graph);
-
-    console.log(generated.nodes);
-    console.log(generated.links);
 
     // add in the links
     // var link = svg.append("g")

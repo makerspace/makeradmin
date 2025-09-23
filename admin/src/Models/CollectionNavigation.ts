@@ -63,7 +63,6 @@ export function withCollectionNavigationProps<P>(
         const location = useLocation();
         const navigate = useNavigate();
         const params = useParams();
-        console.log(params);
 
         return React.createElement(Component, {
             ...(props as any),

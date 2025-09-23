@@ -189,8 +189,6 @@ const ContentWrapper = () => {
         auth.onChange = (status) => setIsLoggedIn(status);
     }, []);
 
-    console.log("AAAAA ", isLoggedIn);
-
     if (!isLoggedIn) {
         return <Login />;
     }

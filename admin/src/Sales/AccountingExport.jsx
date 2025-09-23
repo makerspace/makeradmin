@@ -257,7 +257,6 @@ function DownloadExportForm() {
     const id = useId();
 
     const fetchExportedRanges = async () => {
-        console.log("Fetching exported ranges");
         const response = await get({
             url: "/webshop/accounting/export/",
         });
