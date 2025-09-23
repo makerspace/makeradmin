@@ -1,4 +1,4 @@
-import { MemberboothLabel, MEMBERBOX_DAYS_ALLOWED_TO_KEEP_AFTER_LABACCESS_ENDS, membership_t } from "frontend_common";
+import { LabelMaxRelativeDays } from "frontend_common";
 import { useState } from "preact/hooks";
 import { Translator, useTranslation } from "./i18n";
 
@@ -42,69 +42,6 @@ export const DeleteButton = ({
     );
 };
 
-export const labelExpiryDate = (
-    label: MemberboothLabel,
-    membership: membership_t | null,
-): Date | null => {
-    if ("expires_at" in label) {
-        return new Date(label.expires_at);
-    } else if (label.type === "NameTag" || label.type === "MeetupNameTag") {
-        if (membership && membership.membership_end) {
-            return membership.membership_end
-                ? new Date(membership.membership_end)
-                : null;
-        }
-    } else if (label.type == "BoxLabel") {
-        if (membership && membership.labaccess_end) {
-            const expiry = new Date(membership.labaccess_end);
-            expiry.setDate(
-                expiry.getDate() +
-                    MEMBERBOX_DAYS_ALLOWED_TO_KEEP_AFTER_LABACCESS_ENDS,
-            );
-            return expiry;
-        }
-    }
-    return null;
-};
-
-export const isExpired = (
-    now: Date,
-    label: MemberboothLabel,
-    membership: membership_t | null,
-) => {
-    const expires_at = labelExpiryDate(label, membership);
-    return expires_at ? expires_at.getTime() < now.getTime() : false;
-};
-
-const maxRelativeDays = 7;
-
-export const expiresSoon = (
-    now: Date,
-    label: MemberboothLabel,
-    membership: membership_t | null,
-) => {
-    const expires_at = labelExpiryDate(label, membership);
-    if (expires_at) {
-        const diff = expires_at.getTime() - now.getTime();
-        return diff < 14 * 24 * 60 * 60 * 1000 && diff > 0;
-    }
-    return false;
-};
-
-export const expiredRecently = (
-    now: Date,
-    label: MemberboothLabel,
-    membership: membership_t | null,
-) => {
-    const recentDays = label.type === "DryingLabel" ? 5 : maxRelativeDays;
-    const expires_at = labelExpiryDate(label, membership);
-    if (expires_at) {
-        const diff = now.getTime() - expires_at.getTime();
-        return diff < recentDays * 24 * 60 * 60 * 1000 && diff > 0;
-    }
-    return false;
-};
-
 export const dateToRelative = (
     now: Date,
     date: Date,
@@ -117,8 +54,8 @@ export const dateToRelative = (
     const diffHour = Math.round(diffMin / 60);
     const diffDay = Math.round(diffHour / 24);
 
-    // Show relative if within ±maxRelativeDays days
-    if (Math.abs(diffDay) < maxRelativeDays) {
+    // Show relative if within ±LabelMaxRelativeDays days
+    if (Math.abs(diffDay) < LabelMaxRelativeDays) {
         if (diffDay === 0) {
             if (Math.abs(diffHour) < 24) {
                 if (diffHour === 0) {

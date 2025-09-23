@@ -1,10 +1,9 @@
-import { UploadedLabel } from "frontend_common";
+import { labelExpiredRecently, labelExpiresSoon, UploadedLabel } from "frontend_common";
 import { ComponentChildren } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import Cart from "./cart";
 import { logout, UNAUTHORIZED, url } from "./common";
 import { useTranslation } from "./i18n";
-import { expiredRecently, expiresSoon } from "./label_common";
 import { LoadCurrentLabels } from "./member_common";
 import { ProductData } from "./payment_common";
 
@@ -81,12 +80,12 @@ export const Sidebar = ({
     const labelDot = useMemo(() => {
         if (
             labels.some((label) =>
-                expiredRecently(new Date(), label.label, null),
+                labelExpiredRecently(new Date(), label.label, null),
             )
         ) {
             return "danger";
         } else if (
-            labels.some((label) => expiresSoon(new Date(), label.label, null))
+            labels.some((label) => labelExpiresSoon(new Date(), label.label, null))
         ) {
             return "warning";
         } else {

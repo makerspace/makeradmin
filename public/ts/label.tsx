@@ -1,6 +1,9 @@
 import {
     DryingLabel,
     FireSafetyLabel,
+    labelExpiresSoon,
+    labelExpiryDate,
+    labelIsExpired,
     member_t,
     membership_t,
     Permission,
@@ -16,9 +19,6 @@ import { NOT_FOUND, UNAUTHORIZED } from "./common";
 import { useTranslation } from "./i18n";
 import {
     dateToRelative,
-    expiresSoon,
-    isExpired,
-    labelExpiryDate,
 } from "./label_common";
 import * as login from "./login";
 import {
@@ -148,11 +148,11 @@ export const LabelTemporaryStorageComponent = ({
     return (
         <div
             className={`label-print-tempstorage ${
-                expiresSoon(new Date(), label, membership)
+                labelExpiresSoon(new Date(), label, membership)
                     ? "label-expiring-soon"
                     : ""
             } ${
-                isExpired(new Date(), label, membership)
+                labelIsExpired(new Date(), label, membership)
                     ? "label-expired"
                     : "label-active"
             }`}

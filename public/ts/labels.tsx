@@ -1,4 +1,9 @@
-import { member_t, membership_t, UploadedLabel } from "frontend_common";
+import {
+    labelExpiredRecently,
+    labelExpiresSoon,
+    labelIsExpired,
+    member_t, membership_t, UploadedLabel
+} from "frontend_common";
 import { render } from "preact";
 import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useMemo, useState } from "preact/hooks";
@@ -8,9 +13,6 @@ import { useTranslation } from "./i18n";
 import {
     dateToRelative,
     DeleteButton,
-    expiredRecently,
-    expiresSoon,
-    isExpired,
 } from "./label_common";
 import * as login from "./login";
 import {
@@ -96,7 +98,7 @@ const LabelsList = ({
         ) {
             expiresAt = label.expires_at;
         }
-        return isExpired(now, label, membership);
+        return labelIsExpired(now, label, membership);
     });
 
     // Find the index of the first expired label
@@ -113,8 +115,8 @@ const LabelsList = ({
                 ) {
                     expiresAt = label.expires_at;
                 }
-                const expiringSoon = expiresSoon(now, label, membership);
-                const didExpireRecently = expiredRecently(
+                const expiringSoon = labelExpiresSoon(now, label, membership);
+                const didExpireRecently = labelExpiredRecently(
                     now,
                     label,
                     membership,
@@ -253,7 +255,7 @@ const LabelsPage = ({
                     <LabelsList
                         labels={labels}
                         filter={(label) =>
-                            !isExpired(now, label.label, membership)
+                            !labelIsExpired(now, label.label, membership)
                         }
                         now={now}
                         onChangeLabels={setLabels}
@@ -263,7 +265,7 @@ const LabelsPage = ({
                     <LabelsList
                         labels={labels}
                         filter={(label) =>
-                            isExpired(now, label.label, membership)
+                            labelIsExpired(now, label.label, membership)
                         }
                         now={now}
                         onChangeLabels={setLabels}
