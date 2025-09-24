@@ -66,9 +66,9 @@ export const labelExpiryDate = (
     if ("expires_at" in label) {
         return new Date(label.expires_at);
     } else if (label.type === "NameTag" || label.type === "MeetupNameTag") {
-        if (membership && membership.membership_end) {
-            return membership.membership_end
-                ? new Date(membership.membership_end)
+        if (membership && membership.effective_labaccess_end) {
+            return membership.effective_labaccess_end
+                ? new Date(membership.effective_labaccess_end)
                 : null;
         }
     } else if (label.type == "BoxLabel") {

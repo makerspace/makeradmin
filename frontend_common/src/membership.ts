@@ -22,6 +22,8 @@ export type membership_t = {
     labaccess_end: date_t | null;
     special_labaccess_active: boolean;
     special_labaccess_end: date_t | null;
+    effective_labaccess_end: date_t | null;
+    effective_labaccess_active: boolean;
 };
 
 export type group_t = {
