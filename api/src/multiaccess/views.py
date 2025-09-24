@@ -15,7 +15,7 @@ from membership.membership import MembershipData, get_membership_summary
 from membership.models import Member
 from messages.models import Message, MessageTemplate
 from messages.views import message_entity
-from PIL import Image
+from PIL import Image, ImageOps
 from serde.compat import SerdeError
 from service.api_definition import (
     DELETE,
@@ -258,9 +258,11 @@ def memberbooth_label_action(
 
     if image:
         img = image.read()
-        # Resize image to at most 1000 pixels in width or height to avoid taking up too much space.
         img_io = BytesIO(img)
         with Image.open(img_io) as im:
+            # Correct and bake in orientation based on EXIF data
+            im = ImageOps.exif_transpose(im)
+            # Resize image to at most 1000 pixels in width or height to avoid taking up too much space.
             im.thumbnail((1000, 1000), Image.Resampling.BILINEAR)
             out_io = BytesIO()
             im.save(out_io, format="webp")
