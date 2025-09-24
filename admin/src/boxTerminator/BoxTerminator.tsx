@@ -146,8 +146,7 @@ const BoxTerminator = () => {
                 if (
                     data["v"] >= 1 &&
                     data["v"] <= 2 &&
-                    data.hasOwnProperty("member_number") &&
-                    data.hasOwnProperty("type")
+                    data.hasOwnProperty("member_number")
                 ) {
                     // Seems legit. Try to observe the label by id, which is just the timestamp for v1 and v2 labels
                     const observeRes = await post({
