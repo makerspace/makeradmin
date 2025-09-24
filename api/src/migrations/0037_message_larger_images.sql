@@ -1,0 +1,1 @@
+ALTER TABLE `memberbooth_labels_actions` MODIFY COLUMN `image` MEDIUMBLOB DEFAULT NULL;

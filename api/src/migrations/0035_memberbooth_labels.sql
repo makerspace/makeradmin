@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `memberbooth_labels_actions` (
   `session_token` varchar(32),
   `action` ENUM('observed','reported','cleaned_away') NOT NULL,
   `message` TEXT DEFAULT NULL,
-  `image` BLOB DEFAULT NULL,
+  `image` MEDIUMBLOB DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
   PRIMARY KEY (`id`),
   KEY `memberbooth_labels_actions_session_token_index` (`session_token`),
