@@ -1,6 +1,6 @@
 FROM node:lts-alpine3.22@sha256:d2166de198f26e17e5a442f537754dd616ab069c47cc57b889310a717e0abbf9
 
-RUN apk add --no-cache tzdata
+RUN apk add --no-cache tzdata && rm -rf /var/cache/apk/*
 ENV TZ=Europe/Stockholm
 
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
@@ -10,9 +10,10 @@ COPY ./webpack.config.js ./tsconfig.json ./package.json ./package-lock.json /wor
 
 WORKDIR /work
 
-RUN npm ci
+RUN npm ci --install-links=false
 
 COPY ./src/ /work/src
+COPY --from=frontend_common . /frontend_common
 COPY ./jestSetup.js /work/
 
 RUN npm run build

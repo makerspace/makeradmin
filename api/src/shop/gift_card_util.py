@@ -28,6 +28,6 @@ def send_gift_card_email(gift_card):
     send_message(
         template=MessageTemplate.GIFT_CARD_PURCHASE,
         member=None,
-        recipient_email=gift_card.email,
+        recipient=gift_card.email,
         gift_card=gift_card,
     )

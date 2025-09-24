@@ -1,17 +1,25 @@
 #!/bin/sh
 
-chown -R nginx:nginx /var/www/html
-
-BACKEND_HOST=${HOST_BACKEND#*://}
-BACKEND_PROTOCOL=${HOST_BACKEND%${BACKEND_HOST}}
-
-echo \
-"var config = {
-	apiBasePath: \"${BACKEND_PROTOCOL:-https://}${BACKEND_HOST}\",
-	apiVersion: \"1.0\",
-	pagination: {
-		pageSize: 25,
-	},
-}" > /var/www/html/js/config.js
-
-nginx -g 'daemon off;'
+if [ "$DEV_RUN" = "true" ]; then
+	mkdir -p /work/dist/js
+	echo \
+	"var config = {
+		apiBasePath: \"${HOST_BACKEND}\",
+		apiVersion: \"1.0\",
+		pagination: {
+			pageSize: 25,
+		},
+	}" > /work/dist/js/config.js
+	exec npm run --silent dev
+else
+	echo \
+	"var config = {
+		apiBasePath: \"${HOST_BACKEND}\",
+		apiVersion: \"1.0\",
+		pagination: {
+			pageSize: 25,
+		},
+	}" > /var/www/html/js/config.js
+	chown -R nginx:nginx /var/www/html
+	exec nginx -g 'daemon off;'
+fi

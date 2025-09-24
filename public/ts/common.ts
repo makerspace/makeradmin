@@ -6,6 +6,9 @@ declare global {
     interface Window {
         stripeKey: string;
         apiBasePath: string;
+        hostAdminFrontend: string;
+        hostPublicFrontend: string;
+        basePath: string;
         staticBasePath: string;
         productId: number;
         transactionId: number;
@@ -19,6 +22,7 @@ export interface ServerResponse<T> {
 }
 
 export const UNAUTHORIZED = "unauthorized";
+export const NOT_FOUND = "not_found";
 
 export const trackPlausible: (
     tag: string,
@@ -104,13 +108,17 @@ export function uploadFile<T>(url: string, file: File): Promise<T> {
 export function ajax(
     type: string,
     url: string,
-    data: object | null = null,
+    data: object | FormData | null = null,
     options: { loginToken?: string } = {},
 ): Promise<ServerResponse<any>> {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open(type, url);
-        xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        if (!(data instanceof FormData))
+            xhr.setRequestHeader(
+                "Content-Type",
+                "application/json; charset=utf-8",
+            );
         let token = options.loginToken ?? localStorage.getItem("token");
         if (token) {
             xhr.setRequestHeader("Authorization", "Bearer " + token);
@@ -124,20 +132,32 @@ export function ajax(
                     status: UNAUTHORIZED,
                     message: JSON.parse(xhr.responseText).message,
                 });
+            } else if (xhr.status === 404) {
+                reject({
+                    status: NOT_FOUND,
+                    message: JSON.parse(xhr.responseText).message,
+                });
             } else reject(JSON.parse(xhr.responseText));
         };
         xhr.onerror = () => {
             let response;
             try {
                 response = JSON.parse(xhr.responseText);
+                response.status_code = xhr.status;
             } catch (err) {
-                response = "bad json: " + xhr.responseText;
+                response = {
+                    status: "error",
+                    message: "bad json: " + xhr.responseText,
+                    status_code: xhr.status,
+                };
             }
             reject(response);
         };
 
         if (data == null) {
             xhr.send();
+        } else if (data instanceof FormData) {
+            xhr.send(data);
         } else {
             xhr.send(JSON.stringify(data));
         }
@@ -223,9 +243,16 @@ export function removeToken() {
 
 export function logout() {
     removeToken();
-    window.location.href = "/";
+    window.location.href = url("/");
 }
 
 export function login(token: string) {
     localStorage.setItem("token", token);
+}
+
+export function url(path: string) {
+    if (!path.startsWith("/")) {
+        return path;
+    }
+    return `${window.basePath}${path}`;
 }

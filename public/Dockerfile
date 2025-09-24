@@ -25,7 +25,9 @@ COPY ./package.json ./package-lock.json /work/
 
 WORKDIR /work
 
-RUN npm ci
+COPY --from=frontend_common . /frontend_common
+
+RUN npm ci --install-links=false
 
 COPY ./webpack.config.js /work/
 

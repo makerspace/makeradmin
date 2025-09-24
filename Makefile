@@ -40,9 +40,9 @@ dev-docs:
 	docker build -f ./docs/Dockerfile ./docs -t makeradmin-docs:latest && docker run -p "8000:8000" -v "$(shell pwd)/docs:/work/docs" makeradmin-docs:latest serve -f /work/docs/mkdocs.yml -a 0.0.0.0:8000
 
 init-npm:
-	npm ci
-	cd admin && npm ci
-	cd public && npm ci
+	npm ci --install-links=false
+	cd admin && npm ci --install-links=false
+	cd public && npm ci --install-links=false
 
 init-pip:
 	python3 -m pip install --upgrade -r requirements.txt

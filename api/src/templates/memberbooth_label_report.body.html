@@ -1,0 +1,55 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<h2>Hej {{member.firstname}}</h2>
+<p>(See below for English).</p>
+<p>
+    Förvaringen av din <a href="{{label_url}}">{{thing_name_sv}}</a> som du har lämnat på makerspacet har rapporterats av {{action_author_name}}.
+</p>
+<p>
+    <b>{{action.message}}</b>
+</p>
+<p>
+    Var snäll att svara på detta meddelande snarast, och åtgärda situationen.
+</p>
+{% if image_url %}
+<p>
+    <img src="{{image_url}}" alt="Bild av din {{thing_name_sv}}" style="max-width: 400px; height: auto; border-radius: 5px;"/>
+</p>
+{% endif %}
+<p>
+    Läs våra förvaringsregler <a href="https://wiki.makerspace.se/Medlemsf%C3%B6rvaring">här</a>.
+</p>
+<p>
+  Om du anser att detta inte stämmer, hör av dig till <a href="mailto: info@makerspace.se">info@makerspace.se</a><br/>
+  Med vänliga hälsningar,<br/>
+  Stockholm Makerspace<br/>
+</p>
+{% endblock %}
+
+{% block english %}
+<h2>Hi {{member.firstname}}</h2>
+<p>
+  The storage of your <a href="{{label_url}}">{{thing_name}}</a> has been reported by {{action_author_name}}.
+</p>
+<p>
+    <b>{{action.message}}</b>
+</p>
+<p>
+  Please respond to this message and rectify the situation as soon as possible.
+</p>
+{% if image_url %}
+<p>
+    <img src="{{image_url}}" alt="Picture of your {{thing_name}}" style="max-width: 400px; height: auto; border-radius: 5px;"/>
+</p>
+{% endif %}
+<p>
+  Read our storage rules <a href="https://wiki.makerspace.se/Medlemsf%C3%B6rvaring">here</a>.
+</p>
+<p>
+  If you feel that this is incorrect, please contact <a href="mailto: info@makerspace.se">info@makerspace.se</a> as soon as possible.<br/>
+  Sincerely,<br/>
+  Stockholm Makerspace<br/>
+</p>
+
+{% endblock %}

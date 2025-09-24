@@ -1,11 +1,11 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
+import { member_t } from "frontend_common";
 import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useRef } from "preact/hooks";
 import Cart, { Item } from "./cart";
 import * as common from "./common";
 import { ServerResponse } from "./common";
 import { useTranslation } from "./i18n";
-import { member_t } from "./member_common";
 import {
     StartSubscriptionsRequest,
     SubscriptionStart,

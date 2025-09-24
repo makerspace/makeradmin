@@ -6,6 +6,7 @@ UIkit.use(Icons);
 
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { Outlet } from "react-router";
 import Page404 from "./Components/404";
 import Login from "./Components/Login";
 import Logout from "./Components/Logout";
@@ -14,7 +15,6 @@ import RequestPasswordReset from "./Components/RequestPasswordReset";
 import auth from "./auth";
 import { Nav, SideNav } from "./nav";
 
-import { Outlet } from "react-router";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RedirectToSubpage } from "./Components/Routes";
 import Membership from "./Membership/Routes";
@@ -224,6 +224,10 @@ const router = createBrowserRouter([
         Component: PasswordReset,
     },
     {
+        path: "boxTerminator/*",
+        children: BoxTerminator,
+    },
+    {
         path: "/*",
         Component: ContentWrapper,
         children: [
@@ -254,10 +258,6 @@ const router = createBrowserRouter([
             {
                 path: "quiz/*",
                 children: Quiz,
-            },
-            {
-                path: "boxTerminator/*",
-                children: BoxTerminator,
             },
             {
                 path: "*",

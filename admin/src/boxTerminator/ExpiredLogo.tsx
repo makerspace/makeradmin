@@ -1,17 +1,10 @@
-import React from "react";
 
-type ExpiredLogoProps = {
-    width?: string;
-};
-
-export const ExpiredLogo = (props: ExpiredLogoProps) => {
+export const ExpiredLogo = () => {
     return (
         <svg
-            width={props.width || "800px"}
-            height={props.width || "800px"}
             viewBox="0 0 48 48"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ fill: "#e54141" }}
+            // style={{ fill: "#e54141" }}
         >
             <title>expire-solid</title>
             <g id="Layer_2" data-name="Layer 2">

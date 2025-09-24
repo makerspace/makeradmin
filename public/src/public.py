@@ -2,6 +2,7 @@ import os
 import sys
 from logging import INFO, basicConfig, getLogger
 from typing import Any
+from urllib.parse import urlparse
 
 import flask
 from flask import Blueprint, Flask, redirect, send_from_directory, url_for
@@ -24,21 +25,45 @@ if banner:
     # Set the sidebar to not to use fixed positioning if there is a banner because otherwise the sidebar may end up below the banner, esp. on mobile devices
     sidebar_additional_classes = "sidebar-banner-adjust"
 
+static_hash = os.environ["STATIC_PREFIX_HASH"]
+HOST_PUBLIC = os.environ["HOST_PUBLIC"]
+HOST_BACKEND = os.environ["HOST_BACKEND"]
+HOST_FRONTEND = os.environ["HOST_FRONTEND"]
+
+# Handle hosting at a sub-path, e.g. "mytestserver.com/makerspace/"
+parsed_host_public = urlparse(HOST_PUBLIC)
+HOST_PUBLIC_PATH = parsed_host_public.path.rstrip("/")
+DOMAIN_PUBLIC = parsed_host_public.netloc
+
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "")
+
 
 class Section(Blueprint):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__(name, name)
         self.context_processor(lambda: dict(url=self.url))
 
-    def url(self, path):
-        return f"/{self.name}{path}"
+    def url(self, path: str) -> str:
+        return f"{HOST_PUBLIC_PATH}/{self.name}{path}"
 
-    def route(self, path, **kwargs):
-        return super().route(self.url(path), **kwargs)
+    def route(self, path: str, **kwargs: Any):
+        return super().route(f"/{self.name}{path}", **kwargs)
 
 
 def render_template(path: str, **kwargs: Any) -> str:
-    return flask.render_template(path, banner=banner, sidebar_additional_classes=sidebar_additional_classes, **kwargs)
+    assert "STATIC" not in kwargs
+    return flask.render_template(
+        path,
+        banner=banner,
+        sidebar_additional_classes=sidebar_additional_classes,
+        BASE_PATH=HOST_PUBLIC_PATH,
+        DOMAIN_PUBLIC=DOMAIN_PUBLIC,
+        STATIC=f"{HOST_PUBLIC_PATH}/static{static_hash}",
+        api_base_url=HOST_BACKEND,
+        stripe_public_key=STRIPE_PUBLIC_KEY,
+        host_frontend=HOST_FRONTEND,
+        **kwargs,
+    )
 
 
 shop = Section("shop")
@@ -64,14 +89,15 @@ def purchase_history():
     return render_template("history.html")
 
 
-@shop.route("/member/courses")
-def courses():
-    return render_template("courses.html")
+# # Legacy route
+# @shop.route("/member/courses")
+# def courses():
+#     return render_template("courses.html")
 
-
-@shop.route("/member/licenses")
-def licenses():
-    return render_template("licenses.html")
+# # Legacy route
+# @shop.route("/member/licenses")
+# def licenses():
+#     return render_template("licenses.html")
 
 
 @shop.route("/product/<product_id>")
@@ -113,6 +139,24 @@ def quiz_backwards_compatibility():
     return redirect(member.url("/quiz/1"))
 
 
+# Legacy route
+@shop.route("/member/courses")  # Legacy route
+@member.route("/courses")
+def courses():
+    return render_template("courses.html")
+
+
+@shop.route("/member/licenses")  # Legacy route
+@member.route("/licenses")
+def licenses():
+    return render_template("licenses.html")
+
+
+@member.route("/labels")
+def labels():
+    return render_template("labels.html")
+
+
 @member.route("/change_phone")
 def change_phone():
     return render_template("change_phone.html")
@@ -123,37 +167,34 @@ def reset_password():
     return render_template("reset_password.html")
 
 
-static_hash = os.environ["STATIC_PREFIX_HASH"]
-app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
+label = Section("label")
+
+
+@label.route("/<int:label_id>")
+def label_detail(label_id: int):
+    return render_template("label.html")
+
+
+app = Flask(__name__, static_folder=None)
+
+
+@app.route(f"/static{static_hash}/<path:filepath>")
+def serve_static(filepath: str) -> flask.Response:
+    response = send_from_directory("../static", filepath)
+
+    # During development, the hash is empty to disable caching
+    if static_hash != "":
+        # Cache static files for some time. We use a prefix hash, so caching indefinitely is quite fine.
+        response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24 * 30}, immutable"
+        response.headers["Vary"] = "Accept-Encoding"
+    return response
+
 
 app.register_blueprint(shop)
 app.register_blueprint(member)
-
-
-@app.route("/static/product_images/<path:path>")
-def product_image(path):
-    return send_from_directory("../static/product_images", path)
+app.register_blueprint(label)
 
 
 @app.route("/")
 def root():
-    return redirect(url_for("member.show_member"))
-
-
-api_base_url = os.environ["HOST_BACKEND"]
-if not api_base_url.startswith("http"):
-    api_base_url = "https://" + api_base_url
-
-host_public = os.environ["HOST_PUBLIC"]
-
-
-@app.context_processor
-def context():
-    return dict(
-        STATIC=app.static_url_path,
-        meta=dict(
-            api_base_url=api_base_url,
-            stripe_public_key=os.environ.get("STRIPE_PUBLIC_KEY", ""),
-            host_public=host_public,
-        ),
-    )
+    return redirect(member.url("/"))

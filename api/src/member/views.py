@@ -1,9 +1,11 @@
+import serde
 from change_phone_request import change_phone_request, change_phone_validate
 from flask import g, request
 from membership.member_auth import get_member_permissions
 from membership.membership import get_access_summary, get_membership_summary
 from membership.models import Member
 from membership.views import member_entity
+from multiaccess.memberbooth import get_member_labels
 from quiz.views import member_quiz_statistics
 from service.api_definition import GET, MESSAGE_SEND, POST, PUBLIC, USER, Arg, natural1, non_empty_str
 from service.db import db_session
@@ -74,6 +76,12 @@ def current_membership_groups():
 def current_member_quiz_info():
     """Get info about which quizzes the current user has completed."""
     return member_quiz_statistics(g.user_id)
+
+
+@service.route("/current/labels", method=GET, permission=USER)
+def current_member_labels() -> dict:
+    """Get info about which labels the current user has."""
+    return serde.to_dict(get_member_labels(g.user_id))
 
 
 @service.route("/current/set_pin_code", method=POST, permission=USER)

@@ -5,9 +5,10 @@ import { JSX } from "preact/jsx-runtime";
 import Cart, { useCart } from "./cart";
 import { show_phone_number_dialog } from "./change_phone";
 import * as common from "./common";
-import { UNAUTHORIZED, get_error } from "./common";
+import { UNAUTHORIZED, get_error, url } from "./common";
 import * as login from "./login";
 
+import { access_t, date_t, member_t, membership_t } from "frontend_common";
 import { Trans } from "react-i18next";
 import { Translator, useTranslation } from "./i18n";
 import {
@@ -15,10 +16,6 @@ import {
     LoadCurrentMemberGroups,
     LoadCurrentMemberInfo,
     LoadCurrentMembershipInfo,
-    access_t,
-    date_t,
-    member_t,
-    membership_t,
 } from "./member_common";
 import {
     FindWellKnownProduct,
@@ -65,11 +62,11 @@ type template_strings_t = [
 ];
 
 type membership_info_t = {
-    enddate: date_t;
+    enddate: date_t | null;
     active: boolean;
 };
 
-const webshop_url = `${window.location.origin}/shop`;
+const webshop_url = url("/shop");
 
 function get_random_pin_code(numbers: number): string {
     return Math.random().toString(10).substr(2, numbers);
@@ -89,9 +86,8 @@ function Info({
     const millisecondsPerHour = 1000 * 3600;
     const millisecondsPerDay = millisecondsPerHour * 24;
 
-    const end = Date.parse(info.enddate) + millisecondsPerDay;
-
-    if (info.active) {
+    if (info.active && info.enddate) {
+        const end = Date.parse(info.enddate) + millisecondsPerDay;
         const remainingDays = Math.floor(
             (end - Date.now()) / millisecondsPerDay,
         );
@@ -152,9 +148,8 @@ function Info2({
     const millisecondsPerHour = 1000 * 3600;
     const millisecondsPerDay = millisecondsPerHour * 24;
 
-    const end = Date.parse(info.enddate) + millisecondsPerDay;
-
-    if (info.active) {
+    if (info.active && info.enddate) {
+        const end = Date.parse(info.enddate) + millisecondsPerDay;
         const remainingDays = Math.floor(
             (end - Date.now()) / millisecondsPerDay,
         );

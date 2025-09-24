@@ -47,7 +47,7 @@ const CourseButton = ({ quizInfo }: { quizInfo: QuizInfo }) => {
     }
     return (
         <a
-            href={`/member/quiz/${quizInfo.quiz.id}`}
+            href={common.url(`/member/quiz/${quizInfo.quiz.id}`)}
             className={`course-item ${
                 completed ? "course-item-completed" : ""
             }`}

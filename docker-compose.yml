@@ -89,6 +89,7 @@ services:
       MAILGUN_TO_OVERRIDE:
       HOST_PUBLIC: "${PROTOCOL}://${HOST_PUBLIC}"
       HOST_FRONTEND: "${PROTOCOL}://${HOST_FRONTEND}"
+      HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
     depends_on:
       - api
     networks:
@@ -130,10 +131,13 @@ services:
       - "./.webshop_product_images:/work/static/product_images"
     build:
       context: ./public
+      additional_contexts:
+        frontend_common: ./frontend_common
     environment:
       APIGATEWAY: "api"
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
       HOST_PUBLIC: "${PROTOCOL}://${HOST_PUBLIC}"
+      HOST_FRONTEND: "${PROTOCOL}://${HOST_FRONTEND}"
       STRIPE_PUBLIC_KEY:
       VIRTUAL_HOST: "${HOST_PUBLIC}"
       LETSENCRYPT_HOST: "${HOST_PUBLIC}"
@@ -145,6 +149,8 @@ services:
     image: makeradmin/admin:1.0
     build:
       context: ./admin
+      additional_contexts:
+        frontend_common: ./frontend_common
     environment:
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
       VIRTUAL_HOST: "${HOST_FRONTEND}"

@@ -271,7 +271,7 @@ def send_price_level_email(member: Member) -> None:
         if admin_email == "":
             logger.warning(f"ADMIN_EMAIL not set, cannot send price level email for member {member.member_id}")
         else:
-            send_message(MessageTemplate.NEW_LOW_INCOME_MEMBER, member, recipient_email=admin_email)
+            send_message(MessageTemplate.NEW_LOW_INCOME_MEMBER, member, recipient=admin_email)
 
 
 def activate_member(member: Member) -> None:

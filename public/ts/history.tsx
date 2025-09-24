@@ -1,10 +1,11 @@
+import { member_t } from "frontend_common";
 import { render } from "preact";
 import Cart from "./cart";
 import * as common from "./common";
 import { UNAUTHORIZED } from "./common";
 import { useTranslation } from "./i18n";
 import * as login from "./login";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
+import { LoadCurrentMemberInfo } from "./member_common";
 import { LoadProductData, ProductData, Transaction } from "./payment_common";
 import { Receipt } from "./receipt_common";
 import { Sidebar } from "./sidebar";

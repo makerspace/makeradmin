@@ -1,7 +1,7 @@
 import markdown from "markdown-it";
 import { Component, render } from "preact";
 import * as common from "./common";
-import { ServerResponse } from "./common";
+import { ServerResponse, url } from "./common";
 import { Login } from "./login";
 import { URL_FACEBOOK_GROUP, URL_SLACK_HELP } from "./urls";
 
@@ -106,7 +106,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             }
         } catch (data: any) {
             if (data.status == "unauthorized") {
-                window.location.href = "/member";
+                window.location.href = url("/member");
             }
         }
     }
@@ -143,7 +143,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
                     <div>
                         <a
                             className="uk-button uk-button-primary"
-                            href="/shop/member/courses"
+                            href={url("/shop/member/courses")}
                         >
                             Check out more online courses
                         </a>

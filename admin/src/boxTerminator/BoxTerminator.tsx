@@ -1,60 +1,230 @@
-import { useState } from "react";
-import { get } from "../gateway";
-import { showError } from "../message";
+import { labelExpiryDate, labelIsExpired, membership_t, UploadedLabel } from "frontend_common";
+import { get, post } from "gateway";
+import { useEffect, useRef, useState } from "react";
+import { ActiveLogo } from "./ActiveLogo";
+import { ExpiredLogo } from "./ExpiredLogo";
 import QrCodeScanner from "./QrCodeScanner";
-import { Termination, TerminationRenderProps } from "./Termination";
 
-type ResponseType = TerminationRenderProps;
+export interface LabelActionResponse {
+    id: number;
+    label: UploadedLabel;
+}
+
+const labelUrlRegex = /\/L\/([0-9_-]+)$/;
+
+const ScanResultPopover = ({ labelAction, membership, state }: { labelAction: LabelActionResponse, membership: membership_t, state: "active" | "fading-out" }) => {
+
+    const label = labelAction.label.label;
+    const now = new Date();
+    const expiresAt = labelExpiryDate(label, membership);
+    const isExpired = labelIsExpired(now, label, membership);
+    
+    return <div className={`box-terminator-popover` + (state === "fading-out" ? " fading-out" : "") + (isExpired ? " expired" : " active")}>
+        <div>
+            <div>
+                { isExpired ? <ExpiredLogo /> : <ActiveLogo /> }
+            </div>
+            {expiresAt && (
+                <div>
+                    Expires&nbsp;
+                    {(() => {
+                        const expiresDate = new Date(expiresAt);
+                        const now = new Date();
+                        const diffMs = expiresDate.getTime() - now.getTime();
+                        if (diffMs < 0) return "in the past";
+                        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                        if (diffDays > 0) return `in ${diffDays} day${diffDays > 1 ? "s" : ""}`;
+                        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                        if (diffHours > 0) return `in ${diffHours} hour${diffHours > 1 ? "s" : ""}`;
+                        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                        if (diffMinutes > 0) return `in ${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`;
+                        return "soon";
+                    })()}
+                </div>
+            )}
+            <a
+                href={labelAction.label.public_url}
+                className="uk-button uk-button-default"
+            >
+                View
+            </a>
+        </div>
+    </div>
+};
 
 const BoxTerminator = () => {
-    const [runScanner, setRunScanner] = useState(true);
-    const [response, setResponse] = useState(null as ResponseType);
-    const scanCallback = (scannedString: string) => {
-        try {
-            get({
-                url: `/box_terminator/fetch/${scannedString}`,
-            }).then((res) => {
-                if (res.status === "ok") {
-                    setResponse(JSON.parse(res.data));
-                    setRunScanner(false);
-                }
-            });
-        } catch (err) {
-            showError(err);
+    // Ensure only a single request is in flight at any one time
+    const isScanning = useRef(false);
+    const [pendingScan, setPendingScan] = useState<string | null>(null);
+    const [lastScanResult, setLastScanResult] = useState<{ label: LabelActionResponse, membership: membership_t, state: "active" | "fading-out", timer: NodeJS.Timeout }[]>([]);
+    const nullTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const scanCache = useRef(new Map<string, { label: LabelActionResponse, membership: membership_t } | null>());
+
+    const processScan = async (scannedString: string) => {
+        // Check cache first
+        if (scanCache.current.has(scannedString)) {
+            const cachedLabel = scanCache.current.get(scannedString) ?? null;
+            return cachedLabel;
         }
+
+        let matchedId: number | null = null;
+        try {
+            const parsed = new URL(scannedString);
+            const match = parsed.pathname.match(labelUrlRegex);
+            if (match) {
+                matchedId = parseInt(match[1]!);
+            }
+        } catch {
+            // Not a URL
+        }
+        console.log(matchedId);
+        let label: LabelActionResponse | null = null;
+        let membership : membership_t | null = null;
+        try {
+            if (matchedId !== null) {
+                const [observeRes, membershipRes] = await Promise.all([
+                    post({
+                        url: `/multiaccess/memberbooth/label/${matchedId}/observe`,
+                        allowedErrorCodes: [404],
+                    }), await get({
+                        url: `/multiaccess/memberbooth/label/${matchedId}/membership`,
+                        allowedErrorCodes: [404],
+                    })
+                ]);
+                label = observeRes.data as LabelActionResponse | null;
+                membership = membershipRes.data as membership_t;
+            } else {
+                // Try old format
+                const data = JSON.parse(scannedString);
+                if ((data["v"] >= 1 && data["v"] <= 2) && data.hasOwnProperty("member_number") && data.hasOwnProperty("type")) {
+                    // Seems legit. Try to observe the label by id, which is just the timestamp for v1 and v2 labels
+                    const observeRes = await post({
+                        url: `/multiaccess/memberbooth/label/${data.unix_timestamp}/observe`,
+                        allowedErrorCodes: [404],
+                    });
+
+                    if (observeRes.data == null) {
+                        // Submit unknown label and migrate to new format in the process
+                        const createRes = await post({
+                            url: '/multiaccess/memberbooth/label',
+                            data: data,
+                        });
+                        const createdLabel = createRes.data as UploadedLabel;
+                        console.log(createdLabel);
+
+                        // Observe the new label
+                        const [observeRes2, membershipRes] = await Promise.all([
+                            post({
+                                url: `/multiaccess/memberbooth/label/${createdLabel.label.id}/observe`,
+                                allowedErrorCodes: [404],
+                            }), await get({
+                                url: `/multiaccess/memberbooth/label/${createdLabel.label.id}/membership`,
+                            })
+                        ]);
+                        label = observeRes2.data as LabelActionResponse | null;
+                        membership = membershipRes.data as membership_t;
+                    } else {
+                        const membershipRes = await get({
+                            url: `/multiaccess/memberbooth/label/${data.unix_timestamp}/membership`,
+                        });
+                        label = observeRes.data as LabelActionResponse;
+                        membership = membershipRes.data as membership_t;
+                    }
+                }
+            }
+        } catch (err) {
+            // If it's a network error, just return. Don't store in cache.
+            if (err && (err as any).name === "NetworkError") {
+                return null;
+            }
+            console.error(err);
+            label = null;
+        }
+
+        if (label === null || membership == null) {
+            // Store null in cache to avoid repeated lookups
+            scanCache.current.set(scannedString, null);
+            return null;
+        }
+
+        // Store in cache
+        const cache_item = { label, membership };
+        scanCache.current.set(scannedString, cache_item);
+        return cache_item;
     };
+
+    const fadeoutLabelItem = (item: { label: LabelActionResponse, membership: membership_t, state: "active" | "fading-out", timer: NodeJS.Timeout }) => {
+        if (item.state === "fading-out") return;
+        item.state = "fading-out";
+        window.clearTimeout(item.timer);
+        item.timer = setTimeout(() => {
+            setLastScanResult(current => current.filter(i => i !== item));
+        }, 1000);
+    };
+
+    const fadeoutLabel = (id: number) => {
+        setLastScanResult(prev => {
+            const item = prev.find(v => v.label.id === id);
+            if (item) {
+                fadeoutLabelItem(item);
+            }
+            return [...prev];
+        });
+    };
+
+    // Handles the scan event, queues if busy
+    const scanCallback = (scannedString: string) => {
+        if (isScanning.current) {
+            setPendingScan(scannedString);
+            return;
+        }
+        isScanning.current = true;
+        processScan(scannedString)
+        .then((label) => {
+            // Timer logic for null label
+            if (!label) return;
+
+            console.log("Finished scan", label);
+            setLastScanResult(prev => {
+                // Remove any existing entry for this label
+                for (const v of prev) {
+                    if (v.label.id === label.label.id) {
+                        window.clearTimeout(v.timer);
+                    }
+                }
+                prev = prev.filter(v => v.label.id !== label.label.id);
+
+                // Mark any existing entries for removal
+                for (const v of prev) {
+                    fadeoutLabelItem(v);
+                }
+                return [...prev, { ...label, state: "active", timer: setTimeout(() => fadeoutLabel(label.label.id), 3000) }];
+            });
+        }).finally(() => {
+            isScanning.current = false;
+        });
+    };
+
+    // Effect to process pending scans
+    useEffect(() => {
+        if (!isScanning && pendingScan) {
+            setPendingScan(null);
+            scanCallback(pendingScan);
+        }
+    }, [isScanning, pendingScan]);
+
     return (
         <div
-            style={{
-                textAlign: "center",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-            }}
+            className="box-terminator"
         >
-            {runScanner ? (
-                <QrCodeScanner
-                    onSuccess={scanCallback}
-                    filterScan={(scannedString) => {
-                        const parsedString = JSON.parse(scannedString);
-                        if (
-                            !parsedString.hasOwnProperty("member_number") &&
-                            !parsedString.hasOwnProperty("storage_id")
-                        ) {
-                            showError("Not a member memberbooth tag!");
-                            return false;
-                        }
-                        return true;
-                    }}
-                />
-            ) : (
-                <>
-                    <Termination
-                        props={response}
-                        callback={() => setRunScanner(true)}
-                    />
-                </>
-            )}
+            <QrCodeScanner
+                onSuccess={scanCallback}
+            />
+            { lastScanResult.map(item => {
+                return <ScanResultPopover key={item.label.id} labelAction={item.label} membership={item.membership} state={item.state} />
+            }) }
+
+
         </div>
     );
 };

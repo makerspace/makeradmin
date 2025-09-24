@@ -1,7 +1,7 @@
 import { render } from "preact";
 import { useState } from "preact/hooks";
 import * as common from "./common";
-import { ServerResponse } from "./common";
+import { ServerResponse, url } from "./common";
 import { Translator, useTranslation } from "./i18n";
 import { Sidebar } from "./sidebar";
 declare var UIkit: any;
@@ -46,7 +46,7 @@ export function login_via_password(
             if (data !== null) {
                 let r = data as ServerResponse<any> & { access_token: string };
                 common.login(r.access_token);
-                window.location.replace(redirect || "/");
+                window.location.replace(redirect || url("/"));
             }
         });
 }
@@ -223,7 +223,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                 </a>
             </p>
             <p style="text-align: center;">
-                <a href="/shop/register">{t("register")}</a>
+                <a href={url("/shop/register")}>{t("register")}</a>
             </p>
         </>
     );

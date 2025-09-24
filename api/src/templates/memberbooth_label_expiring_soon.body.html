@@ -1,0 +1,35 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<h2>Hej {{member.firstname}}</h2>
+<p>(See below for English).</p>
+<p>
+    Detta är en vänlig påminnelse om att etiketten för din <a href="{{label_url}}">{{thing_name}}</a> snart kommer att gå ut.
+    <b>Du kan redan ha hämtat detta föremål. Om så är fallet behöver du inte göra något.</b>
+    Annars, vänligen hämta ditt förvarade föremål så snart du har möjlighet.
+</p>
+<p>
+    Du kan se alla dina aktiva etiketter <a href="{{public_url('/member/labels')}}">här</a>.
+</p>
+<p>
+  Med vänliga hälsningar,<br/>
+  Stockholm Makerspace
+</p>
+{% endblock %}
+
+{% block english %}
+<h2>Hi {{member.firstname}}</h2>
+<p>
+  This is a friendly reminder that the label for your <a href="{{label_url}}">{{thing_name}}</a> is about to expire.
+  <b>You may already have picked this item up. If so, you don't need to do anything.</b>
+  Otherwise, please pick up your stored item when possible.
+</p>
+<p>
+  You can view all your active labels <a href="{{public_url('/member/labels')}}">here</a>.
+</p>
+<p>
+  Sincerely,<br/>
+  Stockholm Makerspace<br/>
+</p>
+
+{% endblock %}

@@ -84,6 +84,14 @@ def get_admin_url(path: str) -> str:
     return f"{host}{path}"
 
 
+def get_api_url(path: str) -> str:
+    """Get public site url."""
+    host = config.get("HOST_BACKEND")
+    if not host.startswith("http://") and not host.startswith("https://"):
+        host = "http://" + host
+    return f"{host}{path}"
+
+
 def get_makerspace_local_timezone() -> ZoneInfo:
     zone_str = config.get("MAKERSPACE_LOCAL_TIMEZONE")
     if zone_str is None:

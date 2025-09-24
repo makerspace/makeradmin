@@ -1,3 +1,4 @@
+import { member_t } from "frontend_common";
 import { render } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import Cart from "./cart";
@@ -10,7 +11,7 @@ import {
 } from "./common";
 import { useTranslation } from "./i18n";
 import * as login from "./login";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
+import { LoadCurrentMemberInfo } from "./member_common";
 import {
     LoadProductData,
     Product,

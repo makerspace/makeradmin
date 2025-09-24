@@ -1,13 +1,17 @@
 # Downloaded files
 /public/static/uikit
+/public/static/uikit_old
 
 # Generated files
 **/package-lock.json
 /public/ts/generated_locales
 /public/ts/locales.ts
+/public/static/js
+/admin/dist
+/public/ts/generated_locales
 
 # Jinja2 templates do not work well for some reason
 /api/src/templates/
 
-# Sql files in root folder (likely db dumps)
-*.sql
+# Various sql files in the root that one might have
+/*.sql

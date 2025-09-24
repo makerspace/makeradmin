@@ -1,19 +1,11 @@
-import React from "react";
-
-type ActiveLogoProps = {
-    width?: string;
-};
-
-export const ActiveLogo = (props: ActiveLogoProps) => {
+export const ActiveLogo = () => {
     return (
         <svg
-            width={props.width || "800px"}
-            height={props.width || "800px"}
             viewBox="0 0 32 32"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ fill: "#00aa00" }}
+            // style={{ fill: "#00aa00" }}
         >
-            <g id="Page-1" stroke="none" stroke-width="1">
+            <g id="Page-1" stroke="none" strokeWidth="1">
                 <g
                     id="Icon-Set"
                     transform="translate(-100.000000, -1139.000000)"

@@ -1,0 +1,19 @@
+{
+    "name": "makeradmin-common",
+    "version": "1.0.0",
+    "description": "See repository",
+    "repository": "https://github.com/makerspace/makeradmin",
+    "license": "GPL-3.0",
+    "engines": {
+        "npm": ">=10.5.2",
+        "node": ">=20"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+    },
+    "main": "src/lib.ts",
+    "files": [
+        "/dist"
+    ]
+}

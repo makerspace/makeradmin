@@ -1,0 +1,51 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<h2>Hej {{member.firstname}}</h2>
+<p>(See below for English).</p>
+<p>
+    Din <a href="{{label_url}}">{{thing_name_sv}}</a> som du har lämnat på makerspacet har sparats för länge, och kan komma att rensas ut när som helst.
+    Etiketten gick ut för {{days_after_expiration}} dagar sedan. Hämta gärna din sak så snart som möjligt.
+</p>
+{% if image_url %}
+<p>
+    <img src="{{image_url}}" alt="Bild av din {{thing_name_sv}}" style="max-width: 400px; height: auto; border-radius: 5px;"/>
+</p>
+{% endif %}
+<p>
+    Du kan se alla dina aktiva etiketter <a href="{{public_url('/member/labels')}}">här</a>.
+</p>
+<p>
+    Läs våra förvaringsregler <a href="https://wiki.makerspace.se/Medlemsf%C3%B6rvaring">här</a>.
+</p>
+<p>
+  Om du anser att detta inte stämmer, hör av dig till <a href="mailto: info@makerspace.se">info@makerspace.se</a><br/>
+  Med vänliga hälsningar,<br/>
+  Stockholm Makerspace<br/>
+</p>
+{% endblock %}
+
+{% block english %}
+<h2>Hi {{member.firstname}}</h2>
+<p>
+  Your <a href="{{label_url}}">{{thing_name}}</a> has been stored for too long, and may be cleaned away at any moment.
+  The label expired {{days_after_expiration}} days ago. Please retrieve your item as soon as possible.
+</p>
+{% if image_url %}
+<p>
+    <img src="{{image_url}}" alt="Picture of your {{thing_name}}" style="max-width: 400px; height: auto; border-radius: 5px;"/>
+</p>
+{% endif %}
+<p>
+  You can view all your active labels <a href="{{public_url('/member/labels')}}">here</a>.
+</p>
+<p>
+  Read our storage rules <a href="https://wiki.makerspace.se/Medlemsf%C3%B6rvaring">here</a>.
+</p>
+<p>
+  If you feel that this is incorrect, please contact <a href="mailto: info@makerspace.se">info@makerspace.se</a> as soon as possible.<br/>
+  Sincerely,<br/>
+  Stockholm Makerspace<br/>
+</p>
+
+{% endblock %}

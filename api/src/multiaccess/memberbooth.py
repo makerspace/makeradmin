@@ -1,33 +1,60 @@
+from dataclasses import dataclass
 from logging import getLogger
 
+import serde
+from dataclasses_json import DataClassJsonMixin
 from membership.member_auth import verify_password
-from membership.membership import get_membership_summary
+from membership.membership import MembershipData, get_membership_summary
 from membership.models import Key, Member
+from serde import InternalTagging
+from service.config import get_api_url, get_public_url
 from service.db import db_session
 from service.error import NotFound
+
+from multiaccess.label_data import LabelType, LabelTypeTagged
+from multiaccess.models import MemberboothLabel
+from urllib.parse import urlparse, urlunparse
 
 logger = getLogger("makeradmin")
 
 
-def member_to_response_object(member: Member):
-    return {
-        "member_id": member.member_id,
-        "member_number": member.member_number,
-        "firstname": member.firstname,
-        "lastname": member.lastname,
-        "end_date": max((span.enddate for span in member.spans)).isoformat() if len(member.spans) > 0 else None,
-        "keys": [{"key_id": key.key_id, "rfid_tag": key.tagid} for key in member.keys],
-    }
+@dataclass
+class MemberboothKeyInfo(DataClassJsonMixin):
+    key_id: int
+    rfid_tag: str | None
 
 
-def memberbooth_response_object(member: Member, membership_data):
-    response = member_to_response_object(member)
-    del response["end_date"]
-    response["membership_data"] = membership_data.as_json()
-    return response
+@dataclass
+class MemberboothMemberInfo(DataClassJsonMixin):
+    member_id: int
+    member_number: int
+    firstname: str
+    lastname: str | None
+    keys: list[MemberboothKeyInfo]
+    membership_data: MembershipData
 
 
-def tag_to_memberinfo(tagid: str):
+@serde.serde(deny_unknown_fields=True, tagging=InternalTagging("type"))
+class UploadedLabel:
+    # Public url that can be used to view the given label
+    public_url: str
+    # Public url that will register an observation of the label, and then redirect to public_url. Used for QR codes.
+    public_observation_url: str
+    label: LabelType
+
+
+def memberbooth_response_object(member: Member, membership_data: MembershipData) -> MemberboothMemberInfo:
+    return MemberboothMemberInfo(
+        member_id=member.member_id,
+        member_number=member.member_number,
+        firstname=member.firstname,
+        lastname=member.lastname,
+        keys=[MemberboothKeyInfo(key_id=key.key_id, rfid_tag=key.tagid) for key in member.keys],
+        membership_data=membership_data,
+    )
+
+
+def tag_to_memberinfo(tagid: str) -> MemberboothMemberInfo | None:
     key = (
         db_session.query(Key)
         .join(Key.member)
@@ -46,7 +73,7 @@ def tag_to_memberinfo(tagid: str):
     return memberbooth_response_object(key.member, membership_data)
 
 
-def pin_login_to_memberinfo(member_number: int, pin_code_or_password: str):
+def pin_login_to_memberinfo(member_number: int, pin_code_or_password: str) -> MemberboothMemberInfo:
     member = (
         db_session.query(Member)
         .filter(Member.member_number == member_number)
@@ -73,7 +100,7 @@ def pin_login_to_memberinfo(member_number: int, pin_code_or_password: str):
     return memberbooth_response_object(member, membership_data)
 
 
-def member_number_to_memberinfo(member_number: int):
+def member_number_to_memberinfo(member_number: int) -> MemberboothMemberInfo | None:
     member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).first()
 
     if not member:
@@ -81,3 +108,75 @@ def member_number_to_memberinfo(member_number: int):
 
     membership_data = get_membership_summary(member.member_id)
     return memberbooth_response_object(member, membership_data)
+
+
+def get_label_public_url(label_id: int) -> str:
+    return get_public_url("/label/") + str(label_id)
+
+
+def get_label_qr_code_url(label_id: int) -> str:
+    # Use short URL service for QR codes, to make them easier to scan.
+    # The host and protocol can always be made uppercase, and we make sure to handle an uppercase path too.
+    # QR codes encode uppercase alphanumeric characters with fewer bits.
+    url = get_api_url(f"/L/{label_id}")
+    parsed = urlparse(url)
+    # Uppercase scheme and netloc
+    new_url = urlunparse((
+        parsed.scheme.upper(),
+        parsed.netloc.upper(),
+        parsed.path, # Note: makeradmin may be hosted in a subdirectory, so we cannot necessarily uppercase the whole path
+        parsed.params,
+        parsed.query,
+        parsed.fragment,
+    ))
+    return new_url
+
+
+def create_label(label: LabelType) -> UploadedLabel:
+    member = (
+        db_session.query(Member)
+        .filter(Member.member_number == label.base.member_number, Member.deleted_at.is_(None))
+        .first()
+    )
+    if not member:
+        raise NotFound(f"Member with number {label.base.member_number} not found.")
+
+    db_label = MemberboothLabel(
+        id=label.base.id,
+        member_id=member.member_id,
+        data=serde.to_dict(label, LabelTypeTagged),
+    )
+    db_session.add(db_label)
+    db_session.flush()
+    return UploadedLabel(
+        public_url=get_label_public_url(db_label.id),
+        public_observation_url=get_label_qr_code_url(db_label.id),
+        label=label,
+    )
+
+
+def get_member_labels(member_id: int) -> list[UploadedLabel]:
+    member = db_session.get(Member, member_id)
+    if not member:
+        raise NotFound(f"Member with id {member_id} not found.")
+
+    labels = (
+        db_session.query(MemberboothLabel)
+        .filter(MemberboothLabel.member_id == member_id, MemberboothLabel.deleted_at.is_(None))
+        .order_by(MemberboothLabel.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for label_db in labels:
+        data_dict: dict = label_db.data  # type: ignore
+        label: LabelType = serde.from_dict(LabelTypeTagged, data_dict)  # validate
+        result.append(
+            UploadedLabel(
+                public_url=get_label_public_url(label_db.id),
+                public_observation_url=get_label_qr_code_url(label_db.id),
+                label=label,
+            )
+        )
+
+    return result

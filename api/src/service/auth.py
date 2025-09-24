@@ -16,6 +16,7 @@ def authenticate_request() -> None:
     # Make sure user_id and permissions is always set.
     g.user_id = None
     g.permissions = tuple()
+    g.session_token = None
 
     # logger.info("DATA " + repr(request.get_data()))
     # logger.info("HEADERS " + repr(request.headers))

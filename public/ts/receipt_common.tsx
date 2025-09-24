@@ -1,6 +1,7 @@
+import { member_t } from "frontend_common";
 import Cart from "./cart";
+import { url } from "./common";
 import { useTranslation } from "./i18n";
-import { member_t } from "./member_common";
 import { Transaction, TransactionItem } from "./payment_common";
 
 function format_receipt_status(transaction_status: string) {
@@ -20,7 +21,7 @@ const ReceiptItem = ({ item }: { item: TransactionItem }) => {
         <>
             <a
                 className="product-title"
-                href={`/shop/product/${item.product.id}`}
+                href={url(`/shop/product/${item.product.id}`)}
             >
                 {item.product.name}
             </a>
@@ -48,7 +49,7 @@ export const Receipt = ({
         <div className={`history-item history-item-${transaction.status}`}>
             <a
                 className="receipt-header"
-                href={`/shop/receipt/${transaction.id}`}
+                href={url(`/shop/receipt/${transaction.id}`)}
             >
                 <span>
                     {t("receipt")} {transaction.id}

@@ -3,10 +3,14 @@ import { FC, useEffect, useState } from "react";
 
 type QrCodeScannerProps = {
     onSuccess: (qrCodeMessage: string) => void;
-    filterScan: (qrCodeMessage: string) => boolean;
 };
 
-const QrCodeScanner: FC<QrCodeScannerProps> = ({ filterScan, onSuccess }) => {
+const allowedErrors = [
+    'NotFoundException',
+    "error = D:",
+];
+
+const QrCodeScanner: FC<QrCodeScannerProps> = ({ onSuccess }) => {
     const [module, setModule] = useState<typeof module_type | null>(null);
 
     useEffect(() => {
@@ -40,14 +44,12 @@ const QrCodeScanner: FC<QrCodeScannerProps> = ({ filterScan, onSuccess }) => {
                 fps: 15,
                 qrbox: qrboxFunction,
             },
-            async (qrCodeMessage) => {
-                if (filterScan(qrCodeMessage)) {
-                    await scanner.stop();
-                    onSuccess(qrCodeMessage);
-                }
-            },
+            (qrCodeMessage) => onSuccess(qrCodeMessage),
             (errorMessage) => {
-                console.log(errorMessage);
+
+                if (allowedErrors.some((error) => errorMessage.includes(error))) return;
+
+                console.error(errorMessage);
             },
         );
 
@@ -62,7 +64,7 @@ const QrCodeScanner: FC<QrCodeScannerProps> = ({ filterScan, onSuccess }) => {
         };
     }, [module]);
 
-    return <div id="qr-reader" style={{ width: "100%", height: "100%" }} />;
+    return <div id="qr-reader" />;
 };
 
 export default QrCodeScanner;

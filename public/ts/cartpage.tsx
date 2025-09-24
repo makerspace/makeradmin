@@ -2,7 +2,7 @@ import { render } from "preact";
 import { useMemo, useState } from "preact/hooks";
 import Cart, { Item, useCart } from "./cart";
 import * as common from "./common";
-import { ServerResponse, UNAUTHORIZED } from "./common";
+import { ServerResponse, UNAUTHORIZED, url } from "./common";
 import { useTranslation } from "./i18n";
 import * as login from "./login";
 import { LoadCurrentMemberInfo } from "./member_common";
@@ -113,7 +113,9 @@ const PaymentButton = ({
                 json: ServerResponse<BackendPaymentResponse>,
             ) => {
                 new Cart([]).saveToStorage();
-                window.location.href = "receipt/" + json.data.transaction_id;
+                window.location.href = url(
+                    "receipt/" + json.data.transaction_id,
+                );
             },
             on_failure: (json: ServerResponse<any>) => {
                 if (json.status === UNAUTHORIZED) {
@@ -188,11 +190,12 @@ const PaymentButton = ({
                                 // Payment succeeded! Clear the cart and go to the receipt page.
                                 new Cart([]).saveToStorage();
                                 if (payment.transaction_id !== null) {
-                                    window.location.href =
-                                        "receipt/" + payment.transaction_id;
+                                    window.location.href = url(
+                                        "receipt/" + payment.transaction_id,
+                                    );
                                 } else {
                                     // Shouldn't happen unless only subscriptions were started. Which shouldn't be possible from the cart page.
-                                    window.location.href = "/member";
+                                    window.location.href = url("/member");
                                 }
                             }
                         } catch (e) {

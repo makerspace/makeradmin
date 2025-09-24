@@ -1,3 +1,4 @@
+import { member_t } from "frontend_common";
 import { ComponentChildren, JSX, render } from "preact";
 import {
     Dispatch,
@@ -13,7 +14,7 @@ import { show_phone_number_dialog } from "./change_phone";
 import * as common from "./common";
 import { ServerResponse, trackPlausible } from "./common";
 import { Translator, useTranslation } from "./i18n";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
+import { LoadCurrentMemberInfo } from "./member_common";
 import {
     calculateAmountToPay,
     createPaymentMethod,
@@ -381,7 +382,11 @@ const TermsAndConditions = ({
             <p>
                 <b>{t("terms.understandingPledge")}...</b>
             </p>
-            <ol className="rules-list">{t("terms.understanding")}</ol>
+            <ol className="rules-list">
+                {t("terms.understanding").map((v) => (
+                    <li>{v}</li>
+                ))}
+            </ol>
 
             <RuleCheckbox
                 rule={t("terms.accept")}
@@ -668,8 +673,8 @@ const Success = ({ member }: { member: member_t }) => {
                     onClick={tick}
                 >
                     {t("success.steps.joinSlackButton")}
-                </a>
-                {t("success.steps.joinSlackWhy")}
+                </a>{" "}
+                {t("success.steps.joinSlackWhy")}{" "}
                 <a target="_blank" href={URL_SLACK_HELP}>
                     <i>{t("success.steps.joinSlackWhatIsThis")}</i>
                 </a>
@@ -764,6 +769,7 @@ const Success = ({ member }: { member: member_t }) => {
                     firstName: member.firstname,
                     lastName: member.lastname,
                     email: member.email,
+                    smsReminderNumber: member.phone,
                 }}
             />
         </>

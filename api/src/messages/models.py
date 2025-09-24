@@ -29,6 +29,16 @@ class MessageTemplate(enum.Enum):
     NEW_LOW_INCOME_MEMBER = "new_low_income_member"
     GIFT_CARD_PURCHASE = "gift_card_purchase"
     UPDATED_MEMBER_INFO = "updated_member_info"
+    MEMBERBOOTH_LABEL_REPORT = "memberbooth_label_report"
+    MEMBERBOOTH_LABEL_CLEANED_AWAY = "memberbooth_label_cleaned_away"
+    MEMBERBOOTH_LABEL_REPORT_SMS = "memberbooth_label_report_sms"
+    MEMBERBOOTH_LABEL_CLEANED_AWAY_SMS = "memberbooth_label_cleaned_away_sms"
+    MEMBERBOOTH_LABEL_EXPIRED = "memberbooth_label_expired"
+    MEMBERBOOTH_LABEL_EXPIRING_SOON = "memberbooth_label_expiring_soon"
+    MEMBERBOOTH_BOX_CLEANED_AWAY = "memberbooth_box_cleaned_away"
+    MEMBERBOOTH_BOX_CLEANED_AWAY_SMS = "memberbooth_box_cleaned_away_sms"
+    MEMBERBOOTH_BOX_EXPIRED = "memberbooth_box_expired"
+    MEMBERBOOTH_BOX_EXPIRING_SOON = "memberbooth_box_expiring_soon"
 
 
 class Message(Base):
@@ -41,14 +51,20 @@ class Message(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     subject: Mapped[str] = mapped_column(Text, nullable=False)
-    body: Mapped[Optional[str]] = mapped_column(Text)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
     member_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(Member.member_id))
-    recipient: Mapped[Optional[str]] = mapped_column(String(255))
+    recipient_type: Mapped[Literal["email", "sms"]] = mapped_column(Enum("email", "sms"), nullable=False)
+    recipient: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[STATUS] = mapped_column(Enum(QUEUED, SENT, FAILED), nullable=False)
     template: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+
+    # If this message was associated with some other object, this is the ID of that object
+    # This can for example be the ID of a memberbooth label.
+    # If the ID is used or not, and what it is, depends on the message template.
+    associated_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     member: Mapped[Optional[Member]] = relationship(Member)
 
