@@ -3,6 +3,7 @@ import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
+from html import unescape
 from logging import getLogger
 from threading import Event
 from time import sleep
@@ -104,7 +105,7 @@ def send_messages(mailgun_key: Optional[str], domain: str, sender: str, to_overr
                             },
                         )
                     elif recipient_type == "sms":
-                        response = send_sms(to, message.body)
+                        response = send_sms(to, unescape(message.body))
                     else:
                         assert False, f"unknown recipient type {recipient_type}"
                     break
