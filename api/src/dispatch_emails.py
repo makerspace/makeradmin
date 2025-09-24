@@ -18,8 +18,8 @@ from membership.membership import get_members_and_membership, get_membership_sum
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
-from multiaccess.labal_data import BoxLabel, DryingLabel, FireSafetyLabel, LabelType, TemporaryStorageLabel
-from multiaccess.memberbooth import LabelWrapper, get_label_public_url
+from multiaccess.label_data import BoxLabel, DryingLabel, FireSafetyLabel, LabelType, TemporaryStorageLabel, LabelTypeTagged
+from multiaccess.memberbooth import get_label_public_url
 from multiaccess.models import MemberboothLabelAction
 from quiz.models import QuizQuestion, QuizQuestionOption
 from quiz.views import QuizMemberStat, quiz_member_answer_stats
@@ -275,7 +275,7 @@ def memberbooth_labels() -> None:
 
     for action in recent_actions:
         label = action.label
-        deserialized_label = LabelWrapper.from_dict(label.data).label  # type: ignore
+        deserialized_label: LabelType = serde.from_dict(LabelTypeTagged, label.data)  # type: ignore
         member = db_session.get(Member, label.member_id)
         assert member is not None
         common_kws = get_common_kws(action, member, deserialized_label)
@@ -359,7 +359,7 @@ def memberbooth_labels() -> None:
     # Send messages for recent observations (no recent report/cleaning, and not already sent)
     for label_id, action in observations.items():
         label = action.label
-        deserialized_label = LabelWrapper.from_dict(label.data).label  # type: ignore
+        deserialized_label: LabelType = serde.from_dict(LabelTypeTagged, label.data)  # type: ignore
         member = db_session.get(Member, label.member_id)
         assert member is not None
         common_kws = get_common_kws(action, member, deserialized_label)
@@ -428,7 +428,7 @@ def memberbooth_labels() -> None:
     for action in recent_labels:
         label_id = action.label_id
         label = action.label
-        deserialized_label = LabelWrapper.from_dict(label.data).label  # type: ignore
+        deserialized_label: LabelType = serde.from_dict(LabelTypeTagged, label.data)  # type: ignore
 
         # Only consider TemporaryStorageLabel or FireSafetyLabel
         if not isinstance(deserialized_label, (TemporaryStorageLabel, FireSafetyLabel)):

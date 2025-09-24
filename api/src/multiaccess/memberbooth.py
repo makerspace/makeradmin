@@ -11,8 +11,9 @@ from service.config import get_api_url, get_public_url
 from service.db import db_session
 from service.error import NotFound
 
-from multiaccess.labal_data import LabelType
+from multiaccess.label_data import LabelType, LabelTypeTagged
 from multiaccess.models import MemberboothLabel
+from urllib.parse import urlparse, urlunparse
 
 logger = getLogger("makeradmin")
 
@@ -33,17 +34,12 @@ class MemberboothMemberInfo(DataClassJsonMixin):
     membership_data: MembershipData
 
 
-@serde.serde(tagging=InternalTagging("type"))
+@serde.serde(deny_unknown_fields=True, tagging=InternalTagging("type"))
 class UploadedLabel:
     # Public url that can be used to view the given label
     public_url: str
     # Public url that will register an observation of the label, and then redirect to public_url. Used for QR codes.
     public_observation_url: str
-    label: LabelType
-
-
-@serde.serde(tagging=InternalTagging("type"))
-class UploadLabelRequest:
     label: LabelType
 
 
@@ -122,45 +118,40 @@ def get_label_qr_code_url(label_id: int) -> str:
     # Use short URL service for QR codes, to make them easier to scan.
     # The host and protocol can always be made uppercase, and we make sure to handle an uppercase path too.
     # QR codes encode uppercase alphanumeric characters with fewer bits.
-    return get_api_url(f"/L/{label_id}").upper().replace("HTTPS://", "HTTP://")
+    url = get_api_url(f"/L/{label_id}")
+    parsed = urlparse(url)
+    # Uppercase scheme and netloc
+    new_url = urlunparse((
+        parsed.scheme.upper(),
+        parsed.netloc.upper(),
+        parsed.path, # Note: makeradmin may be hosted in a subdirectory, so we cannot necessarily uppercase the whole path
+        parsed.params,
+        parsed.query,
+        parsed.fragment,
+    ))
+    return new_url
 
 
-@serde.serde(tagging=InternalTagging("type"))
-class LabelWrapper:
-    label: LabelType
-
-    @staticmethod
-    def from_dict(value: dict) -> "LabelWrapper":
-        value = {"label": value}  # wrap, to handle unions properly
-        data = serde.from_dict(LabelWrapper, value)
-        return data
-
-    def to_dict(self) -> dict:
-        label_data = serde.to_dict(self)
-        label_data = label_data["label"]  # unwrap
-        return label_data
-
-
-def create_label(data: UploadLabelRequest) -> UploadedLabel:
+def create_label(label: LabelType) -> UploadedLabel:
     member = (
         db_session.query(Member)
-        .filter(Member.member_number == data.label.base.member_number, Member.deleted_at.is_(None))
+        .filter(Member.member_number == label.base.member_number, Member.deleted_at.is_(None))
         .first()
     )
     if not member:
-        raise NotFound(f"Member with number {data.label.base.member_number} not found.")
+        raise NotFound(f"Member with number {label.base.member_number} not found.")
 
     db_label = MemberboothLabel(
-        id=data.label.base.id,
+        id=label.base.id,
         member_id=member.member_id,
-        data=LabelWrapper(label=data.label).to_dict(),
+        data=serde.to_dict(label, LabelTypeTagged),
     )
     db_session.add(db_label)
     db_session.flush()
     return UploadedLabel(
         public_url=get_label_public_url(db_label.id),
         public_observation_url=get_label_qr_code_url(db_label.id),
-        label=data.label,
+        label=label,
     )
 
 
@@ -177,14 +168,14 @@ def get_member_labels(member_id: int) -> list[UploadedLabel]:
     )
 
     result = []
-    for label in labels:
-        data_dict: dict = label.data  # type: ignore
-        data = LabelWrapper.from_dict(data_dict)  # validate
+    for label_db in labels:
+        data_dict: dict = label_db.data  # type: ignore
+        label: LabelType = serde.from_dict(LabelTypeTagged, data_dict)  # validate
         result.append(
             UploadedLabel(
-                public_url=get_label_public_url(label.id),
-                public_observation_url=get_label_qr_code_url(label.id),
-                label=data.label,
+                public_url=get_label_public_url(label_db.id),
+                public_observation_url=get_label_qr_code_url(label_db.id),
+                label=label,
             )
         )
 

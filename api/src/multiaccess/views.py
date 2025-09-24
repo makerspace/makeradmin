@@ -7,8 +7,13 @@ from typing import Literal
 import flask
 import serde
 import serde.json
+from serde.compat import SerdeError
+from json.decoder import JSONDecodeError
 from dataclasses_json import DataClassJsonMixin
 from flask import Response, g, redirect, request
+from membership.member_entity import MemberEntity
+from membership.membership import MembershipData, get_membership_summary
+from membership.models import Member
 from messages.models import Message, MessageTemplate
 from messages.views import message_entity
 from PIL import Image
@@ -16,6 +21,7 @@ from service.api_definition import (
     DELETE,
     GET,
     MEMBER_EDIT,
+    MEMBER_VIEW,
     MEMBERBOOTH,
     MESSAGE_SEND,
     MESSAGE_VIEW,
@@ -32,11 +38,9 @@ from werkzeug.wrappers.request import FileStorage
 
 from multiaccess import service, short_url_service
 from multiaccess.box_terminator import box_terminator_boxes, box_terminator_nag, box_terminator_validate
-from multiaccess.labal_data import LabelType
+from multiaccess.label_data import LabelType, LabelTypeTagged, BoxLabelV2, BoxLabelV1, TemporaryStorageLabelV1
 from multiaccess.memberbooth import (
-    LabelWrapper,
     UploadedLabel,
-    UploadLabelRequest,
     create_label,
     get_label_public_url,
     get_label_qr_code_url,
@@ -74,43 +78,54 @@ def memberbooth_member(member_number: int) -> dict | None:
     return r.to_dict() if r else None
 
 
-@service.route("/memberbooth/label", method=POST, permission=MEMBERBOOTH)
+@service.route("/memberbooth/label", method=POST, permission=MEMBERBOOTH, status="created")
 def memberbooth_post_label() -> dict:
     request_data = request.get_json()
     logger.info(request_data)
-    logger.info(type(request_data))
     try:
-        data = serde.json.from_json(UploadLabelRequest, request_data)
+        label = serde.json.from_dict(LabelTypeTagged, request_data)
     except Exception as e:
-        raise BadRequest(f"Failed to deserialize: {request_data}: {e}") from e
-    return serde.to_dict(create_label(data))
+        label = None
+        # Maybe this is an old label format, try to convert it
+        for tp in [BoxLabelV2, BoxLabelV1, TemporaryStorageLabelV1]:
+            try:
+                label = serde.json.from_dict(tp, request_data).migrate()
+                if label is None:
+                    raise BadRequest("Member not found", status="member_not_found")
+                break
+            except SerdeError:
+                pass
+            except JSONDecodeError:
+                pass
+        if label is None:
+            raise BadRequest(f"Failed to deserialize: {request_data}: {e}") from e
+    return serde.to_dict(create_label(label))
 
 
 # Note: All labels are public. This is by design, as they are in any case printed and put on physical objects.
 @service.route("/memberbooth/label/<int:id>", method=GET, permission=PUBLIC)
-def memberbooth_get_label(id: int) -> dict:
-    label = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
+def memberbooth_get_label_route(id: int) -> dict:
+    return serde.to_dict(memberbooth_get_label(id))
 
-    if label is None:
+def memberbooth_get_label(id: int) -> UploadedLabel:
+    label_db = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
+
+    if label_db is None:
         raise NotFound()
-    if label.deleted_at is not None:
+    if label_db.deleted_at is not None:
         # If someone accesses this URL, the label is likely not actually gone
         # Treat this as an observation and un-delete the label
-        label.deleted_at = None
-        db_session.add(label)
+        label_db.deleted_at = None
+        db_session.add(label_db)
         db_session.flush()
 
-    data_dict: dict = label.data  # type: ignore
-    data = LabelWrapper.from_dict(data_dict)  # validate
-
-    return serde.to_dict(
-        UploadedLabel(
-            public_url=get_label_public_url(label.id),
-            public_observation_url=get_label_qr_code_url(label.id),
-            label=data.label,
+    data_dict: dict = label_db.data  # type: ignore
+    label: LabelType = serde.from_dict(LabelTypeTagged, data_dict)  # validate
+    return UploadedLabel(
+            public_url=get_label_public_url(label.base.id),
+            public_observation_url=get_label_qr_code_url(label.base.id),
+            label=label,
         )
-    )
-
 
 # Note: All labels are public. This is by design, as they are in any case printed and put on physical objects.
 @service.route("/memberbooth/label/<int:id>", method=DELETE, permission=USER)
@@ -169,9 +184,10 @@ def memberbooth_label_related_messages(id: int) -> list[dict]:
     return [message_entity.to_obj(message) for message in messages]
 
 
-@dataclass
-class LabelActionResponse(DataClassJsonMixin):
+@serde.serde
+class LabelActionResponse():
     id: int
+    label: UploadedLabel
 
 
 # This route is used by QR codes on labels. Scanning one should automatically register an observation, and then redirect to the public label URL.
@@ -184,15 +200,32 @@ def memberbooth_label_qrcode(id: int) -> Response:
         pass
     return flask.make_response(redirect(get_label_public_url(id), code=302))
 
+@service.route("/memberbooth/label/<int:id>/membership", method=GET, permission=MEMBER_VIEW)
+def memberbooth_membership_by_label(id: int) -> dict:
+    label = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
 
-@service.route("/memberbooth/label/<int:id>/report", method=POST, permission=MESSAGE_SEND)
+    if label is None:
+        raise NotFound()
+    
+    membership = get_membership_summary(label.member_id)
+
+    return membership.to_dict()
+
+
+@service.route("/memberbooth/label/<int:id>/observe", method=POST, permission=PUBLIC, status="created")
+def memberbooth_observe_label(id: int) -> dict:
+    return memberbooth_label_action(
+        id, action="observed", message=request.form.get("message"), image=request.files.get("image")
+    )
+
+@service.route("/memberbooth/label/<int:id>/report", method=POST, permission=MESSAGE_SEND, status="created")
 def memberbooth_report_label(id: int) -> dict:
     return memberbooth_label_action(
         id, action="reported", message=request.form.get("message"), image=request.files.get("image")
     )
 
 
-@service.route("/memberbooth/label/<int:id>/terminate", method=POST, permission=MESSAGE_SEND)
+@service.route("/memberbooth/label/<int:id>/terminate", method=POST, permission=MESSAGE_SEND, status="created")
 def memberbooth_terminate_label(id: int) -> dict:
     return memberbooth_label_action(
         id, action="cleaned_away", message=request.form.get("message"), image=request.files.get("image")
@@ -206,7 +239,7 @@ def memberbooth_label_action(
     image: FileStorage | None = None,
 ) -> dict:
     if not message and action == "reported":
-        raise BadRequest("Message is required.")
+        raise BadRequest("Message is required when reporting.")
 
     label = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
 
@@ -251,19 +284,26 @@ def memberbooth_label_action(
                 MemberboothLabelAction.label_id == id,
                 MemberboothLabelAction.action == action,
                 MemberboothLabelAction.created_at >= five_minutes_ago,
+                MemberboothLabelAction.action_member_id == g.user_id,
             )
             .order_by(MemberboothLabelAction.created_at.desc())
+            .with_for_update()
         )
         .scalars()
         .first()
     )
     if prev_action:
+        if message is None and img is None:
+            # If the previous action is identical, or has more info than this one, just return the old one
+            # This is the common case for observations
+            return serde.to_dict(LabelActionResponse(id=prev_action.id, label=memberbooth_get_label(prev_action.label_id)))
+
         db_session.delete(prev_action)
 
     db_session.add(db_action)
     db_session.flush()
 
-    return LabelActionResponse(id=db_action.id).to_dict()
+    return serde.to_dict(LabelActionResponse(id=db_action.id, label=memberbooth_get_label(db_action.label_id)))
 
 
 # Links to these images are included in emails sent out to members, so they need to be public.

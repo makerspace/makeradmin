@@ -1,4 +1,4 @@
-import { membership_t } from "membership";
+import { membership_t } from "./membership";
 
 export const MEMBERBOX_DAYS_ALLOWED_TO_KEEP_AFTER_LABACCESS_ENDS = 45;
 export const TERMINATION_WARNING_DAYS_TO_CLEANOUT = 14;

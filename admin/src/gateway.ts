@@ -21,6 +21,7 @@ export function request({
     options,
     errorMessage,
     expectedDataStatus,
+    allowedErrorCodes,
 }: {
     url: string;
     params: { [key: string]: string | number | boolean | undefined };
@@ -28,6 +29,7 @@ export function request({
     options: RequestInit;
     errorMessage: string;
     expectedDataStatus: string | null | undefined;
+    allowedErrorCodes: number[] | undefined;
 }): Promise<any> {
     const accessToken = auth.getAccessToken();
 
@@ -66,6 +68,10 @@ export function request({
                 return responseData;
             }
 
+            if (allowedErrorCodes !== undefined && allowedErrorCodes.includes(response.status)) {
+                return responseData;
+            }
+
             if (response.status === 401) {
                 auth.logout();
                 return null;
@@ -94,6 +100,7 @@ export type RequestParams = {
     options?: RequestInit;
     errorMessage?: string;
     expectedDataStatus?: string | null;
+    allowedErrorCodes?: number[];
 };
 
 export function get({
@@ -103,6 +110,7 @@ export function get({
     options = { method: "GET" },
     errorMessage = "Error when getting data from server:",
     expectedDataStatus = null,
+    allowedErrorCodes,
 }: RequestParams): Promise<any> {
     return request({
         url,
@@ -111,6 +119,7 @@ export function get({
         options,
         errorMessage,
         expectedDataStatus,
+        allowedErrorCodes,
     });
 }
 
@@ -121,6 +130,7 @@ export function post({
     options = { method: "POST" },
     errorMessage = "Error when creating:",
     expectedDataStatus = "created",
+    allowedErrorCodes,
 }: RequestParams): Promise<any> {
     return request({
         url,
@@ -129,6 +139,7 @@ export function post({
         options,
         errorMessage,
         expectedDataStatus,
+        allowedErrorCodes,
     });
 }
 
@@ -139,6 +150,7 @@ export function put({
     options = { method: "PUT" },
     errorMessage = "Error when saving:",
     expectedDataStatus = "updated",
+    allowedErrorCodes,
 }: RequestParams): Promise<any> {
     return request({
         url,
@@ -147,6 +159,7 @@ export function put({
         options,
         errorMessage,
         expectedDataStatus,
+        allowedErrorCodes,
     });
 }
 
@@ -157,6 +170,7 @@ export function del({
     options = { method: "DELETE" },
     errorMessage = "Error when deleting:",
     expectedDataStatus = "deleted",
+    allowedErrorCodes,
 }: RequestParams): Promise<any> {
     return request({
         url,
@@ -165,6 +179,7 @@ export function del({
         options,
         errorMessage,
         expectedDataStatus,
+        allowedErrorCodes,
     });
 }
 

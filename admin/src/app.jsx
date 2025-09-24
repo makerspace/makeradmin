@@ -6,8 +6,7 @@ UIkit.use(Icons);
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Outlet } from "react-router";
-import { Route, Routes } from "react-router-dom";
+import { Outlet } from "react-router";
 import Page404 from "./Components/404";
 import Login from "./Components/Login";
 import Logout from "./Components/Logout";
@@ -16,6 +15,7 @@ import RequestPasswordReset from "./Components/RequestPasswordReset";
 import auth from "./auth";
 import { Nav, SideNav } from "./nav";
 
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RedirectToSubpage } from "./Components/Routes";
 import Membership from "./Membership/Routes";
 import Messages from "./Messages/Routes";
@@ -24,7 +24,6 @@ import Sales from "./Sales/Routes";
 import Settings from "./Settings/Routes";
 import Statistics from "./Statistics/Routes";
 import BoxTerminator from "./boxTerminator/Routes";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const nav = {
     brand: "MakerAdmin",
@@ -227,6 +226,10 @@ const router = createBrowserRouter([
         Component: PasswordReset,
     },
     {
+        path: "boxTerminator/*",
+        children: BoxTerminator,
+    },
+    {
         path: "/*",
         Component: ContentWrapper,
         children: [
@@ -257,10 +260,6 @@ const router = createBrowserRouter([
             {
                 path: "quiz/*",
                 children: Quiz,
-            },
-            {
-                path: "boxTerminator/*",
-                children: BoxTerminator,
             },
             {
                 path: "*",
