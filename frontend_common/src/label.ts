@@ -72,8 +72,8 @@ export const labelExpiryDate = (
                 : null;
         }
     } else if (label.type == "BoxLabel") {
-        if (membership && membership.labaccess_end) {
-            const expiry = new Date(membership.labaccess_end);
+        if (membership && membership.effective_labaccess_end) {
+            const expiry = new Date(membership.effective_labaccess_end);
             expiry.setDate(
                 expiry.getDate() +
                     MEMBERBOX_DAYS_ALLOWED_TO_KEEP_AFTER_LABACCESS_ENDS,
