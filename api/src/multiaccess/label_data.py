@@ -5,11 +5,11 @@ import json
 import typing
 from datetime import date, datetime, timedelta
 from typing import Any, Literal, Type
-from membership.models import Member
+
 import serde
+from membership.models import Member
 from plum import dispatch
-from serde import field
-from serde import InternalTagging
+from serde import InternalTagging, field
 from service.db import db_session
 
 
@@ -90,7 +90,11 @@ class TemporaryStorageLabelV1:
     expiry_date: date  # date in ISO format
 
     def migrate(self) -> TemporaryStorageLabel | None:
-        member = db_session.query(Member).filter(Member.member_number == self.member_number, Member.deleted_at.is_(None)).first()
+        member = (
+            db_session.query(Member)
+            .filter(Member.member_number == self.member_number, Member.deleted_at.is_(None))
+            .first()
+        )
         if member is None:
             return None
         return TemporaryStorageLabel(
@@ -106,6 +110,7 @@ class TemporaryStorageLabelV1:
             expires_at=self.expiry_date,
         )
 
+
 @serde.serde(deny_unknown_fields=True)
 class BoxLabelV2:
     type: Literal["box"]
@@ -114,7 +119,11 @@ class BoxLabelV2:
     member_number: int
 
     def migrate(self) -> BoxLabel | None:
-        member = db_session.query(Member).filter(Member.member_number == self.member_number, Member.deleted_at.is_(None)).first()
+        member = (
+            db_session.query(Member)
+            .filter(Member.member_number == self.member_number, Member.deleted_at.is_(None))
+            .first()
+        )
         if member is None:
             return None
         return BoxLabel(
@@ -128,6 +137,7 @@ class BoxLabelV2:
             ),
         )
 
+
 @serde.serde(deny_unknown_fields=True)
 class BoxLabelV1:
     v: Literal[1]
@@ -135,7 +145,11 @@ class BoxLabelV1:
     member_number: int
 
     def migrate(self) -> BoxLabel:
-        member = db_session.query(Member).filter(Member.member_number == self.member_number, Member.deleted_at.is_(None)).first()
+        member = (
+            db_session.query(Member)
+            .filter(Member.member_number == self.member_number, Member.deleted_at.is_(None))
+            .first()
+        )
         assert member is not None
         return BoxLabel(
             base=LabelBase(
@@ -147,6 +161,7 @@ class BoxLabelV1:
                 version=3,
             ),
         )
+
 
 LabelType = TemporaryStorageLabel | BoxLabel | FireSafetyLabel | Printer3DLabel | NameTag | MeetupNameTag | DryingLabel
 LabelTypeTagged = InternalTagging("type", LabelType)

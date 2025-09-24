@@ -1,4 +1,8 @@
-import { labelExpiredRecently, labelExpiresSoon, UploadedLabel } from "frontend_common";
+import {
+    labelExpiredRecently,
+    labelExpiresSoon,
+    UploadedLabel,
+} from "frontend_common";
 import { ComponentChildren } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import Cart from "./cart";
@@ -85,7 +89,9 @@ export const Sidebar = ({
         ) {
             return "danger";
         } else if (
-            labels.some((label) => labelExpiresSoon(new Date(), label.label, null))
+            labels.some((label) =>
+                labelExpiresSoon(new Date(), label.label, null),
+            )
         ) {
             return "warning";
         } else {

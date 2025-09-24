@@ -7,12 +7,7 @@
         "forceConsistentCasingInFileNames": true,
         "jsx": "react-jsx",
         "jsxImportSource": "preact",
-        "lib": [
-            "es5",
-            "es6",
-            "es2019",
-            "dom"
-        ],
+        "lib": ["es5", "es6", "es2019", "dom"],
         "moduleResolution": "node",
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
@@ -22,12 +17,8 @@
         "noUncheckedIndexedAccess": true,
         "noUnusedParameters": true,
         "paths": {
-            "react": [
-                "./node_modules/preact/compat/"
-            ],
-            "react-dom": [
-                "./node_modules/preact/compat/"
-            ]
+            "react": ["./node_modules/preact/compat/"],
+            "react-dom": ["./node_modules/preact/compat/"]
         },
         "preserveConstEnums": true,
         "removeComments": true,
@@ -38,13 +29,6 @@
         "strictNullChecks": true,
         "target": "es2019"
     },
-    "exclude": [
-        "node_modules",
-        "dist"
-    ],
-    "include": [
-        "*.ts",
-        "*.tsx",
-        "*.d.ts"
-    ]
+    "exclude": ["node_modules", "dist"],
+    "include": ["*.ts", "*.tsx", "*.d.ts"]
 }

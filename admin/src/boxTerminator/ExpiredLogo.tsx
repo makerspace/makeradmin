@@ -1,4 +1,3 @@
-
 export const ExpiredLogo = () => {
     return (
         <svg

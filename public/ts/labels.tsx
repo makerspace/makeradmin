@@ -2,7 +2,9 @@ import {
     labelExpiredRecently,
     labelExpiresSoon,
     labelIsExpired,
-    member_t, membership_t, UploadedLabel
+    member_t,
+    membership_t,
+    UploadedLabel,
 } from "frontend_common";
 import { render } from "preact";
 import { render as jsx_to_string } from "preact-render-to-string";
@@ -10,10 +12,7 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 import * as common from "./common";
 import { UNAUTHORIZED } from "./common";
 import { useTranslation } from "./i18n";
-import {
-    dateToRelative,
-    DeleteButton,
-} from "./label_common";
+import { dateToRelative, DeleteButton } from "./label_common";
 import * as login from "./login";
 import {
     LoadCurrentLabels,

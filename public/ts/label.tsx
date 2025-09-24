@@ -17,9 +17,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import * as common from "./common";
 import { NOT_FOUND, UNAUTHORIZED } from "./common";
 import { useTranslation } from "./i18n";
-import {
-    dateToRelative,
-} from "./label_common";
+import { dateToRelative } from "./label_common";
 import * as login from "./login";
 import {
     LoadCurrentMemberInfo,
@@ -429,11 +427,13 @@ const LabelActions = ({
                 >
                     {t("actions.report")}
                 </button>
-                {expiresAt && now.getTime() > expiresAt.getTime() && <TerminationButton
-                    expiresAt={expiresAt}
-                    firstCleanoutTime={firstCleanoutTime}
-                    onClick={() => setModalOpen("terminate")}
-                />}
+                {expiresAt && now.getTime() > expiresAt.getTime() && (
+                    <TerminationButton
+                        expiresAt={expiresAt}
+                        firstCleanoutTime={firstCleanoutTime}
+                        onClick={() => setModalOpen("terminate")}
+                    />
+                )}
             </div>
             <div uk-modal className="uk-modal" ref={modalRef}>
                 <div className="uk-modal-dialog uk-modal-body">

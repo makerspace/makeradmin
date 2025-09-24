@@ -5,10 +5,7 @@ type QrCodeScannerProps = {
     onSuccess: (qrCodeMessage: string) => void;
 };
 
-const allowedErrors = [
-    'NotFoundException',
-    "error = D:",
-];
+const allowedErrors = ["NotFoundException", "error = D:"];
 
 const QrCodeScanner: FC<QrCodeScannerProps> = ({ onSuccess }) => {
     const [module, setModule] = useState<typeof module_type | null>(null);
@@ -46,8 +43,8 @@ const QrCodeScanner: FC<QrCodeScannerProps> = ({ onSuccess }) => {
             },
             (qrCodeMessage) => onSuccess(qrCodeMessage),
             (errorMessage) => {
-
-                if (allowedErrors.some((error) => errorMessage.includes(error))) return;
+                if (allowedErrors.some((error) => errorMessage.includes(error)))
+                    return;
 
                 console.error(errorMessage);
             },

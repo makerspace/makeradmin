@@ -1,6 +1,12 @@
-import { access_t, group_t, member_t, membership_t, Permission, UploadedLabel } from "frontend_common";
+import {
+    access_t,
+    group_t,
+    member_t,
+    membership_t,
+    Permission,
+    UploadedLabel,
+} from "frontend_common";
 import * as common from "./common";
-
 
 export async function LoadCurrentMemberInfo(): Promise<
     member_t & { has_password: boolean }

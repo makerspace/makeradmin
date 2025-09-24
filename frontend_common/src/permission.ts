@@ -1,4 +1,3 @@
-
 export type Permission =
     | "member_view"
     | "member_create"

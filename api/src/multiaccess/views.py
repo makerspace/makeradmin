@@ -1,14 +1,13 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
+from json.decoder import JSONDecodeError
 from logging import getLogger
 from typing import Literal
 
 import flask
 import serde
 import serde.json
-from serde.compat import SerdeError
-from json.decoder import JSONDecodeError
 from dataclasses_json import DataClassJsonMixin
 from flask import Response, g, redirect, request
 from membership.member_entity import MemberEntity
@@ -17,6 +16,7 @@ from membership.models import Member
 from messages.models import Message, MessageTemplate
 from messages.views import message_entity
 from PIL import Image
+from serde.compat import SerdeError
 from service.api_definition import (
     DELETE,
     GET,
@@ -38,7 +38,7 @@ from werkzeug.wrappers.request import FileStorage
 
 from multiaccess import service, short_url_service
 from multiaccess.box_terminator import box_terminator_boxes, box_terminator_nag, box_terminator_validate
-from multiaccess.label_data import LabelType, LabelTypeTagged, BoxLabelV2, BoxLabelV1, TemporaryStorageLabelV1
+from multiaccess.label_data import BoxLabelV1, BoxLabelV2, LabelType, LabelTypeTagged, TemporaryStorageLabelV1
 from multiaccess.memberbooth import (
     UploadedLabel,
     create_label,
@@ -107,6 +107,7 @@ def memberbooth_post_label() -> dict:
 def memberbooth_get_label_route(id: int) -> dict:
     return serde.to_dict(memberbooth_get_label(id))
 
+
 def memberbooth_get_label(id: int) -> UploadedLabel:
     label_db = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
 
@@ -122,10 +123,11 @@ def memberbooth_get_label(id: int) -> UploadedLabel:
     data_dict: dict = label_db.data  # type: ignore
     label: LabelType = serde.from_dict(LabelTypeTagged, data_dict)  # validate
     return UploadedLabel(
-            public_url=get_label_public_url(label.base.id),
-            public_observation_url=get_label_qr_code_url(label.base.id),
-            label=label,
-        )
+        public_url=get_label_public_url(label.base.id),
+        public_observation_url=get_label_qr_code_url(label.base.id),
+        label=label,
+    )
+
 
 # Note: All labels are public. This is by design, as they are in any case printed and put on physical objects.
 @service.route("/memberbooth/label/<int:id>", method=DELETE, permission=USER)
@@ -185,7 +187,7 @@ def memberbooth_label_related_messages(id: int) -> list[dict]:
 
 
 @serde.serde
-class LabelActionResponse():
+class LabelActionResponse:
     id: int
     label: UploadedLabel
 
@@ -200,13 +202,14 @@ def memberbooth_label_qrcode(id: int) -> Response:
         pass
     return flask.make_response(redirect(get_label_public_url(id), code=302))
 
+
 @service.route("/memberbooth/label/<int:id>/membership", method=GET, permission=MEMBER_VIEW)
 def memberbooth_membership_by_label(id: int) -> dict:
     label = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
 
     if label is None:
         raise NotFound()
-    
+
     membership = get_membership_summary(label.member_id)
 
     return membership.to_dict()
@@ -217,6 +220,7 @@ def memberbooth_observe_label(id: int) -> dict:
     return memberbooth_label_action(
         id, action="observed", message=request.form.get("message"), image=request.files.get("image")
     )
+
 
 @service.route("/memberbooth/label/<int:id>/report", method=POST, permission=MESSAGE_SEND, status="created")
 def memberbooth_report_label(id: int) -> dict:
@@ -296,7 +300,9 @@ def memberbooth_label_action(
         if message is None and img is None:
             # If the previous action is identical, or has more info than this one, just return the old one
             # This is the common case for observations
-            return serde.to_dict(LabelActionResponse(id=prev_action.id, label=memberbooth_get_label(prev_action.label_id)))
+            return serde.to_dict(
+                LabelActionResponse(id=prev_action.id, label=memberbooth_get_label(prev_action.label_id))
+            )
 
         db_session.delete(prev_action)
 

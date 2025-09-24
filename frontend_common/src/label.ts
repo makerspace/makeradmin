@@ -59,8 +59,6 @@ export type MemberboothLabel =
     | MeetupNameTag
     | DryingLabel;
 
-
-
 export const labelExpiryDate = (
     label: MemberboothLabel,
     membership: membership_t | null,

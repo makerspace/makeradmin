@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from logging import getLogger
+from urllib.parse import urlparse, urlunparse
 
 import serde
 from dataclasses_json import DataClassJsonMixin
@@ -13,7 +14,6 @@ from service.error import NotFound
 
 from multiaccess.label_data import LabelType, LabelTypeTagged
 from multiaccess.models import MemberboothLabel
-from urllib.parse import urlparse, urlunparse
 
 logger = getLogger("makeradmin")
 
@@ -121,14 +121,16 @@ def get_label_qr_code_url(label_id: int) -> str:
     url = get_api_url(f"/L/{label_id}")
     parsed = urlparse(url)
     # Uppercase scheme and netloc
-    new_url = urlunparse((
-        parsed.scheme.upper(),
-        parsed.netloc.upper(),
-        parsed.path, # Note: makeradmin may be hosted in a subdirectory, so we cannot necessarily uppercase the whole path
-        parsed.params,
-        parsed.query,
-        parsed.fragment,
-    ))
+    new_url = urlunparse(
+        (
+            parsed.scheme.upper(),
+            parsed.netloc.upper(),
+            parsed.path,  # Note: makeradmin may be hosted in a subdirectory, so we cannot necessarily uppercase the whole path
+            parsed.params,
+            parsed.query,
+            parsed.fragment,
+        )
+    )
     return new_url
 
 

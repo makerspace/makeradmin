@@ -18,7 +18,14 @@ from membership.membership import get_members_and_membership, get_membership_sum
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
-from multiaccess.label_data import BoxLabel, DryingLabel, FireSafetyLabel, LabelType, TemporaryStorageLabel, LabelTypeTagged
+from multiaccess.label_data import (
+    BoxLabel,
+    DryingLabel,
+    FireSafetyLabel,
+    LabelType,
+    LabelTypeTagged,
+    TemporaryStorageLabel,
+)
 from multiaccess.memberbooth import get_label_public_url
 from multiaccess.models import MemberboothLabelAction
 from quiz.models import QuizQuestion, QuizQuestionOption

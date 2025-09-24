@@ -8,10 +8,8 @@
         "npm": ">=10.5.2",
         "node": ">=20"
     },
-    "dependencies": {
-    },
-    "devDependencies": {
-    },
+    "dependencies": {},
+    "devDependencies": {},
     "main": "src/lib.ts",
     "files": [
         "/dist"

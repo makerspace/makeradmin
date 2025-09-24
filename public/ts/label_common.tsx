@@ -2,7 +2,6 @@ import { LabelMaxRelativeDays } from "frontend_common";
 import { useState } from "preact/hooks";
 import { Translator, useTranslation } from "./i18n";
 
-
 export const DeleteButton = ({
     labelId,
     onDelete,

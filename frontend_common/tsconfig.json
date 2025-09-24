@@ -28,6 +28,6 @@
         "declarationMap": true,
         "composite": true,
         "outDir": "./dist"
-  },
-  "references": []
+    },
+    "references": []
 }

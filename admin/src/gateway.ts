@@ -68,7 +68,10 @@ export function request({
                 return responseData;
             }
 
-            if (allowedErrorCodes !== undefined && allowedErrorCodes.includes(response.status)) {
+            if (
+                allowedErrorCodes !== undefined &&
+                allowedErrorCodes.includes(response.status)
+            ) {
                 return responseData;
             }
 
