@@ -236,8 +236,8 @@ def memberbooth_labels() -> None:
             )
         elif isinstance(deserialized_label, TemporaryStorageLabel):
             desc = deserialized_label.description
-            if len(desc) > 23:
-                desc = desc[:20] + "..."
+            if len(desc) > 33:
+                desc = desc[:30] + "..."
             thing_name = f"item with the label '{desc}'"
             thing_name_sv = f"sak med etiketten '{desc}'"
             expires_at = deserialized_label.expires_at
