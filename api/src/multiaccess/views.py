@@ -327,21 +327,3 @@ def memberbooth_label_action_image(id: int) -> Response:
         raise NotFound()
 
     return Response(action.image, mimetype="image/webp")
-
-
-@service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)
-def box_terminator_boxes_routes():
-    """Returns a list of all boxes scanned, ever."""
-    return box_terminator_boxes()
-
-
-@service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
-def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int), nag_type=Arg(symbol)):
-    """Send a nag email for this box."""
-    return box_terminator_nag(member_number, box_label_id, nag_type)
-
-
-@service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
-def box_terminator_validate_route(member_number=Arg(int), box_label_id=Arg(int)):
-    """Used when scanning boxes."""
-    return box_terminator_validate(member_number, box_label_id, g.session_token)

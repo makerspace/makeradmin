@@ -8,6 +8,7 @@
         NameTag: "Name tag",
         MeetupNameTag: "Meetup name tag",
         DryingLabel: "Drying",
+        WarningLabel: "Warning",
     },
     expires: "Valid until",
     expired: "Expired",

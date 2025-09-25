@@ -83,6 +83,13 @@ class DryingLabel:
     expires_at: datetime = field(serializer=datetime.isoformat, deserializer=datetime.fromisoformat)
 
 
+@serde.serde
+class WarningLabel:
+    base: LabelBase = field(flatten=True)
+    description: str | None
+    expires_at: date = field(serializer=date.isoformat, deserializer=date.fromisoformat)
+
+
 @serde.serde(deny_unknown_fields=True)
 class TemporaryStorageLabelV1:
     type: Literal["temp"]
@@ -166,5 +173,14 @@ class BoxLabelV1:
         )
 
 
-LabelType = TemporaryStorageLabel | BoxLabel | FireSafetyLabel | Printer3DLabel | NameTag | MeetupNameTag | DryingLabel
+LabelType = (
+    TemporaryStorageLabel
+    | BoxLabel
+    | FireSafetyLabel
+    | Printer3DLabel
+    | NameTag
+    | MeetupNameTag
+    | DryingLabel
+    | WarningLabel
+)
 LabelTypeTagged = InternalTagging("type", LabelType)

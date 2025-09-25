@@ -8,6 +8,7 @@
         NameTag: "Namnskylt",
         MeetupNameTag: "Meetup-namnskylt",
         DryingLabel: "Torkning",
+        WarningLabel: "Varning",
     },
     expires: "Gäller till och med",
     expired: "Gick ut",

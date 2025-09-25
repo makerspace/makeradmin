@@ -54,7 +54,8 @@
             "Printer3DLabel": "Filament",
             "NameTag": "Name tag",
             "MeetupNameTag": "Meetup name tag",
-            "DryingLabel": "Drying"
+            "DryingLabel": "Drying",
+            "WarningLabel": "Warning"
         },
         "expires": "Valid until",
         "expired": "Expired",
