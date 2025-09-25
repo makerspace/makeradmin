@@ -66,7 +66,10 @@ class Printer3DLabel:
 @serde.serde
 class NameTag:
     base: LabelBase = field(flatten=True)
-    membership_expires_at: date | None = field(serializer=date.isoformat, deserializer=date.fromisoformat)
+    membership_expires_at: date | None = field(
+        serializer=lambda x: date.isoformat(x) if x is not None else None,
+        deserializer=lambda x: date.fromisoformat(x) if x is not None else None,
+    )
 
 
 @serde.serde
