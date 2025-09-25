@@ -123,7 +123,10 @@ def get_label_qr_code_url(label_id: int) -> str:
     # Uppercase scheme and netloc
     new_url = urlunparse(
         (
-            parsed.scheme.upper(),
+            # Uppercase scheme and netloc, as they are case-insensitive
+            # Also replace HTTPS with HTTP. There will be a redirect to HTTPS anyway, using fewer
+            # characters means we can get away with a smaller QR code.
+            parsed.scheme.upper().replace("HTTPS", "HTTP"),
             parsed.netloc.upper(),
             parsed.path,  # Note: makeradmin may be hosted in a subdirectory, so we cannot necessarily uppercase the whole path
             parsed.params,
