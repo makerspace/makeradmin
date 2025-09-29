@@ -12,6 +12,7 @@ if [ "$DEV_RUN" = "true" ]; then
 	}" > /work/dist/js/config.js
 	exec npm run --silent dev
 else
+	mkdir -p /var/www/html/js;
 	echo \
 	"var config = {
 		apiBasePath: \"${HOST_BACKEND}\",
