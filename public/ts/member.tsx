@@ -917,7 +917,9 @@ function SubscriptionPayment({
                     e.preventDefault();
                     if (member.labaccess_agreement_at === null) {
                         UIkit.modal.alert(
-                            t("subscriptions.errors.no_member_introduction"),
+                            t("subscriptions.errors.no_member_introduction", {
+                                calendar_url: URL_CALENDLY_BOOK,
+                            }),
                         );
                         return;
                     }

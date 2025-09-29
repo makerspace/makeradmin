@@ -245,7 +245,7 @@
                 "membership": "Basmedlemsskapet ger dig rösträtt på årsmötet, stödjer ditt lokala makerspace, och tillåter dig att delta i kurser och andra sociala event."
             },
             "errors": {
-                "no_member_introduction": "Du måste genomgå en medlemsintroduktion innan du kan starta en prenumeration. Du kan hitta dem i <0>kalendern</0>.",
+                "no_member_introduction": "Du måste genomgå en medlemsintroduktion innan du kan starta en prenumeration. Du kan hitta dem i <a href=\"{{calendar_url}}\">kalendern</a>.",
                 "no_member_introduction_title": "Kan inte påbörja en prenumeration"
             },
             "makerspace_access_also_activates_base_subscription": "Automatisk förnyelse av Makerspace Access kommer också aktivera automatisk förnyelse av basmedlemsskapet.",

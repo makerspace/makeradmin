@@ -167,7 +167,6 @@ export type LOCALE_SCHEMA = {
       | "subscriptions.auto_renewal_active"
       | "subscriptions.makerspace_access_also_activates_base_subscription"
       | "subscriptions.errors.no_member_introduction_title"
-      | "subscriptions.errors.no_member_introduction"
       | "subscriptions.pay_dialog.title"
       | "base_membership.title"
       | "makerspace_access.title"
@@ -236,22 +235,26 @@ export type LOCALE_SCHEMA = {
     ((
       key: "subscriptions.add_to_cart",
       args: {
-        unit: string | number;
-        count: string | number;
         price: string | number;
+        count: string | number;
+        unit: string | number;
       },
     ) => string) &
     ((
       key: "subscriptions.binding_period",
-      args: { unit: string | number; count: string | number },
+      args: { count: string | number; unit: string | number },
     ) => string) &
     ((
       key: "subscriptions.next_charge",
-      args: { amount: string | number; formattedDate: string | number },
+      args: { formattedDate: string | number; amount: string | number },
     ) => string) &
     ((
       key: "subscriptions.activate_auto_renewal",
       args: { unit: string | number; price: string | number },
+    ) => string) &
+    ((
+      key: "subscriptions.errors.no_member_introduction",
+      args: { calendar_url: string | number },
     ) => string) &
     ((key: "set_password_alert", args: { email: string | number }) => string) &
     ((
@@ -577,7 +580,6 @@ export type LOCALE_SCHEMA_GLOBAL = ((
       | "member_page:subscriptions.auto_renewal_active"
       | "member_page:subscriptions.makerspace_access_also_activates_base_subscription"
       | "member_page:subscriptions.errors.no_member_introduction_title"
-      | "member_page:subscriptions.errors.no_member_introduction"
       | "member_page:subscriptions.pay_dialog.title"
       | "member_page:base_membership.title"
       | "member_page:makerspace_access.title"
@@ -646,22 +648,26 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((
     key: "member_page:subscriptions.add_to_cart",
     args: {
-      unit: string | number;
-      count: string | number;
       price: string | number;
+      count: string | number;
+      unit: string | number;
     },
   ) => string) &
   ((
     key: "member_page:subscriptions.binding_period",
-    args: { unit: string | number; count: string | number },
+    args: { count: string | number; unit: string | number },
   ) => string) &
   ((
     key: "member_page:subscriptions.next_charge",
-    args: { amount: string | number; formattedDate: string | number },
+    args: { formattedDate: string | number; amount: string | number },
   ) => string) &
   ((
     key: "member_page:subscriptions.activate_auto_renewal",
     args: { unit: string | number; price: string | number },
+  ) => string) &
+  ((
+    key: "member_page:subscriptions.errors.no_member_introduction",
+    args: { calendar_url: string | number },
   ) => string) &
   ((
     key: "member_page:set_password_alert",

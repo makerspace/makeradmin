@@ -57,7 +57,7 @@
         makerspace_access_also_activates_base_subscription: "Activating Makerspace Access Auto-renewal will also activate Base Membership auto-renewal.",
         errors: {
             no_member_introduction_title: "Cannot start subscription",
-            no_member_introduction: "You must attend a member introduction before you can start an auto-renewal subscription. You can find them in the <0>calendar</0>.",
+            no_member_introduction: 'You must attend a member introduction before you can start an auto-renewal subscription. You can find them in the <a href="{{calendar_url}}">calendar</a>.',
         },
         pay_dialog: {
             title: "Activate auto-renewal",
