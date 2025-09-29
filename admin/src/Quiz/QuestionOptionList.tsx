@@ -35,7 +35,7 @@ const Row =
                         type="text"
                         value={item.description}
                         onChange={(v) => {
-                            (item.description = v.target.value), onChanged();
+                            ((item.description = v.target.value), onChanged());
                             debouncedSaves.get(item)!();
                         }}
                     />
@@ -46,7 +46,7 @@ const Row =
                         type="checkbox"
                         checked={item.correct}
                         onChange={(v) => {
-                            (item.correct = v.target.checked), onChanged();
+                            ((item.correct = v.target.checked), onChanged());
                             debouncedSaves.get(item)!();
                         }}
                     />

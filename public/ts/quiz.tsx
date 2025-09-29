@@ -301,8 +301,9 @@ class QuizManager extends Component<QuizManagerProps, State> {
             { option_id },
         );
         const fullQuestion = data.data as Question;
-        const correct = fullQuestion.options.find((x) => x.id == option_id)!
-            .correct!;
+        const correct = fullQuestion.options.find(
+            (x) => x.id == option_id,
+        )!.correct!;
         this.setState({
             question: fullQuestion,
             answer: { selected: option_id, correct },

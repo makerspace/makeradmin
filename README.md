@@ -10,10 +10,10 @@ Member management system for makerspaces. Built by [Stockholm Makerspace](https:
 
 ### Easily administrate members of the makerspace
 
--   Name, address, etc.
--   Membership status
--   Access groups and permissions
--   Automatic emails about membership renewal and similar.
+- Name, address, etc.
+- Membership status
+- Access groups and permissions
+- Automatic emails about membership renewal and similar.
 
 <img src="docs/src/images/member_view.png" alt="member view" width="400"/>
 
@@ -21,10 +21,10 @@ Member management system for makerspaces. Built by [Stockholm Makerspace](https:
 
 Members get their own portal where they can easily:
 
--   Check their membership status.
--   Buy additional membership, or even subscribe for automatic membership renewal.
--   Buy other things in a built-in webshop.
--   Take quizzes to improve their knowledge
+- Check their membership status.
+- Buy additional membership, or even subscribe for automatic membership renewal.
+- Buy other things in a built-in webshop.
+- Take quizzes to improve their knowledge
 
 <img src="docs/src/images/member_portal_front.png" alt="member portal" width="400"/>
 
@@ -46,10 +46,10 @@ With a clean registration flow, members can more easily sign up, and understand 
 
 Get key insights for how to improve the makerspace.
 
--   Integrates with the webshop.
--   Integrates with the membership system.
--   Integrates with the quizzes.
--   Integrates with [Accessy](https://accessy.se) for tracking visits to the space.
+- Integrates with the webshop.
+- Integrates with the membership system.
+- Integrates with the quizzes.
+- Integrates with [Accessy](https://accessy.se) for tracking visits to the space.
 
 <img src="docs/src/images/statistics_sales.png" alt="sales statistics" width="400"/>
 
@@ -167,8 +167,8 @@ make firstrun
 
 Go to:
 
--   [the makeradmin web site](http://localhost:8009)
--   [the web shop](http://localhost:8011/shop)
+- [the makeradmin web site](http://localhost:8009)
+- [the web shop](http://localhost:8011/shop)
 
 ### Logging in
 

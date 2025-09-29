@@ -18,12 +18,12 @@ Click on the _+ Skapa Ny Medlem_ button on the top right.
 On the next page, you get a form where you can add the member's
 information:
 
--   Personal number (Personnummer)
--   First Name\*
--   Last Name
--   Email address\*
--   Telephone number
--   Address
+- Personal number (Personnummer)
+- First Name\*
+- Last Name
+- Email address\*
+- Telephone number
+- Address
 
 It is important that their email address are correct:
 this is their username to login later on.
