@@ -96,4 +96,9 @@
         zip_code: "Postnummer",
         postal_city: "Postort",
     },
+    labaccess_warnings: {
+        no_membership: "Du måste köpa <1>föreningsmedlemskap</1> i <0>webshoppen</0>.",
+        sign_contract: "Du måste delta på en <1>medlemintroduktion</1>. Du hittar dem i <0>kalendern</0>.",
+        missing_phone_number: "Du måste lägga in ditt <0>telefonnummer</0> i personuppgifterna nedan.",
+    },
 }

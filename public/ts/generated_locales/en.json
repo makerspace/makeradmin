@@ -183,6 +183,11 @@
         "failed_set_password_alert": "Failed to send email for setting password: {{error}}",
         "first_name": "First name",
         "instructions_to_become_member": "Remaining steps to get makerspace access",
+        "labaccess_warnings": {
+            "missing_phone_number": "You must enter your <0>phone number</0> in the personal data below.",
+            "no_membership": "You must purchase <1>base membership</1> in the <0>webshop</0>.",
+            "sign_contract": "You must attend a <1>member introduction</1>. You can find them in the <0>calendar</0>."
+        },
         "last_name": "Last name",
         "makerspace_access": {
             "title": "Makerspace Access"

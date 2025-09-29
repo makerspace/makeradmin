@@ -149,118 +149,6 @@ export type LOCALE_SCHEMA = {
       | "register",
   ) => string) &
     ((key: "errors.generic", args: { error: string | number }) => string);
-  member_page: ((
-    key:
-      | "member"
-      | "billing.title"
-      | "billing.manage"
-      | "old_membership_status.labaccess.inactive"
-      | "old_membership_status.labaccess.inactive_yesterday"
-      | "old_membership_status.membership.inactive"
-      | "old_membership_status.membership.inactive_yesterday"
-      | "old_membership_status.special_labaccess.inactive"
-      | "old_membership_status.special_labaccess.inactive_yesterday"
-      | "subscriptions.cancel.title"
-      | "subscriptions.cancel.cancel_cancelling_subscription"
-      | "subscriptions.descriptions.membership"
-      | "subscriptions.descriptions.labaccess"
-      | "subscriptions.auto_renewal_active"
-      | "subscriptions.makerspace_access_also_activates_base_subscription"
-      | "subscriptions.errors.no_member_introduction_title"
-      | "subscriptions.pay_dialog.title"
-      | "base_membership.title"
-      | "makerspace_access.title"
-      | "change_phone_number"
-      | "send_accessy_invite_msg"
-      | "send_accessy_invite"
-      | "change_pin_code"
-      | "change_password"
-      | "pin_code_not_set_warning"
-      | "set_password"
-      | "no_password_set"
-      | "instructions_to_become_member"
-      | "accessy_invite"
-      | "accessy_invite_info"
-      | "password"
-      | "pin_code"
-      | "phone_number"
-      | "email"
-      | "last_name"
-      | "first_name"
-      | "personal_data"
-      | "address.address_title"
-      | "address.address"
-      | "address.address_co"
-      | "address.zip_code"
-      | "address.postal_city",
-  ) => string) &
-    ((
-      key:
-        | "old_membership_status.labaccess.inactive_recent"
-        | "old_membership_status.membership.inactive_recent"
-        | "old_membership_status.special_labaccess.inactive_recent",
-      args: { days: string | number },
-    ) => string) &
-    ((
-      key:
-        | "old_membership_status.labaccess.active_hours_remaining"
-        | "old_membership_status.membership.active_hours_remaining"
-        | "old_membership_status.special_labaccess.active_hours_remaining",
-      args: { hours: string | number },
-    ) => string) &
-    ((
-      key:
-        | "old_membership_status.labaccess.active_few_days_remaining"
-        | "old_membership_status.labaccess.active_days_remaining"
-        | "old_membership_status.membership.active_few_days_remaining"
-        | "old_membership_status.membership.active_days_remaining"
-        | "old_membership_status.special_labaccess.active_few_days_remaining"
-        | "old_membership_status.special_labaccess.active_days_remaining",
-      args: { end_date: string | number; days: string | number },
-    ) => string) &
-    ((
-      key: "subscriptions.cancel.no_longer_renewed",
-      args: { type: string | number },
-    ) => string) &
-    ((
-      key:
-        | "subscriptions.cancel.membership.valid_until"
-        | "subscriptions.cancel.labaccess.valid_until",
-      args: { date: string | number },
-    ) => string) &
-    ((
-      key: "subscriptions.pending_makerspace_access",
-      args: { pending_days: string | number },
-    ) => string) &
-    ((
-      key: "subscriptions.add_to_cart",
-      args: {
-        price: string | number;
-        count: string | number;
-        unit: string | number;
-      },
-    ) => string) &
-    ((
-      key: "subscriptions.binding_period",
-      args: { count: string | number; unit: string | number },
-    ) => string) &
-    ((
-      key: "subscriptions.next_charge",
-      args: { formattedDate: string | number; amount: string | number },
-    ) => string) &
-    ((
-      key: "subscriptions.activate_auto_renewal",
-      args: { unit: string | number; price: string | number },
-    ) => string) &
-    ((
-      key: "subscriptions.errors.no_member_introduction",
-      args: { calendar_url: string | number },
-    ) => string) &
-    ((key: "set_password_alert", args: { email: string | number }) => string) &
-    ((
-      key: "failed_set_password_alert",
-      args: { error: string | number },
-    ) => string);
   payment: (
     key: "cart" | "cart_empty" | "pay_with_stripe" | "payment_failed" | "pay",
   ) => string;
@@ -362,8 +250,8 @@ export type LOCALE_SCHEMA = {
     ((
       key: "plans.decideLater.description2",
       args: {
-        makerspace_acccess_subscription_price: string | number;
         makerspace_acccess_price: string | number;
+        makerspace_acccess_subscription_price: string | number;
       },
     ) => string) &
     ((
@@ -412,6 +300,121 @@ export type LOCALE_SCHEMA = {
       args: { price: string | number },
     ) => string) &
     ((key: "renewal", args: { count: string | number }) => string);
+  member_page: ((
+    key:
+      | "member"
+      | "billing.title"
+      | "billing.manage"
+      | "old_membership_status.labaccess.inactive"
+      | "old_membership_status.labaccess.inactive_yesterday"
+      | "old_membership_status.membership.inactive"
+      | "old_membership_status.membership.inactive_yesterday"
+      | "old_membership_status.special_labaccess.inactive"
+      | "old_membership_status.special_labaccess.inactive_yesterday"
+      | "subscriptions.cancel.title"
+      | "subscriptions.cancel.cancel_cancelling_subscription"
+      | "subscriptions.descriptions.membership"
+      | "subscriptions.descriptions.labaccess"
+      | "subscriptions.auto_renewal_active"
+      | "subscriptions.makerspace_access_also_activates_base_subscription"
+      | "subscriptions.errors.no_member_introduction_title"
+      | "subscriptions.pay_dialog.title"
+      | "base_membership.title"
+      | "makerspace_access.title"
+      | "change_phone_number"
+      | "send_accessy_invite_msg"
+      | "send_accessy_invite"
+      | "change_pin_code"
+      | "change_password"
+      | "pin_code_not_set_warning"
+      | "set_password"
+      | "no_password_set"
+      | "instructions_to_become_member"
+      | "accessy_invite"
+      | "accessy_invite_info"
+      | "password"
+      | "pin_code"
+      | "phone_number"
+      | "email"
+      | "last_name"
+      | "first_name"
+      | "personal_data"
+      | "address.address_title"
+      | "address.address"
+      | "address.address_co"
+      | "address.zip_code"
+      | "address.postal_city"
+      | "labaccess_warnings.no_membership"
+      | "labaccess_warnings.sign_contract"
+      | "labaccess_warnings.missing_phone_number",
+  ) => string) &
+    ((
+      key:
+        | "old_membership_status.labaccess.inactive_recent"
+        | "old_membership_status.membership.inactive_recent"
+        | "old_membership_status.special_labaccess.inactive_recent",
+      args: { days: string | number },
+    ) => string) &
+    ((
+      key:
+        | "old_membership_status.labaccess.active_hours_remaining"
+        | "old_membership_status.membership.active_hours_remaining"
+        | "old_membership_status.special_labaccess.active_hours_remaining",
+      args: { hours: string | number },
+    ) => string) &
+    ((
+      key:
+        | "old_membership_status.labaccess.active_few_days_remaining"
+        | "old_membership_status.labaccess.active_days_remaining"
+        | "old_membership_status.membership.active_few_days_remaining"
+        | "old_membership_status.membership.active_days_remaining"
+        | "old_membership_status.special_labaccess.active_few_days_remaining"
+        | "old_membership_status.special_labaccess.active_days_remaining",
+      args: { end_date: string | number; days: string | number },
+    ) => string) &
+    ((
+      key: "subscriptions.cancel.no_longer_renewed",
+      args: { type: string | number },
+    ) => string) &
+    ((
+      key:
+        | "subscriptions.cancel.membership.valid_until"
+        | "subscriptions.cancel.labaccess.valid_until",
+      args: { date: string | number },
+    ) => string) &
+    ((
+      key: "subscriptions.pending_makerspace_access",
+      args: { pending_days: string | number },
+    ) => string) &
+    ((
+      key: "subscriptions.add_to_cart",
+      args: {
+        unit: string | number;
+        price: string | number;
+        count: string | number;
+      },
+    ) => string) &
+    ((
+      key: "subscriptions.binding_period",
+      args: { unit: string | number; count: string | number },
+    ) => string) &
+    ((
+      key: "subscriptions.next_charge",
+      args: { formattedDate: string | number; amount: string | number },
+    ) => string) &
+    ((
+      key: "subscriptions.activate_auto_renewal",
+      args: { unit: string | number; price: string | number },
+    ) => string) &
+    ((
+      key: "subscriptions.errors.no_member_introduction",
+      args: { calendar_url: string | number },
+    ) => string) &
+    ((key: "set_password_alert", args: { email: string | number }) => string) &
+    ((
+      key: "failed_set_password_alert",
+      args: { error: string | number },
+    ) => string);
   brand: (key: "makerspace_name" | "billing_address") => string;
 };
 
@@ -564,121 +567,6 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((key: "login:errors.generic", args: { error: string | number }) => string) &
   ((
     key:
-      | "member_page:member"
-      | "member_page:billing.title"
-      | "member_page:billing.manage"
-      | "member_page:old_membership_status.labaccess.inactive"
-      | "member_page:old_membership_status.labaccess.inactive_yesterday"
-      | "member_page:old_membership_status.membership.inactive"
-      | "member_page:old_membership_status.membership.inactive_yesterday"
-      | "member_page:old_membership_status.special_labaccess.inactive"
-      | "member_page:old_membership_status.special_labaccess.inactive_yesterday"
-      | "member_page:subscriptions.cancel.title"
-      | "member_page:subscriptions.cancel.cancel_cancelling_subscription"
-      | "member_page:subscriptions.descriptions.membership"
-      | "member_page:subscriptions.descriptions.labaccess"
-      | "member_page:subscriptions.auto_renewal_active"
-      | "member_page:subscriptions.makerspace_access_also_activates_base_subscription"
-      | "member_page:subscriptions.errors.no_member_introduction_title"
-      | "member_page:subscriptions.pay_dialog.title"
-      | "member_page:base_membership.title"
-      | "member_page:makerspace_access.title"
-      | "member_page:change_phone_number"
-      | "member_page:send_accessy_invite_msg"
-      | "member_page:send_accessy_invite"
-      | "member_page:change_pin_code"
-      | "member_page:change_password"
-      | "member_page:pin_code_not_set_warning"
-      | "member_page:set_password"
-      | "member_page:no_password_set"
-      | "member_page:instructions_to_become_member"
-      | "member_page:accessy_invite"
-      | "member_page:accessy_invite_info"
-      | "member_page:password"
-      | "member_page:pin_code"
-      | "member_page:phone_number"
-      | "member_page:email"
-      | "member_page:last_name"
-      | "member_page:first_name"
-      | "member_page:personal_data"
-      | "member_page:address.address_title"
-      | "member_page:address.address"
-      | "member_page:address.address_co"
-      | "member_page:address.zip_code"
-      | "member_page:address.postal_city",
-  ) => string) &
-  ((
-    key:
-      | "member_page:old_membership_status.labaccess.inactive_recent"
-      | "member_page:old_membership_status.membership.inactive_recent"
-      | "member_page:old_membership_status.special_labaccess.inactive_recent",
-    args: { days: string | number },
-  ) => string) &
-  ((
-    key:
-      | "member_page:old_membership_status.labaccess.active_hours_remaining"
-      | "member_page:old_membership_status.membership.active_hours_remaining"
-      | "member_page:old_membership_status.special_labaccess.active_hours_remaining",
-    args: { hours: string | number },
-  ) => string) &
-  ((
-    key:
-      | "member_page:old_membership_status.labaccess.active_few_days_remaining"
-      | "member_page:old_membership_status.labaccess.active_days_remaining"
-      | "member_page:old_membership_status.membership.active_few_days_remaining"
-      | "member_page:old_membership_status.membership.active_days_remaining"
-      | "member_page:old_membership_status.special_labaccess.active_few_days_remaining"
-      | "member_page:old_membership_status.special_labaccess.active_days_remaining",
-    args: { end_date: string | number; days: string | number },
-  ) => string) &
-  ((
-    key: "member_page:subscriptions.cancel.no_longer_renewed",
-    args: { type: string | number },
-  ) => string) &
-  ((
-    key:
-      | "member_page:subscriptions.cancel.membership.valid_until"
-      | "member_page:subscriptions.cancel.labaccess.valid_until",
-    args: { date: string | number },
-  ) => string) &
-  ((
-    key: "member_page:subscriptions.pending_makerspace_access",
-    args: { pending_days: string | number },
-  ) => string) &
-  ((
-    key: "member_page:subscriptions.add_to_cart",
-    args: {
-      price: string | number;
-      count: string | number;
-      unit: string | number;
-    },
-  ) => string) &
-  ((
-    key: "member_page:subscriptions.binding_period",
-    args: { count: string | number; unit: string | number },
-  ) => string) &
-  ((
-    key: "member_page:subscriptions.next_charge",
-    args: { formattedDate: string | number; amount: string | number },
-  ) => string) &
-  ((
-    key: "member_page:subscriptions.activate_auto_renewal",
-    args: { unit: string | number; price: string | number },
-  ) => string) &
-  ((
-    key: "member_page:subscriptions.errors.no_member_introduction",
-    args: { calendar_url: string | number },
-  ) => string) &
-  ((
-    key: "member_page:set_password_alert",
-    args: { email: string | number },
-  ) => string) &
-  ((
-    key: "member_page:failed_set_password_alert",
-    args: { error: string | number },
-  ) => string) &
-  ((
-    key:
       | "payment:cart"
       | "payment:cart_empty"
       | "payment:pay_with_stripe"
@@ -783,8 +671,8 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((
     key: "register:plans.decideLater.description2",
     args: {
-      makerspace_acccess_subscription_price: string | number;
       makerspace_acccess_price: string | number;
+      makerspace_acccess_subscription_price: string | number;
     },
   ) => string) &
   ((
@@ -835,5 +723,123 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((
     key: "special_products:renewal",
     args: { count: string | number },
+  ) => string) &
+  ((
+    key:
+      | "member_page:member"
+      | "member_page:billing.title"
+      | "member_page:billing.manage"
+      | "member_page:old_membership_status.labaccess.inactive"
+      | "member_page:old_membership_status.labaccess.inactive_yesterday"
+      | "member_page:old_membership_status.membership.inactive"
+      | "member_page:old_membership_status.membership.inactive_yesterday"
+      | "member_page:old_membership_status.special_labaccess.inactive"
+      | "member_page:old_membership_status.special_labaccess.inactive_yesterday"
+      | "member_page:subscriptions.cancel.title"
+      | "member_page:subscriptions.cancel.cancel_cancelling_subscription"
+      | "member_page:subscriptions.descriptions.membership"
+      | "member_page:subscriptions.descriptions.labaccess"
+      | "member_page:subscriptions.auto_renewal_active"
+      | "member_page:subscriptions.makerspace_access_also_activates_base_subscription"
+      | "member_page:subscriptions.errors.no_member_introduction_title"
+      | "member_page:subscriptions.pay_dialog.title"
+      | "member_page:base_membership.title"
+      | "member_page:makerspace_access.title"
+      | "member_page:change_phone_number"
+      | "member_page:send_accessy_invite_msg"
+      | "member_page:send_accessy_invite"
+      | "member_page:change_pin_code"
+      | "member_page:change_password"
+      | "member_page:pin_code_not_set_warning"
+      | "member_page:set_password"
+      | "member_page:no_password_set"
+      | "member_page:instructions_to_become_member"
+      | "member_page:accessy_invite"
+      | "member_page:accessy_invite_info"
+      | "member_page:password"
+      | "member_page:pin_code"
+      | "member_page:phone_number"
+      | "member_page:email"
+      | "member_page:last_name"
+      | "member_page:first_name"
+      | "member_page:personal_data"
+      | "member_page:address.address_title"
+      | "member_page:address.address"
+      | "member_page:address.address_co"
+      | "member_page:address.zip_code"
+      | "member_page:address.postal_city"
+      | "member_page:labaccess_warnings.no_membership"
+      | "member_page:labaccess_warnings.sign_contract"
+      | "member_page:labaccess_warnings.missing_phone_number",
+  ) => string) &
+  ((
+    key:
+      | "member_page:old_membership_status.labaccess.inactive_recent"
+      | "member_page:old_membership_status.membership.inactive_recent"
+      | "member_page:old_membership_status.special_labaccess.inactive_recent",
+    args: { days: string | number },
+  ) => string) &
+  ((
+    key:
+      | "member_page:old_membership_status.labaccess.active_hours_remaining"
+      | "member_page:old_membership_status.membership.active_hours_remaining"
+      | "member_page:old_membership_status.special_labaccess.active_hours_remaining",
+    args: { hours: string | number },
+  ) => string) &
+  ((
+    key:
+      | "member_page:old_membership_status.labaccess.active_few_days_remaining"
+      | "member_page:old_membership_status.labaccess.active_days_remaining"
+      | "member_page:old_membership_status.membership.active_few_days_remaining"
+      | "member_page:old_membership_status.membership.active_days_remaining"
+      | "member_page:old_membership_status.special_labaccess.active_few_days_remaining"
+      | "member_page:old_membership_status.special_labaccess.active_days_remaining",
+    args: { end_date: string | number; days: string | number },
+  ) => string) &
+  ((
+    key: "member_page:subscriptions.cancel.no_longer_renewed",
+    args: { type: string | number },
+  ) => string) &
+  ((
+    key:
+      | "member_page:subscriptions.cancel.membership.valid_until"
+      | "member_page:subscriptions.cancel.labaccess.valid_until",
+    args: { date: string | number },
+  ) => string) &
+  ((
+    key: "member_page:subscriptions.pending_makerspace_access",
+    args: { pending_days: string | number },
+  ) => string) &
+  ((
+    key: "member_page:subscriptions.add_to_cart",
+    args: {
+      unit: string | number;
+      price: string | number;
+      count: string | number;
+    },
+  ) => string) &
+  ((
+    key: "member_page:subscriptions.binding_period",
+    args: { unit: string | number; count: string | number },
+  ) => string) &
+  ((
+    key: "member_page:subscriptions.next_charge",
+    args: { formattedDate: string | number; amount: string | number },
+  ) => string) &
+  ((
+    key: "member_page:subscriptions.activate_auto_renewal",
+    args: { unit: string | number; price: string | number },
+  ) => string) &
+  ((
+    key: "member_page:subscriptions.errors.no_member_introduction",
+    args: { calendar_url: string | number },
+  ) => string) &
+  ((
+    key: "member_page:set_password_alert",
+    args: { email: string | number },
+  ) => string) &
+  ((
+    key: "member_page:failed_set_password_alert",
+    args: { error: string | number },
   ) => string) &
   ((key: "brand:makerspace_name" | "brand:billing_address") => string);

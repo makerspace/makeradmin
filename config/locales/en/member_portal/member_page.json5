@@ -96,4 +96,9 @@
         zip_code: "Zip code",
         postal_city: "City",
     },
+    labaccess_warnings: {
+        no_membership: "You must purchase <1>base membership</1> in the <0>webshop</0>.",
+        sign_contract: "You must attend a <1>member introduction</1>. You can find them in the <0>calendar</0>.",
+        missing_phone_number: "You must enter your <0>phone number</0> in the personal data below.",
+    },
 }

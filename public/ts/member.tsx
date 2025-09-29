@@ -221,8 +221,10 @@ function WarningItem({ children }: { children: preact.ComponentChildren }) {
 function SignedContractWarning({ member }: { member: member_t }) {
     return member.labaccess_agreement_at ? null : (
         <WarningItem>
-            Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar
-            dem i <a href={URL_CALENDLY_BOOK}>kalendern</a>.
+            <Trans
+                i18nKey="member_page:labaccess_warnings.sign_contract"
+                components={[<a href={URL_CALENDLY_BOOK} />, <strong />]}
+            />
         </WarningItem>
     );
 }
@@ -230,8 +232,10 @@ function SignedContractWarning({ member }: { member: member_t }) {
 function NoMembershipWarning({ membership }: { membership: membership_t }) {
     return membership.membership_active ? null : (
         <WarningItem>
-            Du måste köpa <strong>föreningsmedlemskap</strong> i{" "}
-            <a href={webshop_url}>webshoppen</a>.
+            <Trans
+                i18nKey="member_page:labaccess_warnings.no_membership"
+                components={[<a href={webshop_url} />, <strong />]}
+            />
         </WarningItem>
     );
 }
@@ -239,8 +243,10 @@ function NoMembershipWarning({ membership }: { membership: membership_t }) {
 function MissingPhoneNumber({ member }: { member: member_t }) {
     return member.phone ? null : (
         <WarningItem>
-            Du måste lägga in ditt <strong>telefonnummer</strong> i
-            personuppgifterna nedan.
+            <Trans
+                i18nKey="member_page:labaccess_warnings.missing_phone_number"
+                components={[<strong />]}
+            />
         </WarningItem>
     );
 }
