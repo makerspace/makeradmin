@@ -8,7 +8,7 @@ from service.config import get_public_url
 
 from messages.models import Message, MessageTemplate
 
-template_loader = FileSystemLoader(abspath(dirname(dirname(__file__))) + "/templates")
+template_loader = FileSystemLoader("/config/messages")
 template_env = Environment(loader=template_loader, autoescape=select_autoescape())
 
 

@@ -9,6 +9,7 @@ services:
     volumes:
       - ./api/src:/work/src
       - ./logs/api:/work/logs
+      - ./config/messages:/config/messages:ro
     ports:
       - "8010:80"
     environment:

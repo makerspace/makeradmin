@@ -22,6 +22,7 @@ VOLUME /work/logs
 COPY default-product-image.png /work
 
 COPY requirements.txt /work
+COPY --from=config messages /config/messages
 
 RUN pip install -U pip
 RUN pip install -r /work/requirements.txt

@@ -21,6 +21,9 @@ services:
     image: makeradmin/api:1.0
     build:
       context: ./api
+      additional_contexts:
+        config: ./config
+        scripts: ./scripts
     volumes:
       - ./logs/api:/work/logs
       - ./data/licenses:/work/data/licenses
@@ -73,6 +76,9 @@ services:
     image: makeradmin/api:1.0
     build:
       context: ./api
+      additional_contexts:
+        config: ./config
+        scripts: ./scripts
     volumes:
       - ./logs/email_dispatcher:/work/logs
     command:
@@ -101,6 +107,9 @@ services:
     image: makeradmin/api:1.0
     build:
       context: ./api
+      additional_contexts:
+        config: ./config
+        scripts: ./scripts
     volumes:
       - ./logs/accessy_syncer:/work/logs
     command:
