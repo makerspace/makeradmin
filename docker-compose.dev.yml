@@ -30,7 +30,7 @@ services:
       args:
         DEV_BUILD: "true"
     ports:
-      - "9111:80"
+      - "8011:80"
     volumes:
       - ./public/ts:/work/ts
       - ./public/scss:/work/scss
