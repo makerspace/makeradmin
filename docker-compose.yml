@@ -135,6 +135,8 @@ services:
       context: ./public
       additional_contexts:
         frontend_common: ./frontend_common
+        config: ./config
+        scripts: ./scripts
     environment:
       APIGATEWAY: "api"
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"

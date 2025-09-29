@@ -36,6 +36,7 @@ services:
       - ./public/scss:/work/scss
       - ./public/src:/work/src
       - ./frontend_common/src:/frontend_common/src
+      - ./config:/config:ro
     environment:
       DEV_RUN: "true"
 

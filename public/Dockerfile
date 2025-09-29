@@ -16,7 +16,7 @@ RUN apk update \
 
 RUN npm install -g npm@9.2.0
 
-RUN pip3 install flask gunicorn
+RUN pip3 install flask gunicorn pyjson5
 
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
 
@@ -26,9 +26,10 @@ COPY ./package.json ./package-lock.json /work/
 WORKDIR /work
 
 COPY --from=frontend_common . /frontend_common
-
 RUN npm ci --install-links=false
 
+COPY --from=scripts build_locales.py /scripts/
+COPY --from=config . /config
 COPY ./webpack.config.js /work/
 
 COPY ts /work/ts
@@ -39,13 +40,11 @@ COPY scss /work/scss
 
 COPY src /work/src
 
-COPY scripts /work/scripts
-
 COPY run.sh /work/run.sh
 
 RUN npm exec sass scss/style.scss static/style.css
 
-RUN npm exec tsx scripts/build_locales.ts
+RUN python3 /scripts/build_locales.py --locale-path=/config/locales --locale-override-path=/config/locale_overrides --output=/work/ts/generated_locales --output-ts-type-definitions=/work/ts/locales.ts --default-locale=en --modules member_portal common
 
 ARG DEV_BUILD
 

@@ -12,7 +12,6 @@ export const LOCALE_RESOURCES = {
 } as const;
 
 export type LOCALE_SCHEMA = {
-  brand: (key: "makerspace_name" | "billing_address") => string;
   change_phone: (
     key:
       | "new_number_prompt"
@@ -237,22 +236,22 @@ export type LOCALE_SCHEMA = {
     ((
       key: "subscriptions.add_to_cart",
       args: {
-        count: string | number;
         unit: string | number;
+        count: string | number;
         price: string | number;
       },
     ) => string) &
     ((
       key: "subscriptions.binding_period",
-      args: { count: string | number; unit: string | number },
+      args: { unit: string | number; count: string | number },
     ) => string) &
     ((
       key: "subscriptions.next_charge",
-      args: { formattedDate: string | number; amount: string | number },
+      args: { amount: string | number; formattedDate: string | number },
     ) => string) &
     ((
       key: "subscriptions.activate_auto_renewal",
-      args: { price: string | number; unit: string | number },
+      args: { unit: string | number; price: string | number },
     ) => string) &
     ((key: "set_password_alert", args: { email: string | number }) => string) &
     ((
@@ -360,15 +359,15 @@ export type LOCALE_SCHEMA = {
     ((
       key: "plans.decideLater.description2",
       args: {
-        makerspace_acccess_price: string | number;
         makerspace_acccess_subscription_price: string | number;
+        makerspace_acccess_price: string | number;
       },
     ) => string) &
     ((
       key: "calendar.text",
       args: {
-        URL_FACEBOOK_GROUP: string | number;
         URL_SLACK_HELP: string | number;
+        URL_FACEBOOK_GROUP: string | number;
       },
     ) => string) &
     ((
@@ -410,19 +409,17 @@ export type LOCALE_SCHEMA = {
       args: { price: string | number },
     ) => string) &
     ((key: "renewal", args: { count: string | number }) => string);
+  brand: (key: "makerspace_name" | "billing_address") => string;
 };
 
 export type LOCALE_SCHEMA_GLOBAL = ((
-  key: "brand:makerspace_name" | "brand:billing_address",
+  key:
+    | "change_phone:new_number_prompt"
+    | "change_phone:validation_code_prompt"
+    | "change_phone:errors.generic"
+    | "change_phone:errors.incorrect_code"
+    | "change_phone:validatePhone",
 ) => string) &
-  ((
-    key:
-      | "change_phone:new_number_prompt"
-      | "change_phone:validation_code_prompt"
-      | "change_phone:errors.generic"
-      | "change_phone:errors.incorrect_code"
-      | "change_phone:validatePhone",
-  ) => string) &
   ((
     key:
       | "common:continue"
@@ -649,22 +646,22 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((
     key: "member_page:subscriptions.add_to_cart",
     args: {
-      count: string | number;
       unit: string | number;
+      count: string | number;
       price: string | number;
     },
   ) => string) &
   ((
     key: "member_page:subscriptions.binding_period",
-    args: { count: string | number; unit: string | number },
+    args: { unit: string | number; count: string | number },
   ) => string) &
   ((
     key: "member_page:subscriptions.next_charge",
-    args: { formattedDate: string | number; amount: string | number },
+    args: { amount: string | number; formattedDate: string | number },
   ) => string) &
   ((
     key: "member_page:subscriptions.activate_auto_renewal",
-    args: { price: string | number; unit: string | number },
+    args: { unit: string | number; price: string | number },
   ) => string) &
   ((
     key: "member_page:set_password_alert",
@@ -780,15 +777,15 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((
     key: "register:plans.decideLater.description2",
     args: {
-      makerspace_acccess_price: string | number;
       makerspace_acccess_subscription_price: string | number;
+      makerspace_acccess_price: string | number;
     },
   ) => string) &
   ((
     key: "register:calendar.text",
     args: {
-      URL_FACEBOOK_GROUP: string | number;
       URL_SLACK_HELP: string | number;
+      URL_FACEBOOK_GROUP: string | number;
     },
   ) => string) &
   ((
@@ -832,4 +829,5 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((
     key: "special_products:renewal",
     args: { count: string | number },
-  ) => string);
+  ) => string) &
+  ((key: "brand:makerspace_name" | "brand:billing_address") => string);

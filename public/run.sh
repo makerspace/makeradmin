@@ -24,9 +24,9 @@ function watch_sass() {
 
 function watch_locales() {
     echo "Watching locales for changes..."
-    cmd="npx tsx scripts/build_locales.ts"
+    cmd="python3 /scripts/build_locales.py --locale-path=/config/locales --locale-override-path=/config/locale_overrides --output=./ts/generated_locales --output-ts-type-definitions=./ts/locales.ts --default-locale=en --modules member_portal common"
     $cmd || true
-    while inotifywait -qq -r -e modify,create,delete ts/locales; do
+    while inotifywait -qq -r -e modify,create,delete /config/locales /config/locale_overrides; do
         echo "Updating locales"
         sleep 0.05
         $cmd || true

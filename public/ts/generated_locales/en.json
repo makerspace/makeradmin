@@ -1,333 +1,319 @@
 {
     "brand": {
-        "makerspace_name": "Stockholm Makerspace",
-        "billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm"
+        "billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",
+        "makerspace_name": "Stockholm Makerspace"
     },
     "change_phone": {
-        "new_number_prompt": "New phone number",
-        "validation_code_prompt": "Validation code: ",
         "errors": {
             "generic": "Could not change phone number",
             "incorrect_code": "Incorrect code. Try again."
         },
-        "validatePhone": "We have sent a validation code to your phone. Please enter it below."
+        "new_number_prompt": "New phone number",
+        "validatePhone": "We have sent a validation code to your phone. Please enter it below.",
+        "validation_code_prompt": "Validation code: "
     },
     "common": {
-        "continue": "Continue",
-        "back": "Back",
         "and": "and",
+        "back": "Back",
         "cancel": "Cancel",
-        "unit": {
-            "year_one": "year",
-            "year_many": "years",
-            "month_one": "month",
-            "month_many": "months",
-            "day_one": "day",
-            "day_many": "days",
-            "piece_one": "piece",
-            "piece_many": "pieces"
-        },
+        "continue": "Continue",
+        "logOut": "Log out",
         "priceUnit": "kr",
-        "logOut": "Log out"
+        "unit": {
+            "day_many": "days",
+            "day_one": "day",
+            "month_many": "months",
+            "month_one": "month",
+            "piece_many": "pieces",
+            "piece_one": "piece",
+            "year_many": "years",
+            "year_one": "year"
+        }
     },
     "courses": {
-        "title": "Courses",
-        "description": "Here you can find all online courses that $t(brand:makerspace_name) provides.     Most courses are held physically and will instead be announced in our Slack group #events.     But some have a digital variant that you can find here, and take whenever you want.",
         "course_completed": "Completed",
         "course_continue": "Continue",
-        "course_take": "Take course"
+        "course_take": "Take course",
+        "description": "Here you can find all online courses that $t(brand:makerspace_name) provides.     Most courses are held physically and will instead be announced in our Slack group #events.     But some have a digital variant that you can find here, and take whenever you want.",
+        "title": "Courses"
     },
     "history": {
-        "title": "Receipts",
         "receipt": "Receipt",
+        "receipt_has_been_sent": "A receipt has also been sent via email.",
+        "receipt_not_found": "Could not find this receipt",
         "receipt_sum": "Sum",
         "thank_you_for_your_purchase": "Thank you for your purchase!",
-        "receipt_has_been_sent": "A receipt has also been sent via email.",
-        "receipt_not_found": "Could not find this receipt"
+        "title": "Receipts"
     },
     "labels": {
-        "page_title": "Memberbooth Labels",
-        "label_type": {
-            "TemporaryStorageLabel": "Temp",
-            "BoxLabel": "Box",
-            "FireSafetyLabel": "Dangerous",
-            "Printer3DLabel": "Filament",
-            "NameTag": "Name tag",
-            "MeetupNameTag": "Meetup name tag",
-            "DryingLabel": "Drying",
-            "WarningLabel": "Warning"
-        },
-        "expires": "Valid until",
-        "expired": "Expired",
-        "delete_label": "Delete label",
-        "delete_label_confirm": "Delete?",
-        "delete_failed": "Failed to delete label",
-        "expiring_soon": "Expiring soon",
-        "active_labels": "Active labels",
-        "expired_labels": "Expired labels",
-        "no_labels_uploaded": "No labels here yet",
-        "relative_expiry": {
-            "in_minutes": "Expires in {{count}} minutes",
-            "minutes_ago": "Expired {{count}} minutes ago",
-            "in_hours": "Expires in {{count}} hours",
-            "hours_ago": "Expired {{count}} hours ago",
-            "in_days": "Expires in {{count}} days",
-            "days_ago": "Expired {{count}} days ago",
-            "now": "Expired just now",
-            "date_future": "Expires {{date}}",
-            "date_past": "Expired {{date}}"
-        },
-        "relative_drying": {
-            "in_minutes": "Dry in {{count}} minutes",
-            "minutes_ago": "Dried {{count}} minutes ago",
-            "in_hours": "Dry in {{count}} hours",
-            "hours_ago": "Dried {{count}} hours ago",
-            "in_days": "Dry in {{count}} days",
-            "days_ago": "Dried {{count}} days ago",
-            "now": "Dried just now",
-            "date_future": "Dries {{date}}",
-            "date_past": "Dried {{date}}"
-        },
-        "relative_generic": {
-            "in_minutes": "In {{count}} minutes",
-            "minutes_ago": "{{count}} minutes ago",
-            "in_hours": "In {{count}} hours",
-            "hours_ago": "{{count}} hours ago",
-            "in_days": "In {{count}} days",
-            "days_ago": "{{count}} days ago",
-            "now": "Just now",
-            "date_future": "{{date}}",
-            "date_past": "{{date}}"
-        },
         "actions": {
-            "title": "Actions",
-            "submitted_successfully": "Label submitted successfully",
+            "add_photo": "Add photo",
+            "can_terminate_after_observation": "Not scanned after expiry, cannot be cleaned away yet.",
+            "can_terminate_in": "Can terminate {{duration}}",
+            "cancel": "Cancel",
+            "change_photo": "Change photo",
             "failed_to_submit": "Failed to submit label",
             "report": "Report",
-            "terminate": "Terminate",
-            "can_terminate_in": "Can terminate {{duration}}",
-            "can_terminate_after_observation": "Not scanned after expiry, cannot be cleaned away yet.",
             "report_label": "Report label",
-            "terminate_label": "Terminate label",
-            "write_a_message": "Write a message",
-            "change_photo": "Change photo",
-            "add_photo": "Add photo",
             "submit": "Submit",
-            "cancel": "Cancel"
+            "submitted_successfully": "Label submitted successfully",
+            "terminate": "Terminate",
+            "terminate_label": "Terminate label",
+            "title": "Actions",
+            "write_a_message": "Write a message"
+        },
+        "active_labels": "Active labels",
+        "delete_failed": "Failed to delete label",
+        "delete_label": "Delete label",
+        "delete_label_confirm": "Delete?",
+        "expired": "Expired",
+        "expired_labels": "Expired labels",
+        "expires": "Valid until",
+        "expiring_soon": "Expiring soon",
+        "label_type": {
+            "BoxLabel": "Box",
+            "DryingLabel": "Drying",
+            "FireSafetyLabel": "Dangerous",
+            "MeetupNameTag": "Meetup name tag",
+            "NameTag": "Name tag",
+            "Printer3DLabel": "Filament",
+            "TemporaryStorageLabel": "Temp",
+            "WarningLabel": "Warning"
         },
         "messages": {
-            "title": "Messages",
             "status": {
+                "failed": "Failed",
                 "queued": "Pending",
-                "sent": "Sent",
-                "failed": "Failed"
+                "sent": "Sent"
             },
             "template": {
-                "memberbooth_label_report": "Reported",
-                "memberbooth_label_cleaned_away": "Cleaned away",
-                "memberbooth_label_report_sms": "Reported (SMS)",
-                "memberbooth_label_cleaned_away_sms": "Cleaned away (SMS)",
-                "memberbooth_label_expired": "Expired",
-                "memberbooth_label_expiring_soon": "Expiring soon",
                 "memberbooth_box_cleaned_away": "Box cleaned away",
                 "memberbooth_box_cleaned_away_sms": "Box cleaned away (SMS)",
                 "memberbooth_box_expired": "Box expired",
-                "memberbooth_box_expiring_soon": "Box expiring soon"
-            }
+                "memberbooth_box_expiring_soon": "Box expiring soon",
+                "memberbooth_label_cleaned_away": "Cleaned away",
+                "memberbooth_label_cleaned_away_sms": "Cleaned away (SMS)",
+                "memberbooth_label_expired": "Expired",
+                "memberbooth_label_expiring_soon": "Expiring soon",
+                "memberbooth_label_report": "Reported",
+                "memberbooth_label_report_sms": "Reported (SMS)"
+            },
+            "title": "Messages"
+        },
+        "no_labels_uploaded": "No labels here yet",
+        "page_title": "Memberbooth Labels",
+        "relative_drying": {
+            "date_future": "Dries {{date}}",
+            "date_past": "Dried {{date}}",
+            "days_ago": "Dried {{count}} days ago",
+            "hours_ago": "Dried {{count}} hours ago",
+            "in_days": "Dry in {{count}} days",
+            "in_hours": "Dry in {{count}} hours",
+            "in_minutes": "Dry in {{count}} minutes",
+            "minutes_ago": "Dried {{count}} minutes ago",
+            "now": "Dried just now"
+        },
+        "relative_expiry": {
+            "date_future": "Expires {{date}}",
+            "date_past": "Expired {{date}}",
+            "days_ago": "Expired {{count}} days ago",
+            "hours_ago": "Expired {{count}} hours ago",
+            "in_days": "Expires in {{count}} days",
+            "in_hours": "Expires in {{count}} hours",
+            "in_minutes": "Expires in {{count}} minutes",
+            "minutes_ago": "Expired {{count}} minutes ago",
+            "now": "Expired just now"
+        },
+        "relative_generic": {
+            "date_future": "{{date}}",
+            "date_past": "{{date}}",
+            "days_ago": "{{count}} days ago",
+            "hours_ago": "{{count}} hours ago",
+            "in_days": "In {{count}} days",
+            "in_hours": "In {{count}} hours",
+            "in_minutes": "In {{count}} minutes",
+            "minutes_ago": "{{count}} minutes ago",
+            "now": "Just now"
         }
     },
     "login": {
-        "title": "Log in",
-        "magic_link_sent": "An email has been sent with a link that you can use to log in",
+        "continue": "Continue",
         "errors": {
-            "title_failed": "Log in failed",
+            "bad_credentials": "Wrong email, member number or password",
             "generic": "Received an unexpected response from the server: {{error}}",
             "generic2": "Could not communicate with the server.",
             "no_such_user": "Cannot find a user with that email or member number",
-            "bad_credentials": "Wrong email, member number or password"
+            "title_failed": "Log in failed"
         },
         "form_validation": {
-            "missing_tag": "You must enter an email address or member number.",
-            "missing_password": "You must enter a password"
+            "missing_password": "You must enter a password",
+            "missing_tag": "You must enter an email address or member number."
         },
-        "tag_placeholder": "Email/member number",
-        "password_placeholder": "Password",
-        "continue": "Continue",
         "login_methods": {
             "email_and_password": "Log in using password",
             "email_link": "Log in using only email"
         },
-        "register": "Become a member"
+        "magic_link_sent": "An email has been sent with a link that you can use to log in",
+        "password_placeholder": "Password",
+        "register": "Become a member",
+        "tag_placeholder": "Email/member number",
+        "title": "Log in"
     },
     "member_page": {
-        "member": "Member",
-        "billing": {
-            "title": "Billing",
-            "manage": "Manage Payment Methods"
-        },
-        "old_membership_status": {
-            "labaccess": {
-                "inactive": "Your makerspace access is inactive.",
-                "inactive_recent": "Your makerspace access expired {{days}} days ago.",
-                "inactive_yesterday": "Your makerspace access expired yesterday",
-                "active_hours_remaining": "Your makerspace access is valid for only {{hours}} more hours.",
-                "active_few_days_remaining": "Your makerspace access is valid through {{end_date}} (only {{days}} days left).",
-                "active_days_remaining": "Your makerspace access is valid through {{end_date}} ({{days}} days left)."
-            },
-            "membership": {
-                "inactive": "Your base membership is inactive.",
-                "inactive_recent": "Your base membership expired {{days}} days ago.",
-                "inactive_yesterday": "Your base membership expired yesterday",
-                "active_hours_remaining": "Your base membership is valid for only {{hours}} more hours.",
-                "active_few_days_remaining": "Your base membership is valid through {{end_date}} (only {{days}} days left).",
-                "active_days_remaining": "Your base membership is valid through {{end_date}} ({{days}} days left)."
-            },
-            "special_labaccess": {
-                "inactive": "Your special makerspace access is inactive.",
-                "inactive_recent": "Your special makerspace access expired {{days}} days ago.",
-                "inactive_yesterday": "Your special makerspace access expired yesterday",
-                "active_hours_remaining": "You have been given special access to the premises, which is for only {{hours}} more hours.",
-                "active_few_days_remaining": "You have been given special access to the premises through {{end_date}} (only {{days}} days left).",
-                "active_days_remaining": "You have been given special access to the premises through {{end_date}} ({{days}} days left)."
-            }
-        },
-        "subscriptions": {
-            "cancel": {
-                "title": "Cancel auto-renewal",
-                "no_longer_renewed": "Your {{type}} will no longer be automatically renewed.",
-                "cancel_cancelling_subscription": "Nevermind",
-                "membership": {
-                    "valid_until": "Your base membership will stay active until it expires on {{date}}"
-                },
-                "labaccess": {
-                    "valid_until": "Your makerspace access will stay active until it expires on {{date}}"
-                }
-            },
-            "descriptions": {
-                "membership": "Base membership gives you voting rights at the yearly meeting, supports your local makerspace, and allows you to attend courses/social events.",
-                "labaccess": "Makerspace access allows you to work on your own projects at the makerspace.                 You get 24/7 access to the space and you can also store one box with your own things at the space.                 Makerspace Access requires the Base Membership."
-            },
-            "pending_makerspace_access": "Your <strong>{{pending_days}}</strong> days of makerspace access will start when you attend a member introduction.",
-            "add_to_cart": "Add {{count}} {{unit}} to cart: {{price}} kr",
-            "binding_period": "subscription has a binding period of {{count}} {{unit}}",
-            "next_charge": "Your membership will renew at {{formattedDate}} for {{amount}} kr.",
-            "activate_auto_renewal": "Activate auto-renewal: {{price}} {{unit}}",
-            "auto_renewal_active": "Auto renew: Active",
-            "makerspace_access_also_activates_base_subscription": "Activating Makerspace Access Auto-renewal will also activate Base Membership auto-renewal.",
-            "errors": {
-                "no_member_introduction_title": "Cannot start subscription",
-                "no_member_introduction": "You must attend a member introduction before you can start an auto-renewal subscription. You can find them in the <0>calendar</0>."
-            },
-            "pay_dialog": {
-                "title": "Activate auto-renewal"
-            }
+        "accessy_invite": "Invite yourself to Accessy",
+        "accessy_invite_info": "If you have reinstalled the Accessy app, you need to re-invite yourself to get access again.",
+        "address": {
+            "address": "Address",
+            "address_co": "Extra address info (for example c/o)",
+            "address_title": "Address",
+            "postal_city": "City",
+            "zip_code": "Zip code"
         },
         "base_membership": {
             "title": "Base Membership"
         },
+        "billing": {
+            "manage": "Manage Payment Methods",
+            "title": "Billing"
+        },
+        "change_password": "Change",
+        "change_phone_number": "Change",
+        "change_pin_code": "Change",
+        "email": "Email",
+        "failed_set_password_alert": "Failed to send email for setting password: {{error}}",
+        "first_name": "First name",
+        "instructions_to_become_member": "Remaining steps to get makerspace access",
+        "last_name": "Last name",
         "makerspace_access": {
             "title": "Makerspace Access"
         },
-        "change_phone_number": "Change",
-        "send_accessy_invite_msg": "Install the Accessy app on your phone. You can use this to unlock doors at the makerspace.",
-        "send_accessy_invite": "Send Accessy invite",
-        "change_pin_code": "Change",
-        "change_password": "Change",
-        "pin_code_not_set_warning": "You haven't set a pin-code yet. Use the $t(member_page:change_pin_code)-button to set it. The pin-code is used for <0>memberbooth</0>",
-        "set_password": "Set",
+        "member": "Member",
         "no_password_set": "No password set",
-        "set_password_alert": "We've sent an email to {{email}} with a link for changing your password.",
-        "failed_set_password_alert": "Failed to send email for setting password: {{error}}",
-        "instructions_to_become_member": "Remaining steps to get makerspace access",
-        "accessy_invite": "Invite yourself to Accessy",
-        "accessy_invite_info": "If you have reinstalled the Accessy app, you need to re-invite yourself to get access again.",
+        "old_membership_status": {
+            "labaccess": {
+                "active_days_remaining": "Your makerspace access is valid through {{end_date}} ({{days}} days left).",
+                "active_few_days_remaining": "Your makerspace access is valid through {{end_date}} (only {{days}} days left).",
+                "active_hours_remaining": "Your makerspace access is valid for only {{hours}} more hours.",
+                "inactive": "Your makerspace access is inactive.",
+                "inactive_recent": "Your makerspace access expired {{days}} days ago.",
+                "inactive_yesterday": "Your makerspace access expired yesterday"
+            },
+            "membership": {
+                "active_days_remaining": "Your base membership is valid through {{end_date}} ({{days}} days left).",
+                "active_few_days_remaining": "Your base membership is valid through {{end_date}} (only {{days}} days left).",
+                "active_hours_remaining": "Your base membership is valid for only {{hours}} more hours.",
+                "inactive": "Your base membership is inactive.",
+                "inactive_recent": "Your base membership expired {{days}} days ago.",
+                "inactive_yesterday": "Your base membership expired yesterday"
+            },
+            "special_labaccess": {
+                "active_days_remaining": "You have been given special access to the premises through {{end_date}} ({{days}} days left).",
+                "active_few_days_remaining": "You have been given special access to the premises through {{end_date}} (only {{days}} days left).",
+                "active_hours_remaining": "You have been given special access to the premises, which is for only {{hours}} more hours.",
+                "inactive": "Your special makerspace access is inactive.",
+                "inactive_recent": "Your special makerspace access expired {{days}} days ago.",
+                "inactive_yesterday": "Your special makerspace access expired yesterday"
+            }
+        },
         "password": "Password",
-        "pin_code": "Pin-code",
-        "phone_number": "Phone number",
-        "email": "Email",
-        "last_name": "Last name",
-        "first_name": "First name",
         "personal_data": "Personal data",
-        "address": {
-            "address_title": "Address",
-            "address": "Address",
-            "address_co": "Extra address info (for example c/o)",
-            "zip_code": "Zip code",
-            "postal_city": "City"
+        "phone_number": "Phone number",
+        "pin_code": "Pin-code",
+        "pin_code_not_set_warning": "You haven't set a pin-code yet. Use the $t(member_page:change_pin_code)-button to set it. The pin-code is used for <0>memberbooth</0>",
+        "send_accessy_invite": "Send Accessy invite",
+        "send_accessy_invite_msg": "Install the Accessy app on your phone. You can use this to unlock doors at the makerspace.",
+        "set_password": "Set",
+        "set_password_alert": "We've sent an email to {{email}} with a link for changing your password.",
+        "subscriptions": {
+            "activate_auto_renewal": "Activate auto-renewal: {{price}} {{unit}}",
+            "add_to_cart": "Add {{count}} {{unit}} to cart: {{price}} kr",
+            "auto_renewal_active": "Auto renew: Active",
+            "binding_period": "subscription has a binding period of {{count}} {{unit}}",
+            "cancel": {
+                "cancel_cancelling_subscription": "Nevermind",
+                "labaccess": {
+                    "valid_until": "Your makerspace access will stay active until it expires on {{date}}"
+                },
+                "membership": {
+                    "valid_until": "Your base membership will stay active until it expires on {{date}}"
+                },
+                "no_longer_renewed": "Your {{type}} will no longer be automatically renewed.",
+                "title": "Cancel auto-renewal"
+            },
+            "descriptions": {
+                "labaccess": "Makerspace access allows you to work on your own projects at the makerspace.                 You get 24/7 access to the space and you can also store one box with your own things at the space.                 Makerspace Access requires the Base Membership.",
+                "membership": "Base membership gives you voting rights at the yearly meeting, supports your local makerspace, and allows you to attend courses/social events."
+            },
+            "errors": {
+                "no_member_introduction": "You must attend a member introduction before you can start an auto-renewal subscription. You can find them in the <0>calendar</0>.",
+                "no_member_introduction_title": "Cannot start subscription"
+            },
+            "makerspace_access_also_activates_base_subscription": "Activating Makerspace Access Auto-renewal will also activate Base Membership auto-renewal.",
+            "next_charge": "Your membership will renew at {{formattedDate}} for {{amount}} kr.",
+            "pay_dialog": {
+                "title": "Activate auto-renewal"
+            },
+            "pending_makerspace_access": "Your <strong>{{pending_days}}</strong> days of makerspace access will start when you attend a member introduction."
         }
     },
     "payment": {
         "cart": "Cart",
         "cart_empty": "Your cart is empty",
+        "pay": "Pay",
         "pay_with_stripe": "Pay with Stripe",
-        "payment_failed": "Payment failed",
-        "pay": "Pay"
+        "payment_failed": "Payment failed"
     },
     "register": {
-        "memberships": {
-            "title": "Makerspace Memberships",
-            "p1": "Memberships are split into two parts",
-            "p2": "Everyone has the yearly <strong>Base Membership</strong>, and if you want to work on your own projects, you must also get <strong>Makerspace Access</strong> (paid monthly)."
+        "calendar": {
+            "bookButton": "Book a member introduction",
+            "text": "Book a Member Introduction, during which you'll get a tour of the space (if you haven't already) and gain permission to use the makerspace. Your makerspace access will not be activated until you have visited a Member Introduction. In some situations, there may be no available time slots. Please let us know on <a href={{URL_FACEBOOK_GROUP}}>Facebook</a> or <a href={{URL_SLACK_HELP}}>Slack</a> if you cannot book a slot.",
+            "title": "Calendar"
         },
         "chooseYourPlan": {
-            "title": "Choose your membership",
-            "help": ""
+            "help": "",
+            "title": "Choose your membership"
+        },
+        "discounts": {
+            "apply_for_discounts": "I cannot afford the membership fee",
+            "cancel": "Cancel",
+            "confirmationDiscount": "You'll get a {{percent}}% discount on membership.",
+            "confirmationMessage": "We understand that not everyone can afford the full price of membership. But there are other ways you can help, if you want to. The Makerspace is run by its members volonteering their time and effort. Join a work day, help out with maintaining a machine, or why not hold a course about something you are excited about?",
+            "confirmationTitle": "Discount approved!",
+            "messagePlaceholder": "Tell us why you need a discount, in at least a few sentences.",
+            "reasons": {
+                "other": "Other",
+                "senior": "I am a senior citizen",
+                "student": "I am a student",
+                "unemployed": "I am unemployed"
+            },
+            "submit": "Continue",
+            "submitWriteMore": "Please write a bit more",
+            "text": "If you cannot afford the full price of membership, you can apply for a discount.",
+            "title": "Low Income Discounts"
+        },
+        "memberInfo": {
+            "email": "Email",
+            "firstName": "First name",
+            "lastName": "Last name",
+            "phone": "Phone (your phone will be used as your key to the makerspace)",
+            "submit": "Continue",
+            "title": "A little bit about you",
+            "zipCode": "Zip code"
+        },
+        "memberships": {
+            "p1": "Memberships are split into two parts",
+            "p2": "Everyone has the yearly <strong>Base Membership</strong>, and if you want to work on your own projects, you must also get <strong>Makerspace Access</strong> (paid monthly).",
+            "title": "Makerspace Memberships"
+        },
+        "payment": {
+            "bookIntroduction": "Before you gain access to the makerspace you need to attend a member introduction. These are held <0>regularly every 1-2 weeks</0>.",
+            "paymentProcessor": "Payment handled by Stripe",
+            "subTitle": "Almost done, we just need to take care of the payment.",
+            "title": "Payment"
         },
         "plans": {
-            "ofWhichBaseMembership": "of which {{price}} kr is yearly base membership",
-            "makerspaceAccessSub": {
-                "title": "Makerspace Access Subscription",
-                "abovePrice": "",
-                "period": "per month",
-                "description1": "A monthly subscription gets you access all the time, for a lower price.\n2 months minimum.",
-                "description2": "",
-                "included": [
-                    "Take part in courses and social events",
-                    "Vote at yearly meetings",
-                    "Support your local makerspace",
-                    "Access to Stockholm Makerspace 24/7",
-                    "Work on your own projects",
-                    "Store a personal box at the space"
-                ],
-                "notIncluded": []
-            },
-            "starterPack": {
-                "title": "Starter Pack",
-                "abovePrice": "",
-                "period": "",
-                "description1": "Two months of makerspace access for a lower price. New members only.",
-                "description2": "",
-                "included": [
-                    "Take part in courses and social events",
-                    "Vote at yearly meetings",
-                    "Support your local makerspace",
-                    "Access to Stockholm Makerspace 24/7",
-                    "Work on your own projects",
-                    "Store a personal box at the space"
-                ],
-                "notIncluded": []
-            },
-            "singleMonth": {
-                "title": "1 month of Makerspace Access",
-                "abovePrice": "",
-                "period": "",
-                "description1": "One month of makerspace access.",
-                "description2": "",
-                "included": [
-                    "Take part in courses and social events",
-                    "Vote at yearly meetings",
-                    "Support your local makerspace",
-                    "Access to Stockholm Makerspace 24/7",
-                    "Work on your own projects",
-                    "Store a personal box at the space"
-                ],
-                "notIncluded": []
-            },
             "decideLater": {
-                "title": "1 year of Base Membership only",
                 "abovePrice": "",
-                "price": "0",
-                "period": "",
                 "description1": "One year of base membership.",
                 "description2": "Later, you can pay for individual months of makerspace access ({{makerspace_acccess_price}} kr/mo) in our webshop, or get a subscription ({{makerspace_acccess_subscription_price}} kr/mo).",
                 "included": [
@@ -339,127 +325,141 @@
                     "Access to the space outside of events",
                     "Work on your own projects",
                     "Store a personal box at the space"
-                ]
+                ],
+                "period": "",
+                "price": "0",
+                "title": "1 year of Base Membership only"
+            },
+            "makerspaceAccessSub": {
+                "abovePrice": "",
+                "description1": "A monthly subscription gets you access all the time, for a lower price.\n2 months minimum.",
+                "description2": "",
+                "included": [
+                    "Take part in courses and social events",
+                    "Vote at yearly meetings",
+                    "Support your local makerspace",
+                    "Access to Stockholm Makerspace 24/7",
+                    "Work on your own projects",
+                    "Store a personal box at the space"
+                ],
+                "notIncluded": [],
+                "period": "per month",
+                "title": "Makerspace Access Subscription"
+            },
+            "ofWhichBaseMembership": "of which {{price}} kr is yearly base membership",
+            "singleMonth": {
+                "abovePrice": "",
+                "description1": "One month of makerspace access.",
+                "description2": "",
+                "included": [
+                    "Take part in courses and social events",
+                    "Vote at yearly meetings",
+                    "Support your local makerspace",
+                    "Access to Stockholm Makerspace 24/7",
+                    "Work on your own projects",
+                    "Store a personal box at the space"
+                ],
+                "notIncluded": [],
+                "period": "",
+                "title": "1 month of Makerspace Access"
+            },
+            "starterPack": {
+                "abovePrice": "",
+                "description1": "Two months of makerspace access for a lower price. New members only.",
+                "description2": "",
+                "included": [
+                    "Take part in courses and social events",
+                    "Vote at yearly meetings",
+                    "Support your local makerspace",
+                    "Access to Stockholm Makerspace 24/7",
+                    "Work on your own projects",
+                    "Store a personal box at the space"
+                ],
+                "notIncluded": [],
+                "period": "",
+                "title": "Starter Pack"
             }
         },
-        "memberInfo": {
-            "title": "A little bit about you",
-            "firstName": "First name",
-            "lastName": "Last name",
-            "email": "Email",
-            "phone": "Phone (your phone will be used as your key to the makerspace)",
-            "zipCode": "Zip code",
-            "submit": "Continue"
+        "success": {
+            "bookButton": "Book your member introduction",
+            "bookIntroduction": "To gain access to the Makerspace you must attend a member introduction. You can book it here, or do it later.",
+            "continueToMemberPortal": "Continue to your member page",
+            "nextSteps": "Here are your next steps:",
+            "steps": {
+                "instagramButton": "Instagram",
+                "instagramPrefix": "Get inspired on our",
+                "installAccessy": "Install Accessy",
+                "installAccessyWhy": "to be able to unlock doors, after your introduction.",
+                "joinSlackButton": "Join our Slack",
+                "joinSlackWhatIsThis": "What is this?",
+                "joinSlackWhy": "to chat with other members.",
+                "quizName": "Get Started Quiz",
+                "quizTake": "Take our",
+                "quizWhy": "to learn about the space.",
+                "wikiButton": "wiki",
+                "wikiPrefix": "Check out our"
+            },
+            "subTitle": "We look forward to meeting you!",
+            "title": "Welcome to the $t(brand:makerspace_name)!"
         },
         "terms": {
-            "title": "Rules for the premises",
-            "continue": "Continue",
             "accept": "I accept the rules",
+            "continue": "Continue",
+            "pledge": "I pledge to...",
             "rules": [
                 "<li>keep myself up to date about:</li>             <ol>             <li>general rules.</li>             <li>rules for storage.</li>             <li>rules for specific rooms that I will be in.</li>             <li>rules for the machines and tools I will use.</li>             </ol>             <li>             only visit the space when I have an active makerspace             access membership. If my makerspace access membership is             not active, I don't have access to the space, except             during events like courses, work days, open house, and             similar.             </li>             <li>             not engage in commercial activities on the premises.             </li>             <li>             take responsibility for my own actions and to be             considerate towards others.             </li>             <li>             store my projects correctly according to current rules.             Left-behind materials belong to the association.             </li>             <li>             always try to leave surfaces/machines/tools in better             condition than I found them, and to plan my visit to             ensure I have time to clean afterwards.             </li>             <li>not remove equipment from the space.</li>             <li>report equipment damage to the board, or on Slack.</li>             <li>             ask other members, or the board, if I am unsure about             something.             </li>             <li>             always ask before I take photos of someone or something             at the space.             </li>             <li>not do anything illegal at the space.</li>             <li>             not consume alcohol/drugs in the premises and to not use             the association's machinery while under the influence.             </li>             <li>not sleep at the space.</li>             <li>             take full responsibility for what my guests do at the             space. Guests may not work on their own projects during             their visit.             </li>             <li>             not use other areas of the building than those that             belong to the space. For example AWL's kitchen on the             entry floor, if the board has not said otherwise.             </li>"
             ],
-            "pledge": "I pledge to...",
-            "understandingPledge": "I understand that...",
+            "title": "Rules for the premises",
             "understanding": [
                 "to handle membership and access to the space, Stockholm Makerspace needs to handle personal information.",
                 "if I violate any of the rules above or in any other way misuse my access to the premises, I may be banned from the premises without refund of the paid fee.",
                 "I may be liable for compensation if I act negligently.",
                 "the space has camera surveillance."
             ],
+            "understandingPledge": "I understand that...",
             "welcoming": "I will do my best to ensure that the Stockholm Makerspace is a clean, safe and welcoming place."
-        },
-        "calendar": {
-            "title": "Calendar",
-            "text": "Book a Member Introduction, during which you'll get a tour of the space (if you haven't already) and gain permission to use the makerspace. Your makerspace access will not be activated until you have visited a Member Introduction. In some situations, there may be no available time slots. Please let us know on <a href={{URL_FACEBOOK_GROUP}}>Facebook</a> or <a href={{URL_SLACK_HELP}}>Slack</a> if you cannot book a slot.",
-            "bookButton": "Book a member introduction"
-        },
-        "payment": {
-            "title": "Payment",
-            "subTitle": "Almost done, we just need to take care of the payment.",
-            "bookIntroduction": "Before you gain access to the makerspace you need to attend a member introduction. These are held <0>regularly every 1-2 weeks</0>.",
-            "paymentProcessor": "Payment handled by Stripe"
-        },
-        "success": {
-            "title": "Welcome to the $t(brand:makerspace_name)!",
-            "subTitle": "We look forward to meeting you!",
-            "bookIntroduction": "To gain access to the Makerspace you must attend a member introduction. You can book it here, or do it later.",
-            "nextSteps": "Here are your next steps:",
-            "bookButton": "Book your member introduction",
-            "steps": {
-                "joinSlackButton": "Join our Slack",
-                "joinSlackWhy": "to chat with other members.",
-                "joinSlackWhatIsThis": "What is this?",
-                "quizTake": "Take our",
-                "quizName": "Get Started Quiz",
-                "quizWhy": "to learn about the space.",
-                "installAccessy": "Install Accessy",
-                "installAccessyWhy": "to be able to unlock doors, after your introduction.",
-                "wikiPrefix": "Check out our",
-                "wikiButton": "wiki",
-                "instagramPrefix": "Get inspired on our",
-                "instagramButton": "Instagram"
-            },
-            "continueToMemberPortal": "Continue to your member page"
-        },
-        "discounts": {
-            "title": "Low Income Discounts",
-            "apply_for_discounts": "I cannot afford the membership fee",
-            "text": "If you cannot afford the full price of membership, you can apply for a discount.",
-            "confirmationTitle": "Discount approved!",
-            "confirmationDiscount": "You'll get a {{percent}}% discount on membership.",
-            "confirmationMessage": "We understand that not everyone can afford the full price of membership. But there are other ways you can help, if you want to. The Makerspace is run by its members volonteering their time and effort. Join a work day, help out with maintaining a machine, or why not hold a course about something you are excited about?",
-            "submit": "Continue",
-            "submitWriteMore": "Please write a bit more",
-            "cancel": "Cancel",
-            "messagePlaceholder": "Tell us why you need a discount, in at least a few sentences.",
-            "reasons": {
-                "student": "I am a student",
-                "unemployed": "I am unemployed",
-                "senior": "I am a senior citizen",
-                "other": "Other"
-            }
         }
     },
     "shop": {
         "search_placeholder": "Find product..."
     },
     "sidebar": {
-        "member": "Membership",
-        "shop": "Webshop",
         "cart": "Cart",
-        "purchase_history": "Receipts",
         "courses": "Courses",
+        "labels": "Labels",
         "licenses": "Licenses and discounts",
-        "wiki": "Wiki",
+        "member": "Membership",
         "pay": "Pay",
-        "labels": "Labels"
+        "purchase_history": "Receipts",
+        "shop": "Webshop",
+        "wiki": "Wiki"
     },
     "special_products": {
+        "access_starter_pack": {
+            "period": "2 months",
+            "renewal": "SHOULD NOT BE VISIBLE {{price}}",
+            "summary": "Starter Pack"
+        },
+        "cart_total": "Total",
         "labaccess_subscription": {
-            "summary": "Makerspace Access",
-            "renewal": "Your makerspace access will renew monthly at {{price}} kr/month."
+            "renewal": "Your makerspace access will renew monthly at {{price}} kr/month.",
+            "summary": "Makerspace Access"
         },
         "membership_subscription": {
-            "summary": "Base Membership",
-            "renewal": "Your base membership will renew yearly at {{price}} kr/year."
+            "renewal": "Your base membership will renew yearly at {{price}} kr/year.",
+            "summary": "Base Membership"
         },
-        "single_labaccess_month": {
-            "summary": "Makerspace Access",
-            "renewal": "SHOULD NOT BE VISIBLE {{price}}"
-        },
-        "single_membership_year": {
-            "summary": "Base Membership",
-            "renewal": "SHOULD NOT BE VISIBLE {{price}}"
-        },
-        "access_starter_pack": {
-            "summary": "Starter Pack",
-            "period": "2 months",
-            "renewal": "SHOULD NOT BE VISIBLE {{price}}"
-        },
+        "payment_right_now": "Right now, you will pay",
+        "payment_right_now_nothing": "Right now, you will pay nothing.",
         "renewal_one": "You can cancel this subscription at any time.",
         "renewal_other": "You can cancel these subscriptions at any time.",
-        "cart_total": "Total",
-        "payment_right_now_nothing": "Right now, you will pay nothing.",
-        "payment_right_now": "Right now, you will pay"
+        "single_labaccess_month": {
+            "renewal": "SHOULD NOT BE VISIBLE {{price}}",
+            "summary": "Makerspace Access"
+        },
+        "single_membership_year": {
+            "renewal": "SHOULD NOT BE VISIBLE {{price}}",
+            "summary": "Base Membership"
+        }
     }
 }
