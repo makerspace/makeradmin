@@ -393,7 +393,7 @@ export type LOCALE_SCHEMA = {
     ) => string) &
     ((
       key: "subscriptions.next_charge",
-      args: { formattedDate: string | number; amount: string | number },
+      args: { amount: string | number; formattedDate: string | number },
     ) => string) &
     ((
       key: "subscriptions.activate_auto_renewal",
@@ -415,7 +415,14 @@ export type LOCALE_SCHEMA = {
       key: "unit.year" | "unit.month" | "unit.day" | "unit.piece",
       args: { count: string | number },
     ) => string);
-  brand: (key: "makerspace_name" | "billing_address" | "email") => string;
+  brand: (
+    key:
+      | "makerspace_name"
+      | "billing_address"
+      | "email"
+      | "organization_number"
+      | "homepage_url",
+  ) => string;
 };
 
 export type LOCALE_SCHEMA_GLOBAL = ((
@@ -807,7 +814,7 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ) => string) &
   ((
     key: "member_page:subscriptions.next_charge",
-    args: { formattedDate: string | number; amount: string | number },
+    args: { amount: string | number; formattedDate: string | number },
   ) => string) &
   ((
     key: "member_page:subscriptions.activate_auto_renewal",
@@ -843,5 +850,10 @@ export type LOCALE_SCHEMA_GLOBAL = ((
     args: { count: string | number },
   ) => string) &
   ((
-    key: "brand:makerspace_name" | "brand:billing_address" | "brand:email",
+    key:
+      | "brand:makerspace_name"
+      | "brand:billing_address"
+      | "brand:email"
+      | "brand:organization_number"
+      | "brand:homepage_url",
   ) => string);

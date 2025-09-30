@@ -13,9 +13,11 @@
     </p>
     <p>
         Om du inte tänkt förnya ditt medlemskap så är vi nyfikna på att veta varför, skriv en rad eller två
-        till <a href="mailto:info@makerspace.se">info@makerspace.se</a>.
+        till <a href="mailto:{{translate('brand:email')}}">{{translate("brand:email")}}</a>.
     </p>
-    <p>Med vänliga hälsningar,<br/>Stockholm Makerspace</p>
+    <p>Med vänliga hälsningar,<br/>
+        {{translate("brand:makerspace_name")}}
+    </p>
 {% endblock %}
 
 {% block english %}
@@ -29,7 +31,9 @@
     </p>
     <p>
         If you are not going to renew your membership, we are curious to know why. Please write a line
-        or two to <a href="mailto:info@makerspace.se">info@makerspace.se</a>.
+        or two to <a href="mailto:{{translate('brand:email')}}">{{translate("brand:email")}}</a>.
     </p>
-    <p>Sincerely,<br/>Stockholm Makerspace</p>
+    <p>Sincerely,<br/>
+        {{translate("brand:makerspace_name")}}
+    </p>
 {% endblock %}

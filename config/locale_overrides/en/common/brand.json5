@@ -2,4 +2,6 @@
     makerspace_name: "Stockholm\u00A0Makerspace",
     billing_address: "Stockholm\u00A0Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",
     email: "info@makerspace.se",
+    organization_number: "802467-7026",
+    homepage_url: "https://makerspace.se",
 }

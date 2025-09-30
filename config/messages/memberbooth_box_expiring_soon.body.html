@@ -4,43 +4,43 @@
 <h2>Hej {{member.firstname}}</h2>
 <p>(See below for English).</p>
 <p>
-  Ditt labbmedlemskap i Stockholm Makerspace gick ut den {{labaccess_end_date}}, om {{days_to_expiration}} dagar kommer
+  Ditt labbmedlemskap i {{translate("brand:makerspace_name")}} gick ut den {{labaccess_end_date}}, om {{days_to_expiration}} dagar kommer
   lådan och dess innehåll att tillfalla föreningen i enlighet med gällande labbmedlemsavtal. Enligt det har du
   45 dagar på dig efter att labbmedlemskapet löpt ut att hämta din labblåda.
 </p>
 <p>
   Du har nu följande två alternativ:
   <ul>
-    <li>Förnya ditt labbmedlemskap i <a href="https://medlem.makerspace.se/shop">webshoppen</a>.</li>
+    <li>Förnya ditt labbmedlemskap i <a href="{{ public_url('/shop') }}">webshoppen</a>.</li>
     <li>Hämta din labblåda och eventuell temporär förvaring.</li>
   </ul>
 </p>
 <p>
-  Om du anser att detta inte stämmer, hör av dig till <a href="mailto: info@makerspace.se">info@makerspace.se</a><br/>
+  Om du anser att detta inte stämmer, hör av dig till <a href="mailto:{{translate('brand:email')}}">{{translate("brand:email")}}</a><br/>
   Med vänliga hälsningar,<br/>
-  Stockholm Makerspace
+  {{translate("brand:makerspace_name")}}
 </p>
 {% endblock %}
 
 {% block english %}
 <h2>Hi {{member.firstname}}</h2>
 <p>
-  Your lab membership in Stockholm Makerspace expired on {{labaccess_end_date}}, in {{days_to_expiration}}
-  days, your lab storage box and its contents will belong to the Stockholm Makerspace in accordance with the lab
+  Your lab membership in {{translate("brand:makerspace_name")}} expired on {{labaccess_end_date}}, in {{days_to_expiration}}
+  days, your lab storage box and its contents will belong to the {{translate("brand:makerspace_name")}} in accordance with the lab
   membership agreement. According to the agreement, you have 45 days after your lab membership expires to retrieve
   your lab storage box.
 </p>
 <p>
   You now have the following two options:
   <ul>
-    <li>Renew your lab membership in our <a href="https://medlem.makerspace.se/shop">webshoppen</a>.</li>
+    <li>Renew your lab membership in our <a href="{{ public_url('/shop') }}">webshoppen</a>.</li>
     <li>Retrieve your lab storage box and any of your other temporary storage.</li>
   </ul>
 </p>
 <p>
-  If you feel that this is not the case, please contact <a href = "mailto: info@makerspace.se">info@makerspace.se</a> as soon as possible.<br/>
+  If you feel that this is not the case, please contact <a href="mailto:{{translate('brand:email')}}">{{translate("brand:email")}}</a> as soon as possible.<br/>
   Sincerely,<br/>
-  Stockholm Makerspace<br/>
+  {{translate("brand:makerspace_name")}}<br/>
 </p>
 
 {% endblock %}

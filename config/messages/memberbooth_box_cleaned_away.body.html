@@ -4,7 +4,7 @@
 <h2>Hej {{member.firstname}}</h2>
 <p>(See below for English).</p>
 <p>
-  Ditt labbmedlemskap i Stockholm Makerspace gick ut den {{labaccess_end_date}}, det har gått
+  Ditt labbmedlemskap i {{translate("brand:makerspace_name")}} gick ut den {{labaccess_end_date}}, det har gått
   {{days_after_labaccess_expiration}} dagar sedan att ditt labbmedlemskap gått ut vilket innebär att din låda och
   dess innehåll nu tillfallit föreningen i enlighet med gällande labbmedlemsavtal.
 </p>
@@ -14,18 +14,18 @@
 </p>
 {% endif %}
 <p>
-  Om du anser att detta inte stämmer, hör av dig till <a href="mailto: info@makerspace.se">info@makerspace.se</a><br/>
+  Om du anser att detta inte stämmer, hör av dig till <a href="mailto:{{translate('brand:email')}}">{{translate("brand:email")}}</a><br/>
   Med vänliga hälsningar,<br/>
-  Stockholm Makerspace<br/>
+  {{translate("brand:makerspace_name")}}<br/>
 </p>
 {% endblock %}
 
 {% block english %}
 <h2>Hi {{member.firstname}}</h2>
 <p>
-  Your lab membership in Stockholm Makerspace expired on {{labaccess_end_date}}, you have not had an active
+  Your lab membership in {{translate("brand:makerspace_name")}} expired on {{labaccess_end_date}}, you have not had an active
   lab membership for {{days_after_labaccess_expiration}} days which means that your lab storage box and all of its
-  contents now belong to the Stockholm Makerspace according to the lab membership agreement.
+  contents now belong to the {{translate("brand:makerspace_name")}} according to the lab membership agreement.
 </p>
 {% if image_url %}
 <p>
@@ -33,8 +33,8 @@
 </p>
 {% endif %}
 <p>
-  If you feel that this is not the case, please contact <a href="mailto: info@makerspace.se">info@makerspace.se</a> as soon as possible.<br/>
+  If you feel that this is not the case, please contact <a href="mailto:{{translate('brand:email')}}">{{translate("brand:email")}}</a> as soon as possible.<br/>
   Sincerely,<br/>
-  Stockholm Makerspace<br/>
+  {{translate("brand:makerspace_name")}}<br/>
 </p>
 {% endblock %}

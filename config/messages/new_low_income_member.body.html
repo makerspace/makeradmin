@@ -1,5 +1,5 @@
 <h2>
-   <a href="https://admin.makerspace.se/membership/members/{{member.member_id}}">#{{member.member_number}} {{member.firstname}} {{member.lastname}}</a> has
+   <a href="{{ admin_url('/membership/members/{{member.member_id}}') }}">#{{member.member_number}} {{member.firstname}} {{member.lastname}}</a> has
   registered as a low income member.
 </h2>
 

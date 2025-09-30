@@ -2,4 +2,6 @@
     makerspace_name: "Vårt\u00A0Makerspace",
     billing_address: "Vårt\u00A0Makerspace - Makerville",
     email: "example@mymakerspace.com",
+    organization_number: "999999999-9999",
+    homepage_url: "https://example.com",
 }

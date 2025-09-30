@@ -5,7 +5,7 @@ from typing import Any
 from i18n.locales import translate
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from membership.models import Member
-from service.config import get_public_url
+from service.config import get_admin_url, get_public_url
 
 from messages.models import Message, MessageTemplate
 
@@ -35,6 +35,7 @@ def send_message(
         render_template(
             f"{template.value}.subject.html",
             public_url=get_public_url,
+            admin_url=get_admin_url,
             member=member,
             translate=translate,
             **kwargs,
@@ -48,6 +49,7 @@ def send_message(
     body = render_template(
         f"{template.value}.body.html",
         public_url=get_public_url,
+        admin_url=get_admin_url,
         member=member,
         translate=translate,
         **kwargs,
