@@ -53,6 +53,12 @@ Get key insights for how to improve the makerspace.
 
 <img src="docs/src/images/statistics_sales.png" alt="sales statistics" width="400"/>
 
+### Localization
+
+Most text can be customized for your language and for your makerspace.
+
+See [localization](#customizing-text-for-your-makerspace)
+
 ## Installation
 
 First, you'll need some dependencies.
@@ -270,6 +276,52 @@ stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
 
 Note: When running tests, this is not necessary, as it will poll the stripe server automatically.
+
+## Customizing text for YOUR makerspace
+
+Makeradmin supports localization for different languages and allows you to customize most text to suit your makerspace.
+
+You can find all localization files in [`./config/locales`](./config/locales), and all messages (emails, text messages and so on) in [`./config/messages`](./config/messages). When browsing the website, the language will be set based on the user's preferred language, as set in their browser settings.
+
+When changing locales, create or edit the file in [`./config/locale_overrides`](./config/locale_overrides) which corresponds to the file in [`./config/locales`](./config/locales) that you want to override. This allows better error checking, and to allow using `git pull` to get new locales from upstream without annoying merge conflicts.
+
+### Setting the name of your makerspace
+
+Edit [`config/locale_overrides/en/common/brand.json5`](config/locale_overrides/en/common/brand.json5). For example you can enter:
+
+```json5
+{
+    makerspace_name: "My Cool Makerspace",
+    billing_address: "My Cool Makerspace - Maker Street 1, Makerville",
+    email: "info@mymakerspace.com",
+}
+```
+
+And you'll also want to edit the Swedish localization ([`config/locale_overrides/sv/common/brand.json5`](config/locale_overrides/sv/common/brand.json5)) in a similar fashion.
+
+The correct makerspace name will now be automatically used on the frontend, as well in emails and text messages sent to members.
+
+### Changing other localization entries
+
+Say you are an old-fashioned makerspace, and you don't want to say "month", you want to say "moon cycles", because you're cool or something.
+
+Then create the directory `config/locale_overrides/en/member_portal` and then the file `config/locale_overrides/en/member_portal/common.json5` in that directory.
+In this file we can override specific entries from the original [`config/locales/en/member_portal/common.json5`](config/locales/en/member_portal/common.json5) file.
+
+In this case, we want to change the definition of "unit -> month" so we write:
+
+```json5
+{
+    unit: {
+        month_one: "moon cycle",
+        month_other: "moon cycles",
+    },
+}
+```
+
+Now `moon cycle` will be used in place of `month` in the frontend. For example when adding one membership month to the cart:
+
+<img src="docs/src/images/localization_month.png" alt="sales statistics"/>
 
 ## Bookkeeping and accounting
 
