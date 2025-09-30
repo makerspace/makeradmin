@@ -3,5 +3,6 @@ LOCALE = {
     "brand:email": "info@makerspace.se",
     "brand:homepage_url": "https://makerspace.se",
     "brand:makerspace_name": "Stockholm Makerspace",
-    "brand:organization_number": "802467-7026"
+    "brand:organization_number": "802467-7026",
+    "common:todo": "should really add some translation for the admin interface too"
 }

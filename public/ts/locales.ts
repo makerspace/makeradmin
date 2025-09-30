@@ -243,8 +243,8 @@ export type LOCALE_SCHEMA = {
     ((
       key: "plans.decideLater.description2",
       args: {
-        makerspace_acccess_subscription_price: string | number;
         makerspace_acccess_price: string | number;
+        makerspace_acccess_subscription_price: string | number;
       },
     ) => string) &
     ((
@@ -363,7 +363,7 @@ export type LOCALE_SCHEMA = {
         | "old_membership_status.membership.active_days_remaining"
         | "old_membership_status.special_labaccess.active_few_days_remaining"
         | "old_membership_status.special_labaccess.active_days_remaining",
-      args: { days: string | number; end_date: string | number },
+      args: { end_date: string | number; days: string | number },
     ) => string) &
     ((
       key: "subscriptions.cancel.no_longer_renewed",
@@ -382,14 +382,14 @@ export type LOCALE_SCHEMA = {
     ((
       key: "subscriptions.add_to_cart",
       args: {
-        count: string | number;
-        unit: string | number;
         price: string | number;
+        unit: string | number;
+        count: string | number;
       },
     ) => string) &
     ((
       key: "subscriptions.binding_period",
-      args: { count: string | number; unit: string | number },
+      args: { unit: string | number; count: string | number },
     ) => string) &
     ((
       key: "subscriptions.next_charge",
@@ -397,7 +397,7 @@ export type LOCALE_SCHEMA = {
     ) => string) &
     ((
       key: "subscriptions.activate_auto_renewal",
-      args: { unit: string | number; price: string | number },
+      args: { price: string | number; unit: string | number },
     ) => string) &
     ((
       key: "subscriptions.errors.no_member_introduction",
@@ -661,8 +661,8 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((
     key: "register:plans.decideLater.description2",
     args: {
-      makerspace_acccess_subscription_price: string | number;
       makerspace_acccess_price: string | number;
+      makerspace_acccess_subscription_price: string | number;
     },
   ) => string) &
   ((
@@ -784,7 +784,7 @@ export type LOCALE_SCHEMA_GLOBAL = ((
       | "member_page:old_membership_status.membership.active_days_remaining"
       | "member_page:old_membership_status.special_labaccess.active_few_days_remaining"
       | "member_page:old_membership_status.special_labaccess.active_days_remaining",
-    args: { days: string | number; end_date: string | number },
+    args: { end_date: string | number; days: string | number },
   ) => string) &
   ((
     key: "member_page:subscriptions.cancel.no_longer_renewed",
@@ -803,14 +803,14 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ((
     key: "member_page:subscriptions.add_to_cart",
     args: {
-      count: string | number;
-      unit: string | number;
       price: string | number;
+      unit: string | number;
+      count: string | number;
     },
   ) => string) &
   ((
     key: "member_page:subscriptions.binding_period",
-    args: { count: string | number; unit: string | number },
+    args: { unit: string | number; count: string | number },
   ) => string) &
   ((
     key: "member_page:subscriptions.next_charge",
@@ -818,7 +818,7 @@ export type LOCALE_SCHEMA_GLOBAL = ((
   ) => string) &
   ((
     key: "member_page:subscriptions.activate_auto_renewal",
-    args: { unit: string | number; price: string | number },
+    args: { price: string | number; unit: string | number },
   ) => string) &
   ((
     key: "member_page:subscriptions.errors.no_member_introduction",

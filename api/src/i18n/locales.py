@@ -15,8 +15,15 @@ RESOURCES = {
 
 logger = logging.getLogger("i18n")
 
+class commonTranslator(Protocol):
+    def __call__(self, key: Literal["todo","common:todo"]) -> str: ...
+
 class brandTranslator(Protocol):
     def __call__(self, key: Literal["makerspace_name","billing_address","email","organization_number","homepage_url","brand:makerspace_name","brand:billing_address","brand:email","brand:organization_number","brand:homepage_url"]) -> str: ...
+@overload
+def translate(key: Literal["todo","common:todo"]) -> str: ...
+
+
 @overload
 def translate(key: Literal["makerspace_name","billing_address","email","organization_number","homepage_url","brand:makerspace_name","brand:billing_address","brand:email","brand:organization_number","brand:homepage_url"]) -> str: ...
 
@@ -38,6 +45,10 @@ def translate(key: str, *, count: int | None = None, language: Literal["en", "sv
     if kwargs:
         return v.format(count=count, **kwargs)
     return v
+
+@overload
+def translator(prefix: Literal['common']) -> commonTranslator: ...
+
 
 @overload
 def translator(prefix: Literal['brand']) -> brandTranslator: ...
