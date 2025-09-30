@@ -9,7 +9,8 @@ services:
     volumes:
       - ./api/src:/work/src
       - ./logs/api:/work/logs
-      - ./config/messages:/config/messages:ro
+      - ./config:/config:ro
+      - ./scripts:/scripts:ro
     ports:
       - "8010:80"
     environment:
@@ -20,11 +21,17 @@ services:
     volumes:
       - ./api/src:/work/src
       - ./logs/email_dispatcher:/work/logs
+      - ./config:/config:ro
+      - ./scripts:/scripts:ro
+    environment:
+      DEV_RUN: "true"
 
   accessy-syncer:
     volumes:
       - ./api/src:/work/src
       - ./logs/accessy_syncer:/work/logs
+    environment:
+      DEV_RUN: "true"
 
   public:
     build:
@@ -38,6 +45,7 @@ services:
       - ./public/src:/work/src
       - ./frontend_common/src:/frontend_common/src
       - ./config:/config:ro
+      - ./scripts:/scripts:ro
     environment:
       DEV_RUN: "true"
 

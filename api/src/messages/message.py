@@ -2,6 +2,7 @@ from html import unescape
 from os.path import abspath, dirname
 from typing import Any
 
+from i18n.locales import translate
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from membership.models import Member
 from service.config import get_public_url
@@ -35,6 +36,7 @@ def send_message(
             f"{template.value}.subject.html",
             public_url=get_public_url,
             member=member,
+            translate=translate,
             **kwargs,
         )
         if not sms
@@ -47,6 +49,7 @@ def send_message(
         f"{template.value}.body.html",
         public_url=get_public_url,
         member=member,
+        translate=translate,
         **kwargs,
     )
 

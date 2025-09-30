@@ -44,7 +44,7 @@ COPY run.sh /work/run.sh
 
 RUN npm exec sass scss/style.scss static/style.css
 
-RUN python3 /scripts/build_locales.py --locale-path=/config/locales --locale-override-path=/config/locale_overrides --output=/work/ts/generated_locales --output-ts-type-definitions=/work/ts/locales.ts --default-locale=en --modules member_portal common
+RUN python3 /scripts/build_locales.py --locale-path=/config/locales --locale-override-path=/config/locale_overrides --output-json=/work/ts/generated_locales --output-ts-type-definitions=/work/ts/locales.ts --default-locale=en --modules member_portal common
 
 ARG DEV_BUILD
 

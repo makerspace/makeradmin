@@ -1,4 +1,5 @@
 {
-    makerspace_name: "Stockholm Makerspace",
-    billing_address: "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",
+    makerspace_name: "Vårt\u00A0Makerspace",
+    billing_address: "Vårt\u00A0Makerspace - Makerville",
+    email: "example@mymakerspace.com",
 }

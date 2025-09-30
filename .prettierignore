@@ -9,6 +9,7 @@
 /public/static/js
 /admin/dist
 /public/ts/generated_locales
+/api/src/i18n
 
 # Jinja2 templates do not work well for some reason
 /api/src/templates/

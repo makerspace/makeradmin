@@ -1,4 +1,5 @@
 {
     makerspace_name: "Our\u00A0Makerspace",
     billing_address: "Our\u00A0Makerspace - Makerville",
+    email: "example@mymakerspace.com",
 }

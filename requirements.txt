@@ -2,5 +2,4 @@ requests
 pip
 ruff==0.6.9
 pre-commit
-pyjson5
 -r api/requirements.txt
