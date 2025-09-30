@@ -21,14 +21,14 @@
         "logOut": "Log out",
         "priceUnit": "kr",
         "unit": {
-            "day_many": "days",
             "day_one": "day",
-            "month_many": "months",
+            "day_other": "days",
             "month_one": "month",
-            "piece_many": "pieces",
+            "month_other": "months",
             "piece_one": "piece",
-            "year_many": "years",
-            "year_one": "year"
+            "piece_other": "pieces",
+            "year_one": "year",
+            "year_other": "years"
         }
     },
     "courses": {

@@ -21,14 +21,14 @@
         "logOut": "Logga ut",
         "priceUnit": "kr",
         "unit": {
-            "day_many": "dagar",
             "day_one": "dag",
-            "month_many": "månader",
+            "day_other": "dagar",
             "month_one": "månad",
-            "piece_many": "st",
+            "month_other": "månader",
             "piece_one": "st",
-            "year_many": "år",
-            "year_one": "år"
+            "piece_other": "st",
+            "year_one": "år",
+            "year_other": "år"
         }
     },
     "courses": {
