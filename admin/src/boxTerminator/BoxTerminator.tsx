@@ -5,7 +5,7 @@ import {
     UploadedLabel,
 } from "frontend_common";
 import { get, post } from "gateway";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ActiveLogo } from "./ActiveLogo";
 import { ExpiredLogo } from "./ExpiredLogo";
 import QrCodeScanner from "./QrCodeScanner";
@@ -86,6 +86,73 @@ const ScanResultPopover = ({
     );
 };
 
+const LabelIdSearchPopover = ({
+    onSelect,
+    onClose,
+}: {
+    onSelect: (labelId: number) => void;
+    onClose: () => void;
+}) => {
+    const [input, setInput] = useState("");
+    const [results, setResults] = useState<
+        { id: number; description: string; public_url: string }[]
+    >([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (input.length === 0) {
+            setResults([]);
+            return;
+        }
+        setLoading(true);
+        get({
+            url: `/multiaccess/memberbooth/label/search/${input}`,
+        })
+            .then((res) => {
+                setResults(res.data);
+            })
+            .finally(() => setLoading(false));
+    }, [input]);
+
+    return (
+        <div className="label-id-search-popover">
+            <button className="close-btn" onClick={onClose}>
+                ×
+            </button>
+            <input
+                type="tel"
+                pattern="[0-9]*"
+                inputMode="numeric"
+                autoFocus
+                placeholder="Enter label ID"
+                value={input}
+                onChange={(e) => setInput(e.target.value.replace(/\D/g, ""))}
+                style={{ fontSize: "2em", width: "100%", marginBottom: "1em" }}
+            />
+            {loading && <div>Searching…</div>}
+            <ul>
+                {results.map((label) => (
+                    <li key={label.id}>
+                        <button
+                            className="label-search-result"
+                            onClick={() => onSelect(label.id)}
+                        >
+                            #{label.id} – {truncate(label.description, 24)}
+                        </button>
+                    </li>
+                ))}
+            </ul>
+            {results.length === 0 && input.length > 0 && !loading && (
+                <div>No matching labels</div>
+            )}
+        </div>
+    );
+};
+
+function truncate(str: string, n: number) {
+    return str.length > n ? str.slice(0, n - 1) + "…" : str;
+}
+
 const BoxTerminator = () => {
     // Ensure only a single request is in flight at any one time
     const isScanning = useRef(false);
@@ -105,6 +172,7 @@ const BoxTerminator = () => {
             { label: LabelActionResponse; membership: membership_t } | null
         >(),
     );
+    const [showLabelIdSearch, setShowLabelIdSearch] = useState(false);
 
     const processScan = async (scannedString: string) => {
         // Check cache first
@@ -273,6 +341,37 @@ const BoxTerminator = () => {
             });
     };
 
+    const handleLabelIdSelect = useCallback(
+        async (labelId: number) => {
+            setShowLabelIdSearch(false);
+            // Simulate a scan by fetching and displaying the label
+            const [observeRes, membershipRes] = await Promise.all([
+                post({
+                    url: `/multiaccess/memberbooth/label/${labelId}/observe`,
+                    allowedErrorCodes: [404],
+                }),
+                get({
+                    url: `/multiaccess/memberbooth/label/${labelId}/membership`,
+                    allowedErrorCodes: [404],
+                }),
+            ]);
+            if (observeRes.data && membershipRes.data) {
+                setLastScanResult([
+                    {
+                        label: observeRes.data,
+                        membership: membershipRes.data,
+                        state: "active",
+                        timer: setTimeout(
+                            () => fadeoutLabel(observeRes.data.id),
+                            3000,
+                        ),
+                    },
+                ]);
+            }
+        },
+        [setLastScanResult],
+    );
+
     // Effect to process pending scans
     useEffect(() => {
         if (!isScanning && pendingScan) {
@@ -283,7 +382,34 @@ const BoxTerminator = () => {
 
     return (
         <div className="box-terminator">
-            <QrCodeScanner onSuccess={scanCallback} />
+            <div style={{ position: "relative" }}>
+                <button
+                    className="label-id-search-btn"
+                    style={{
+                        position: "absolute",
+                        top: 10,
+                        right: 10,
+                        zIndex: 10,
+                        fontSize: "2em",
+                        background: "#fff",
+                        border: "1px solid #ccc",
+                        borderRadius: "50%",
+                        width: "48px",
+                        height: "48px",
+                    }}
+                    title="Search by label ID"
+                    onClick={() => setShowLabelIdSearch(true)}
+                >
+                    #
+                </button>
+                {showLabelIdSearch && (
+                    <LabelIdSearchPopover
+                        onSelect={handleLabelIdSelect}
+                        onClose={() => setShowLabelIdSearch(false)}
+                    />
+                )}
+                <QrCodeScanner onSuccess={scanCallback} />
+            </div>
             {lastScanResult.map((item) => {
                 return (
                     <ScanResultPopover

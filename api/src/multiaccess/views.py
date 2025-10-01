@@ -327,3 +327,25 @@ def memberbooth_label_action_image(id: int) -> Response:
         raise NotFound()
 
     return Response(action.image, mimetype="image/webp")
+
+
+@service.route("/memberbooth/label/search/<string:id_prefix>", method=GET, permission=MEMBERBOOTH)
+def memberbooth_search_label_by_id_prefix(id_prefix: str) -> list[dict]:
+    # Only allow numeric prefixes
+    if not id_prefix.isdigit():
+        raise BadRequest("Prefix must be numeric")
+    q = (
+        select(MemberboothLabel)
+        .where(MemberboothLabel.id.like(f"{id_prefix}%"), MemberboothLabel.deleted_at.is_(None))
+        .order_by(MemberboothLabel.id.asc())
+        .limit(10)
+    )
+    labels = db_session.execute(q).scalars().all()
+    return [
+        {
+            "id": label.id,
+            "description": (label.data.get("description", "") if isinstance(label.data, dict) else ""),
+            "public_url": get_label_public_url(label.id),
+        }
+        for label in labels
+    ]
