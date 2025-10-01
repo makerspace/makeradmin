@@ -1,7 +1,5 @@
 services:
   db2:
-    ports:
-      - "3306:3306"
     volumes:
       - ./logs/db:/var/www/html/storage/logs
 

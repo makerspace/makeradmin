@@ -466,3 +466,69 @@ button > svg {
     0% { transform: translateY(0px); opacity: 1; }
     100% { transform: translateY(100px); opacity: 0; }
 }
+
+
+.label-id-search-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    font-size: 2em;
+    background: #ccc;
+    border: 1px solid #999;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+}
+
+.label-id-search-popover {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    left: 50%;
+    bottom: 50%;
+    transform: translate(-50%, 0%);
+    background: #f0f0f0;
+    /* border: 2px solid #333; */
+    border-radius: 8px;
+    padding: 1em;
+    z-index: 100;
+    width: 80%;
+    max-width: 90vw;
+    justify-items: stretch;
+}
+
+.label-id-search-popover ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.label-search-result {
+    width: 100%;
+    text-align: left;
+    font-size: 1.2em;
+    padding: 0.5em;
+    margin-bottom: 0.2em;
+    background: #eee;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.label-search-result:hover {
+    background: #ddd;
+}
+
+.label-id-input {
+    font-size: 1.5em;
+    padding: 0.3em 0.5em;
+    border-radius: 4px;
+    outline: none !important;
+    box-shadow: none !important;
+    /* Remove Firefox's default selection border */
+    border: none;
+}
