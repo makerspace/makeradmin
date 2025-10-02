@@ -68,4 +68,3 @@ fi
 # However running the servers behind nginx (and using the sync class) resolves all problems
 # as nginx handles all the persistent connections.
 exec gunicorn $GUNICORN_FLAGS --access-logfile - --log-level info --error-logfile - --worker-class sync --chdir src --workers=$GUNICORN_WORKERS -b :$GUNICORN_PORT public:app
-gunicorn $GUNICORN_FLAGS --access-logfile - --log-level info --error-logfile - --worker-class sync --chdir src --workers=$GUNICORN_WORKERS -b :$GUNICORN_PORT public:app
