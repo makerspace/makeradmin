@@ -1,6 +1,7 @@
 FROM node:lts-alpine3.22@sha256:d2166de198f26e17e5a442f537754dd616ab069c47cc57b889310a717e0abbf9
 
-RUN apk add --no-cache tzdata
+RUN apk add --no-cache tzdata inotify-tools && rm -rf /var/cache/apk/*
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 ENV TZ=Europe/Stockholm
 
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
@@ -14,8 +15,13 @@ RUN npm ci --install-links=false
 
 COPY ./webpack.config.js /work/
 
-COPY  ./src/ /work/src
 COPY --from=frontend_common . /frontend_common
+COPY --from=config . /config
+COPY --from=scripts build_locales.py /scripts/
+COPY  ./src/ /work/src
+
+# compile-bytecode makes the script start faster when run later (not sure if the difference is noticeable)
+RUN uv run --compile-bytecode /scripts/build_locales.py --locale-path=/config/locales --locale-override-path=/config/locale_overrides --output-json=/work/src/i18n/generated_locales --output-ts-type-definitions=/work/src/i18n/locales.ts --default-locale=en --modules admin common
 
 COPY  ./dist/ /work/dist
 

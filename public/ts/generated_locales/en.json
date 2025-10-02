@@ -469,5 +469,18 @@
             "renewal": "SHOULD NOT BE VISIBLE {{price}}",
             "summary": "Base Membership"
         }
+    },
+    "time": {
+        "relative_generic": {
+            "date_future": "{{date}}",
+            "date_past": "{{date}}",
+            "days_ago": "{{count}} days ago",
+            "hours_ago": "{{count}} hours ago",
+            "in_days": "In {{count}} days",
+            "in_hours": "In {{count}} hours",
+            "in_minutes": "In {{count}} minutes",
+            "minutes_ago": "{{count}} minutes ago",
+            "now": "Just now"
+        }
     }
 }

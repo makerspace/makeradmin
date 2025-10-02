@@ -5,6 +5,7 @@
         "baseUrl": "./src",
         "esModuleInterop": true,
         "exactOptionalPropertyTypes": true,
+        "resolveJsonModule": true,
         // Disallow features that require cross-file awareness
         "isolatedModules": true,
         "jsx": "react-jsx",

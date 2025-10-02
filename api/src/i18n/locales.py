@@ -15,17 +15,42 @@ RESOURCES = {
 
 logger = logging.getLogger("i18n")
 
+class brandTranslator(Protocol):
+    def __call__(self, key: Literal["billing_address","email","homepage_url","makerspace_name","organization_number","brand:billing_address","brand:email","brand:homepage_url","brand:makerspace_name","brand:organization_number"]) -> str: ...
+
 class commonTranslator(Protocol):
     def __call__(self, key: Literal["todo","common:todo"]) -> str: ...
 
-class brandTranslator(Protocol):
-    def __call__(self, key: Literal["makerspace_name","billing_address","email","organization_number","homepage_url","brand:makerspace_name","brand:billing_address","brand:email","brand:organization_number","brand:homepage_url"]) -> str: ...
+class timeTranslator(Protocol):
+    @overload
+    def __call__(self, key: Literal["relative_generic.now","time:relative_generic.now"]) -> str: ...
+
+    @overload
+    def __call__(self, key: Literal["relative_generic.days_ago","relative_generic.hours_ago","relative_generic.in_days","relative_generic.in_hours","relative_generic.in_minutes","relative_generic.minutes_ago","time:relative_generic.days_ago","time:relative_generic.hours_ago","time:relative_generic.in_days","time:relative_generic.in_hours","time:relative_generic.in_minutes","time:relative_generic.minutes_ago"], *, count: int) -> str: ...
+
+    @overload
+    def __call__(self, key: Literal["relative_generic.date_future","relative_generic.date_past","time:relative_generic.date_future","time:relative_generic.date_past"], *, date: str | int | float) -> str: ...
+
+def __call__(self, key: str, **kwargs: Any) -> str: ...
+
+@overload
+def translate(key: Literal["billing_address","email","homepage_url","makerspace_name","organization_number","brand:billing_address","brand:email","brand:homepage_url","brand:makerspace_name","brand:organization_number"]) -> str: ...
+
+
 @overload
 def translate(key: Literal["todo","common:todo"]) -> str: ...
 
 
 @overload
-def translate(key: Literal["makerspace_name","billing_address","email","organization_number","homepage_url","brand:makerspace_name","brand:billing_address","brand:email","brand:organization_number","brand:homepage_url"]) -> str: ...
+def translate(key: Literal["relative_generic.now","time:relative_generic.now"]) -> str: ...
+
+
+@overload
+def translate(key: Literal["relative_generic.days_ago","relative_generic.hours_ago","relative_generic.in_days","relative_generic.in_hours","relative_generic.in_minutes","relative_generic.minutes_ago","time:relative_generic.days_ago","time:relative_generic.hours_ago","time:relative_generic.in_days","time:relative_generic.in_hours","time:relative_generic.in_minutes","time:relative_generic.minutes_ago"], *, count: int) -> str: ...
+
+
+@overload
+def translate(key: Literal["relative_generic.date_future","relative_generic.date_past","time:relative_generic.date_future","time:relative_generic.date_past"], *, date: str | int | float) -> str: ...
 
 def translate(key: str, *, count: int | None = None, language: Literal["en", "sv"]="en", **kwargs: Any) -> str | list[str]:
     if count is not None:
@@ -47,11 +72,15 @@ def translate(key: str, *, count: int | None = None, language: Literal["en", "sv
     return v
 
 @overload
+def translator(prefix: Literal['brand']) -> brandTranslator: ...
+
+
+@overload
 def translator(prefix: Literal['common']) -> commonTranslator: ...
 
 
 @overload
-def translator(prefix: Literal['brand']) -> brandTranslator: ...
+def translator(prefix: Literal['time']) -> timeTranslator: ...
 
 
 

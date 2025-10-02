@@ -164,6 +164,8 @@ services:
       context: ./admin
       additional_contexts:
         frontend_common: ./frontend_common
+        config: ./config
+        scripts: ./scripts
     environment:
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
       VIRTUAL_HOST: "${HOST_FRONTEND}"

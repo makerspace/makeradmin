@@ -1,0 +1,25 @@
+{
+    "brand": {
+        "billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",
+        "email": "info@makerspace.se",
+        "homepage_url": "https://makerspace.se",
+        "makerspace_name": "Stockholm Makerspace",
+        "organization_number": "802467-7026"
+    },
+    "common": {
+        "todo": "should really add some translation for the admin interface too"
+    },
+    "time": {
+        "relative_generic": {
+            "date_future": "{{date}}",
+            "date_past": "{{date}}",
+            "days_ago": "För {{count}} dagar sedan",
+            "hours_ago": "För {{count}} timmar sedan",
+            "in_days": "Om {{count}} dagar",
+            "in_hours": "Om {{count}} timmar",
+            "in_minutes": "Om {{count}} minuter",
+            "minutes_ago": "För {{count}} minuter sedan",
+            "now": "Just nu"
+        }
+    }
+}

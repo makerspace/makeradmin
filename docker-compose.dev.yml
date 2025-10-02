@@ -41,7 +41,7 @@ services:
       - ./public/ts:/work/ts
       - ./public/scss:/work/scss
       - ./public/src:/work/src
-      - ./frontend_common/src:/frontend_common/src
+      - ./frontend_common/src:/frontend_common/src:ro
       - ./config:/config:ro
       - ./scripts:/scripts:ro
     environment:
@@ -55,6 +55,8 @@ services:
     volumes:
       - ./admin/src:/work/src
       - ./admin/dist:/work/dist
-      - ./frontend_common/src:/frontend_common/src
+      - ./frontend_common/src:/frontend_common/src:ro
+      - ./config:/config:ro
+      - ./scripts:/scripts:ro
     environment:
       DEV_RUN: "true"
