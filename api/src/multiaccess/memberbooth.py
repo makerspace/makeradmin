@@ -149,7 +149,7 @@ def create_label(label: LabelType) -> UploadedLabel:
     db_label = MemberboothLabel(
         id=label.base.id,
         member_id=member.member_id,
-        data=serde.to_dict(label, LabelTypeTagged),
+        data=serde.to_dict(label, LabelTypeTagged),  # type: ignore
     )
     db_session.add(db_label)
     db_session.flush()

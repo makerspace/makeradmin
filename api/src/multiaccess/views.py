@@ -37,7 +37,6 @@ from sqlalchemy import select
 from werkzeug.wrappers.request import FileStorage
 
 from multiaccess import service, short_url_service
-from multiaccess.box_terminator import box_terminator_boxes, box_terminator_nag, box_terminator_validate
 from multiaccess.label_data import BoxLabelV1, BoxLabelV2, LabelType, LabelTypeTagged, TemporaryStorageLabelV1
 from multiaccess.memberbooth import (
     UploadedLabel,
@@ -54,9 +53,12 @@ logger = getLogger("memberbooth")
 
 
 @service.route("/memberbooth/tag/<string:tagid>", method=GET, permission=MEMBERBOOTH)
-def memberbooth_tag(tagid: str) -> dict | None:
+def memberbooth_tag(tagid: str) -> dict:
     r = tag_to_memberinfo(tagid)
-    return r.to_dict() if r else None
+    if r is None:
+        raise NotFound()
+
+    return r.to_dict()
 
 
 @dataclass
@@ -73,9 +75,12 @@ def memberbooth_pin_login() -> dict:
 
 
 @service.route("/memberbooth/member/<string:member_number>", method=GET, permission=MEMBERBOOTH)
-def memberbooth_member(member_number: int) -> dict | None:
+def memberbooth_member(member_number: int) -> dict:
     r = member_number_to_memberinfo(member_number)
-    return r.to_dict() if r else None
+    if r is None:
+        raise NotFound()
+
+    return r.to_dict()
 
 
 @service.route("/memberbooth/label", method=POST, permission=MEMBERBOOTH, status="created")
@@ -89,7 +94,7 @@ def memberbooth_post_label() -> dict:
         # Maybe this is an old label format, try to convert it
         for tp in [BoxLabelV2, BoxLabelV1, TemporaryStorageLabelV1]:
             try:
-                label = serde.json.from_dict(tp, request_data).migrate()
+                label = serde.json.from_dict(tp, request_data).migrate()  # type: ignore
                 if label is None:
                     raise BadRequest("Member not found", status="member_not_found")
                 break
@@ -341,11 +346,13 @@ def memberbooth_search_label_by_id_prefix(id_prefix: str) -> list[dict]:
         .limit(10)
     )
     labels = db_session.execute(q).scalars().all()
-    return serde.to_dict([
-        UploadedLabel(
-            public_url=get_label_public_url(label_db.id),
-            public_observation_url=get_label_qr_code_url(label_db.id),
-            label=serde.from_dict(LabelTypeTagged, label_db.data), # type: ignore
-        )
-        for label_db in labels
-    ])
+    return serde.to_dict(
+        [
+            UploadedLabel(
+                public_url=get_label_public_url(label_db.id),
+                public_observation_url=get_label_qr_code_url(label_db.id),
+                label=serde.from_dict(LabelTypeTagged, label_db.data),  # type: ignore
+            )
+            for label_db in labels
+        ]
+    )
