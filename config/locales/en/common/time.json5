@@ -1,0 +1,13 @@
+{
+    relative_generic: {
+        in_minutes: "in {{count}} minutes",
+        minutes_ago: "{{count}} minutes ago",
+        in_hours: "in {{count}} hours",
+        hours_ago: "{{count}} hours ago",
+        in_days: "in {{count}} days",
+        days_ago: "{{count}} days ago",
+        now: "just now",
+        date_future: "{{date}}",
+        date_past: "{{date}}",
+    },
+}

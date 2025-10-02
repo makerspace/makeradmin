@@ -3,14 +3,15 @@ import {
     FireSafetyLabel,
     labelExpiresSoon,
     labelExpiryDate,
+    labelFirstValidTerminationDate,
     labelIsExpired,
     member_t,
     membership_t,
     Permission,
     TemporaryStorageLabel,
-    TERMINATION_WARNING_DAYS_TO_CLEANOUT,
-    UploadedLabel,
+    UploadedLabel
 } from "frontend_common";
+import { Message, MessageTemplate } from "frontend_common/src/message";
 import { render } from "preact";
 import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useRef, useState } from "preact/hooks";
@@ -24,7 +25,6 @@ import {
     LoadCurrentMembershipInfo,
     LoadCurrentPermissions,
 } from "./member_common";
-import { Message, MessageTemplate } from "./message";
 import { NotFoundPage } from "./notfound";
 
 declare var UIkit: any;
@@ -263,7 +263,7 @@ const TerminationButton = ({
                             now,
                             firstCleanoutTime,
                             t,
-                            "generic",
+                            "relative_generic",
                         ).toLowerCase(),
                     })}
                 </button>
@@ -305,40 +305,9 @@ const LabelActions = ({
 
     // Prevent cleaning out an item, unless an expiration warning has been sent at least N days ago
     const now = new Date();
-    const thresholdTime = new Date(
-        now.getTime() -
-            TERMINATION_WARNING_DAYS_TO_CLEANOUT * 24 * 60 * 60 * 1000,
-    );
-    let firstCleanoutTime: Date | null = null;
-
     const expiresAt = labelExpiryDate(label.label, membership);
+    let firstCleanoutTime: Date | null = labelFirstValidTerminationDate(expiresAt, messages);
 
-    if (expiresAt) {
-        // For other labels, find first "expired" message sent after label expired
-        const expiredMessages = messages
-            .filter(
-                (m) =>
-                    (m.template === "memberbooth_box_expired" ||
-                        m.template === "memberbooth_label_expired") &&
-                    // Use created_at instead of sent_at, to allow this to work in dev mode where sending always fails
-                    new Date(m.created_at) > expiresAt,
-            )
-            .sort(
-                (a, b) =>
-                    new Date(a.created_at).getTime() -
-                    new Date(b.created_at).getTime(),
-            );
-
-        if (expiredMessages.length > 0) {
-            const firstExpiredMsgTime = new Date(
-                expiredMessages[0]!.created_at,
-            );
-            firstCleanoutTime = new Date(
-                firstExpiredMsgTime.getTime() +
-                    TERMINATION_WARNING_DAYS_TO_CLEANOUT * 24 * 60 * 60 * 1000,
-            );
-        }
-    }
 
     useEffect(() => {
         if (modalOpen && inputRef.current && textareaRef.current) {
@@ -550,7 +519,7 @@ const LabelMessage = ({
                         new Date(),
                         new Date(message.created_at),
                         t,
-                        "generic",
+                        "relative_generic",
                     )}
                 </span>
                 <span>{t(`messages.template.${template}`)}</span>

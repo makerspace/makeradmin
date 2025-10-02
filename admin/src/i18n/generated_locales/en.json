@@ -1,4 +1,12 @@
 {
+    "box_terminator": {
+        "can_be_terminated_in": "Can terminate {{relative_time}}",
+        "can_terminate": "Can terminate",
+        "enter_label_id": "Enter label ID",
+        "expires": "Expires {{relative_time}}",
+        "no_matching_labels": "No matching labels",
+        "view_label": "View"
+    },
     "brand": {
         "billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",
         "email": "info@makerspace.se",
@@ -15,11 +23,11 @@
             "date_past": "{{date}}",
             "days_ago": "{{count}} days ago",
             "hours_ago": "{{count}} hours ago",
-            "in_days": "In {{count}} days",
-            "in_hours": "In {{count}} hours",
-            "in_minutes": "In {{count}} minutes",
+            "in_days": "in {{count}} days",
+            "in_hours": "in {{count}} hours",
+            "in_minutes": "in {{count}} minutes",
             "minutes_ago": "{{count}} minutes ago",
-            "now": "Just now"
+            "now": "just now"
         }
     }
 }

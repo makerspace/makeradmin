@@ -1,10 +1,15 @@
 import {
     labelExpiryDate,
+    labelFirstValidTerminationDate,
     labelIsExpired,
+    LabelMaxRelativeDays,
     membership_t,
-    UploadedLabel,
+    Message,
+    UploadedLabel
 } from "frontend_common";
 import { get, post } from "gateway";
+import { Translator, useTranslation } from "i18n/hooks";
+import i18next from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ActiveLogo } from "./ActiveLogo";
 import { ExpiredLogo } from "./ExpiredLogo";
@@ -17,19 +22,100 @@ export interface LabelActionResponse {
 
 const labelUrlRegex = /\/L\/([0-9_-]+)$/;
 
+export const dateToRelative = (
+    now: Date,
+    date: Date,
+    t: Translator<"time">,
+    mode: "relative_generic",
+) => {
+    const diffMs = date.getTime() - now.getTime();
+    const diffSec = Math.round(diffMs / 1000);
+    const diffMin = Math.round(diffSec / 60);
+    const diffHour = Math.round(diffMin / 60);
+    const diffDay = Math.round(diffHour / 24);
+
+    // Show relative if within ±LabelMaxRelativeDays days
+    if (Math.abs(diffDay) < LabelMaxRelativeDays) {
+        if (diffDay === 0) {
+            if (Math.abs(diffHour) < 24) {
+                if (diffHour === 0) {
+                    if (Math.abs(diffMin) < 60) {
+                        if (diffMin === 0) {
+                            return t(`${mode}.now`);
+                        }
+                        return t(
+                            diffMin > 0
+                                ? `${mode}.in_minutes`
+                                : `${mode}.minutes_ago`,
+                            { count: Math.abs(diffMin) },
+                        );
+                    }
+                    return t(
+                        diffHour > 0
+                            ? `${mode}.in_hours`
+                            : `${mode}.hours_ago`,
+                        { count: Math.abs(diffHour) },
+                    );
+                }
+                return t(
+                    diffHour > 0
+                        ? `${mode}.in_hours`
+                        : `${mode}.hours_ago`,
+                    { count: Math.abs(diffHour) },
+                );
+            }
+            return t(
+                diffDay > 0
+                    ? `${mode}.in_days`
+                    : `${mode}.days_ago`,
+                { count: Math.abs(diffDay) },
+            );
+        }
+        return t(
+            diffDay > 0
+                ? `${mode}.in_days`
+                : `${mode}.days_ago`,
+            { count: Math.abs(diffDay) },
+        );
+    }
+
+    // Otherwise, show absolute
+    const fourMonthsMs = 4 * 30 * 24 * 60 * 60 * 1000;
+    let options: Intl.DateTimeFormatOptions = {
+        month: "short",
+        day: "numeric",
+        hour: undefined,
+        minute: undefined,
+    };
+    if (Math.abs(date.getTime() - now.getTime()) > fourMonthsMs) {
+        // Several months difference, include year
+        options.year = "numeric";
+    }
+    const date_str = date.toLocaleString(i18next.language, options);
+    return date.getTime() < now.getTime()
+        ? t(`${mode}.date_past`, { date: date_str })
+        : t(`${mode}.date_future`, { date: date_str });
+};
+
+
 const ScanResultPopover = ({
     labelAction,
     membership,
     state,
+    messages,
 }: {
-    labelAction: LabelActionResponse;
-    membership: membership_t;
-    state: "active" | "fading-out";
+    labelAction: LabelActionResponse,
+    membership: membership_t,
+    state: "active" | "fading-out",
+    messages: Message[],
 }) => {
     const label = labelAction.label.label;
     const now = new Date();
     const expiresAt = labelExpiryDate(label, membership);
     const isExpired = labelIsExpired(now, label, membership);
+    const terminationDate = labelFirstValidTerminationDate(expiresAt, messages);
+    const { t: t_time } = useTranslation("time");
+    const { t } = useTranslation("box_terminator");
 
     return (
         <div
@@ -41,45 +127,21 @@ const ScanResultPopover = ({
         >
             <div>
                 <div>{isExpired ? <ExpiredLogo /> : <ActiveLogo />}</div>
-                {expiresAt && (
+                { terminationDate != null && (
                     <div>
-                        Expires&nbsp;
-                        {(() => {
-                            const expiresDate = new Date(expiresAt);
-                            const now = new Date();
-                            const diffMs =
-                                expiresDate.getTime() - now.getTime();
-                            if (diffMs < 0) return "in the past";
-                            const diffDays = Math.floor(
-                                diffMs / (1000 * 60 * 60 * 24),
-                            );
-                            if (diffDays > 0)
-                                return `in ${diffDays} day${
-                                    diffDays > 1 ? "s" : ""
-                                }`;
-                            const diffHours = Math.floor(
-                                diffMs / (1000 * 60 * 60),
-                            );
-                            if (diffHours > 0)
-                                return `in ${diffHours} hour${
-                                    diffHours > 1 ? "s" : ""
-                                }`;
-                            const diffMinutes = Math.floor(
-                                diffMs / (1000 * 60),
-                            );
-                            if (diffMinutes > 0)
-                                return `in ${diffMinutes} minute${
-                                    diffMinutes > 1 ? "s" : ""
-                                }`;
-                            return "soon";
-                        })()}
+                        {terminationDate <= now ? t("can_terminate") : t("can_be_terminated_in", { relative_time: dateToRelative(now, terminationDate, t_time, "relative_generic") })}
+                    </div>
+                )}
+                {expiresAt && terminationDate == null && (
+                    <div>
+                        {t("expires", { relative_time: dateToRelative(now, expiresAt, t_time, "relative_generic") })}
                     </div>
                 )}
                 <a
                     href={labelAction.label.public_url}
                     className="uk-button uk-button-default"
                 >
-                    View
+                    {t("view_label")}
                 </a>
             </div>
         </div>
@@ -114,6 +176,8 @@ const LabelIdSearchPopover = ({
         .finally(() => setLoading(false));
     }, [input]);
 
+    const { t } = useTranslation("box_terminator");
+
     return (
         <div className="label-id-search-popover">
             {loading && results.length == 0 && <div>Searching…</div>}
@@ -122,10 +186,7 @@ const LabelIdSearchPopover = ({
                     <li key={label.label.id}>
                         <button
                             className="label-search-result"
-                            onClick={() => {
-                                console.log("Selected label", label.label.id);
-                                onSelect(label.label.id)
-                            }}
+                            onClick={() => onSelect(label.label.id)}
                         >
                             {label.label.id} – {label.label.type === "TemporaryStorageLabel" ? label.label.description : label.label.type}
                         </button>
@@ -133,7 +194,7 @@ const LabelIdSearchPopover = ({
                 ))}
             </ul>
             {results.length === 0 && input.length > 0 && !loading && (
-                <div>No matching labels</div>
+                <div>{t("no_matching_labels")}</div>
             )}
             <input
                 className="label-id-input"
@@ -141,7 +202,7 @@ const LabelIdSearchPopover = ({
                 pattern="[0-9]*"
                 inputMode="numeric"
                 autoFocus
-                placeholder="Enter label ID"
+                placeholder={t("enter_label_id")}
                 value={input}
                 onChange={(e) => setInput(e.target.value.replace(/\D/g, ""))}
                 // Close after a short time, to allow other click events to register
@@ -151,28 +212,34 @@ const LabelIdSearchPopover = ({
     );
 };
 
+type ScanItem = {
+    label: LabelActionResponse;
+    membership: membership_t;
+    messages: Message[];
+    state: "active" | "fading-out";
+    timer: NodeJS.Timeout;
+}
+
+type ScanResult = {
+    label: LabelActionResponse;
+    membership: membership_t;
+    messages: Message[];
+}
+
 const BoxTerminator = () => {
     // Ensure only a single request is in flight at any one time
     const isScanning = useRef(false);
     const [pendingScan, setPendingScan] = useState<string | null>(null);
-    const [lastScanResult, setLastScanResult] = useState<
-        {
-            label: LabelActionResponse;
-            membership: membership_t;
-            state: "active" | "fading-out";
-            timer: NodeJS.Timeout;
-        }[]
-    >([]);
-    const nullTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [lastScanResult, setLastScanResult] = useState<ScanItem[]>([]);
     const scanCache = useRef(
         new Map<
             string,
-            { label: LabelActionResponse; membership: membership_t } | null
+            ScanResult | null
         >(),
     );
     const [showLabelIdSearch, setShowLabelIdSearch] = useState(false);
 
-    const processScan = async (scannedString: string) => {
+    const processScan = async (scannedString: string): Promise<ScanResult | null> => {
         // Check cache first
         if (scanCache.current.has(scannedString)) {
             const cachedLabel = scanCache.current.get(scannedString) ?? null;
@@ -192,9 +259,10 @@ const BoxTerminator = () => {
         console.log(matchedId);
         let label: LabelActionResponse | null = null;
         let membership: membership_t | null = null;
+        let messages: Message[] = [];
         try {
             if (matchedId !== null) {
-                const [observeRes, membershipRes] = await Promise.all([
+                const [observeRes, membershipRes, messageRes] = await Promise.all([
                     post({
                         url: `/multiaccess/memberbooth/label/${matchedId}/observe`,
                         allowedErrorCodes: [404],
@@ -203,9 +271,14 @@ const BoxTerminator = () => {
                         url: `/multiaccess/memberbooth/label/${matchedId}/membership`,
                         allowedErrorCodes: [404],
                     }),
+                    await get({
+                        url: `/multiaccess/memberbooth/label/${matchedId}/message`,
+                        allowedErrorCodes: [404],
+                    }),
                 ]);
                 label = observeRes.data as LabelActionResponse | null;
                 membership = membershipRes.data as membership_t;
+                messages = (messageRes.data ?? []) as Message[];
             } else {
                 // Try old format
                 const data = JSON.parse(scannedString);
@@ -230,7 +303,7 @@ const BoxTerminator = () => {
                         console.log(createdLabel);
 
                         // Observe the new label
-                        const [observeRes2, membershipRes] = await Promise.all([
+                        const [observeRes2, membershipRes, messageRes] = await Promise.all([
                             post({
                                 url: `/multiaccess/memberbooth/label/${createdLabel.label.id}/observe`,
                                 allowedErrorCodes: [404],
@@ -238,15 +311,25 @@ const BoxTerminator = () => {
                             await get({
                                 url: `/multiaccess/memberbooth/label/${createdLabel.label.id}/membership`,
                             }),
+                            await get({
+                                url: `/multiaccess/memberbooth/label/${createdLabel.label.id}/message`,
+                            }),
                         ]);
                         label = observeRes2.data as LabelActionResponse | null;
                         membership = membershipRes.data as membership_t;
+                        messages = (messageRes.data ?? []) as Message[];
                     } else {
-                        const membershipRes = await get({
-                            url: `/multiaccess/memberbooth/label/${data.unix_timestamp}/membership`,
-                        });
+                        const [membershipRes, messageRes] = await Promise.all([
+                            get({
+                                url: `/multiaccess/memberbooth/label/${data.unix_timestamp}/membership`,
+                            }),
+                            get({
+                                url: `/multiaccess/memberbooth/label/${data.unix_timestamp}/message`,
+                            }),
+                        ]);
                         label = observeRes.data as LabelActionResponse;
                         membership = membershipRes.data as membership_t;
+                        messages = (messageRes.data ?? []) as Message[];
                     }
                 }
             }
@@ -266,17 +349,12 @@ const BoxTerminator = () => {
         }
 
         // Store in cache
-        const cache_item = { label, membership };
+        const cache_item = { label, membership, messages };
         scanCache.current.set(scannedString, cache_item);
         return cache_item;
     };
 
-    const fadeoutLabelItem = (item: {
-        label: LabelActionResponse;
-        membership: membership_t;
-        state: "active" | "fading-out";
-        timer: NodeJS.Timeout;
-    }) => {
+    const fadeoutLabelItem = (item: ScanItem) => {
         if (item.state === "fading-out") return;
         item.state = "fading-out";
         window.clearTimeout(item.timer);
@@ -343,7 +421,7 @@ const BoxTerminator = () => {
         async (labelId: number) => {
             setShowLabelIdSearch(false);
             // Simulate a scan by fetching and displaying the label
-            const [observeRes, membershipRes] = await Promise.all([
+            const [observeRes, membershipRes, messageRes] = await Promise.all([
                 post({
                     url: `/multiaccess/memberbooth/label/${labelId}/observe`,
                     allowedErrorCodes: [404],
@@ -352,12 +430,17 @@ const BoxTerminator = () => {
                     url: `/multiaccess/memberbooth/label/${labelId}/membership`,
                     allowedErrorCodes: [404],
                 }),
+                get({
+                    url: `/multiaccess/memberbooth/label/${labelId}/message`,
+                    allowedErrorCodes: [404],
+                }),
             ]);
-            if (observeRes.data && membershipRes.data) {
+            if (observeRes.data && membershipRes.data && messageRes.data) {
                 setLastScanResult([
                     {
                         label: observeRes.data,
                         membership: membershipRes.data,
+                        messages: messageRes.data ?? [],
                         state: "active",
                         timer: setTimeout(
                             () => fadeoutLabel(observeRes.data.id),
@@ -400,6 +483,7 @@ const BoxTerminator = () => {
                         key={item.label.id}
                         labelAction={item.label}
                         membership={item.membership}
+                        messages={item.messages}
                         state={item.state}
                     />
                 );

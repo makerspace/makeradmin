@@ -1,0 +1,13 @@
+{
+    relative_generic: {
+        in_minutes: "om {{count}} minuter",
+        minutes_ago: "för {{count}} minuter sedan",
+        in_hours: "om {{count}} timmar",
+        hours_ago: "för {{count}} timmar sedan",
+        in_days: "om {{count}} dagar",
+        days_ago: "för {{count}} dagar sedan",
+        now: "just nu",
+        date_future: "{{date}}",
+        date_past: "{{date}}",
+    },   
+}

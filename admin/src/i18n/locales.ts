@@ -13,7 +13,10 @@ import sv from "./generated_locales/sv.json";
         } as const;
 
         export type LOCALE_SCHEMA = {
-        	"brand": 
+        	"box_terminator": 
+((key: "can_terminate" | "enter_label_id" | "no_matching_labels" | "view_label") => string) 
+		& ((key: "can_be_terminated_in" | "expires", args: { "relative_time": string | number}) => string)
+	"brand": 
 ((key: "billing_address" | "email" | "homepage_url" | "makerspace_name" | "organization_number") => string)
 	"common": 
 ((key: "todo") => string)
@@ -24,7 +27,9 @@ import sv from "./generated_locales/sv.json";
 };
 
 export type LOCALE_SCHEMA_GLOBAL = (
-((key: "brand:billing_address" | "brand:email" | "brand:homepage_url" | "brand:makerspace_name" | "brand:organization_number") => string) 
+((key: "box_terminator:can_terminate" | "box_terminator:enter_label_id" | "box_terminator:no_matching_labels" | "box_terminator:view_label") => string) 
+		& ((key: "box_terminator:can_be_terminated_in" | "box_terminator:expires", args: { "relative_time": string | number}) => string) 
+		& ((key: "brand:billing_address" | "brand:email" | "brand:homepage_url" | "brand:makerspace_name" | "brand:organization_number") => string) 
 		& ((key: "common:todo") => string) 
 		& ((key: "time:relative_generic.now") => string) 
 		& ((key: "time:relative_generic.days_ago" | "time:relative_generic.hours_ago" | "time:relative_generic.in_days" | "time:relative_generic.in_hours" | "time:relative_generic.in_minutes" | "time:relative_generic.minutes_ago", args: { "count": string | number}) => string) 

@@ -1,4 +1,10 @@
 LOCALE = {
+    "box_terminator:can_be_terminated_in": "Kan termineras {relative_time}",
+    "box_terminator:can_terminate": "Kan termineras",
+    "box_terminator:enter_label_id": "Skriv in etikett-ID",
+    "box_terminator:expires": "Utgår {relative_time}",
+    "box_terminator:no_matching_labels": "Inga matchande etiketter",
+    "box_terminator:view_label": "Visa",
     "brand:billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",
     "brand:email": "info@makerspace.se",
     "brand:homepage_url": "https://makerspace.se",
@@ -7,11 +13,11 @@ LOCALE = {
     "common:todo": "should really add some translation for the admin interface too",
     "time:relative_generic.date_future": "{date}",
     "time:relative_generic.date_past": "{date}",
-    "time:relative_generic.days_ago": "För {count} dagar sedan",
-    "time:relative_generic.hours_ago": "För {count} timmar sedan",
-    "time:relative_generic.in_days": "Om {count} dagar",
-    "time:relative_generic.in_hours": "Om {count} timmar",
-    "time:relative_generic.in_minutes": "Om {count} minuter",
-    "time:relative_generic.minutes_ago": "För {count} minuter sedan",
-    "time:relative_generic.now": "Just nu"
+    "time:relative_generic.days_ago": "för {count} dagar sedan",
+    "time:relative_generic.hours_ago": "för {count} timmar sedan",
+    "time:relative_generic.in_days": "om {count} dagar",
+    "time:relative_generic.in_hours": "om {count} timmar",
+    "time:relative_generic.in_minutes": "om {count} minuter",
+    "time:relative_generic.minutes_ago": "för {count} minuter sedan",
+    "time:relative_generic.now": "just nu"
 }

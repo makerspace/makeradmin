@@ -15,6 +15,16 @@ RESOURCES = {
 
 logger = logging.getLogger("i18n")
 
+class box_terminatorTranslator(Protocol):
+    @overload
+    def __call__(self, key: Literal["can_terminate","enter_label_id","no_matching_labels","view_label","box_terminator:can_terminate","box_terminator:enter_label_id","box_terminator:no_matching_labels","box_terminator:view_label"]) -> str: ...
+
+    @overload
+    def __call__(self, key: Literal["can_be_terminated_in","expires","box_terminator:can_be_terminated_in","box_terminator:expires"], *, relative_time: str | int | float) -> str: ...
+
+def __call__(self, key: str, **kwargs: Any) -> str: ...
+
+
 class brandTranslator(Protocol):
     def __call__(self, key: Literal["billing_address","email","homepage_url","makerspace_name","organization_number","brand:billing_address","brand:email","brand:homepage_url","brand:makerspace_name","brand:organization_number"]) -> str: ...
 
@@ -32,6 +42,14 @@ class timeTranslator(Protocol):
     def __call__(self, key: Literal["relative_generic.date_future","relative_generic.date_past","time:relative_generic.date_future","time:relative_generic.date_past"], *, date: str | int | float) -> str: ...
 
 def __call__(self, key: str, **kwargs: Any) -> str: ...
+
+@overload
+def translate(key: Literal["can_terminate","enter_label_id","no_matching_labels","view_label","box_terminator:can_terminate","box_terminator:enter_label_id","box_terminator:no_matching_labels","box_terminator:view_label"]) -> str: ...
+
+
+@overload
+def translate(key: Literal["can_be_terminated_in","expires","box_terminator:can_be_terminated_in","box_terminator:expires"], *, relative_time: str | int | float) -> str: ...
+
 
 @overload
 def translate(key: Literal["billing_address","email","homepage_url","makerspace_name","organization_number","brand:billing_address","brand:email","brand:homepage_url","brand:makerspace_name","brand:organization_number"]) -> str: ...
@@ -70,6 +88,10 @@ def translate(key: str, *, count: int | None = None, language: Literal["en", "sv
     if kwargs:
         return v.format(count=count, **kwargs)
     return v
+
+@overload
+def translator(prefix: Literal['box_terminator']) -> box_terminatorTranslator: ...
+
 
 @overload
 def translator(prefix: Literal['brand']) -> brandTranslator: ...

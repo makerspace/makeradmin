@@ -1,0 +1,8 @@
+{
+    "view_label": "View",
+    "expires": "Expires {{relative_time}}",
+    "can_be_terminated_in": "Can terminate {{relative_time}}",
+    "can_terminate": "Can terminate",
+    "enter_label_id": "Enter label ID",
+    "no_matching_labels": "No matching labels",
+}

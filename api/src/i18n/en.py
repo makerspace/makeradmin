@@ -1,4 +1,10 @@
 LOCALE = {
+    "box_terminator:can_be_terminated_in": "Can terminate {relative_time}",
+    "box_terminator:can_terminate": "Can terminate",
+    "box_terminator:enter_label_id": "Enter label ID",
+    "box_terminator:expires": "Expires {relative_time}",
+    "box_terminator:no_matching_labels": "No matching labels",
+    "box_terminator:view_label": "View",
     "brand:billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",
     "brand:email": "info@makerspace.se",
     "brand:homepage_url": "https://makerspace.se",
@@ -9,9 +15,9 @@ LOCALE = {
     "time:relative_generic.date_past": "{date}",
     "time:relative_generic.days_ago": "{count} days ago",
     "time:relative_generic.hours_ago": "{count} hours ago",
-    "time:relative_generic.in_days": "In {count} days",
-    "time:relative_generic.in_hours": "In {count} hours",
-    "time:relative_generic.in_minutes": "In {count} minutes",
+    "time:relative_generic.in_days": "in {count} days",
+    "time:relative_generic.in_hours": "in {count} hours",
+    "time:relative_generic.in_minutes": "in {count} minutes",
     "time:relative_generic.minutes_ago": "{count} minutes ago",
-    "time:relative_generic.now": "Just now"
+    "time:relative_generic.now": "just now"
 }

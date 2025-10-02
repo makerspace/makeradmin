@@ -1,4 +1,5 @@
 import { membership_t } from "./membership";
+import { Message } from "./message";
 
 export const MEMBERBOX_DAYS_ALLOWED_TO_KEEP_AFTER_LABACCESS_ENDS = 45;
 export const TERMINATION_WARNING_DAYS_TO_CLEANOUT = 14;
@@ -127,4 +128,38 @@ export const labelExpiredRecently = (
         return diff < recentDays * 24 * 60 * 60 * 1000 && diff > 0;
     }
     return false;
+};
+
+
+export const labelFirstValidTerminationDate = (expiresAt: Date | null, labelMessages: Message[]): Date | null => {
+    let firstCleanoutTime: Date | null = null;
+
+    if (expiresAt) {
+        // For other labels, find first "expired" message sent after label expired
+        const expiredMessages = labelMessages
+            .filter(
+                (m) =>
+                    (m.template === "memberbooth_box_expired" ||
+                        m.template === "memberbooth_label_expired") &&
+                    // Use created_at instead of sent_at, to allow this to work in dev mode where sending always fails
+                    new Date(m.created_at) > expiresAt,
+            )
+            .sort(
+                (a, b) =>
+                    new Date(a.created_at).getTime() -
+                    new Date(b.created_at).getTime(),
+            );
+
+        if (expiredMessages.length > 0) {
+            const firstExpiredMsgTime = new Date(
+                expiredMessages[0]!.created_at,
+            );
+            firstCleanoutTime = new Date(
+                firstExpiredMsgTime.getTime() +
+                    TERMINATION_WARNING_DAYS_TO_CLEANOUT * 24 * 60 * 60 * 1000,
+            );
+        }
+    }
+
+    return firstCleanoutTime;
 };

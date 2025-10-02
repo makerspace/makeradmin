@@ -1,4 +1,5 @@
 import { LabelMaxRelativeDays } from "frontend_common";
+import i18next from "i18next";
 import { useState } from "preact/hooks";
 import { Translator, useTranslation } from "./i18n";
 
@@ -45,7 +46,7 @@ export const dateToRelative = (
     now: Date,
     date: Date,
     t: Translator<"labels">,
-    mode: "expiry" | "drying" | "generic",
+    mode: "relative_expiry" | "relative_drying" | "relative_generic",
 ) => {
     const diffMs = date.getTime() - now.getTime();
     const diffSec = Math.round(diffMs / 1000);
@@ -60,40 +61,40 @@ export const dateToRelative = (
                 if (diffHour === 0) {
                     if (Math.abs(diffMin) < 60) {
                         if (diffMin === 0) {
-                            return t(`relative_${mode}.now`);
+                            return t(`${mode}.now`);
                         }
                         return t(
                             diffMin > 0
-                                ? `relative_${mode}.in_minutes`
-                                : `relative_${mode}.minutes_ago`,
+                                ? `${mode}.in_minutes`
+                                : `${mode}.minutes_ago`,
                             { count: Math.abs(diffMin) },
                         );
                     }
                     return t(
                         diffHour > 0
-                            ? `relative_${mode}.in_hours`
-                            : `relative_${mode}.hours_ago`,
+                            ? `${mode}.in_hours`
+                            : `${mode}.hours_ago`,
                         { count: Math.abs(diffHour) },
                     );
                 }
                 return t(
                     diffHour > 0
-                        ? `relative_${mode}.in_hours`
-                        : `relative_${mode}.hours_ago`,
+                        ? `${mode}.in_hours`
+                        : `${mode}.hours_ago`,
                     { count: Math.abs(diffHour) },
                 );
             }
             return t(
                 diffDay > 0
-                    ? `relative_${mode}.in_days`
-                    : `relative_${mode}.days_ago`,
+                    ? `${mode}.in_days`
+                    : `${mode}.days_ago`,
                 { count: Math.abs(diffDay) },
             );
         }
         return t(
             diffDay > 0
-                ? `relative_${mode}.in_days`
-                : `relative_${mode}.days_ago`,
+                ? `${mode}.in_days`
+                : `${mode}.days_ago`,
             { count: Math.abs(diffDay) },
         );
     }
@@ -110,8 +111,8 @@ export const dateToRelative = (
         // Several months difference, include year
         options.year = "numeric";
     }
-    const date_str = date.toLocaleString(undefined, options);
+    const date_str = date.toLocaleString(i18next.language, options);
     return date.getTime() < now.getTime()
-        ? t(`relative_${mode}.date_past`, { date: date_str })
-        : t(`relative_${mode}.date_future`, { date: date_str });
+        ? t(`${mode}.date_past`, { date: date_str })
+        : t(`${mode}.date_future`, { date: date_str });
 };

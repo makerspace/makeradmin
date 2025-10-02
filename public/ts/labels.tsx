@@ -173,8 +173,8 @@ const LabelsList = ({
                                             new Date(expiresAt),
                                             t,
                                             label.type === "DryingLabel"
-                                                ? "drying"
-                                                : "expiry",
+                                                ? "relative_drying"
+                                                : "relative_expiry",
                                         )}
                                     </span>
                                 </>

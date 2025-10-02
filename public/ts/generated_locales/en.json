@@ -476,11 +476,11 @@
             "date_past": "{{date}}",
             "days_ago": "{{count}} days ago",
             "hours_ago": "{{count}} hours ago",
-            "in_days": "In {{count}} days",
-            "in_hours": "In {{count}} hours",
-            "in_minutes": "In {{count}} minutes",
+            "in_days": "in {{count}} days",
+            "in_hours": "in {{count}} hours",
+            "in_minutes": "in {{count}} minutes",
             "minutes_ago": "{{count}} minutes ago",
-            "now": "Just now"
+            "now": "just now"
         }
     }
 }
