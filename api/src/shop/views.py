@@ -3,7 +3,7 @@ from logging import getLogger
 from typing import Any
 
 from basic_types.enums import PriceLevel
-from flask import Response, g, make_response, request, send_file
+from flask import Response, g, jsonify, make_response, request, send_file
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
 from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT
 from service.db import db_session
@@ -268,12 +268,22 @@ def ship_labaccess_orders_endpoint(member_id: int) -> None:
 
 @service.route("/product_data", method=GET, permission=PUBLIC)
 def shop_data():
-    return all_product_data()
+    response = jsonify({ "status": "ok", "data": all_product_data() })
+
+    # Allow caching of this response for a short amount of time
+    response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24}"
+    response.headers["Vary"] = "Accept-Encoding"
+    return response
 
 
 @service.route("/product_data/<int:product_id>", method=GET, permission=PUBLIC)
 def product_data(product_id):
-    return get_product_data(product_id)
+    response = jsonify({ "status": "ok", "data": get_product_data(product_id) })
+
+    # Allow caching of this response for a short amount of time
+    response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24}"
+    response.headers["Vary"] = "Accept-Encoding"
+    return response
 
 
 @service.raw_route("/image/<int:image_id>")
@@ -288,7 +298,8 @@ def public_image(image_id: int) -> Response:
     response = make_response(image.data)
     response.headers.set("Content-Type", image.type)
     response.headers.set("Max-Age", "36000")
-    response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24 * 7}"
+    # Cache images for some time. We never update images, so setting immutable is fine.
+    response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24 * 7}, immutable"
     response.headers["Vary"] = "Accept-Encoding"
     return response
 
