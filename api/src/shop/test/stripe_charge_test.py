@@ -49,6 +49,7 @@ class StripeChargeTest(FlaskTestBase):
         filtered_charges: Dict[int, stripe.Charge] = {}
         stripe_customers_id: List[str] = []
         for member in self.seen_members:
+            assert member.stripe_customer_id is not None
             stripe_customers_id.append(member.stripe_customer_id)
         for charge in stripe_charges:
             if charge.customer in stripe_customers_id:
@@ -97,8 +98,20 @@ class StripeChargeTest(FlaskTestBase):
             assert charge.paid
             balance_transaction = charge.balance_transaction
             assert isinstance(balance_transaction, stripe.BalanceTransaction)
-            transaction_fee = convert_from_stripe_amount(balance_transaction.fee)
-            estimated_transaction_fee = test_transaction.amount * Decimal("0.025") + Decimal("1.8")
+
+            # The test card is annoyingly in USD, so we have to account for currency conversion costs
+            transaction_fee = convert_from_stripe_amount(
+                int(balance_transaction.fee / balance_transaction.exchange_rate)
+                if balance_transaction.exchange_rate
+                else balance_transaction.fee
+            )
+
+            percentage_cost = Decimal("0.015")
+            currency_conversion_cost = Decimal("0.02")
+            fixed_cost = Decimal("1.8")
+            estimated_transaction_fee = (
+                test_transaction.amount * (percentage_cost + currency_conversion_cost) + fixed_cost
+            )
             assert math.isclose(
                 transaction_fee, estimated_transaction_fee, abs_tol=test_transaction.amount * Decimal("0.025")
             )

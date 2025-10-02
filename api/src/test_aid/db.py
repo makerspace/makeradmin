@@ -144,6 +144,7 @@ class DbFactory:
             body=self.fake.bs(),
             recipient=member.email if member else self.fake.email(),
             status=Message.QUEUED,
+            recipient_type="email",
         )
         obj.update(**kwargs)
         self.message = Message(**obj)

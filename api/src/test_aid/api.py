@@ -10,7 +10,7 @@ class ApiResponse:
     def __init__(self, response):
         self.response = response
 
-    def expect(self, code=None, **kwargs):
+    def expect(self, code: int | None = None, **kwargs: Any) -> "ApiResponse":
         if code is not None:
             assert code == self.response.status_code, (
                 f"bad status, expected code '{code}', was '{self.response.status_code}'"
@@ -27,14 +27,14 @@ class ApiResponse:
 
         return self
 
-    def is_ok(self):
+    def is_ok(self) -> "ApiResponse":
         assert self.response.status_code in (200, 201), (
             f"bad status, not ok', was '{self.response.status_code}'"
             f", url: {self.response.url}, content: {self.response.text}"
         )
         return self
 
-    def is_not_ok(self):
+    def is_not_ok(self) -> "ApiResponse":
         assert self.response.status_code not in (200, 201), (
             f"bad status, was ok, status: '{self.response.status_code}'"
             f", url: {self.response.url}, content: {self.response.text}"

@@ -23,6 +23,7 @@ RUN pip install -U pip
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+COPY --from=config . /config
 COPY test_run.sh .
 
 COPY src ./src
