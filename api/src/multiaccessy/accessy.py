@@ -605,7 +605,8 @@ class AccessySession:
 
     def _get_json_paginated(self, url: str, msg: str | None = None) -> list[Any]:
         """Convenience method for getting all data for a JSON endpoint that is paginated"""
-        page_size = 10000
+        # Accessy started to enforce a page size of max 250 some time late 2025
+        page_size = 250
         page_number = 0
         items = []
 
