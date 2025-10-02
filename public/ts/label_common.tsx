@@ -71,32 +71,22 @@ export const dateToRelative = (
                         );
                     }
                     return t(
-                        diffHour > 0
-                            ? `${mode}.in_hours`
-                            : `${mode}.hours_ago`,
+                        diffHour > 0 ? `${mode}.in_hours` : `${mode}.hours_ago`,
                         { count: Math.abs(diffHour) },
                     );
                 }
                 return t(
-                    diffHour > 0
-                        ? `${mode}.in_hours`
-                        : `${mode}.hours_ago`,
+                    diffHour > 0 ? `${mode}.in_hours` : `${mode}.hours_ago`,
                     { count: Math.abs(diffHour) },
                 );
             }
-            return t(
-                diffDay > 0
-                    ? `${mode}.in_days`
-                    : `${mode}.days_ago`,
-                { count: Math.abs(diffDay) },
-            );
+            return t(diffDay > 0 ? `${mode}.in_days` : `${mode}.days_ago`, {
+                count: Math.abs(diffDay),
+            });
         }
-        return t(
-            diffDay > 0
-                ? `${mode}.in_days`
-                : `${mode}.days_ago`,
-            { count: Math.abs(diffDay) },
-        );
+        return t(diffDay > 0 ? `${mode}.in_days` : `${mode}.days_ago`, {
+            count: Math.abs(diffDay),
+        });
     }
 
     // Otherwise, show absolute

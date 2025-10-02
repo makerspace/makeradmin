@@ -651,15 +651,13 @@ def get_login_link(member: Member, browser: str, path: str) -> str:
 if __name__ == "__main__":
     exit = Event()
 
-
     def handle_signal(signum: int, frame: Any) -> None:
         logger.error(f"Got signal {signum}, exiting...")
         exit.set()
 
-
     for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
         signal.signal(sig, handle_signal)
-        
+
     with log_exception(status=1), stoppable():
         parser = ArgumentParser(
             description="Dispatch emails in db send queue.", formatter_class=ArgumentDefaultsHelpFormatter

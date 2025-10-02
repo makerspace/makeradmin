@@ -9,7 +9,7 @@ import {
     membership_t,
     Permission,
     TemporaryStorageLabel,
-    UploadedLabel
+    UploadedLabel,
 } from "frontend_common";
 import { Message, MessageTemplate } from "frontend_common/src/message";
 import { render } from "preact";
@@ -306,8 +306,10 @@ const LabelActions = ({
     // Prevent cleaning out an item, unless an expiration warning has been sent at least N days ago
     const now = new Date();
     const expiresAt = labelExpiryDate(label.label, membership);
-    let firstCleanoutTime: Date | null = labelFirstValidTerminationDate(expiresAt, messages);
-
+    let firstCleanoutTime: Date | null = labelFirstValidTerminationDate(
+        expiresAt,
+        messages,
+    );
 
     useEffect(() => {
         if (modalOpen && inputRef.current && textareaRef.current) {

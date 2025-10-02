@@ -9,5 +9,5 @@
         now: "just nu",
         date_future: "{{date}}",
         date_past: "{{date}}",
-    },   
+    },
 }

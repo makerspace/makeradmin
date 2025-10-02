@@ -28,7 +28,10 @@ const QrCodeScanner: FC<QrCodeScannerProps> = ({ onSuccess }) => {
         ) {
             let minEdgePercentage = 0.85;
             let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-            let qrboxSize = Math.max(50, Math.floor(minEdgeSize * minEdgePercentage));
+            let qrboxSize = Math.max(
+                50,
+                Math.floor(minEdgeSize * minEdgePercentage),
+            );
             return {
                 width: qrboxSize,
                 height: qrboxSize,

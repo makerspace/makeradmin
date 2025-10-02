@@ -268,7 +268,7 @@ def ship_labaccess_orders_endpoint(member_id: int) -> None:
 
 @service.route("/product_data", method=GET, permission=PUBLIC)
 def shop_data():
-    response = jsonify({ "status": "ok", "data": all_product_data() })
+    response = jsonify({"status": "ok", "data": all_product_data()})
 
     # Allow caching of this response for a short amount of time
     response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24}"
@@ -278,7 +278,7 @@ def shop_data():
 
 @service.route("/product_data/<int:product_id>", method=GET, permission=PUBLIC)
 def product_data(product_id):
-    response = jsonify({ "status": "ok", "data": get_product_data(product_id) })
+    response = jsonify({"status": "ok", "data": get_product_data(product_id)})
 
     # Allow caching of this response for a short amount of time
     response.headers["Cache-Control"] = f"public, max-age={60 * 60 * 24}"

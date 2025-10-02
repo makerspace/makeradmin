@@ -8,11 +8,12 @@
 /public/ts/locales.ts
 /public/static/js
 /admin/dist
+/admin/src/i18n
 /public/ts/generated_locales
 /api/src/i18n
 
 # Jinja2 templates do not work well for some reason
-/api/src/templates/
+/config/messages
 
 # Various sql files in the root that one might have
 /*.sql

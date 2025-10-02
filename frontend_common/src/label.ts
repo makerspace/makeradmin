@@ -130,8 +130,10 @@ export const labelExpiredRecently = (
     return false;
 };
 
-
-export const labelFirstValidTerminationDate = (expiresAt: Date | null, labelMessages: Message[]): Date | null => {
+export const labelFirstValidTerminationDate = (
+    expiresAt: Date | null,
+    labelMessages: Message[],
+): Date | null => {
     let firstCleanoutTime: Date | null = null;
 
     if (expiresAt) {

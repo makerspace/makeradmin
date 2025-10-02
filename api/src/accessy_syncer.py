@@ -32,6 +32,7 @@ def deferred_sync() -> None:
         logger.info("Enqueuing deferred sync command")
         redis_connection.rpush(REDIS_COMMAND_QUEUE, COMMAND_SYNC.encode("utf-8"))
 
+
 def scheduled_ship() -> None:
     logger.info("shipping orders")
     try:
@@ -132,7 +133,6 @@ if __name__ == "__main__":
 
     def handle_signal(signum: int, frame: Any) -> None:
         exit.set()
-
 
     for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
         signal.signal(sig, handle_signal)
