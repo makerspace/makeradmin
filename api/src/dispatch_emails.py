@@ -42,15 +42,6 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
 
 logger = getLogger("email-dispatcher")
-exit = Event()
-
-
-def handle_signal(signum: int, frame: Any) -> None:
-    exit.set()
-
-
-for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
-    signal.signal(sig, handle_signal)
 
 LABACCESS_REMINDER_DAYS_BEFORE = 20
 LABACCESS_REMINDER_GRACE_PERIOD = 28
@@ -658,6 +649,17 @@ def get_login_link(member: Member, browser: str, path: str) -> str:
 
 
 if __name__ == "__main__":
+    exit = Event()
+
+
+    def handle_signal(signum: int, frame: Any) -> None:
+        logger.error(f"Got signal {signum}, exiting...")
+        exit.set()
+
+
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        signal.signal(sig, handle_signal)
+        
     with log_exception(status=1), stoppable():
         parser = ArgumentParser(
             description="Dispatch emails in db send queue.", formatter_class=ArgumentDefaultsHelpFormatter

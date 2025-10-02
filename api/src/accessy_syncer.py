@@ -23,7 +23,6 @@ COMMAND_SHIP = "ship"
 COMMAND_SYNC = "sync"
 
 REDIS_COMMAND_QUEUE = "accessy_commands"
-exit = Event()
 
 
 def deferred_sync() -> None:
@@ -32,15 +31,6 @@ def deferred_sync() -> None:
     if redis_connection.lpos(REDIS_COMMAND_QUEUE, COMMAND_SYNC.encode("utf-8")) is None:
         logger.info("Enqueuing deferred sync command")
         redis_connection.rpush(REDIS_COMMAND_QUEUE, COMMAND_SYNC.encode("utf-8"))
-
-
-def handle_signal(signum: int, frame: Any) -> None:
-    exit.set()
-
-
-for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
-    signal.signal(sig, handle_signal)
-
 
 def scheduled_ship() -> None:
     logger.info("shipping orders")
@@ -95,7 +85,7 @@ def run_queued_commands() -> None:
         logger.exception(f"error processing command queue: {e}")
 
 
-def main() -> None:
+def main(exit: Event) -> None:
     with log_exception(status=1), stoppable():
         parser = ArgumentParser(
             description="Sync accessy and ship labaccess orders.", formatter_class=ArgumentDefaultsHelpFormatter
@@ -138,4 +128,13 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    exit = Event()
+
+    def handle_signal(signum: int, frame: Any) -> None:
+        exit.set()
+
+
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        signal.signal(sig, handle_signal)
+
+    main(exit)
