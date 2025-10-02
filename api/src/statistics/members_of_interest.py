@@ -108,7 +108,7 @@ def members_of_interest(start: Optional[datetime], end: Optional[datetime]) -> M
             name="Laser",
             scores={
                 "category:Förbrukning laser": 1,
-                "product:Använding av Laserskärare": 2,
+                "product:Laser cutter usage": 2,
             },
         ),
         ActivityGroup(
@@ -116,7 +116,7 @@ def members_of_interest(start: Optional[datetime], end: Optional[datetime]) -> M
             scores={
                 "product:MDF%": 1,
                 "product:Plywood%": 1,
-                "product:Använding av Laserskärare": -5,
+                "product:Laser cutter usage": -5,
             },
         ),
         ActivityGroup(
