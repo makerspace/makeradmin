@@ -227,7 +227,7 @@ def handle_event(event: AccessyWebhookEvent) -> None:
         db_session.commit()
     elif isinstance(event, AccessyWebhookEventMembership_Created):
         # Expire the cache if an invitation was likely used.
-        # TODO: Not quite sure if this happens when an invitation is created or accepted, though.
+        # This seems to happen when a user accepts an invitation.
         redis_connection.delete(PENDING_INVITATIONS_CACHE_KEY)
     elif isinstance(event, AccessyWebhookEventOrganization_Invitation_Deleted):
         redis_connection.delete(PENDING_INVITATIONS_CACHE_KEY)  # Force refresh
@@ -250,7 +250,7 @@ def accessy_webhook() -> str:
     if accessy_session.is_valid_webhook_signature(signature):
         event = decode_event(event_type_str, request.json)
         if event is not None:
-            logger.info(f"Received accessy event {event_type_str}: {event.to_dict()}")
+            logger.info(f"Received accessy event {event_type_str}: {request.json}")
             handle_event(event)
         return "ok"
     else:

@@ -1,60 +1,45 @@
+from dataclasses import dataclass
 from datetime import datetime
+from decimal import Decimal
 from logging import getLogger
 from typing import Any
 
 from basic_types.enums import PriceLevel
+from dataclasses_json import DataClassJsonMixin
 from flask import Response, g, jsonify, make_response, request, send_file
-from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
-from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT
+from membership.models import Member
+from multiaccessy.invite import (AccessyInvitePreconditionFailed,
+                                 ensure_accessy_labaccess)
+from service.api_definition import (DELETE, GET, MEMBER_EDIT, POST, PUBLIC,
+                                    USER, WEBSHOP, WEBSHOP_EDIT)
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from service.error import BadRequest, PreconditionFailed
-from sqlalchemy.exc import NoResultFound
-
 from shop import service
-from shop.entities import (
-    category_entity,
-    gift_card_content_entity,
-    gift_card_entity,
-    product_accounting_entity,
-    product_action_entity,
-    product_entity,
-    product_image_entity,
-    transaction_account_entity,
-    transaction_action_entity,
-    transaction_content_entity,
-    transaction_cost_center_entity,
-    transaction_entity,
-)
-from shop.models import ProductImage, TransactionContent
-from shop.pay import (
-    CancelSubscriptionsRequest,
-    SetupPaymentMethodResponse,
-    StartSubscriptionsRequest,
-    cancel_subscriptions,
-    pay,
-    register,
-    setup_payment_method,
-    start_subscriptions,
-)
-from shop.shop_data import (
-    all_product_data,
-    get_membership_products,
-    get_product_data,
-    member_history,
-    pending_actions,
-    receipt,
-)
+from shop.entities import (category_entity, gift_card_content_entity,
+                           gift_card_entity, product_accounting_entity,
+                           product_action_entity, product_entity,
+                           product_image_entity, transaction_account_entity,
+                           transaction_action_entity,
+                           transaction_content_entity,
+                           transaction_cost_center_entity, transaction_entity)
+from shop.models import Product, ProductImage, TransactionContent
+from shop.pay import (CancelSubscriptionsRequest, SetupPaymentMethodResponse,
+                      StartSubscriptionsRequest, cancel_subscriptions, pay,
+                      register, setup_payment_method, start_subscriptions)
+from shop.shop_data import (all_product_data, get_membership_products,
+                            get_product_data, member_history, pending_actions,
+                            receipt)
 from shop.statistics import category_sales, product_sales
 from shop.stripe_discounts import get_discount_fraction_off
 from shop.stripe_event import stripe_callback
 from shop.stripe_payment_intent import PartialPayment
 from shop.stripe_setup import setup_stripe_products
-from shop.stripe_subscriptions import (
-    list_subscriptions,
-    open_stripe_customer_portal,
-)
-from shop.transactions import ship_labaccess_orders
+from shop.stripe_subscriptions import (list_subscriptions,
+                                       open_stripe_customer_portal)
+from shop.transactions import (TransactionContent, commit_transaction_to_db,
+                               payment_success, ship_labaccess_orders)
+from sqlalchemy.exc import NoResultFound
 
 logger = getLogger("makeradmin")
 
@@ -358,3 +343,73 @@ def category_sales_route(category_id: int) -> Any:
     end_str = request.args.get("end", default=None)
     end = datetime.fromisoformat(end_str) if end_str is not None else None
     return category_sales(category_id, start, end).to_dict()
+
+
+@dataclass
+class GiftProductRequest(DataClassJsonMixin):
+    product_id: int
+    count: int
+    member_ids: list[int]
+
+@service.route("/gift-product", method=POST, permission=WEBSHOP_EDIT)
+def gift_product() -> Any:
+    """
+    Create a gift transaction where someone donates money to purchase products for other members.
+    The recipients get the product with zero payment required.
+    """
+
+    data = request.get_json()
+    
+    if not data:
+        raise BadRequest("No JSON data provided")
+
+    data = GiftProductRequest.from_json(data)
+
+    if data.count <= 0:
+        raise BadRequest("count must be a positive number")
+
+    if len(data.member_ids) == 0:
+        raise BadRequest("At least one member_id is required")
+    
+    # Get the product
+    try:
+        product = db_session.get(Product, data.product_id)
+        if not product:
+            raise BadRequest(f"Product with id {data.product_id} not found")
+    except Exception:
+        raise BadRequest(f"Product with id {data.product_id} not found")
+    
+    # Verify all members exist
+    for member_id in data.member_ids:
+        try:
+            member = db_session.get(Member, member_id)
+            if not member:
+                raise BadRequest(f"Member with id {member_id} not found")
+        except Exception:
+            raise BadRequest(f"Member with id {member_id} not found")
+
+    # Create gift transactions for each member - each gets the product for free
+    created_transactions = []
+    
+    for member_id in data.member_ids:
+        # Create transaction content for the product with zero amount (gift)
+        transaction_content = TransactionContent(
+            product_id=data.product_id,
+            count=data.count,
+            amount=Decimal('0.00')  # The recipient pays nothing
+        )
+        
+        # Create the transaction with zero amount
+        transaction = commit_transaction_to_db(
+            member_id=member_id,
+            total_amount=Decimal('0.00'),  # The recipient pays nothing
+            contents=[transaction_content]
+        )
+        
+        # Mark transaction as completed immediately since no payment is required
+        payment_success(transaction)
+        created_transactions.append(transaction.id)
+    
+    return {
+        "transaction_ids": created_transactions
+    }
