@@ -1,4 +1,5 @@
 import React from "react";
+import { Navigate } from "react-router-dom";
 import { RedirectToSubpage } from "../Components/Routes";
 import AccountingAccount from "./AccountingAccount";
 import AccountingBox from "./AccountingBox";
@@ -8,13 +9,13 @@ import AccountingProduct from "./AccountingProduct";
 import CategoryList from "./CategoryList";
 import GiftCardList from "./GiftCardList";
 import GiftCardShow from "./GiftCardShow";
+import GiftProduct from "./GiftProduct";
 import ImageList from "./ImageList";
 import OrderList from "./OrderList";
 import OrderShow from "./OrderShow";
 import ProductAdd from "./ProductAdd";
 import ProductEdit from "./ProductEdit";
 import ProductList from "./ProductList";
-import { Navigate } from "react-router-dom";
 
 const routes = [
     {
@@ -36,6 +37,10 @@ const routes = [
     {
         path: "gift-card/:id",
         element: <GiftCardShow />,
+    },
+    {
+        path: "gift-product",
+        element: <GiftProduct />,
     },
     {
         path: "product",

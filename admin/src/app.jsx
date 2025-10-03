@@ -86,6 +86,10 @@ const nav = {
                     target: "/sales/category",
                 },
                 {
+                    text: "Skänk produkt",
+                    target: "/sales/gift-product",
+                },
+                {
                     text: "Bokföring",
                     target: "/sales/accounting",
                 },

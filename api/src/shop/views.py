@@ -1,9 +1,13 @@
+from dataclasses import dataclass
 from datetime import datetime
+from decimal import Decimal
 from logging import getLogger
 from typing import Any
 
 from basic_types.enums import PriceLevel
+from dataclasses_json import DataClassJsonMixin
 from flask import Response, g, jsonify, make_response, request, send_file
+from membership.models import Member
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
 from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT
 from service.db import db_session
@@ -26,7 +30,7 @@ from shop.entities import (
     transaction_cost_center_entity,
     transaction_entity,
 )
-from shop.models import ProductImage, TransactionContent
+from shop.models import Product, ProductImage, TransactionContent
 from shop.pay import (
     CancelSubscriptionsRequest,
     SetupPaymentMethodResponse,
@@ -50,11 +54,8 @@ from shop.stripe_discounts import get_discount_fraction_off
 from shop.stripe_event import stripe_callback
 from shop.stripe_payment_intent import PartialPayment
 from shop.stripe_setup import setup_stripe_products
-from shop.stripe_subscriptions import (
-    list_subscriptions,
-    open_stripe_customer_portal,
-)
-from shop.transactions import ship_labaccess_orders
+from shop.stripe_subscriptions import list_subscriptions, open_stripe_customer_portal
+from shop.transactions import TransactionContent, commit_transaction_to_db, payment_success, ship_labaccess_orders
 
 logger = getLogger("makeradmin")
 
@@ -358,3 +359,74 @@ def category_sales_route(category_id: int) -> Any:
     end_str = request.args.get("end", default=None)
     end = datetime.fromisoformat(end_str) if end_str is not None else None
     return category_sales(category_id, start, end).to_dict()
+
+
+@dataclass
+class GiftProductRequest(DataClassJsonMixin):
+    product_id: int
+    count: int
+    member_ids: list[int]
+
+
+@service.route("/gift-product", method=POST, permission=WEBSHOP_EDIT)
+def gift_product() -> Any:
+    """
+    Create a gift transaction where a number of products are gifted to a number of members.
+    The recipients get the products with zero payment required.
+
+    A receipt will be sent out to each recipient, but the sum will be zero.
+    """
+
+    data = request.get_json()
+
+    if not data:
+        raise BadRequest("No JSON data provided")
+
+    data = GiftProductRequest.from_dict(data)
+
+    if data.count <= 0:
+        raise BadRequest("count must be a positive number")
+
+    if len(data.member_ids) == 0:
+        raise BadRequest("At least one member_id is required")
+
+    # Get the product
+    try:
+        product = db_session.get(Product, data.product_id)
+        if not product:
+            raise BadRequest(f"Product with id {data.product_id} not found")
+    except Exception:
+        raise BadRequest(f"Product with id {data.product_id} not found")
+
+    # Verify all members exist
+    for member_id in data.member_ids:
+        try:
+            member = db_session.get(Member, member_id)
+            if not member:
+                raise BadRequest(f"Member with id {member_id} not found")
+        except Exception:
+            raise BadRequest(f"Member with id {member_id} not found")
+
+    # Create gift transactions for each member - each gets the product for free
+    created_transactions = []
+
+    for member_id in data.member_ids:
+        # Create transaction content for the product with zero amount (gift)
+        transaction_content = TransactionContent(
+            product_id=data.product_id,
+            count=data.count,
+            amount=Decimal("0.00"),  # The recipient pays nothing
+        )
+
+        # Create the transaction with zero amount
+        transaction = commit_transaction_to_db(
+            member_id=member_id,
+            total_amount=Decimal("0.00"),  # The recipient pays nothing
+            contents=[transaction_content],
+        )
+
+        # Mark transaction as completed immediately since no payment is required
+        payment_success(transaction)
+        created_transactions.append(transaction.id)
+
+    return {"transaction_ids": created_transactions}
