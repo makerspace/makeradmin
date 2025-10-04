@@ -322,7 +322,18 @@ def resume_paused_subscription(
         # We can just wait for it to start as normal
         return False
 
-    subscription = retry(lambda: stripe.Subscription.retrieve(subscription_id))
+    try:
+        subscription = retry(lambda: stripe.Subscription.retrieve(subscription_id))
+    except InvalidRequestError as e:
+        if e.code == "resource_missing":
+            # The subscription was deleted.
+            # We might have missed the webhook to delete the reference from the member.
+            # Or the webhook might be on its way.
+            # Treat this as if there is no subscription.
+            return False
+        else:
+            raise
+
     # If the subscription is not paused, we can just do nothing.
     if subscription["pause_collection"] is None:
         return False
