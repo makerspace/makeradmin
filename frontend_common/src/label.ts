@@ -57,6 +57,11 @@ export interface WarningLabel extends LabelBase {
     expires_at: string; // ISO date string
 }
 
+export interface RotatingStorageLabel extends LabelBase {
+    type: "RotatingStorageLabel";
+    description: string;
+}
+
 export type MemberboothLabel =
     | TemporaryStorageLabel
     | BoxLabel
@@ -65,7 +70,8 @@ export type MemberboothLabel =
     | NameTag
     | MeetupNameTag
     | DryingLabel
-    | WarningLabel;
+    | WarningLabel
+    | RotatingStorageLabel;
 
 export const labelExpiryDate = (
     label: MemberboothLabel,

@@ -9,6 +9,7 @@
         MeetupNameTag: "Meetup-namnskylt",
         DryingLabel: "Torkning",
         WarningLabel: "Varning",
+        RotatingStorageLabel: "Roterande",
     },
     expires: "Gäller till och med",
     expired: "Gick ut",

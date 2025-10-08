@@ -90,6 +90,12 @@ class WarningLabel:
     expires_at: date = field(serializer=date.isoformat, deserializer=date.fromisoformat)
 
 
+@serde.serde
+class RotatingStorageLabel:
+    base: LabelBase = field(flatten=True)
+    description: str
+
+
 @serde.serde(deny_unknown_fields=True)
 class TemporaryStorageLabelV1:
     type: Literal["temp"]
@@ -182,5 +188,6 @@ LabelType = (
     | MeetupNameTag
     | DryingLabel
     | WarningLabel
+    | RotatingStorageLabel
 )
 LabelTypeTagged = InternalTagging("type", LabelType)

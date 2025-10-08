@@ -80,6 +80,7 @@
             "MeetupNameTag": "Meetup-namnskylt",
             "NameTag": "Namnskylt",
             "Printer3DLabel": "Filament",
+            "RotatingStorageLabel": "Roterande",
             "TemporaryStorageLabel": "Tillfälligt",
             "WarningLabel": "Varning"
         },

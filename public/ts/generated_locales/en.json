@@ -80,6 +80,7 @@
             "MeetupNameTag": "Meetup name tag",
             "NameTag": "Name tag",
             "Printer3DLabel": "Filament",
+            "RotatingStorageLabel": "Rotating",
             "TemporaryStorageLabel": "Temp",
             "WarningLabel": "Warning"
         },

@@ -9,6 +9,7 @@
         MeetupNameTag: "Meetup name tag",
         DryingLabel: "Drying",
         WarningLabel: "Warning",
+        RotatingStorageLabel: "Rotating",
     },
     expires: "Valid until",
     expired: "Expired",
