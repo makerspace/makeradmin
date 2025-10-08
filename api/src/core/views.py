@@ -58,3 +58,9 @@ def roll_service_token(user_id=None):
         raise BadRequest(f"Can only roll tokens for service users.")
 
     return auth.roll_service_token(user_id)
+
+
+@service.route("/permission/authenticated", method=GET, permission=PUBLIC)
+def list_permissions() -> list[str]:
+    """List all permissions that the caller has"""
+    return g.permissions
