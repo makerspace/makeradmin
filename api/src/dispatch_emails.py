@@ -202,6 +202,8 @@ def memberbooth_labels() -> None:
                         MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY.value,
                         MessageTemplate.MEMBERBOOTH_LABEL_REPORT_SMS.value,
                         MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY_SMS.value,
+                        MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY.value,
+                        MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY_SMS.value,
                     ]
                 )
             ),
