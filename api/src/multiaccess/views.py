@@ -153,26 +153,6 @@ def memberbooth_delete_label(id: int) -> Response:
     return Response(status=204)
 
 
-# Note: Permissions are checked in the function itself.
-# A member may view their own membership info always, but require SPAN_VIEW to view other members' membership info,
-@service.route("/memberbooth/label/<int:id>/membership", method=GET, permission=PUBLIC)
-def memberbooth_label_owner_membership(id: int) -> dict:
-    label = memberbooth_get_label(id)
-    if label is None:
-        raise NotFound()
-
-    member = db_session.execute(
-        select(Member).where(Member.member_number == label.label.base.member_number)
-    ).scalar_one_or_none()
-    if member is None:
-        raise NotFound()
-
-    if SPAN_VIEW not in g.permissions and member.member_id != g.user_id:
-        raise Forbidden("You do not have permission to view other members' membership info")
-
-    return get_membership_summary(member.member_id).as_json()
-
-
 @service.route("/memberbooth/label/<int:id>/message", method=GET, permission=USER)
 def memberbooth_label_related_messages(id: int) -> list[dict]:
     label = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
@@ -229,12 +209,17 @@ def memberbooth_label_qrcode(id: int) -> Response:
     return flask.make_response(redirect(get_label_public_url(id), code=302))
 
 
-@service.route("/memberbooth/label/<int:id>/membership", method=GET, permission=MEMBER_VIEW)
+# Note: Permissions are checked in the function itself.
+# A member may view their own membership info always, but require SPAN_VIEW to view other members' membership info,
+@service.route("/memberbooth/label/<int:id>/membership", method=GET, permission=PUBLIC)
 def memberbooth_membership_by_label(id: int) -> dict:
     label = db_session.execute(select(MemberboothLabel).where(MemberboothLabel.id == id)).scalar_one_or_none()
 
     if label is None:
         raise NotFound()
+
+    if SPAN_VIEW not in g.permissions and label.member_id != g.user_id:
+        raise Forbidden("You do not have permission to view other members' membership info")
 
     membership = get_membership_summary(label.member_id)
 
