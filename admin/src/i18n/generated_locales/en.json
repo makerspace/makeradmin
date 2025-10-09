@@ -3,7 +3,8 @@
         "can_be_terminated_in": "Can terminate {{relative_time}}",
         "can_terminate": "Can terminate",
         "enter_label_id": "Enter label ID",
-        "expires": "Expires {{relative_time}}",
+        "expires_future": "Expires {{relative_time}}",
+        "expires_past": "Expired {{relative_time}}",
         "no_matching_labels": "No matching labels",
         "view_label": "View"
     },

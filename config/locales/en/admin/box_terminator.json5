@@ -1,6 +1,7 @@
 {
     view_label: "View",
-    expires: "Expires {{relative_time}}",
+    expires_future: "Expires {{relative_time}}",
+    expires_past: "Expired {{relative_time}}",
     can_be_terminated_in: "Can terminate {{relative_time}}",
     can_terminate: "Can terminate",
     enter_label_id: "Enter label ID",

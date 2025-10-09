@@ -132,14 +132,19 @@ const ScanResultPopover = ({
                 )}
                 {expiresAt && terminationDate == null && (
                     <div>
-                        {t("expires", {
-                            relative_time: dateToRelative(
-                                now,
-                                expiresAt,
-                                t_time,
-                                "relative_generic",
-                            ),
-                        })}
+                        {t(
+                            expiresAt.getTime() > now.getTime()
+                                ? "expires_future"
+                                : "expires_past",
+                            {
+                                relative_time: dateToRelative(
+                                    now,
+                                    expiresAt,
+                                    t_time,
+                                    "relative_generic",
+                                ),
+                            },
+                        )}
                     </div>
                 )}
                 <a

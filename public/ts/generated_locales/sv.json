@@ -60,8 +60,8 @@
             "report_label": "Rapportera etikett",
             "submit": "Skicka",
             "submitted_successfully": "Etiketten skickades in",
-            "terminate": "Avsluta",
-            "terminate_label": "Avsluta etikett",
+            "terminate": "Rensa bort",
+            "terminate_label": "Rensa bort etikett",
             "title": "Åtgärder",
             "write_a_message": "Skriv ett meddelande"
         },

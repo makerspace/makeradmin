@@ -3,7 +3,8 @@
         "can_be_terminated_in": "Kan termineras {{relative_time}}",
         "can_terminate": "Kan termineras",
         "enter_label_id": "Skriv in etikett-ID",
-        "expires": "Utgår {{relative_time}}",
+        "expires_future": "Utgår {{relative_time}}",
+        "expires_past": "Utgick {{relative_time}}",
         "no_matching_labels": "Inga matchande etiketter",
         "view_label": "Visa"
     },
