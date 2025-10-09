@@ -27,6 +27,7 @@ from service.api_definition import (
     MESSAGE_VIEW,
     POST,
     PUBLIC,
+    SPAN_VIEW,
     USER,
     Arg,
     symbol,
@@ -150,6 +151,26 @@ def memberbooth_delete_label(id: int) -> Response:
     label.deleted_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db_session.flush()
     return Response(status=204)
+
+
+# Note: Permissions are checked in the function itself.
+# A member may view their own membership info always, but require SPAN_VIEW to view other members' membership info,
+@service.route("/memberbooth/label/<int:id>/membership", method=GET, permission=PUBLIC)
+def memberbooth_label_owner_membership(id: int) -> dict:
+    label = memberbooth_get_label(id)
+    if label is None:
+        raise NotFound()
+
+    member = db_session.execute(
+        select(Member).where(Member.member_number == label.label.base.member_number)
+    ).scalar_one_or_none()
+    if member is None:
+        raise NotFound()
+
+    if SPAN_VIEW not in g.permissions and member.member_id != g.user_id:
+        raise Forbidden("You do not have permission to view other members' membership info")
+
+    return get_membership_summary(member.member_id).as_json()
 
 
 @service.route("/memberbooth/label/<int:id>/message", method=GET, permission=USER)

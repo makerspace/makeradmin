@@ -5,7 +5,6 @@ import {
     labelExpiryDate,
     labelFirstValidTerminationDate,
     labelIsExpired,
-    member_t,
     membership_t,
     Permission,
     TemporaryStorageLabel,
@@ -20,11 +19,7 @@ import { NOT_FOUND, UNAUTHORIZED } from "./common";
 import { useTranslation } from "./i18n";
 import { dateToRelative } from "./label_common";
 import * as login from "./login";
-import {
-    LoadCurrentMemberInfo,
-    LoadCurrentMembershipInfo,
-    LoadCurrentPermissions,
-} from "./member_common";
+import { LoadCurrentPermissions } from "./member_common";
 import { NotFoundPage } from "./notfound";
 
 declare var UIkit: any;
@@ -537,14 +532,12 @@ const LabelMessage = ({
 };
 
 const LabelPage = ({
-    member: _member,
     membership: membership,
     label,
     showActions,
     messages: initial_messages,
     showMessageLinks,
 }: {
-    member: member_t | null;
     membership: membership_t | null;
     label: UploadedLabel;
     showActions: boolean;
@@ -652,18 +645,20 @@ const LoadLabelMessages = (labelId: number) => {
 };
 
 const apiBasePath = window.apiBasePath;
-const future1 = LoadCurrentMemberInfo().catch((e) =>
-    e.status == UNAUTHORIZED ? null : Promise.reject(e),
-);
-const future2 = LoadCurrentMembershipInfo().catch((e) =>
-    e.status == UNAUTHORIZED ? null : Promise.reject(e),
-);
 function getLabelIdFromPath(): number | null {
     const match = window.location.pathname.match(/\/label\/(\d+)/);
     return match ? parseInt(match[1]!, 10) : null;
 }
 
 const labelId = getLabelIdFromPath();
+const future2 = common
+    .ajax(
+        "GET",
+        `${window.apiBasePath}/multiaccess/memberbooth/label/${labelId}/membership`,
+    )
+    .then((r) => r.data as membership_t)
+    .catch((e) => (e.status == UNAUTHORIZED ? null : Promise.reject(e)));
+
 const future3 = common
     .ajax(
         "GET",
@@ -678,8 +673,8 @@ const future5 = labelId
 common.documentLoaded().then(() => {
     const root = document.querySelector("#label-page") as HTMLElement;
 
-    Promise.all([future1, future2, future3, future4, future5] as const)
-        .then(([member, membership, label, permissions, messages]) => {
+    Promise.all([future2, future3, future4, future5] as const)
+        .then(([membership, label, permissions, messages]) => {
             root.innerHTML = "";
             const showActionsPermission: Permission = "message_send";
             const showMessageLinksPermission: Permission = "message_view";
@@ -688,7 +683,6 @@ common.documentLoaded().then(() => {
             );
             render(
                 <LabelPage
-                    member={member}
                     membership={membership}
                     label={label}
                     showActions={permissions.includes(showActionsPermission)}
