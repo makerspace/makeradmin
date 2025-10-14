@@ -10,9 +10,8 @@ function MemberExport() {
         setState("loading");
 
         get({ url: "/membership/member/all_with_membership" }).then((data) => {
-            const members = data.data;
-            // Type of members is (in typescript notation) Member & { membership: MembershipData }
-            // where those types are defined in the api backend.
+            const members: (member_t & { membership: membership_t })[] =
+                data.data;
 
             // Find all members which are either active lab members or makerspace members.
             // Lab membership does technically imply makerspace membership... but people are not always paying their membership fees properly.
@@ -53,8 +52,6 @@ function MemberExport() {
         get({ url: "/membership/member/all_with_membership" }).then((data) => {
             const members: (member_t & { membership: membership_t })[] =
                 data.data;
-            // Type of members is (in typescript notation) Member & { membership: MembershipData }
-            // where those types are defined in the api backend.
 
             // Find all members which are either active lab members or makerspace members.
             // Lab membership does technically imply makerspace membership... but people are not always paying their membership fees properly.
