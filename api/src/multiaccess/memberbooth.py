@@ -4,7 +4,7 @@ from urllib.parse import urlparse, urlunparse
 
 import serde
 from dataclasses_json import DataClassJsonMixin
-from membership.member_auth import verify_password
+from membership.member_auth import get_member_permissions, verify_password
 from membership.membership import MembershipData, get_membership_summary
 from membership.models import Key, Member
 from serde import InternalTagging
@@ -31,6 +31,7 @@ class MemberboothMemberInfo(DataClassJsonMixin):
     firstname: str
     lastname: str | None
     keys: list[MemberboothKeyInfo]
+    permissions: list[str]
     membership_data: MembershipData
 
 
@@ -43,12 +44,15 @@ class UploadedLabel:
     label: LabelType
 
 
-def memberbooth_response_object(member: Member, membership_data: MembershipData) -> MemberboothMemberInfo:
+def memberbooth_response_object(
+    member: Member, membership_data: MembershipData, permissions: list[str]
+) -> MemberboothMemberInfo:
     return MemberboothMemberInfo(
         member_id=member.member_id,
         member_number=member.member_number,
         firstname=member.firstname,
         lastname=member.lastname,
+        permissions=permissions,
         keys=[MemberboothKeyInfo(key_id=key.key_id, rfid_tag=key.tagid) for key in member.keys],
         membership_data=membership_data,
     )
@@ -70,7 +74,9 @@ def tag_to_memberinfo(tagid: str) -> MemberboothMemberInfo | None:
         return None
 
     membership_data = get_membership_summary(key.member_id)
-    return memberbooth_response_object(key.member, membership_data)
+
+    permissions = [p[1] for p in get_member_permissions(key.member_id)]
+    return memberbooth_response_object(key.member, membership_data, permissions)
 
 
 def pin_login_to_memberinfo(member_number: int, pin_code_or_password: str) -> MemberboothMemberInfo:
@@ -97,7 +103,8 @@ def pin_login_to_memberinfo(member_number: int, pin_code_or_password: str) -> Me
         raise NotFound(f"The member + pin code/password combination does not belong to any known user.")
 
     membership_data = get_membership_summary(member.member_id)
-    return memberbooth_response_object(member, membership_data)
+    permissions = [p[1] for p in get_member_permissions(member.member_id)]
+    return memberbooth_response_object(member, membership_data, permissions)
 
 
 def member_number_to_memberinfo(member_number: int) -> MemberboothMemberInfo | None:
@@ -107,7 +114,8 @@ def member_number_to_memberinfo(member_number: int) -> MemberboothMemberInfo | N
         return None
 
     membership_data = get_membership_summary(member.member_id)
-    return memberbooth_response_object(member, membership_data)
+    permissions = [p[1] for p in get_member_permissions(member.member_id)]
+    return memberbooth_response_object(member, membership_data, permissions)
 
 
 def get_label_public_url(label_id: int) -> str:
