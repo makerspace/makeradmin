@@ -9,6 +9,7 @@ import flask
 import serde
 import serde.json
 from dataclasses_json import DataClassJsonMixin
+from dispatch_emails import memberbooth_labels
 from flask import Response, g, redirect, request
 from membership.member_entity import MemberEntity
 from membership.membership import MembershipData, get_membership_summary
@@ -196,6 +197,7 @@ def memberbooth_label_related_messages(id: int) -> list[dict]:
 class LabelActionResponse:
     id: int
     label: UploadedLabel
+    messages_to_send: list[MessageTemplate]
 
 
 # This route is used by QR codes on labels. Scanning one should automatically register an observation, and then redirect to the public label URL.
@@ -313,8 +315,13 @@ def memberbooth_label_action(
         if message is None and img is None:
             # If the previous action is identical, or has more info than this one, just return the old one
             # This is the common case for observations
+            messages_to_send = memberbooth_labels(prev_action.id)
             return serde.to_dict(
-                LabelActionResponse(id=prev_action.id, label=memberbooth_get_label(prev_action.label_id))
+                LabelActionResponse(
+                    id=prev_action.id,
+                    label=memberbooth_get_label(prev_action.label_id),
+                    messages_to_send=[m.template for m in messages_to_send],
+                )
             )
 
         db_session.delete(prev_action)
@@ -322,7 +329,15 @@ def memberbooth_label_action(
     db_session.add(db_action)
     db_session.flush()
 
-    return serde.to_dict(LabelActionResponse(id=db_action.id, label=memberbooth_get_label(db_action.label_id)))
+    messages_to_send = memberbooth_labels(db_action.id)
+
+    return serde.to_dict(
+        LabelActionResponse(
+            id=db_action.id,
+            label=memberbooth_get_label(db_action.label_id),
+            messages_to_send=[m.template for m in messages_to_send],
+        )
+    )
 
 
 # Links to these images are included in emails sent out to members, so they need to be public.

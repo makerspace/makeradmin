@@ -407,11 +407,11 @@ button > svg {
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: box-terminator-slide-in ease-in-out 0.2s forwards;
+    animation: box-terminator-slide-in-up ease-in-out 0.2s forwards;
 }
 
 .box-terminator-popover.fading-out {
-    animation: box-terminator-slide-out ease-in-out 0.2s forwards;
+    animation: box-terminator-slide-out-down ease-in-out 0.2s forwards;
 }
 
 .box-terminator-popover > div {
@@ -429,6 +429,8 @@ button > svg {
         0px 0.9px 2.2px rgba(0, 0, 0, 0.072),
         0px 1.7px 4.2px rgba(0, 0, 0, 0.086),
         0px 4px 10px rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
+    min-width: 400px;
 }
 
 .box-terminator-popover.active > div {
@@ -457,14 +459,25 @@ button > svg {
     height: auto;
 }
 
-@keyframes box-terminator-slide-in {
+@keyframes box-terminator-slide-in-up {
     0% { transform: translateY(100px); opacity: 0; }
     100% { transform: translateY(0px); opacity: 1; }
 }
 
-@keyframes box-terminator-slide-out {
+@keyframes box-terminator-slide-out-down {
     0% { transform: translateY(0px); opacity: 1; }
     100% { transform: translateY(100px); opacity: 0; }
+}
+
+
+@keyframes box-terminator-slide-in-down {
+    0% { transform: translateY(-100px); opacity: 0; }
+    100% { transform: translateY(0px); opacity: 1; }
+}
+
+@keyframes box-terminator-slide-out-up {
+    0% { transform: translateY(0px); opacity: 1; }
+    100% { transform: translateY(-100px); opacity: 0; }
 }
 
 
@@ -531,4 +544,66 @@ button > svg {
     box-shadow: none !important;
     /* Remove Firefox's default selection border */
     border: none;
+}
+
+.messages-to-send-popover {
+    position: absolute;
+    top: 10px;
+    z-index: 10;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: box-terminator-slide-in-down ease-in-out 0.2s forwards;
+}
+
+.messages-to-send-popover.fading-out {
+    animation: box-terminator-slide-out-up ease-in-out 0.2s forwards;
+}
+
+.messages-to-send-popover svg {
+    width: 30px;
+    height: 30px;
+    margin-top: 4px;
+}
+
+.messages-to-send-popover ul {
+    padding: 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 400px;
+}
+
+@media (max-width: 600px) {
+    .messages-to-send-popover ul {
+        min-width: unset;
+        width: 95%;
+    }
+
+    .box-terminator-popover > div {
+        min-width: unset;
+        width: 95%;
+    }
+}
+
+.messages-to-send-popover li {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    gap: 15px;
+    height: 52px;
+    box-sizing: border-box;
+    /* min-width: 400px; */
+    /* max-width: 90vw; */
+    box-shadow:
+        0px 0.1px 0.3px rgba(0, 0, 0, 0.034),
+        0px 0.3px 0.7px rgba(0, 0, 0, 0.048),
+        0px 0.5px 1.3px rgba(0, 0, 0, 0.06),
+        0px 0.9px 2.2px rgba(0, 0, 0, 0.072),
+        0px 1.7px 4.2px rgba(0, 0, 0, 0.086),
+        0px 4px 10px rgba(0, 0, 0, 0.12);
 }

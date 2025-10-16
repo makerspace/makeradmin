@@ -5,12 +5,14 @@ import {
     labelExpiryDate,
     labelFirstValidTerminationDate,
     labelIsExpired,
+    LabelMessageTemplate,
+    LabelMessageTemplates,
     membership_t,
     Permission,
     TemporaryStorageLabel,
     UploadedLabel,
 } from "frontend_common";
-import { Message, MessageTemplate } from "frontend_common/src/message";
+import { Message } from "frontend_common/src/message";
 import { render } from "preact";
 import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useRef, useState } from "preact/hooks";
@@ -471,21 +473,6 @@ const LabelActions = ({
         </>
     );
 };
-
-const LabelMessageTemplates = [
-    "memberbooth_label_report",
-    "memberbooth_label_cleaned_away",
-    "memberbooth_label_report_sms",
-    "memberbooth_label_cleaned_away_sms",
-    "memberbooth_label_expired",
-    "memberbooth_label_expiring_soon",
-    "memberbooth_box_cleaned_away",
-    "memberbooth_box_cleaned_away_sms",
-    "memberbooth_box_expired",
-    "memberbooth_box_expiring_soon",
-] as const satisfies ReadonlyArray<MessageTemplate>;
-
-type LabelMessageTemplate = (typeof LabelMessageTemplates)[number];
 
 const LabelMessage = ({
     message,

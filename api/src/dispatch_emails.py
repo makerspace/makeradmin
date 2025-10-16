@@ -2,6 +2,7 @@ import signal
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from html import unescape
 from logging import getLogger
@@ -57,6 +58,16 @@ warned_about_missing_key = False
 
 class NoEmailAuthConfigured(Exception):
     pass
+
+
+@dataclass
+class SendMessage:
+    template: MessageTemplate
+    member: Member
+    recipient: str | None = None
+    sms: bool = False
+    associated_id: int | None = None
+    additional_template_args: dict[str, Any] | None = None
 
 
 def send_messages(mailgun_key: Optional[str], domain: str, sender: str, to_override: Optional[str], limit: int) -> None:
@@ -157,12 +168,28 @@ def already_sent_message(template: MessageTemplate, member_id: int, days: int) -
     return reminder_sent > 0
 
 
-def memberbooth_labels() -> None:
+def schedule_messages(messages: list[SendMessage]) -> None:
+    for msg in messages:
+        send_message(
+            template=msg.template,
+            member=msg.member,
+            db_session=db_session,
+            recipient=msg.recipient,
+            sms=msg.sms,
+            associated_id=msg.associated_id,
+            **(msg.additional_template_args or {}),
+        )
+
+
+def memberbooth_labels(
+    action_id_filter: int | None = None, observation_send_delay: timedelta | None = None
+) -> list[SendMessage]:
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     # Define the time window for "recent" as the past two weeks
 
     recent_window = now - timedelta(days=14)
+    messages_to_send: list[SendMessage] = []
 
     # Organize actions by label and type. More recent of the same type overwrites older ones.
     # label_actions: dict[
@@ -184,15 +211,21 @@ def memberbooth_labels() -> None:
             .filter(MemberboothLabelAction.label_id == label_id)
             .count()
             > 0
+        ) or any(
+            msg.template == template and msg.member.member_id == member_id and msg.associated_id == label_id
+            for msg in messages_to_send
         )
 
+    recent_actions_q = db_session.query(MemberboothLabelAction).filter(
+        MemberboothLabelAction.created_at >= recent_window,
+        MemberboothLabelAction.action != "observed",
+    )
+
+    if action_id_filter is not None:
+        recent_actions_q = recent_actions_q.filter(MemberboothLabelAction.id == action_id_filter)
+
     recent_actions = (
-        db_session.query(MemberboothLabelAction)
-        .filter(
-            MemberboothLabelAction.created_at >= recent_window,
-            MemberboothLabelAction.action != "observed",
-        )
-        .join(
+        recent_actions_q.join(
             Message,
             (Message.associated_id == MemberboothLabelAction.id)
             & (
@@ -289,15 +322,18 @@ def memberbooth_labels() -> None:
                 (MessageTemplate.MEMBERBOOTH_LABEL_REPORT_SMS, True),
             ]:
                 logger.info(f"Sending message {tp} for label {label.id} to member {member.member_id}")
-                send_message(
-                    associated_id=action.id,
-                    template=tp,
-                    member=member,
-                    db_session=db_session,
-                    action=action,
-                    action_author_name=f"{action_author.firstname} {action_author.lastname}",
-                    sms=sms,
-                    **common_kws,
+                messages_to_send.append(
+                    SendMessage(
+                        associated_id=action.id,
+                        template=tp,
+                        member=member,
+                        sms=sms,
+                        additional_template_args=common_kws
+                        | {
+                            "action": action,
+                            "action_author_name": f"{action_author.firstname} {action_author.lastname}",
+                        },
+                    )
                 )
         elif action.action == "cleaned_away":
             tps = [
@@ -311,14 +347,14 @@ def memberbooth_labels() -> None:
                 ]
             for tp, sms in tps:
                 logger.info(f"Sending message {tp} for label {label.id} to member {member.member_id}")
-                send_message(
-                    associated_id=action.id,
-                    template=tp,
-                    member=member,
-                    db_session=db_session,
-                    action=action,
-                    sms=sms,
-                    **common_kws,
+                messages_to_send.append(
+                    SendMessage(
+                        associated_id=action.id,
+                        template=tp,
+                        member=member,
+                        sms=sms,
+                        additional_template_args=common_kws | {"action": action},
+                    )
                 )
         else:
             assert False, f"unknown action {action.action}"
@@ -328,25 +364,25 @@ def memberbooth_labels() -> None:
     # was taken for the same label within a few days of the observation.
     non_obs_alias = MemberboothLabelAction.__table__.alias("non_obs")
 
-    recent_observations = (
-        db_session.query(MemberboothLabelAction)
+    recent_observations_q = db_session.query(MemberboothLabelAction).filter(
+        MemberboothLabelAction.created_at >= recent_window,
+        # Don't send messages for very recent observations, to allow time for the member to e.g. report after an observation
+        MemberboothLabelAction.created_at < (now - observation_send_delay if observation_send_delay else now),
+        MemberboothLabelAction.action == "observed",
+        ~db_session.query(non_obs_alias.c.id)
         .filter(
-            MemberboothLabelAction.created_at >= recent_window,
-            # Don't send messages for very recent observations, to allow time for the member to e.g. report after an observation
-            MemberboothLabelAction.created_at < now - timedelta(minutes=5),
-            MemberboothLabelAction.action == "observed",
-            ~db_session.query(non_obs_alias.c.id)
-            .filter(
-                non_obs_alias.c.label_id == MemberboothLabelAction.label_id,
-                non_obs_alias.c.action != "observed",
-                non_obs_alias.c.created_at > MemberboothLabelAction.created_at - timedelta(days=1),
-                non_obs_alias.c.created_at <= MemberboothLabelAction.created_at + timedelta(days=1),
-            )
-            .exists(),
+            non_obs_alias.c.label_id == MemberboothLabelAction.label_id,
+            non_obs_alias.c.action != "observed",
+            non_obs_alias.c.created_at > MemberboothLabelAction.created_at - timedelta(days=1),
+            non_obs_alias.c.created_at <= MemberboothLabelAction.created_at + timedelta(days=1),
         )
-        .order_by(MemberboothLabelAction.created_at.asc())
-        .all()
+        .exists(),
     )
+
+    if action_id_filter is not None:
+        recent_observations_q = recent_observations_q.filter(MemberboothLabelAction.id == action_id_filter)
+
+    recent_observations = recent_observations_q.order_by(MemberboothLabelAction.created_at.asc()).all()
 
     # Map label_id to the most recent observation
     observations: dict[int, MemberboothLabelAction] = {}
@@ -380,13 +416,13 @@ def memberbooth_labels() -> None:
                         else MessageTemplate.MEMBERBOOTH_LABEL_EXPIRED
                     )
                     if not already_sent_for_label(tp, member.member_id, label_id):
-                        send_message(
-                            associated_id=action.id,
-                            template=tp,
-                            member=member,
-                            db_session=db_session,
-                            action=obs,
-                            **common_kws,
+                        messages_to_send.append(
+                            SendMessage(
+                                associated_id=action.id,
+                                template=tp,
+                                member=member,
+                                additional_template_args=common_kws | {"action": action},
+                            )
                         )
                 else:
                     # About to expire
@@ -396,14 +432,16 @@ def memberbooth_labels() -> None:
                         else MessageTemplate.MEMBERBOOTH_LABEL_EXPIRING_SOON
                     )
                     if not already_sent_for_label(tp, member.member_id, label_id):
-                        send_message(
-                            associated_id=action.id,
-                            template=tp,
-                            member=member,
-                            db_session=db_session,
-                            action=obs,
-                            **common_kws,
+                        messages_to_send.append(
+                            SendMessage(
+                                associated_id=action.id,
+                                template=tp,
+                                member=member,
+                                additional_template_args=common_kws | {"action": action},
+                            )
                         )
+
+    return messages_to_send
 
 
 def labaccess_reminder() -> None:
@@ -700,7 +738,7 @@ if __name__ == "__main__":
 
                     db_session.commit()
 
-                memberbooth_labels()
+                schedule_messages(memberbooth_labels(observation_send_delay=timedelta(minutes=5)))
                 send_messages(key, domain, sender, to_override, args.limit)
                 db_session.commit()
             except DatabaseError as e:

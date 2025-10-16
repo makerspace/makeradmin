@@ -16,6 +16,7 @@ export type UiKitIconName =
     | "plus-circle"
     | "phone"
     | "mail"
+    | "comment"
     | "tag"
     | "trash"
     | "refresh"

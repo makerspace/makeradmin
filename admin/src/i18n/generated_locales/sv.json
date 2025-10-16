@@ -5,8 +5,21 @@
         "enter_label_id": "Skriv in etikett-ID",
         "expires_future": "Utgår {{relative_time}}",
         "expires_past": "Utgick {{relative_time}}",
+        "message_templates": {
+            "memberbooth_box_cleaned_away": "Låda bortrensad",
+            "memberbooth_box_cleaned_away_sms": "Låda bortrensad (SMS)",
+            "memberbooth_box_expired": "Låda utgången",
+            "memberbooth_box_expiring_soon": "Låda går snart ut",
+            "memberbooth_label_cleaned_away": "Bortrensad",
+            "memberbooth_label_cleaned_away_sms": "Bortrensad (SMS)",
+            "memberbooth_label_expired": "Utgången",
+            "memberbooth_label_expiring_soon": "Går snart ut",
+            "memberbooth_label_report": "Rapporterad",
+            "memberbooth_label_report_sms": "Rapporterad (SMS)"
+        },
         "no_matching_labels": "Inga matchande etiketter",
-        "view_label": "Visa"
+        "view_label": "Visa",
+        "will_send": "Skickar snart:"
     },
     "brand": {
         "billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",

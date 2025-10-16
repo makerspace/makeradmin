@@ -6,4 +6,17 @@
     can_terminate: "Kan termineras",
     enter_label_id: "Skriv in etikett-ID",
     no_matching_labels: "Inga matchande etiketter",
+    will_send: "Skickar snart:",
+    message_templates: {
+        memberbooth_label_report: "Rapporterad",
+        memberbooth_label_cleaned_away: "Bortrensad",
+        memberbooth_label_report_sms: "Rapporterad (SMS)",
+        memberbooth_label_cleaned_away_sms: "Bortrensad (SMS)",
+        memberbooth_label_expired: "Utgången",
+        memberbooth_label_expiring_soon: "Går snart ut",
+        memberbooth_box_cleaned_away: "Låda bortrensad",
+        memberbooth_box_cleaned_away_sms: "Låda bortrensad (SMS)",
+        memberbooth_box_expired: "Låda utgången",
+        memberbooth_box_expiring_soon: "Låda går snart ut",
+    },
 }

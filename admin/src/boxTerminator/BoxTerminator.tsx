@@ -1,10 +1,14 @@
+import Icon from "Components/icons";
 import {
     labelExpiryDate,
     labelFirstValidTerminationDate,
     labelIsExpired,
     LabelMaxRelativeDays,
+    LabelMessageTemplate,
+    LabelMessageTemplates,
     membership_t,
     Message,
+    MessageTemplate,
     UploadedLabel,
 } from "frontend_common";
 import { get, post } from "gateway";
@@ -18,6 +22,7 @@ import QrCodeScanner from "./QrCodeScanner";
 export interface LabelActionResponse {
     id: number;
     label: UploadedLabel;
+    messages_to_send: MessageTemplate[];
 }
 
 const labelUrlRegex = /\/L\/([0-9_-]+)$/;
@@ -106,55 +111,91 @@ const ScanResultPopover = ({
     const { t: t_time } = useTranslation("time");
     const { t } = useTranslation("box_terminator");
 
+    for (const m of labelAction.messages_to_send) {
+        if (!LabelMessageTemplates.includes(m as LabelMessageTemplate)) {
+            console.warn("Unknown message template", m);
+        }
+    }
+    const messagesToSend =
+        labelAction.messages_to_send as LabelMessageTemplate[];
+
     return (
-        <div
-            className={
-                `box-terminator-popover` +
-                (state === "fading-out" ? " fading-out" : "") +
-                (isExpired ? " expired" : " active")
-            }
-        >
-            <div>
-                <div>{isExpired ? <ExpiredLogo /> : <ActiveLogo />}</div>
-                {terminationDate != null && (
-                    <div>
-                        {terminationDate <= now
-                            ? t("can_terminate")
-                            : t("can_be_terminated_in", {
-                                  relative_time: dateToRelative(
-                                      now,
-                                      terminationDate,
-                                      t_time,
-                                      "relative_generic",
-                                  ),
-                              })}
-                    </div>
-                )}
-                {expiresAt && terminationDate == null && (
-                    <div>
-                        {t(
-                            expiresAt.getTime() > now.getTime()
-                                ? "expires_future"
-                                : "expires_past",
-                            {
-                                relative_time: dateToRelative(
-                                    now,
-                                    expiresAt,
-                                    t_time,
-                                    "relative_generic",
-                                ),
-                            },
-                        )}
-                    </div>
-                )}
-                <a
-                    href={labelAction.label.public_url}
-                    className="uk-button uk-button-default"
-                >
-                    {t("view_label")}
-                </a>
+        <>
+            <div
+                className={
+                    `box-terminator-popover` +
+                    (state === "fading-out" ? " fading-out" : "") +
+                    (isExpired ? " expired" : " active")
+                }
+            >
+                <div>
+                    <div>{isExpired ? <ExpiredLogo /> : <ActiveLogo />}</div>
+                    {terminationDate != null && (
+                        <div>
+                            {terminationDate <= now
+                                ? t("can_terminate")
+                                : t("can_be_terminated_in", {
+                                      relative_time: dateToRelative(
+                                          now,
+                                          terminationDate,
+                                          t_time,
+                                          "relative_generic",
+                                      ),
+                                  })}
+                        </div>
+                    )}
+                    {expiresAt && terminationDate == null && (
+                        <div className="uk-flex-1">
+                            {t(
+                                expiresAt.getTime() > now.getTime()
+                                    ? "expires_future"
+                                    : "expires_past",
+                                {
+                                    relative_time: dateToRelative(
+                                        now,
+                                        expiresAt,
+                                        t_time,
+                                        "relative_generic",
+                                    ),
+                                },
+                            )}
+                        </div>
+                    )}
+                    <a
+                        href={labelAction.label.public_url}
+                        className="uk-button uk-button-default"
+                    >
+                        {t("view_label")}
+                    </a>
+                </div>
             </div>
-        </div>
+            {messagesToSend.length > 0 && (
+                <div
+                    className={
+                        `messages-to-send-popover` +
+                        (state === "fading-out" ? " fading-out" : "")
+                    }
+                >
+                    <ul>
+                        {messagesToSend.map((msg, idx) => (
+                            <li key={idx} className="messages-to-send-item">
+                                <Icon
+                                    icon={
+                                        msg.includes("sms") ? "comment" : "mail"
+                                    }
+                                />
+                                <span>
+                                    {t("will_send")}{" "}
+                                    <strong>
+                                        {t(`message_templates.${msg}`)}
+                                    </strong>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </>
     );
 };
 

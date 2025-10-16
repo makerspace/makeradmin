@@ -6,4 +6,17 @@
     can_terminate: "Can terminate",
     enter_label_id: "Enter label ID",
     no_matching_labels: "No matching labels",
+    will_send: "Soon sending:",
+    message_templates: {
+        memberbooth_label_report: "Reported",
+        memberbooth_label_cleaned_away: "Cleaned away",
+        memberbooth_label_report_sms: "Reported (SMS)",
+        memberbooth_label_cleaned_away_sms: "Cleaned away (SMS)",
+        memberbooth_label_expired: "Expired",
+        memberbooth_label_expiring_soon: "Expiring soon",
+        memberbooth_box_cleaned_away: "Box cleaned away",
+        memberbooth_box_cleaned_away_sms: "Box cleaned away (SMS)",
+        memberbooth_box_expired: "Box expired",
+        memberbooth_box_expiring_soon: "Box expiring soon",
+    },
 }

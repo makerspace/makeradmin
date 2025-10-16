@@ -5,8 +5,21 @@
         "enter_label_id": "Enter label ID",
         "expires_future": "Expires {{relative_time}}",
         "expires_past": "Expired {{relative_time}}",
+        "message_templates": {
+            "memberbooth_box_cleaned_away": "Box cleaned away",
+            "memberbooth_box_cleaned_away_sms": "Box cleaned away (SMS)",
+            "memberbooth_box_expired": "Box expired",
+            "memberbooth_box_expiring_soon": "Box expiring soon",
+            "memberbooth_label_cleaned_away": "Cleaned away",
+            "memberbooth_label_cleaned_away_sms": "Cleaned away (SMS)",
+            "memberbooth_label_expired": "Expired",
+            "memberbooth_label_expiring_soon": "Expiring soon",
+            "memberbooth_label_report": "Reported",
+            "memberbooth_label_report_sms": "Reported (SMS)"
+        },
         "no_matching_labels": "No matching labels",
-        "view_label": "View"
+        "view_label": "View",
+        "will_send": "Soon sending:"
     },
     "brand": {
         "billing_address": "Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm",

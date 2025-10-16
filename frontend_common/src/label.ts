@@ -1,8 +1,23 @@
 import { membership_t } from "./membership";
-import { Message } from "./message";
+import { Message, MessageTemplate } from "./message";
 
 export const MEMBERBOX_DAYS_ALLOWED_TO_KEEP_AFTER_LABACCESS_ENDS = 45;
 export const TERMINATION_WARNING_DAYS_TO_CLEANOUT = 14;
+
+export const LabelMessageTemplates = [
+    "memberbooth_label_report",
+    "memberbooth_label_cleaned_away",
+    "memberbooth_label_report_sms",
+    "memberbooth_label_cleaned_away_sms",
+    "memberbooth_label_expired",
+    "memberbooth_label_expiring_soon",
+    "memberbooth_box_cleaned_away",
+    "memberbooth_box_cleaned_away_sms",
+    "memberbooth_box_expired",
+    "memberbooth_box_expiring_soon",
+] as const satisfies ReadonlyArray<MessageTemplate>;
+
+export type LabelMessageTemplate = (typeof LabelMessageTemplates)[number];
 
 export interface UploadedLabel {
     public_url: string;
