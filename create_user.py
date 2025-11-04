@@ -18,9 +18,12 @@ from basic_types.enums import PriceLevel
 # import backend_service
 
 headers = {
-    "Authorization": f'Bearer {env.get("TEST_SERVICE_TOKEN")}',
+    "Authorization": f"Bearer {env.get('TEST_SERVICE_TOKEN')}",
 }
 api_url = env.get("HOST_BACKEND")
+
+if not api_url.startswith("http"):
+    api_url = "http://" + api_url
 
 
 def post(url, payload):
