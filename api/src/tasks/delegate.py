@@ -55,12 +55,22 @@ class SlackMessage:
 
 
 @serde
+class SlackUser:
+    id: str
+
+
+@serde
+class SlackChannel:
+    id: str
+
+
+@serde
 class SlackInteraction:
     action: SlackInteractionAction
-    user: str
+    user: SlackUser
     message: SlackMessage
     trigger_id: str
-    channel: str
+    channel: SlackChannel
 
 
 def member_recently_received_task(member_id: int, days: int = 3) -> bool:
@@ -688,7 +698,7 @@ def send_slack_message_to_member(
         if slack_interaction is not None:
             # Respond to an existing message
             slack_response = slack_client.chat_update(
-                channel=slack_interaction.channel,
+                channel=slack_interaction.channel.id,
                 ts=slack_interaction.message.ts,
                 text=text,
                 blocks=blocks,
@@ -717,10 +727,10 @@ def send_slack_message_to_member(
         for action_type, value in actions:
             new_interaction = SlackInteraction(
                 action=SlackInteractionAction(action_id=action_type, value=f"{log_id}:{value}"),
-                user=slack_user,
+                user=SlackUser(id=slack_user),
                 message=SlackMessage(ts=slack_response.get("ts", "")),
                 trigger_id="",
-                channel=slack_response.get("channel", ""),
+                channel=SlackChannel(id=slack_response.get("channel", "")),
             )
             new_interaction_json = to_json(new_interaction)
             new_interaction_json = new_interaction_json.replace("'", "\\'")  # Poor-man's escaping for curl

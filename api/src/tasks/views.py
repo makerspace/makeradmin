@@ -60,7 +60,7 @@ def slack_interaction() -> dict:
         db_session.commit()
 
         slack_client.chat_update(
-            channel=payload.channel,
+            channel=payload.channel.id,
             ts=payload.message.ts,
             text="Thank you! The task has been marked as completed.",
             blocks=[],
@@ -78,7 +78,7 @@ def slack_interaction() -> dict:
         )
 
         slack_client.chat_update(
-            channel=payload.channel,
+            channel=payload.channel.id,
             ts=payload.message.ts,
             text="No worries, thanks for letting us know. We'll give you something else next time.",
             blocks=[],
