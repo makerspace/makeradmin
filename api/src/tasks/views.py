@@ -26,7 +26,7 @@ def slack_interaction() -> dict:
     Expects 'payload' form param with JSON body from Slack.
     button value format: "{log_id}:done" or "{log_id}:skip"
     """
-    json = request.data.decode("utf-8")
+    json = request.form.get("payload")
     if not json:
         raise BadRequest("Missing JSON payload")
     logger.info(f"Received Slack interaction payload:\n{json}")
