@@ -875,7 +875,13 @@ def process_new_visits() -> None:
 
     print("Last id", last_id)
     # TODO: Only consider recent visits, since the redis data is ephemeral and may be lost on rebuilds of the container
-    q = select(PhysicalAccessEntry).where(PhysicalAccessEntry.id > last_id).order_by(PhysicalAccessEntry.id.asc())
+    q = (
+        select(PhysicalAccessEntry)
+        .where(
+            PhysicalAccessEntry.id > last_id, PhysicalAccessEntry.created_at > datetime.now() - timedelta(minutes=20)
+        )
+        .order_by(PhysicalAccessEntry.id.asc())
+    )
     rows = db_session.execute(q).scalars().all()
     max_seen = last_id
     for entry in rows:
