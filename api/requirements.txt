@@ -28,6 +28,7 @@ NamedAtomicLock
 dataclasses_json
 pyserde
 pyjson5
+slack_sdk
 
 # Test requirements
 pytest<7.2.0 # https://github.com/pytest-dev/pytest/issues/10420 remove version limitation when fixed

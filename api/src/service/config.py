@@ -33,6 +33,7 @@ default = Dict(
         ACCESSY_SPECIAL_LABACCESS=None,
         ACCESSY_DO_MODIFY="false",  # Do perform modify operations to Accessy, default is to log only, useful when developing.
         LOG_DIR="logs",
+        SLACK_BOT_TOKEN=None,
     ),
 )
 env = Env()
@@ -62,6 +63,7 @@ def get_mysql_config() -> dict[str, str | int]:
 
 def get_public_url(path: str) -> str:
     """Get public site url."""
+    assert path == "" or path.startswith("/"), "path must start with /"
     host = config.get("HOST_PUBLIC")
     if not host.startswith("http://") and not host.startswith("https://"):
         host = "http://" + host
@@ -78,6 +80,7 @@ def get_46elks_auth() -> tuple[str, str] | None:
 
 def get_admin_url(path: str) -> str:
     """Get public site url."""
+    assert path == "" or path.startswith("/"), "path must start with /"
     host = config.get("HOST_FRONTEND")
     if not host.startswith("http://") and not host.startswith("https://"):
         host = "http://" + host
@@ -86,6 +89,7 @@ def get_admin_url(path: str) -> str:
 
 def get_api_url(path: str) -> str:
     """Get public site url."""
+    assert path == "" or path.startswith("/"), "path must start with /"
     host = config.get("HOST_BACKEND")
     if not host.startswith("http://") and not host.startswith("https://"):
         host = "http://" + host

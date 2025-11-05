@@ -62,6 +62,10 @@ services:
       FIRSTRUN_AUTO_ADMIN_EMAIL:
       FIRSTRUN_AUTO_ADMIN_PASSWORD:
       MAKERSPACE_LOCAL_TIMEZONE:
+      SLACK_BOT_TOKEN:
+      TRELLO_KEY:
+      TRELLO_TOKEN:
+      TRELLO_BOARD_URL_TASKS:
   redis:
     # Use redis as a cross-worker cache
     # This instance does NOT persist any data if the container is rebuilt.
@@ -126,11 +130,16 @@ services:
       MAILGUN_TO_OVERRIDE:
       HOST_PUBLIC: "${PROTOCOL}://${HOST_PUBLIC}"
       HOST_FRONTEND: "${PROTOCOL}://${HOST_FRONTEND}"
+      HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
       ACCESSY_CLIENT_ID:
       ACCESSY_CLIENT_SECRET:
       ACCESSY_LABACCESS_GROUP:
       ACCESSY_SPECIAL_LABACCESS_GROUP:
       ACCESSY_DO_MODIFY:
+      SLACK_BOT_TOKEN:
+      TRELLO_KEY:
+      TRELLO_TOKEN:
+      TRELLO_BOARD_URL_TASKS:
     depends_on:
       - api
     networks:

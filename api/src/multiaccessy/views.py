@@ -3,7 +3,7 @@ from datetime import date, datetime
 from logging import getLogger
 from typing import Any, Optional, Tuple, cast
 
-from accessy_syncer import deferred_sync
+from accessy_syncer import deferred_delegate, deferred_sync
 from dataclasses_json import DataClassJsonMixin
 from flask import Response, request
 from redis_cache import redis_connection
@@ -225,6 +225,7 @@ def handle_event(event: AccessyWebhookEvent) -> None:
             )
         )
         db_session.commit()
+        deferred_delegate()
     elif isinstance(event, AccessyWebhookEventMembership_Created):
         # Expire the cache if an invitation was likely used.
         # This seems to happen when a user accepts an invitation.

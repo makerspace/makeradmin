@@ -11,6 +11,7 @@ import multiaccessy
 import quiz
 import shop
 import shop.accounting
+import tasks
 
 Instance = namedtuple("Instance", "path,service")
 
@@ -30,4 +31,5 @@ services = (
     Instance(path="/quiz", service=quiz.service),
     Instance(path="/accessy", service=multiaccessy.service),
     Instance(path="/box_terminator", service=box_terminator.service),
+    Instance(path="/tasks", service=tasks.service),
 )

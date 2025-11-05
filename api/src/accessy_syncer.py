@@ -21,16 +21,29 @@ logger = getLogger("accessy-syncer")
 COMMAND_SCHEDULED = "sheduled"
 COMMAND_SHIP = "ship"
 COMMAND_SYNC = "sync"
+COMMAND_DELEGATE = "delegate"
 
-REDIS_COMMAND_QUEUE = "accessy_commands"
+REDIS_COMMAND_QUEUE = "accessy_commands_zset"
+
+
+def enqueue_command(command: str, timestamp: float) -> None:
+    """Add a command to the sorted set with a timestamp."""
+    command_key = f"{command}:{timestamp}"  # Unique key for each command-timestamp pair
+    logger.info(f"Enqueuing command '{command}' with timestamp {timestamp}")
+    redis_connection.zadd(REDIS_COMMAND_QUEUE, {command_key: timestamp})
 
 
 def deferred_sync() -> None:
     """Enqueue a sync command to be run by the main loop."""
-    # Only push if the command is not already in the queue
-    if redis_connection.lpos(REDIS_COMMAND_QUEUE, COMMAND_SYNC.encode("utf-8")) is None:
-        logger.info("Enqueuing deferred sync command")
-        redis_connection.rpush(REDIS_COMMAND_QUEUE, COMMAND_SYNC.encode("utf-8"))
+    enqueue_command(COMMAND_SYNC, time.time())
+
+
+def deferred_delegate() -> None:
+    from tasks.delegate import ASSIGNMENT_DELAY_AFTER_START_OF_VISIT
+
+    """Enqueue a delegate command to be run by the main loop."""
+    MARGIN = 5  # seconds
+    enqueue_command(COMMAND_DELEGATE, time.time() + ASSIGNMENT_DELAY_AFTER_START_OF_VISIT.total_seconds() + MARGIN)
 
 
 def scheduled_ship() -> None:
@@ -71,19 +84,29 @@ def hourly_job() -> None:
 
 def run_queued_commands() -> None:
     try:
-        command = redis_connection.lpop(REDIS_COMMAND_QUEUE)
-        if command is not None:
-            command = command.decode("utf-8")
-            logger.info(f"Running deferred command from queue: {command}")
+        now = time.time()
+        # Get the earliest command in the sorted set
+        commands = redis_connection.zrangebyscore(REDIS_COMMAND_QUEUE, 0, now, start=0, num=1, withscores=True)
+        if commands:
+            command_key_b, timestamp = commands[0]
+            command_key = command_key_b.decode("utf-8")
+            command, _ = command_key.rsplit(":", 1)  # Extract the command from the key
+            logger.info(f"Running deferred command '{command}' scheduled for {datetime.fromtimestamp(timestamp)}")
+            redis_connection.zrem(REDIS_COMMAND_QUEUE, command_key)  # Remove the command after fetching
+
             match command:
                 case x if x == COMMAND_SYNC:
                     sync()
                 case x if x == COMMAND_SHIP:
                     ship_orders()
+                case x if x == COMMAND_DELEGATE:
+                    from tasks.delegate import process_new_visits
+
+                    process_new_visits()
                 case _:
-                    logger.warning(f"unknown command from queue: {command}")
+                    logger.warning(f"Unknown command: {command}")
     except Exception as e:
-        logger.exception(f"error processing command queue: {e}")
+        logger.exception(f"Error processing command queue: {e}")
 
 
 def main(exit: Event) -> None:
