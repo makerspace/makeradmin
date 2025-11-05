@@ -873,13 +873,15 @@ def process_new_visits() -> None:
     """
     last_id = int(redis_connection.get(REDIS_LAST_ID_KEY) or b"0")
 
+    print("Last id", last_id)
+    # TODO: Only consider recent visits, since the redis data is ephemeral and may be lost on rebuilds of the container
     q = select(PhysicalAccessEntry).where(PhysicalAccessEntry.id > last_id).order_by(PhysicalAccessEntry.id.asc())
     rows = db_session.execute(q).scalars().all()
     max_seen = last_id
     for entry in rows:
+        max_seen = max(max_seen, entry.id)
         if entry.member_id is not None:
             delegate_task_for_member(entry.member_id)
-        max_seen = max(max_seen, entry.id)
 
     redis_connection.set(REDIS_LAST_ID_KEY, str(max_seen))
     db_session.commit()

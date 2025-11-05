@@ -92,7 +92,7 @@ def run_queued_commands() -> None:
             command_key = command_key_b.decode("utf-8")
             command, _ = command_key.rsplit(":", 1)  # Extract the command from the key
             logger.info(f"Running deferred command '{command}' scheduled for {datetime.fromtimestamp(timestamp)}")
-            redis_connection.zrem(REDIS_COMMAND_QUEUE, command_key)  # Remove the command after fetching
+            redis_connection.zrem(REDIS_COMMAND_QUEUE, command_key_b)  # Remove the command after fetching
 
             match command:
                 case x if x == COMMAND_SYNC:
