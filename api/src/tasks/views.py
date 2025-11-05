@@ -31,8 +31,13 @@ def slack_interaction() -> dict:
         raise BadRequest("Missing JSON payload")
     logger.info(f"Received Slack interaction payload:\n{json}")
     payload = from_json(SlackInteraction, json)
-    action_type = payload.action.action_id
-    parts = payload.action.value.split(":")
+
+    if not payload.actions:
+        raise BadRequest("No actions in payload")
+
+    action = payload.actions[0]
+    action_type = action.action_id
+    parts = action.value.split(":")
 
     log_id = int(parts[0])
     sub_action = parts[1]

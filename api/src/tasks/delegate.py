@@ -66,7 +66,7 @@ class SlackChannel:
 
 @serde
 class SlackInteraction:
-    action: SlackInteractionAction
+    actions: list[SlackInteractionAction]
     user: SlackUser
     message: SlackMessage
     trigger_id: str
@@ -726,7 +726,7 @@ def send_slack_message_to_member(
         logger.info(f"Dev mode: Use the following curl commands to simulate Slack button actions:")
         for action_type, value in actions:
             new_interaction = SlackInteraction(
-                action=SlackInteractionAction(action_id=action_type, value=f"{log_id}:{value}"),
+                actions=[SlackInteractionAction(action_id=action_type, value=f"{log_id}:{value}")],
                 user=SlackUser(id=slack_user),
                 message=SlackMessage(ts=slack_response.get("ts", "")),
                 trigger_id="",
