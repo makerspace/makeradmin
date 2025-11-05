@@ -5,6 +5,7 @@ from typing import cast, get_args
 from flask import request
 from membership.models import Member
 from serde import from_dict, serde
+from serde.json import from_json, to_json
 from service.api_definition import POST, PUBLIC
 from service.config import config
 from service.db import db_session
@@ -25,10 +26,11 @@ def slack_interaction() -> dict:
     Expects 'payload' form param with JSON body from Slack.
     button value format: "{log_id}:done" or "{log_id}:skip"
     """
-    json = request.json
-    if json is None:
+    json = request.data.decode("utf-8")
+    if not json:
         raise BadRequest("Missing JSON payload")
-    payload = from_dict(SlackInteraction, json)
+    logger.info(f"Received Slack interaction payload:\n{json}")
+    payload = from_json(SlackInteraction, json)
     action_type = payload.action.action_id
     parts = payload.action.value.split(":")
 
