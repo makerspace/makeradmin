@@ -18,7 +18,7 @@ logger = getLogger("makeradmin")
 
 # This is the current global banner.
 # Set to an empty string ("") to disable.
-banner = ""
+banner = "The wood workshop is currently closed due to a fire. Check Slack for more info."
 
 sidebar_additional_classes = ""
 if banner:
