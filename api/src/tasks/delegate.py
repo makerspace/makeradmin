@@ -281,14 +281,12 @@ class MemberTaskInfo:
             .limit(1)
         ).scalar_one_or_none()
 
-        print(last_assigned_task)
         if last_assigned_task is not None:
             day_after_last_task = last_assigned_task.created_at
             day_after_last_task += timedelta(days=1)
             day_after_last_task.replace(hour=0, minute=0, second=0, microsecond=0)
 
             visits = visit_events_by_member_id(day_after_last_task, now, member_id=member_id).get(member_id, [])
-            print(visits)
             time_at_space_since_last_task = timedelta()
             for _, duration in visits:
                 time_at_space_since_last_task += duration
@@ -672,8 +670,8 @@ class CardRequirements:
         if "Machine: Laser" in labels:
             required.append(
                 (
-                    "Hasn't purchased Laser Minutes recently",
-                    lambda context: (context.member.purchased_product_count("Laser Minutes") > 50),
+                    "Hasn't purchased Laser cutter usage recently",
+                    lambda context: (context.member.purchased_product_count("Laser cutter usage") > 50),
                 )
             )
 
@@ -1139,7 +1137,6 @@ def upload_image_to_slack(trello_attachment: trello.TrelloAttachment, slack_clie
             filename=trello_attachment.name,
             title=trello_attachment.name,
         )
-        print(slack_response)
         slack_url: str | None = slack_response["file"]["permalink"]
         slack_image_id: str | None = slack_response["file"]["id"]
         if not slack_url or not slack_image_id:
@@ -1297,7 +1294,6 @@ def send_slack_message_to_member(
             )
         else:
             slack_response = slack_client.chat_postMessage(channel=slack_user, text=text, blocks=blocks)
-        print(slack_response)
     except SlackApiError as e:
         logger.error(f"Failed to send Slack message to #{member.member_number}: {e.response['error']}")
         raise
@@ -1341,30 +1337,14 @@ def send_slack_message_to_member(
 def select_card_for_member(ctx: TaskContext, ignore_reasons: list[str]) -> Optional[trello.TrelloCard]:
     member_id = ctx.member.member_id
     visits = visit_events_by_member_id(datetime.now() - timedelta(days=30), datetime.now())
-    for visit_time, duration in visits.get(member_id, []):
-        print(f"Member {member_id} visited at {visit_time} for {duration}")
 
     ASSIGN_DELAY = timedelta(minutes=3)
-    print("Loading reference task assignment contexts")
     reference_task_assignment_contexts = [
         TaskContext.from_cache(m, visit_time + ASSIGN_DELAY)
         for m, visit_times in visits.items()
         for (visit_time, _) in visit_times
     ]
 
-    # for c in reference_task_assignment_contexts:
-    #     if random() < 0.5:
-    #         c.member.completed_tasks_by_label["Level: 1"] = 3
-    #         c.member.total_completed_tasks += 3
-
-    #     if random() < 0.3:
-    #         c.member.total_completed_tasks += 10
-
-    #     c.member.doors_opened_this_visit.add("<UUID>")
-
-    print(len(reference_task_assignment_contexts), len(visits))
-
-    print("Loading cards")
     cards = trello.cached_cards(trello.SOURCE_LIST_NAME)
     template_cards = trello.cached_cards(trello.TEMPLATE_LIST_NAME)
     print(f"Loaded {len(cards)} cards")
@@ -1428,7 +1408,6 @@ def delegate_task_for_member(
         logger.info(f"Member {member_id} received a task recently; skipping delegation")
         return None
 
-    print(ctx.member.time_at_space_since_last_task)
     trello.refresh_cache()  # ensure fresh data when delegating
     picked_card = select_card_for_member(ctx, ignore_reasons)
 
