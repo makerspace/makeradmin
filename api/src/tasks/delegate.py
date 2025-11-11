@@ -63,9 +63,15 @@ class SlackFile:
 
 
 @serde
+class SlackSelectedOption:
+    value: str
+
+
+@serde
 class SlackInteractionAction:
     action_id: str
-    value: str
+    value: str | None = None
+    selected_option: SlackSelectedOption | None = None
 
 
 @serde

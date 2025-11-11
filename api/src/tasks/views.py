@@ -60,7 +60,7 @@ def slack_interaction() -> dict:
 def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[str] = []) -> dict:
     action = payload.actions[0]
     action_type = action.action_id
-    sub_action = action.value
+    sub_action = action.selected_option.value if action.selected_option is not None else action.value
 
     log = db_session.execute(
         select(TaskDelegationLog)
