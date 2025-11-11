@@ -55,6 +55,12 @@ TASK_LOG_CHANNEL = config.get("SLACK_TASK_LOG_CHANNEL_ID")
 if TASK_LOG_CHANNEL == "":
     TASK_LOG_CHANNEL = None
 
+# Duration for which a member is considered "at the space" after having opened a door.
+# If they open a door again, the timer resets.
+DURATION_AT_SPACE_HEURISTIC = timedelta(minutes=90)
+
+TASK_RESPONSIBLE = "@Aron Granberg"
+
 
 @serde
 class SlackFile:
@@ -536,7 +542,7 @@ class CardCompletionInfo:
                     TaskDelegationLog.action == "completed",
                 )
                 .join(PhysicalAccessEntry, PhysicalAccessEntry.member_id == Member.member_id)
-                .where(PhysicalAccessEntry.created_at >= datetime.now() - timedelta(minutes=90))
+                .where(PhysicalAccessEntry.created_at >= datetime.now() - DURATION_AT_SPACE_HEURISTIC)
                 .group_by(Member.member_id)
             )
             .tuples()
@@ -886,7 +892,7 @@ def visit_events_by_member_id(
 
         def add_visit(start: datetime, end: datetime) -> None:
             duration = end - start
-            duration += timedelta(minutes=90)  # Assume some extra time after last door open
+            duration += DURATION_AT_SPACE_HEURISTIC  # Assume some extra time after last door open
             visits.append((start, duration))
 
         for event in events:
