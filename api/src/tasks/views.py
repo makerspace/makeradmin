@@ -185,7 +185,6 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
         if log.action == "completed":
             # If the task was already completed, then give the member a new task instead of replacing the old one
             # This can happen if the member clicks "I can do something else too" after already marking the task done
-            print(ignore_reasons)
             delegate_task_for_member(
                 member.member_id, slack_interaction=None, force=True, ignore_reasons=ignore_reasons
             )
