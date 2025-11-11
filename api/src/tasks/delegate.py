@@ -1075,9 +1075,15 @@ def task_score(
 
 def lookup_slack_user_by_email(email: str, slack_client: WebClient) -> Optional[str]:
     # Look up Slack user by email
+    cache_key = f"slack_user_id:{email}"
+    cached_id = redis_connection.get(cache_key)
+    if cached_id:
+        return cached_id.decode("utf-8")
+
     try:
         response = slack_client.users_lookupByEmail(email=email)
         id: str = response["user"]["id"]
+        redis_connection.setex(cache_key, timedelta(hours=24), id)
         return id
     except SlackApiError as e:
         logger.error(f"Failed to look up Slack user by email {email}: {e.response['error']}")
