@@ -85,6 +85,12 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
     slack_client = WebClient(token=token)
     now = datetime.now()
 
+    try:
+        card = trello.get_card(log.card_id)
+    except Exception as e:
+        logger.error(f"Failed to fetch Trello card {log.card_id}: {e}")
+        raise BadRequest("Trello card not found")
+
     if action_type == "task_feedback_done":
         if sub_action != "done":
             raise BadRequest(f"Invalid sub-action '{sub_action}'")
@@ -94,12 +100,6 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
 
         # Update log and move trello card
         log.action = "completed"
-
-        try:
-            card = trello.get_card(log.card_id)
-        except Exception as e:
-            logger.error(f"Failed to fetch Trello card {log.card_id}: {e}")
-            raise BadRequest("Trello card not found")
 
         completion_info = CardCompletionInfo.from_card(card, [])
         requirements = CardRequirements.from_card(card)
