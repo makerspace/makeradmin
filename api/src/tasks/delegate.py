@@ -618,7 +618,7 @@ class CardRequirements:
         # label("Size: Large").size(16)
         # label("Size: Medium").size(8)
 
-        if "Room: Big room" in labels:
+        if "Room: Big room" in labels or "Room: 3D-printers" in labels or "Room: Painting room" in labels:
             required.append(
                 (
                     "Hasn't entered lower floor",
@@ -627,7 +627,7 @@ class CardRequirements:
                 )
             )
 
-        if "Room: Textile workshop" in labels:
+        if "Room: Textile workshop" in labels or "Room: Electronics room" in labels:
             required.append(
                 (
                     "Hasn't entered upper floor",
@@ -651,7 +651,7 @@ class CardRequirements:
                 )
             )
 
-        if "Room: Metal workshop" in labels:
+        if "Room: Metal workshop" in labels or "Room: Welding" in labels:
             required.append(
                 (
                     "Hasn't entered lower floor/metal workshop",
@@ -778,6 +778,18 @@ class CardRequirements:
             )
             completion_message.append(
                 lambda context: "Congratulations on completing a large task! Your effort is greatly appreciated and helps keep the makerspace running smoothly! :tada:"
+            )
+
+        if "Needs documentation" in labels:
+            introduction_message.append(
+                lambda context: f":construction: This task is not yet documented. If you know how to do it, your task is to do it and document it well for future members. This includes writing a step-by-step guide for how to do it, and taking good photos of the process. Send the results to {TASK_RESPONSIBLE} so that the task can be updated. The goal is that a reasonable member should be able to do the task without prior instructions or help from others."
+            )
+            if size == TaskSize.SMALL:
+                size = TaskSize.MEDIUM  # Documentation tasks are at least medium size
+
+        if "Needs better image" in labels:
+            introduction_message.append(
+                lambda context: f":camera_flash: This task needs better images. If you complete this task, please take clear and well-lit photos that illustrate the steps involved. Send the photos to {TASK_RESPONSIBLE} so that the task can be updated."
             )
 
         # Extract "Requires" instructions from the card description
