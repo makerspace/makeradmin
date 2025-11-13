@@ -232,7 +232,6 @@ def main() -> None:
                         member_id=None,
                         card_id=card.id,
                         task_size=TaskSize.SMALL,
-                        template_card_id=None,
                         slack_channel_id=None,
                         slack_message_ts=None,
                         card_name=card.name,

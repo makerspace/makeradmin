@@ -35,10 +35,6 @@ class TaskDelegationLog(Base):
     card_id: Mapped[str] = mapped_column(String(128), nullable=False)  # Trello card ID
     task_size: Mapped[TaskSize] = mapped_column(nullable=False)  # Size of the task
 
-    # Trello card ID that was the template for this specific instance.
-    # Can be null if not applicable. This is used for cards that are scheduled repeatedly.
-    template_card_id: Mapped[str] = mapped_column(String(128), nullable=True)
-
     slack_channel_id: Mapped[str] = mapped_column(String(64), nullable=True)  # Slack channel ID
     slack_message_ts: Mapped[str] = mapped_column(
         String(32), nullable=True
