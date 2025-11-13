@@ -121,12 +121,16 @@ TASK_SIZE_TO_TIME = {
 
 @serde
 class TaskDelegationLogSimple:
+    # ID of the log entry in the database
     log_id: int
+    # ID of the trello card
     card_id: str
-    # template_card_id: str | None
     status: TaskDelegationLog.ACTION_TYPE
+    # Name of the trello card
     card_name: str
+    # When the log entry was created
     created_at: datetime
+    # Size of the task
     size: TaskSize
 
     @staticmethod
@@ -539,12 +543,25 @@ class CardCompletionInfo:
 
 @dataclass
 class CardRequirements:
+    # List of (requirement name, requirement function) tuples.
     required: Sequence[Tuple[str, Callable[[TaskContext], bool]]]
+
+    # Size of the task
     size: TaskSize
+
+    # In which room the task is located
     location: str | None
+
+    # Which machine the task is associated with
     machine: str | None
+
+    # Messages to show when assigning the task to a member
     introduction_message: list[Callable[[TaskContext], str | None]]
+
+    # Messages to show when completing the task
     completion_message: list[Callable[[TaskContext], str | None]]
+
+    # Task description
     description: str
 
     # If set, the average interval at which this task repeats.
@@ -603,27 +620,6 @@ class CardRequirements:
                 checked_labels.add(label_name)
                 return True
             return False
-
-        # label("Room: Big room").requires(door_opened("UUID") or door_opened("UUID"))
-        # label("Room: Textile workshop").requires(door_opened("UUID"))
-
-        # label("Machine: Laser").requires(purchased_product_count("Laser Minutes", member_id=member_id, days=30) > 50)
-        # # label("Machine: Laser").ask_before_assigning("Are you using the laser today?")
-
-        # label("Cleaning").score(2 if is_evening() or is_morning() else 1)
-
-        # label("Room Developer: Wood").requires(is_part_of_group("Room Developers: Wood") or is_part_of_group("Styrelsen"))
-
-        # label("Level: 3").requires(previously_completed_tasks(label("Level: 2")) >= 2)
-        # label("Level: 3").requires(unique_months_visited() >= 3)
-
-        # label("Level: 2").requires(previously_completed_tasks(label("Level: 1")) >= 3)
-
-        # label("Size: Medium").requires(previously_completed_tasks() >= 5)
-        # label("Size: Large").requires(previously_completed_tasks() >= 10)
-
-        # label("Size: Large").size(16)
-        # label("Size: Medium").size(8)
 
         for label in labels:
             if label.startswith("Room: "):
@@ -1037,9 +1033,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
