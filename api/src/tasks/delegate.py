@@ -3,7 +3,7 @@ import re
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from enum import IntEnum
+from enum import Enum, IntEnum
 from io import BytesIO
 from logging import getLogger
 from random import random
@@ -13,6 +13,8 @@ import requests
 from membership.models import Group, Member, member_group
 from multiaccessy.models import PhysicalAccessEntry
 from PIL import Image
+from quiz.models import QuizAnswer, QuizQuestion
+from quiz.views import member_quiz_statistics
 from redis_cache import redis_connection
 from serde import field, serde, to_dict
 from serde.json import from_json, to_json
@@ -48,7 +50,7 @@ REDIS_LAST_ID_KEY = "task_delegator_last_id"
 ASSIGNMENT_DELAY_AFTER_START_OF_VISIT = timedelta(minutes=3)
 
 # Increment this when the structure or semantics of MemberTaskInfo changes, to avoid using stale cached data.
-CACHE_VERSION = 4
+CACHE_VERSION = 5
 IMAGE_CACHE_VERSION = 5
 
 TASK_LOG_CHANNEL = config.get("SLACK_TASK_LOG_CHANNEL_ID")
@@ -60,6 +62,12 @@ if TASK_LOG_CHANNEL == "":
 DURATION_AT_SPACE_HEURISTIC = timedelta(minutes=90)
 
 TASK_RESPONSIBLE = "@Aron Granberg"
+
+GREY_ANSI = "\033[90m"
+YELLOW_ANSI = "\033[93m"
+RED_ANSI = "\033[91m"
+BLUE_ANSI = "\033[94m"
+RESET_ANSI = "\033[0m"
 
 
 @serde
@@ -113,8 +121,9 @@ TASK_SIZE_TO_TIME = {
 
 @serde
 class TaskDelegationLogSimple:
+    log_id: int
     card_id: str
-    template_card_id: str | None
+    # template_card_id: str | None
     status: TaskDelegationLog.ACTION_TYPE
     card_name: str
     created_at: datetime
@@ -125,8 +134,9 @@ class TaskDelegationLogSimple:
         if log is None:
             return None
         return TaskDelegationLogSimple(
+            log_id=log.id,
             card_id=log.card_id,
-            template_card_id=log.template_card_id,
+            # template_card_id=log.template_card_id,
             card_name=log.card_name,
             created_at=log.created_at,
             size=log.task_size,
@@ -136,7 +146,7 @@ class TaskDelegationLogSimple:
     def matches(self, other: "CardCompletionInfo") -> bool:
         return (
             self.card_id == other.card_id
-            or (self.template_card_id is not None and self.template_card_id == other.template_card_id)
+            # or (self.template_card_id is not None and self.template_card_id == other.template_card_id)
             or self.card_name == other.card_name
         )
 
@@ -345,8 +355,8 @@ class MemberTaskInfo:
         completed_card_names: dict[str, int] = {}
         for log in completed_logs:
             completed_card_ids[log.card_id] = completed_card_ids.get(log.card_id, 0) + 1
-            if log.template_card_id is not None:
-                completed_card_ids[log.template_card_id] = completed_card_ids.get(log.template_card_id, 0) + 1
+            # if log.template_card_id is not None:
+            #     completed_card_ids[log.template_card_id] = completed_card_ids.get(log.template_card_id, 0) + 1
             completed_card_names[log.card_name] = completed_card_names.get(log.card_name, 0) + 1
 
         return MemberTaskInfo(
@@ -435,82 +445,41 @@ class CardCompletionInfo:
     # If this card was created from a template card, the ID of that template card.
     # Template cards are used for repeat tasks, and a new card instance will be created
     # each repeat cycle.
-    template_card_id: Optional[str]
+    # template_card_id: Optional[str]
 
     # Trello card name
     card_name: str
 
-    # The first time this instance of the task was available to be assigned.
-    # For a repeat task, this is the time when the last repeat cycle began.
+    # The first time this task was available to be assigned.
+    # This is when the card was created in Trello.
     first_available_at: datetime
 
     present_members_with_experience: list[Member]
 
-    # If set, the average interval at which this task repeats.
-    # If not set, the task is likely a one-off task.
-    repeat_interval: Optional[timedelta]
-
-    # True if the task can be repeated many times by the same or different members.
-    # It will not be moved to the Done list once completed.
-    infinitely_repeatable: bool = True
-
-    # How many times an individual member can complete this task.
-    limit_per_member: Optional[int] = None
-
-    # How many members are assigned to this this specific task right now.
+    # How many members are assigned to this task right now.
     # Will typically only be 0 or 1, unless the task is infinitely repeatable
-    assigned_count: int = 0
+    assigned_count: int
 
-    # How many times this specific task has been completed.
-    # This does not count repeat completions of the same template card.
-    completed_count: int = 0
+    # How many times this task has been completed.
+    completed_count: int
+
+    # The last time this task was completed by any member.
+    last_completed: datetime | None
 
     @staticmethod
-    def from_card(card: trello.TrelloCard, template_cards: list[trello.TrelloCard]) -> "CardCompletionInfo":
+    def from_card(card: trello.TrelloCard) -> "CardCompletionInfo":
         # Find the first time this card was assigned to the member
         first_available_at = trello.trello_id_to_timestamp(card.id)
-        repeat_interval = None
-
-        limit_per_member = None
-        for label in card.labels:
-            if label.name.startswith("Limit per member:"):
-                try:
-                    limit_per_member = int(label.name.split("Limit per member:")[1])
-                except ValueError:
-                    logger.warning(f"Invalid limit per member label on card {card.id}: {label.name}")
 
         # Find the template card that this card was copied from.
         # TODO: Validate that no two template cards have the same name
-        template_card = next((c for c in template_cards if c.name == card.name), None)
+        # template_card = next((c for c in template_cards if c.name == card.name), None)
 
-        if template_card is not None and template_card.id == card.id:
-            logger.error(
-                f"Card {card.id} has itself as template card. Some list names in the trello config must be incorrect."
-            )
-            template_card = None
-
-        if template_card is not None and template_card.pluginData is not None:
-            recurrance_plugin_data_value = next(
-                (c for c in template_card.pluginData if c.idPlugin == "57b47fb862d25a30298459b1"), None
-            )
-            if recurrance_plugin_data_value is not None:
-                if recurrance_plugin_data_value.value == "{}":
-                    logger.warning(f"Empty recurrance plugin data on card {card.name} ({card.id})")
-                else:
-                    recurrance_data = from_json(RecurrancePluginData, recurrance_plugin_data_value.value).recurrence
-                    if recurrance_data.period == "daily":
-                        repeat_interval = timedelta(days=recurrance_data.interval)
-                    elif recurrance_data.period == "weekly":
-                        assert recurrance_data.weekdays is not None
-                        repeat_interval = timedelta(weeks=recurrance_data.interval) / len(recurrance_data.weekdays)
-                    elif recurrance_data.period == "monthly":
-                        assert recurrance_data.days is not None
-                        repeat_interval = timedelta(days=30 * recurrance_data.interval) / len(recurrance_data.days)
-                    elif recurrance_data.period == "yearly":
-                        assert recurrance_data.dates is not None
-                        repeat_interval = timedelta(days=365 * recurrance_data.interval) / len(recurrance_data.dates)
-                    else:
-                        logger.warning(f"Unknown recurrance period on card {card.id}: {recurrance_data.period}")
+        # if template_card is not None and template_card.id == card.id:
+        #     logger.error(
+        #         f"Card {card.id} has itself as template card. Some list names in the trello config must be incorrect."
+        #     )
+        #     template_card = None
 
         assigned_count = (
             db_session.execute(
@@ -530,14 +499,20 @@ class CardCompletionInfo:
             or 0
         )
 
+        last_completed = db_session.execute(
+            select(func.max(TaskDelegationLog.created_at)).where(
+                TaskDelegationLog.card_id == card.id, TaskDelegationLog.action == "completed"
+            )
+        ).scalar_one_or_none()
+
         present_members_with_experience = list(
             db_session.execute(
                 select(Member, func.count())
                 .join(TaskDelegationLog, TaskDelegationLog.member_id == Member.member_id)
                 .where(
                     (
-                        (TaskDelegationLog.card_id == card.id)
-                        | (TaskDelegationLog.template_card_id == (template_card or card).id)
+                        TaskDelegationLog.card_id == card.id
+                        # | (TaskDelegationLog.template_card_id == (template_card or card).id)
                     ),
                     TaskDelegationLog.action == "completed",
                 )
@@ -553,14 +528,12 @@ class CardCompletionInfo:
         return CardCompletionInfo(
             card_name=card.name,
             card_id=card.id,
-            template_card_id=template_card.id if template_card else None,
+            # template_card_id=template_card.id if template_card else None,
             first_available_at=first_available_at,
-            repeat_interval=repeat_interval,
-            infinitely_repeatable=any(label.name == "Infinitely Repeatable" for label in card.labels),
-            limit_per_member=limit_per_member,
             assigned_count=assigned_count,
             completed_count=completed_count,
             present_members_with_experience=[pair[0] for pair in present_members_with_experience],
+            last_completed=last_completed,
         )
 
 
@@ -568,9 +541,22 @@ class CardCompletionInfo:
 class CardRequirements:
     required: Sequence[Tuple[str, Callable[[TaskContext], bool]]]
     size: TaskSize
+    location: str | None
+    machine: str | None
     introduction_message: list[Callable[[TaskContext], str | None]]
     completion_message: list[Callable[[TaskContext], str | None]]
     description: str
+
+    # If set, the average interval at which this task repeats.
+    # If not set, the task is likely a one-off task.
+    repeat_interval: timedelta | None
+
+    # True if the task can be repeated many times by the same or different members.
+    # It will not be moved to the Done list once completed.
+    infinitely_repeatable: bool
+
+    # How many times an individual member can complete this task.
+    limit_per_member: Optional[int]
 
     def can_satisfy(self, context: TaskContext) -> bool:
         for _, req in self.required:
@@ -608,6 +594,15 @@ class CardRequirements:
         size = TaskSize.SMALL
         completion_message: list[Callable[[TaskContext], str | None]] = []
         introduction_message: list[Callable[[TaskContext], str | None]] = []
+        location = None
+        machine = None
+        checked_labels: Set[str] = set()
+
+        def has_label(label_name: str) -> bool:
+            if label_name in labels:
+                checked_labels.add(label_name)
+                return True
+            return False
 
         # label("Room: Big room").requires(door_opened("UUID") or door_opened("UUID"))
         # label("Room: Textile workshop").requires(door_opened("UUID"))
@@ -630,7 +625,20 @@ class CardRequirements:
         # label("Size: Large").size(16)
         # label("Size: Medium").size(8)
 
-        if "Room: Big room" in labels or "Room: 3D-printers" in labels or "Room: Painting room" in labels:
+        for label in labels:
+            if label.startswith("Room: "):
+                checked_labels.add(label)
+                if location is not None:
+                    logger.warning(f"Multiple location labels on card {card.id}: {location} and {label}")
+                location = label.split("Room: ")[1]
+
+            if label.startswith("Machine: "):
+                checked_labels.add(label)
+                if machine is not None:
+                    logger.warning(f"Multiple machine labels on card {card.id}: {machine} and {label}")
+                machine = label.split("Machine: ")[1]
+
+        if has_label("Room: Big room") or has_label("Room: 3D-printers") or has_label("Room: Painting room"):
             required.append(
                 (
                     "Hasn't entered lower floor",
@@ -639,7 +647,7 @@ class CardRequirements:
                 )
             )
 
-        if "Room: Textile workshop" in labels or "Room: Electronics room" in labels:
+        if has_label("Room: Textile workshop") or has_label("Room: Electronics room"):
             required.append(
                 (
                     "Hasn't entered upper floor",
@@ -647,7 +655,7 @@ class CardRequirements:
                 )
             )
 
-        if "Room: Wood workshop" in labels:
+        if has_label("Room: Wood workshop"):
             required.append(
                 (
                     "Hasn't entered lower floor",
@@ -663,7 +671,7 @@ class CardRequirements:
                 )
             )
 
-        if "Room: Metal workshop" in labels or "Room: Welding" in labels:
+        if has_label("Room: Metal workshop") or has_label("Room: Welding"):
             required.append(
                 (
                     "Hasn't entered lower floor/metal workshop",
@@ -671,7 +679,7 @@ class CardRequirements:
                 )
             )
 
-        if "Room: Storage room" in labels:
+        if has_label("Room: Storage room"):
             required.append(
                 (
                     "Hasn't entered storage room",
@@ -679,7 +687,7 @@ class CardRequirements:
                 )
             )
 
-        if "Machine: Laser" in labels:
+        if has_label("Machine: Laser"):
             required.append(
                 (
                     "Hasn't purchased Laser cutter usage recently",
@@ -687,7 +695,7 @@ class CardRequirements:
                 )
             )
 
-        if "Board member" in labels:
+        if has_label("Board member"):
             required.append(
                 (
                     "Is not a board member",
@@ -695,7 +703,7 @@ class CardRequirements:
                 )
             )
 
-        if "Room Developer: Wood" in labels:
+        if has_label("Room Developer: Wood"):
             required.append(
                 (
                     "Is not a wood room developer or board member",
@@ -705,7 +713,27 @@ class CardRequirements:
                 )
             )
 
-        if "Level: 3" in labels:
+        if has_label("Level: 4"):
+            required.append(
+                (
+                    "Has not completed Level: 3 tasks at least twice",
+                    lambda context: (context.member.completed_tasks_with_label("Level: 3") >= 2),
+                )
+            )
+            required.append(
+                (
+                    "Has visited the space fewer than 6 unique months",
+                    lambda context: (context.member.unique_months_visited >= 6),
+                )
+            )
+
+            completion_message.append(
+                lambda context: "Congratulations on completing your *first Level 4 task*! You're becoming a true makerspace hero! :star_struck:"
+                if context.member.completed_tasks_with_label("Level: 4") == 1
+                else None
+            )
+
+        if has_label("Level: 3"):
             required.append(
                 (
                     "Has not completed Level: 2 tasks at least twice",
@@ -719,7 +747,7 @@ class CardRequirements:
                 )
             )
 
-            if "Room: Wood workshop" in labels:
+            if has_label("Room: Wood workshop"):
                 required.append(
                     (
                         "Has not completed wood workshop tasks at least twice",
@@ -733,7 +761,7 @@ class CardRequirements:
                 else None
             )
 
-        if "Level: 2" in labels:
+        if has_label("Level: 2"):
             required.append(
                 (
                     "Has not completed Level: 1 tasks at least thrice",
@@ -741,7 +769,7 @@ class CardRequirements:
                 )
             )
 
-            if "Room: Wood workshop" in labels:
+            if has_label("Room: Wood workshop"):
                 required.append(
                     (
                         "Has not completed wood workshop tasks at least once",
@@ -755,7 +783,7 @@ class CardRequirements:
                 else None
             )
 
-        if "Level: 1" in labels:
+        if has_label("Level: 1"):
             required.append(
                 (
                     "Has not completed Level: Intro1 tasks",
@@ -769,7 +797,7 @@ class CardRequirements:
                 else None
             )
 
-        if "Size: Medium" in labels:
+        if has_label("Size: Medium"):
             required.append(
                 ("Has completed fewer than 5 tasks", lambda context: (context.member.total_completed_tasks >= 5))
             )
@@ -779,7 +807,7 @@ class CardRequirements:
                 lambda context: "This is a medium-sized task, which may require some additional effort compared to smaller tasks. Thank you for taking the time to help out! If you complete this, it will take longer until you are given another task."
             )
 
-        if "Size: Large" in labels:
+        if has_label("Size: Large"):
             required.append(
                 ("Has completed fewer than 10 tasks", lambda context: (context.member.total_completed_tasks >= 10))
             )
@@ -792,14 +820,14 @@ class CardRequirements:
                 lambda context: "Congratulations on completing a large task! Your effort is greatly appreciated and helps keep the makerspace running smoothly! :tada:"
             )
 
-        if "Needs documentation" in labels:
+        if has_label("Needs documentation"):
             introduction_message.append(
                 lambda context: f":construction: This task is not yet documented. If you know how to do it, your task is to do it and document it well for future members. This includes writing a step-by-step guide for how to do it, and taking good photos of the process. Send the results to {TASK_RESPONSIBLE} so that the task can be updated. The goal is that a reasonable member should be able to do the task without prior instructions or help from others."
             )
             if size == TaskSize.SMALL:
                 size = TaskSize.MEDIUM  # Documentation tasks are at least medium size
 
-        if "Needs better image" in labels:
+        if has_label("Needs better image"):
             introduction_message.append(
                 lambda context: f":camera_flash: This task needs better images. If you complete this task, please take clear and well-lit photos that illustrate the steps involved. Send the photos to {TASK_RESPONSIBLE} so that the task can be updated."
             )
@@ -831,6 +859,42 @@ class CardRequirements:
                 )
             )
 
+        repeat_interval = None
+
+        limit_per_member = None
+        for label in labels:
+            if label.startswith("Limit per member:"):
+                try:
+                    checked_labels.add(label)
+                    limit_per_member = int(label.split("Limit per member:")[1])
+                except ValueError:
+                    logger.warning(f"Invalid limit per member label on card {card.id}: {label}")
+
+        repeat_regex = r"^Every (\d+)? ?(day|week|month|year)s?$"
+        repeat_labels = [label for label in labels if re.match(repeat_regex, label)]
+        if len(repeat_labels) > 1:
+            logger.warning(f"Multiple repeat labels on card {card.id}: {repeat_labels}")
+        elif len(repeat_labels) == 1:
+            repeat_label = repeat_labels[0]
+            checked_labels.add(repeat_label)
+            match = re.match(repeat_regex, repeat_label)
+            if match:
+                count = int(match.group(1) or 1)  # Default to 1 if no count is specified
+                if count <= 0:
+                    logger.warning(f"Invalid repeat count on card {card.id}: {repeat_label}")
+                    count = 1
+
+                period = match.group(2)
+                days_map = {"day": 1, "week": 7, "month": 30, "year": 365}
+                assert period in days_map
+                repeat_interval = timedelta(days=days_map[period] * count)
+
+        infinitely_repeatable = has_label("Infinitely Repeatable")
+
+        unknown_labels = set(labels) - checked_labels
+        if unknown_labels:
+            logger.warning(f"Unknown labels on card {card.name}: {unknown_labels}")
+
         # Remove "Requires" instructions from the description
         desc = requires_pattern.sub("", desc).strip()
 
@@ -840,6 +904,11 @@ class CardRequirements:
             introduction_message=introduction_message,
             completion_message=completion_message,
             description=desc,
+            location=location,
+            machine=machine,
+            infinitely_repeatable=infinitely_repeatable,
+            repeat_interval=repeat_interval,
+            limit_per_member=limit_per_member,
         )
 
 
@@ -917,12 +986,61 @@ class CannotAssignReason:
     reason: str
 
 
+class ScoreOpType(Enum):
+    ADD = "add"
+    MULTIPLY = "multiply"
+    SET = "set"
+
+
+@dataclass
+class ScoreOperation:
+    operation: ScoreOpType
+    value: float
+    description: str
+
+
 @dataclass
 class TaskScore:
     can_be_assigned: bool
     cannot_be_assigned_reason: Optional[CannotAssignReason]
     score: float
-    total_assignable_visits: int
+    score_calculation: list[ScoreOperation] = field(default_factory=list)
+
+    @staticmethod
+    def from_reason(reason: CannotAssignReason) -> "TaskScore":
+        return TaskScore(
+            can_be_assigned=False,
+            cannot_be_assigned_reason=reason,
+            score=0,
+        )
+
+    def add_score(self, value: float, description: str) -> None:
+        self.score += value
+        self.score_calculation.append(ScoreOperation(ScoreOpType.ADD, value, description))
+
+    def multiply_score(self, factor: float, description: str) -> None:
+        self.score *= factor
+        self.score_calculation.append(ScoreOperation(ScoreOpType.MULTIPLY, factor, description))
+
+    def score_calculation_summary(self, line_prefix: str = "", column_width: int = 0) -> str:
+        lines = []
+        current_score = 0.0
+        for op in self.score_calculation:
+            v_str = f"{op.value:.2f}: {op.description}".ljust(column_width - len("+  =>"))
+            if op.operation == ScoreOpType.ADD:
+                current_score += op.value
+                lines.append(f"{line_prefix}+ {v_str} => {current_score:.2f}")
+            elif op.operation == ScoreOpType.MULTIPLY:
+                current_score *= op.value
+                lines.append(f"{line_prefix}* {v_str} => {current_score:.2f}")
+            elif op.operation == ScoreOpType.SET:
+                current_score = op.value
+                lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
+
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
+        return "\n".join(lines)
 
 
 def task_score(
@@ -931,87 +1049,67 @@ def task_score(
     ctx: TaskContext,
     reference_task_assignment_contexts: list[TaskContext],
     ignore_reasons: List[str],
+    all_cards: list[trello.TrelloCard],
 ) -> TaskScore:
     if (
         completion_info.assigned_count > 0
-        and not completion_info.infinitely_repeatable
+        and not requirements.infinitely_repeatable
         and not "Task has already been assigned" in ignore_reasons
     ):
-        return TaskScore(
-            can_be_assigned=False,
-            cannot_be_assigned_reason=CannotAssignReason("Task has already been assigned"),
-            score=0,
-            total_assignable_visits=0,
-        )
+        return TaskScore.from_reason(CannotAssignReason("Task has already been assigned"))
 
-    # This primarily guards against an out-of-date trello cache.
-    # If someone completes a task, and we don't update the trello cache before the next task assignment,
-    # we don't want to try to assign the same task again.
+    # If someone completes a task, we don't want to try to assign the same task again.
     if (
-        completion_info.completed_count > 0
-        and not completion_info.infinitely_repeatable
+        completion_info.last_completed is not None
+        and not requirements.infinitely_repeatable
+        and (
+            requirements.repeat_interval is None
+            or completion_info.last_completed + requirements.repeat_interval > ctx.time
+        )
         and not "Task has already been completed" in ignore_reasons
     ):
-        return TaskScore(
-            can_be_assigned=False,
-            cannot_be_assigned_reason=CannotAssignReason("Task has already been completed"),
-            score=0,
-            total_assignable_visits=0,
-        )
+        return TaskScore.from_reason(CannotAssignReason("Task has already been completed"))
 
-    limit_per_member = completion_info.limit_per_member
+    limit_per_member = requirements.limit_per_member
     if (
         limit_per_member is not None
         and (
             ctx.member.completed_card_ids.get(completion_info.card_id, 0) >= limit_per_member
-            or (
-                completion_info.template_card_id is not None
-                and ctx.member.completed_card_ids.get(completion_info.template_card_id, 0) >= limit_per_member
-            )
+            # or (
+            #     completion_info.template_card_id is not None
+            #     and ctx.member.completed_card_ids.get(completion_info.template_card_id, 0) >= limit_per_member
+            # )
             or ctx.member.completed_card_names.get(completion_info.card_name, 0) >= limit_per_member
         )
         and not "Task has already been completed the maximum number of times by this member" in ignore_reasons
     ):
-        return TaskScore(
-            can_be_assigned=False,
-            cannot_be_assigned_reason=CannotAssignReason(
-                "Task has already been completed the maximum number of times by this member"
-            ),
-            score=0,
-            total_assignable_visits=0,
+        return TaskScore.from_reason(
+            CannotAssignReason("Task has already been completed the maximum number of times by this member")
         )
 
     # Check if requirements are satisfied
     reasons = requirements.cannot_satisfy_reasons(ctx)
     reasons = [r for r in reasons if r not in ignore_reasons]
     if reasons:
-        return TaskScore(
-            can_be_assigned=False,
-            cannot_be_assigned_reason=CannotAssignReason(", ".join(reasons)),
-            score=0,
-            total_assignable_visits=0,
-        )
+        return TaskScore.from_reason(CannotAssignReason(", ".join(reasons)))
 
-    if (
-        ctx.time < completion_info.first_available_at + timedelta(minutes=10)
-        and completion_info.template_card_id is None
-    ):
+    if ctx.time < completion_info.first_available_at + timedelta(minutes=10):
         # Don't assign tasks that just became available, as they may be manually created and might still be manually edited
-        return TaskScore(
-            can_be_assigned=False,
-            cannot_be_assigned_reason=CannotAssignReason("Task just became available"),
-            score=0,
-            total_assignable_visits=0,
-        )
+        return TaskScore.from_reason(CannotAssignReason("Task just became available"))
 
-    if completion_info.repeat_interval is not None:
-        assert completion_info.repeat_interval.total_seconds() > 0
+    if requirements.repeat_interval is not None:
+        assert requirements.repeat_interval.total_seconds() > 0
         elapsed_periods = (
-            completion_info.first_available_at - ctx.time
-        ).total_seconds() / completion_info.repeat_interval.total_seconds()
-        equivalent_repeat_interval = completion_info.repeat_interval
+            ctx.time - (completion_info.last_completed or completion_info.first_available_at)
+        ).total_seconds() / requirements.repeat_interval.total_seconds()
+        if elapsed_periods < 0:
+            logger.warning(
+                f"Negative elapsed periods for task {completion_info.card_id}. Now={ctx.time}, last_completed={completion_info.last_completed}, first_available_at={completion_info.first_available_at}, repeat_interval={requirements.repeat_interval}"
+            )
+            elapsed_periods = 0
+        equivalent_repeat_interval = requirements.repeat_interval
     else:
-        if completion_info.infinitely_repeatable:
+        if requirements.infinitely_repeatable:
             # Assign a default repeat interval for infinitely repeatable one-off tasks
             equivalent_repeat_interval = timedelta(days=30)
         else:
@@ -1023,10 +1121,16 @@ def task_score(
         round(timedelta(days=365).total_seconds() / equivalent_repeat_interval.total_seconds())
     )
 
+    score = TaskScore(True, None, 0.0)
+
     # A task that is done once per month should be selected more often than a task that is done once per year.
-    score = math.sqrt(frequency_days_per_year)
+    score.add_score(
+        math.sqrt(frequency_days_per_year),
+        f"Base score from task frequency ({frequency_days_per_year:.1f} times per year)",
+    )
+
     # A task that is not getting done in time should have its score increased
-    score *= 1 + elapsed_periods
+    score.multiply_score(1 + elapsed_periods, f"Overdue multiplier from {elapsed_periods:.1f} elapsed periods")
 
     # Avoid assigning the same task twice in a row (regardless of completion status)
     # and avoid assigning the same task as the last completed task
@@ -1038,7 +1142,35 @@ def task_score(
     )
 
     if same_as_last_assigned_task or same_as_last_completed_task:
-        score *= 0.1
+        score.multiply_score(0.1, "Avoid assigning the same task twice in a row")
+
+    last_completed_card_requirements: Optional[CardRequirements] = None
+    if ctx.member.last_completed_task is not None:
+        last_completed_card = next(
+            (card for card in all_cards if card.id == ctx.member.last_completed_task.card_id), None
+        )
+        if last_completed_card is not None:
+            last_completed_card_requirements = CardRequirements.from_card(last_completed_card)
+
+        if (
+            last_completed_card_requirements is not None
+            and ctx.time - ctx.member.last_completed_task.created_at < timedelta(minutes=20)
+            and last_completed_card_requirements.location == requirements.location
+            and requirements.location is not None
+        ):
+            # Boost the score if the last completed task was in the same location and was completed recently.
+            # Avoids having the member move around too much.
+            score.multiply_score(1.5, "Boost from same location as recently completed task")
+
+        if (
+            last_completed_card_requirements is not None
+            and ctx.time - ctx.member.last_completed_task.created_at < timedelta(minutes=20)
+            and last_completed_card_requirements.machine == requirements.machine
+            and requirements.machine is not None
+        ):
+            # Boost the score if the last completed task was on the same machine and was completed recently.
+            # Avoids having the member move around too much.
+            score.multiply_score(1.5, "Boost from same machine as recently completed task")
 
     present_other_members_with_experience = [
         m for m in completion_info.present_members_with_experience if m.member_id != ctx.member.member_id
@@ -1047,12 +1179,13 @@ def task_score(
     # If there are members present who have experience with this task, this is a good time to assign it,
     # because the member can ask them for help if needed.
     score_multiplier_by_members_present = [1, 3, 4, 4.5]
-    score *= score_multiplier_by_members_present[
-        min(len(present_other_members_with_experience), len(score_multiplier_by_members_present) - 1)
-    ]
-
-    # Make the scores become a bit more readable by humans
-    score *= 100
+    if len(present_other_members_with_experience) > 0:
+        score.multiply_score(
+            score_multiplier_by_members_present[
+                min(len(present_other_members_with_experience), len(score_multiplier_by_members_present) - 1)
+            ],
+            f"Boost from {len(present_other_members_with_experience)} members present with experience",
+        )
 
     # How many members in the recent past have been assignable to this task
     # If many members can do it, the score should be lower. If only a few can do it, the score should be higher.
@@ -1060,17 +1193,18 @@ def task_score(
         requirements.can_satisfy(other_ctx) for other_ctx in reference_task_assignment_contexts
     )
 
-    score /= max(total_assignable_visits, 1)
+    score.multiply_score(
+        max(len(reference_task_assignment_contexts), 1) / max(total_assignable_visits, 1),
+        f"{total_assignable_visits} of {len(reference_task_assignment_contexts)} recent visits could've been allocated the task",
+    )
+
+    # Make the scores become a bit more readable by humans
+    # score.multiply_score(100, "Make easier to read by humans")
 
     # Score: (weight * frequency * (1 + overdue_frequency_intervals)) / (how many members in the past 30 days have been assignable to this task)
     # Can be assigned task: (last completed task size) - (hours spent at space since last completed task)
 
-    return TaskScore(
-        can_be_assigned=True,
-        cannot_be_assigned_reason=None,
-        score=score,
-        total_assignable_visits=total_assignable_visits,
-    )
+    return score
 
 
 def lookup_slack_user_by_email(email: str, slack_client: WebClient) -> Optional[str]:
@@ -1376,8 +1510,6 @@ def select_card_for_member(ctx: TaskContext, ignore_reasons: list[str]) -> Optio
     ]
 
     cards = trello.cached_cards(trello.SOURCE_LIST_NAME)
-    template_cards = trello.cached_cards(trello.TEMPLATE_LIST_NAME)
-    print(f"Loaded {len(cards)} cards")
 
     total_weight = 0.0
     picked_card: Optional[trello.TrelloCard] = None
@@ -1387,10 +1519,11 @@ def select_card_for_member(ctx: TaskContext, ignore_reasons: list[str]) -> Optio
             card,
             task_score(
                 CardRequirements.from_card(card),
-                CardCompletionInfo.from_card(card, template_cards),
+                CardCompletionInfo.from_card(card),
                 ctx,
                 reference_task_assignment_contexts,
                 ignore_reasons,
+                cards,
             ),
         )
         for card in cards
@@ -1405,18 +1538,21 @@ def select_card_for_member(ctx: TaskContext, ignore_reasons: list[str]) -> Optio
     )
 
     for card, score in scores:
-        if score.cannot_be_assigned_reason is not None:
-            print(f"    N/A: {card.name.ljust(60)} {score.cannot_be_assigned_reason.reason}")
-        else:
-            print(
-                f"{score.score:7.2f} {score.total_assignable_visits * 100 / max(1, len(reference_task_assignment_contexts)):3.0f}%: {card.name}"
-            )
-
-            # Use reservoir sampling to pick a card randomly with weights
+        # Use reservoir sampling to pick a card randomly with weights
+        assert score.score >= 0
+        if score.score > 0:
             total_weight += score.score
             rnd = random()
             if picked_card is None or rnd < (score.score / total_weight):
                 picked_card = card
+
+    for card, score in scores:
+        if score.cannot_be_assigned_reason is not None:
+            print(f"    N/A: {card.name.ljust(70)} {RED_ANSI}{score.cannot_be_assigned_reason.reason}{RESET_ANSI}")
+        else:
+            color = BLUE_ANSI if card == picked_card else ""
+            print(f"{score.score:7.2f}: {color}{card.name}{RESET_ANSI}")
+            print(f"{GREY_ANSI}{score.score_calculation_summary('    ', 70 + 5)}{RESET_ANSI}")
 
     return picked_card
 
@@ -1438,13 +1574,12 @@ def delegate_task_for_member(
         logger.info(f"Member {member_id} received a task recently; skipping delegation")
         return None
 
-    trello.refresh_cache()  # ensure fresh data when delegating
     picked_card = select_card_for_member(ctx, ignore_reasons)
 
     print()
     if picked_card:
         print(f"Selected card for member {member_id}: {picked_card.name}")
-        completion = CardCompletionInfo.from_card(picked_card, trello.cached_cards(trello.TEMPLATE_LIST_NAME))
+        completion = CardCompletionInfo.from_card(picked_card)
         log_id = assign_task_to_member(ctx, picked_card, completion, slack_interaction)
         return log_id
     else:
@@ -1469,7 +1604,7 @@ def assign_task_to_member(
             member_id=member_id,
             card_id=card.id,
             card_name=card.name,
-            template_card_id=card_completion.template_card_id,
+            # template_card_id=card_completion.template_card_id,
             task_size=CardRequirements.from_card(card).size,
             action="assigned",
             details=f"",

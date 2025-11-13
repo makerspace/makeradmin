@@ -101,12 +101,11 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
         # Update log and move trello card
         log.action = "completed"
 
-        completion_info = CardCompletionInfo.from_card(card, [])
         requirements = CardRequirements.from_card(card)
         ctx = TaskContext.from_member(member.member_id, now)
 
         try:
-            if not completion_info.infinitely_repeatable:
+            if not requirements.infinitely_repeatable and requirements.repeat_interval is None:
                 trello.move_card_to_done(log.card_id)
 
             trello.add_comment_to_card(

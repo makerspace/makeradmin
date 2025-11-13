@@ -22,9 +22,9 @@ TRELLO_KEY = config.get("TRELLO_KEY")
 TRELLO_TOKEN = config.get("TRELLO_TOKEN")
 TRELLO_API_BASE = "https://api.trello.com/1"
 
-TEMPLATE_LIST_NAME = "* Templates"
-PRIMARY_SOURCE_LIST_NAME = "Available Tasks"
-SOURCE_LIST_NAME = "Available Tasks*"
+# TEMPLATE_LIST_NAME = "* Templates"
+# PRIMARY_SOURCE_LIST_NAME = "Available Tasks"
+SOURCE_LIST_NAME = "* Templates*"
 DONE_LIST_NAME = "Done"
 
 
@@ -155,7 +155,7 @@ def cached_cards(list_name: str) -> List[TrelloCard]:
         raise RuntimeError(f"No lists matching '{list_name}' found on Trello board")
     cards = [c for c in cards if c.idList in list_ids]
 
-    redis_connection.setex(cache_key, timedelta(hours=3), to_json(cards))
+    redis_connection.setex(cache_key, timedelta(hours=1), to_json(cards))
     return cards
 
 
