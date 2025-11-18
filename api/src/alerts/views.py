@@ -1,11 +1,12 @@
 from logging import getLogger
 
 from flask import request
-from multiaccessy import service
 from service.api_definition import POST, PUBLIC
 from service.config import config
 from service.error import BadRequest, UnprocessableEntity
 from slack_sdk import WebClient
+
+from alerts import service
 
 logger = getLogger("alerts")
 
