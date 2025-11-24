@@ -50,7 +50,7 @@ REDIS_LAST_ID_KEY = "task_delegator_last_id"
 ASSIGNMENT_DELAY_AFTER_START_OF_VISIT = timedelta(minutes=3)
 
 # Increment this when the structure or semantics of MemberTaskInfo changes, to avoid using stale cached data.
-CACHE_VERSION = 5
+CACHE_VERSION = 6
 IMAGE_CACHE_VERSION = 5
 
 TASK_LOG_CHANNEL = config.get("SLACK_TASK_LOG_CHANNEL_ID")
@@ -178,8 +178,12 @@ class MemberTaskInfo:
     # Names of makeradmin groups that the member is part of
     groups: set[str]
 
-    # Last task assigned to the member, regardless of completion status
-    last_assigned_task: Optional[TaskDelegationLogSimple]
+    # Last tasks assigned to the member, regardless of completion status
+    # This will include all tasks that have been assigned to the member, since (and including) the last completed task.
+    # So if the member clicks "Something else please" multiple times, all those assignments will be here.
+    # If the member ignored a task assignment, it will also be here.
+    # Ordered by created_at descending (more recent first)
+    last_assigned_tasks: list[TaskDelegationLogSimple]
 
     # Last task that was definitely completed
     last_completed_task: Optional[TaskDelegationLogSimple]
@@ -297,22 +301,38 @@ class MemberTaskInfo:
             .limit(1)
         ).scalar_one_or_none()
 
-        last_assigned_task = db_session.execute(
-            select(TaskDelegationLog)
-            .where(
-                TaskDelegationLog.member_id == member_id,
-                TaskDelegationLog.created_at <= now,
+        last_assigned_tasks = (
+            db_session.execute(
+                select(TaskDelegationLog)
+                .where(
+                    TaskDelegationLog.member_id == member_id,
+                    TaskDelegationLog.created_at <= now,
+                    TaskDelegationLog.created_at
+                    >= (last_completed_task.created_at if last_completed_task is not None else datetime.min),
+                )
+                .order_by(TaskDelegationLog.created_at.desc())
+                .limit(
+                    10
+                )  # Arbitrary limit to avoid fetching too many records, and to avoid completely running out of tasks to delegate to a member.
             )
-            .order_by(TaskDelegationLog.created_at.desc())
-            .limit(1)
-        ).scalar_one_or_none()
+            .scalars()
+            .all()
+        )
 
-        if last_assigned_task is not None:
-            day_after_last_task = last_assigned_task.created_at
+        if last_completed_task is not None:
+            assert len(last_assigned_tasks) > 0
+
+        if last_assigned_tasks:
+            day_after_last_task = last_assigned_tasks[0].created_at
             day_after_last_task += timedelta(days=1)
             day_after_last_task.replace(hour=0, minute=0, second=0, microsecond=0)
 
-            visits = visit_events_by_member_id(day_after_last_task, now, member_id=member_id).get(member_id, [])
+            # Count all visits after the day after the last task was assigned or completed.
+            # and before the current time minus some margin to avoid counting ongoing visits.
+            # This prevents us from assigning a task in the middle of a visit, instead of at the start.
+            visits = visit_events_by_member_id(day_after_last_task, now - timedelta(hours=18), member_id=member_id).get(
+                member_id, []
+            )
             time_at_space_since_last_task = timedelta()
             for _, duration in visits:
                 time_at_space_since_last_task += duration
@@ -372,7 +392,9 @@ class MemberTaskInfo:
             unique_days_visited=unique_days_visited,
             groups=groups,
             last_completed_task=TaskDelegationLogSimple.from_log(last_completed_task),
-            last_assigned_task=TaskDelegationLogSimple.from_log(last_assigned_task),
+            last_assigned_tasks=[
+                x for x in [TaskDelegationLogSimple.from_log(t) for t in last_assigned_tasks] if x is not None
+            ],
             purchased_product_count_by_name=purchased_product_count_by_name,
             completed_card_ids=completed_card_ids,
             completed_card_names=completed_card_names,
@@ -915,16 +937,17 @@ def member_recently_received_task(ctx: TaskContext) -> bool:
         if ctx.member.time_at_space_since_last_task < TASK_SIZE_TO_TIME[ctx.member.last_completed_task.size]:
             return True
 
-    if ctx.member.last_assigned_task is not None:
+    last_assigned_task = ctx.member.last_assigned_tasks[0] if ctx.member.last_assigned_tasks else None
+    if last_assigned_task is not None:
         # If a member has an assigned task that they haven't completed yet, don't assign them another one.
         # Tasks that are ignored will be marked as such after some time, so this only applies to recently assigned tasks.
-        if ctx.member.last_assigned_task.status == "assigned":
+        if last_assigned_task.status == "assigned":
             return True
 
         # If a member has been assigned (but not necessarily completed) a task recently, don't assign them another one too soon.
         # This can be relevant if a member quickly says that they cannot complete a task for some reason.
         # It's then no longer assigned or completed, but we still don't want to assign them another task too soon.
-        if ctx.time - ctx.member.last_assigned_task.created_at < timedelta(hours=14):
+        if ctx.time - last_assigned_task.created_at < timedelta(hours=14):
             return True
 
     return False
@@ -958,6 +981,8 @@ def visit_events_by_member_id(
         def add_visit(start: datetime, end: datetime) -> None:
             duration = end - start
             duration += DURATION_AT_SPACE_HEURISTIC  # Assume some extra time after last door open
+            # Clamp duration to not go beyond 'end'
+            duration = min(start + duration, end) - start
             visits.append((start, duration))
 
         for event in events:
@@ -1033,9 +1058,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
@@ -1130,15 +1155,13 @@ def task_score(
 
     # Avoid assigning the same task twice in a row (regardless of completion status)
     # and avoid assigning the same task as the last completed task
-    same_as_last_assigned_task = ctx.member.last_assigned_task is not None and ctx.member.last_assigned_task.matches(
-        completion_info
-    )
+    same_as_last_assigned_task = any(t.matches(completion_info) for t in ctx.member.last_assigned_tasks)
     same_as_last_completed_task = ctx.member.last_completed_task is not None and ctx.member.last_completed_task.matches(
         completion_info
     )
 
     if same_as_last_assigned_task or same_as_last_completed_task:
-        score.multiply_score(0.1, "Avoid assigning the same task twice in a row")
+        score.multiply_score(0.1, "Avoid assigning the same task multiple times in a row")
 
     last_completed_card_requirements: Optional[CardRequirements] = None
     if ctx.member.last_completed_task is not None:
