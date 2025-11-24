@@ -113,9 +113,9 @@ class SlackInteraction:
 
 
 TASK_SIZE_TO_TIME = {
-    TaskSize.SMALL: timedelta(hours=4),
-    TaskSize.MEDIUM: timedelta(hours=8),
-    TaskSize.LARGE: timedelta(hours=20),
+    TaskSize.SMALL: timedelta(hours=2),
+    TaskSize.MEDIUM: timedelta(hours=6),
+    TaskSize.LARGE: timedelta(hours=15),
 }
 
 
