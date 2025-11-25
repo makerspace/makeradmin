@@ -480,6 +480,8 @@ class CardCompletionInfo:
     # This is when the card was created in Trello.
     first_available_at: datetime
 
+    # Members who have completed this task before.
+    # Ordered by the number of times they have completed it (most first)
     present_members_with_experience: list[Member]
 
     # How many members are assigned to this task right now.
@@ -1395,11 +1397,13 @@ def send_slack_message_to_member(
                 )
 
     help_block = None
-    if completion.present_members_with_experience:
-        slack_members = [
-            lookup_slack_user_by_email(m.email, slack_client) for m in completion.present_members_with_experience[:10]
-        ]
-        slack_members = [m for m in slack_members if m is not None]
+    slack_members = [
+        lookup_slack_user_by_email(m.email, slack_client)
+        for m in completion.present_members_with_experience[:10]
+        # if m.member_id != member.member_id
+    ]
+    slack_members = [m for m in slack_members if m is not None]
+    if slack_members:
         slack_members = slack_members[:3]
 
         if len(slack_members) == 1:
@@ -1409,7 +1413,7 @@ def send_slack_message_to_member(
             if len(slack_members) > 1:
                 experienced_members += f" or <@{slack_members[-1]}>"
 
-        help_text = f"If you need help with this task, you can ask {experienced_members} who have done it before, and they should be at the space right now."
+        help_text = f"If you need help with this task, you can ask {experienced_members} who have done it before. They should be at the space right now."
         help_block = SectionBlock(text=MarkdownTextObject(text=help_text))
 
     blocks: list[Block] = [
