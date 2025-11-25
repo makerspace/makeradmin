@@ -167,8 +167,7 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
         slack_client.chat_update(
             channel=payload.channel.id,
             ts=payload.message.ts,
-            text=":thumbsup: No worries, thanks for letting us know. We'll give you something else next time.",
-            blocks=[],
+            text=f":thumbsup: Can't do the task *{log.card_name}* right now? No worries, thanks for letting us know. We'll give you something else next time.",
         )
 
         if TASK_LOG_CHANNEL is not None:
@@ -191,7 +190,6 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
             log.action = "not_done_other"  # TODO: Replace by "rerolled" or something
             logger.info(f"Member #{member.member_number} {member.firstname} {member.lastname} requested a new task")
             db_session.commit()
-            logger.info(f"Action {log.action} saved to DB for log {log.id}")
 
             delegate_task_for_member(member.member_id, slack_interaction=payload, ignore_reasons=ignore_reasons)
 
