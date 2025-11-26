@@ -28,7 +28,7 @@ def fire() -> str:
     slack_client.chat_postMessage(
         channel=FIRE_ALERT_CHANNEL,
         mrkdwn=True,
-        markdown_text=f""":fire: :fire: :fire:\n\n<!channel> *Fire detected in wood workshop dust collector.* Dumping 20 liters of water into the dust bin.\n
+        markdown_text=f""":fire: :fire: :fire:\n\n<#{FIRE_ALERT_CHANNEL}> **Fire detected in wood workshop dust collector.** Dumping 20 liters of water into the dust bin.\n
 If you see this and you are at the space, please:
 1. Stop working on whatever you are doing.
 2. Check the dust bin in the dust collector in the wood workshop to ensure the fire is out.
