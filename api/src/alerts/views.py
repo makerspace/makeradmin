@@ -10,8 +10,7 @@ from alerts import service
 
 logger = getLogger("alerts")
 
-FIRE_ALERT_CHANNEL = "C09S5J35FME"
-# FIRE_ALERT_CHANNEL = "C4MM2M5EV"
+FIRE_ALERT_CHANNEL = config.get("SLACK_FIRE_ALERT_CHANNEL_ID")
 
 
 @service.route("/pressure_sensor_triggered", method=POST, permission=PUBLIC)
@@ -19,7 +18,10 @@ def fire() -> str:
     token = config.get("SLACK_BOT_TOKEN")
     if not token:
         logger.error("Slack bot token not configured, but we received an event")
-        raise BadRequest("Slack bot token not configured")
+        raise UnprocessableEntity("Slack bot token not configured")
+    if not FIRE_ALERT_CHANNEL:
+        logger.error("Slack fire alert channel not configured, but we received an fire alert event")
+        raise UnprocessableEntity("Slack fire alert channel not configured")
 
     slack_client = WebClient(token=token)
 
