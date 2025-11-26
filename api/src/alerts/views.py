@@ -28,7 +28,7 @@ def fire() -> str:
     slack_client.chat_postMessage(
         channel=FIRE_ALERT_CHANNEL,
         mrkdwn=True,
-        markdown_text=f""":fire: :fire: :fire:\n\n@channel Fire detected in wood workshop dust collector. Dumping 20 liters of water into the dust bin.\n
+        markdown_text=f""":fire: :fire: :fire:\n\n<!channel> *Fire detected in wood workshop dust collector.* Dumping 20 liters of water into the dust bin.\n
 If you see this and you are at the space, please:
 1. Stop working on whatever you are doing.
 2. Check the dust bin in the dust collector in the wood workshop to ensure the fire is out.
@@ -52,6 +52,9 @@ def fire_reset() -> str:
     if not token:
         logger.error("Slack bot token not configured, but we received an event")
         raise BadRequest("Slack bot token not configured")
+    if not FIRE_ALERT_CHANNEL:
+        logger.error("Slack fire alert channel not configured, but we received an fire alert event")
+        raise UnprocessableEntity("Slack fire alert channel not configured")
 
     slack_client = WebClient(token=token)
 
