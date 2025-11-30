@@ -18,7 +18,7 @@ logger = getLogger("makeradmin")
 
 # This is the current global banner.
 # Set to an empty string ("") to disable.
-banner = ""
+banner = os.environ["GLOBAL_BANNER_TEXT"]
 
 sidebar_additional_classes = ""
 if banner:

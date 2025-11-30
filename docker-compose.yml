@@ -167,6 +167,7 @@ services:
       VIRTUAL_HOST: "${HOST_PUBLIC}"
       LETSENCRYPT_HOST: "${HOST_PUBLIC}"
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
+      GLOBAL_BANNER_TEXT:
     networks:
       - makeradmin
 
