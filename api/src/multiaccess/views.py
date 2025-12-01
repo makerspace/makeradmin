@@ -138,7 +138,7 @@ def memberbooth_get_label(id: int) -> UploadedLabel:
 
 # Note: All labels are public. This is by design, as they are in any case printed and put on physical objects.
 @service.route("/memberbooth/label/<int:id>", method=DELETE, permission=USER)
-def memberbooth_delete_label(id: int) -> Response:
+def memberbooth_delete_label(id: int) -> None:
     label = db_session.execute(
         select(MemberboothLabel).where(MemberboothLabel.id == id, MemberboothLabel.deleted_at.is_(None))
     ).scalar_one_or_none()
@@ -151,7 +151,7 @@ def memberbooth_delete_label(id: int) -> Response:
 
     label.deleted_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db_session.flush()
-    return Response(status=204)
+    return None
 
 
 @service.route("/memberbooth/label/<int:id>/message", method=GET, permission=USER)
