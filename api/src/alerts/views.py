@@ -11,6 +11,7 @@ from alerts import service
 logger = getLogger("alerts")
 
 FIRE_ALERT_CHANNEL = config.get("SLACK_FIRE_ALERT_CHANNEL_ID")
+EMERGENCY_SERVICE_NUMBER = "112"
 
 
 @service.route("/pressure_sensor_triggered", method=POST, permission=PUBLIC)
@@ -33,8 +34,8 @@ If you see this and you are at the space, please:
 1. Stop working on whatever you are doing.
 2. Check the dust bin in the dust collector in the wood workshop to ensure the fire is out.
 3. Check the filters inside the machine to ensure they are not smoldering (right above the dust bin).
-4. If things are burning and you cannot put out the fire safely, call emergency services immediately.
-5. If the fire is out, but it's very smoky and you cannot be in the wood workshop safely, evacuate and call emergency services. Let them know that it's not burning, but that you'd appreciate help with ventilation and ensuring it's safe.
+4. If things are burning and you cannot put out the fire safely, call {EMERGENCY_SERVICE_NUMBER} immediately.
+5. If the fire is out, but it's very smoky and you cannot be in the wood workshop safely, evacuate and call {EMERGENCY_SERVICE_NUMBER}. Let them know that it's not burning, but that you'd appreciate help with ventilation and ensuring it's safe.
 6. Unplug the dust collector from power.
 7. Alert people on Slack about the situation.
 8. Handle any follow-up actions as necessary, including cleaning up water, debris, and similar. People on Slack will be helpful if you have questions.
