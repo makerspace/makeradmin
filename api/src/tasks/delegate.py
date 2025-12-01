@@ -1056,7 +1056,12 @@ def member_recently_received_task(ctx: TaskContext) -> bool:
         # If a member has been assigned (but not necessarily completed) a task recently, don't assign them another one too soon.
         # This can be relevant if a member quickly says that they cannot complete a task for some reason.
         # It's then no longer assigned or completed, but we still don't want to assign them another task too soon.
-        if ctx.time - last_assigned_task.created_at < timedelta(hours=14):
+        #
+        # If the member explicitly wanted a new task, we allow assigning a new task sooner.
+        if (
+            ctx.time - last_assigned_task.created_at < timedelta(hours=14)
+            and last_assigned_task.status != "not_done_rerolled"
+        ):
             return True
 
     return False

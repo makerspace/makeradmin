@@ -25,6 +25,7 @@ class TaskDelegationLog(Base):
         "not_done_forgot",
         "not_done_no_time",
         "not_done_other",
+        "not_done_rerolled",
         "ignored",
         "already_completed_by_someone_else",
     ]
@@ -52,6 +53,7 @@ class TaskDelegationLog(Base):
             "not_done_forgot",
             "not_done_no_time",
             "not_done_other",
+            "not_done_rerolled",
             "ignored",
             "already_completed_by_someone_else",
             name="task_action",

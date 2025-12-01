@@ -373,7 +373,7 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
                 member.member_id, slack_interaction=None, force=True, ignore_reasons=ignore_reasons
             )
         else:
-            log.action = "not_done_other"  # TODO: Replace by "rerolled" or something
+            log.action = "not_done_rerolled"
             logger.info(f"Member #{member.member_number} {member.firstname} {member.lastname} requested a new task")
             db_session.commit()
 
