@@ -1172,9 +1172,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
@@ -1329,8 +1329,10 @@ def task_score(
 
     # Check room preferences
     if requirements.location is not None and ctx.member.preferred_rooms is not None:
-        if requirements.location not in ctx.member.preferred_rooms:
-            score.multiply_score(0.1, f"Task is '{requirements.location}' which isn't a preferred room for the member")
+        if requirements.location in ctx.member.preferred_rooms:
+            score.multiply_score(1.5, f"'{requirements.location}' is a preferred room for the member")
+        else:
+            score.multiply_score(0.1, f"'{requirements.location}' isn't a preferred room for the member")
 
     # Score: (weight * frequency * (1 + overdue_frequency_intervals)) / (how many members in the past 30 days have been assignable to this task)
     # Can be assigned task: (last completed task size) - (hours spent at space since last completed task)
