@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Any, List
 
+from dataclasses_json import DataClassJsonMixin
 from flask import g, request
 from membership.models import Member
 from service.api_definition import GET, POST, PUBLIC, QUIZ_EDIT, USER
@@ -140,7 +141,14 @@ def mapify(rows):
     return {r[0]: r[1] for r in rows}
 
 
-def member_quiz_statistics(member_id: int):
+@dataclass
+class MemberQuizStatistic(DataClassJsonMixin):
+    quiz: Any
+    total_questions_in_quiz: int
+    correctly_answered_questions: int
+
+
+def member_quiz_statistics(member_id: int) -> list[MemberQuizStatistic]:
     """Returns information about all quizzes and if the given member has completed them"""
 
     quizzes = db_session.query(Quiz).filter(Quiz.deleted_at == None).all()
@@ -167,13 +175,13 @@ def member_quiz_statistics(member_id: int):
     )
 
     return [
-        {
-            "quiz": quiz_entity.to_obj(quiz),
-            "total_questions_in_quiz": total_questions_in_quiz[quiz.id] if quiz.id in total_questions_in_quiz else 0,
-            "correctly_answered_questions": answered_questions_per_quiz[quiz.id]
+        MemberQuizStatistic(
+            quiz=quiz_entity.to_obj(quiz),
+            total_questions_in_quiz=total_questions_in_quiz[quiz.id] if quiz.id in total_questions_in_quiz else 0,
+            correctly_answered_questions=answered_questions_per_quiz[quiz.id]
             if quiz.id in answered_questions_per_quiz
             else 0,
-        }
+        )
         for quiz in quizzes
     ]
 
