@@ -135,7 +135,7 @@ def try_scrape_event_info(event: Event) -> bool:
         max_slots = ticket_row.find(class_="ticket-type-max_tickets").find("input").get("value")
         # print(ticket_row)
         # print(name, price, max_slots)
-        event.ticket_types.append(EventTicketType(name=name, price=float(price), max_slots=int(max_slots)))
+        event.ticket_types.append(EventTicketType(name=name, price=float(price), max_slots=int(max_slots or 1)))
 
     return True
 
