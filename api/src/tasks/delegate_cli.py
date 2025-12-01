@@ -28,6 +28,7 @@ from tasks.trello import (
     cached_cards,
     delete_card,
     get_list_id_by_name,
+    refresh_cache,
 )
 from tasks.views import slack_handle_task_feedback
 
@@ -130,6 +131,7 @@ def main() -> None:
     # Delegate command
     delegate_parser = subparsers.add_parser("delegate", help="Delegate a task for a member")
     delegate_parser.add_argument("member_number", type=int, help="Member number to delegate task for")
+    delegate_parser.add_argument("--task-name", type=str, help="Name of the task to delegate")
     add_allow_arg(delegate_parser)
 
     reset_parser = subparsers.add_parser("reset-member", help="Reset task delegation state for a member")
@@ -181,7 +183,17 @@ def main() -> None:
     if cli_args.command == "delegate":
         assert cli_args.member_number is not None
         member = db_session.execute(select(Member).where(Member.member_number == cli_args.member_number)).scalar_one()
-        delegate_task_for_member(member.member_id, force=True, ignore_reasons=cli_args.allow or [])
+        card = None
+        if cli_args.task_name is not None:
+            refresh_cache()
+            cards = cached_cards(SOURCE_LIST_NAME)
+            matching_cards = [card for card in cards if card.name == cli_args.task_name]
+            if not matching_cards:
+                raise RuntimeError(f"No task found with name '{cli_args.task_name}'")
+            elif len(matching_cards) > 1:
+                raise RuntimeError(f"Multiple tasks found with name '{cli_args.task_name}'")
+            card = matching_cards[0]
+        delegate_task_for_member(member.member_id, force=True, ignore_reasons=cli_args.allow or [], picked_card=card)
     # elif cli_args.command == "make-task-available":
     #     make_task_available()
     elif cli_args.command == "reset-member":

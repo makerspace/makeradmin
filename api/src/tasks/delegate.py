@@ -27,6 +27,7 @@ from slack_sdk.models.blocks import (
     ActionsBlock,
     Block,
     ButtonElement,
+    CheckboxesElement,
     DividerBlock,
     ImageBlock,
     MarkdownTextObject,
@@ -38,7 +39,13 @@ from slack_sdk.models.blocks import (
 from sqlalchemy import distinct, func, select
 
 from tasks import trello
-from tasks.models import TaskDelegationLog, TaskDelegationLogLabel, TaskSize
+from tasks.models import (
+    MemberPreference,
+    MemberPreferenceQuestionType,
+    TaskDelegationLog,
+    TaskDelegationLogLabel,
+    TaskSize,
+)
 
 logger = getLogger("task-delegator")
 
@@ -50,7 +57,7 @@ REDIS_LAST_ID_KEY = "task_delegator_last_id"
 ASSIGNMENT_DELAY_AFTER_START_OF_VISIT = timedelta(minutes=3)
 
 # Increment this when the structure or semantics of MemberTaskInfo changes, to avoid using stale cached data.
-CACHE_VERSION = 6
+CACHE_VERSION = 7
 IMAGE_CACHE_VERSION = 5
 
 TASK_LOG_CHANNEL = config.get("SLACK_TASK_LOG_CHANNEL_ID")
@@ -104,12 +111,24 @@ class SlackChannel:
 
 
 @serde
+class SlackViewStateValue:
+    type: str
+    selected_options: Optional[list[SlackSelectedOption]] = None
+
+
+@serde
+class SlackViewState:
+    values: dict[str, dict[str, SlackViewStateValue]]
+
+
+@serde
 class SlackInteraction:
     actions: list[SlackInteractionAction]
     user: SlackUser
     message: SlackMessage
     trigger_id: str
     channel: SlackChannel
+    state: Optional[SlackViewState] = None
 
 
 TASK_SIZE_TO_TIME = {
@@ -198,11 +217,17 @@ class MemberTaskInfo:
     # Number of times this member has completed tasks, by trello card name.
     completed_card_names: dict[str, int]
 
+    # IDs of courses that this member has completed
+    completed_courses: Set[int]
+
     # Number of hours spent at the space since the day after the last task was either assigned or completed
     # If the member has never completed a task, this will be a very large value.
     time_at_space_since_last_task: timedelta = field(
         serializer=lambda td: td.total_seconds(), deserializer=lambda seconds: timedelta(seconds=seconds)
     )
+
+    # Member's room preferences (if they've answered the question)
+    preferred_rooms: Optional[set[str]] = None
 
     def is_in_group(self, group_name: str) -> bool:
         return group_name in self.groups
@@ -215,6 +240,9 @@ class MemberTaskInfo:
 
     def purchased_product_count(self, product_name: str) -> int:
         return self.purchased_product_count_by_name.get(product_name, 0)
+
+    def has_completed_course(self, course_id: int) -> bool:
+        return course_id in self.completed_courses
 
     @staticmethod
     def from_member(member_id: int, now: datetime) -> "MemberTaskInfo":
@@ -236,7 +264,7 @@ class MemberTaskInfo:
         )
 
         completed_tasks_by_label = {}
-        purchased_rows = (
+        completed_tasks_by_label_rows = (
             db_session.execute(
                 select(TaskDelegationLogLabel.label, func.count())
                 .select_from(TaskDelegationLog)
@@ -251,7 +279,7 @@ class MemberTaskInfo:
             .tuples()
             .all()
         )
-        for label, count in purchased_rows:
+        for label, count in completed_tasks_by_label_rows:
             completed_tasks_by_label[label] = count
 
         groups = set(
@@ -383,6 +411,30 @@ class MemberTaskInfo:
             #     completed_card_ids[log.template_card_id] = completed_card_ids.get(log.template_card_id, 0) + 1
             completed_card_names[log.card_name] = completed_card_names.get(log.card_name, 0) + 1
 
+        # Fetch room preferences
+        room_pref = db_session.execute(
+            select(MemberPreference)
+            .where(
+                MemberPreference.member_id == member_id,
+                MemberPreference.question_type == MemberPreferenceQuestionType.ROOM_PREFERENCE,
+                MemberPreference.created_at <= now,
+                # Only consider room preferences up-to-date for 1 year
+                MemberPreference.created_at > now - timedelta(days=365),
+            )
+            .order_by(MemberPreference.created_at.desc())
+            .limit(1)
+        ).scalar_one_or_none()
+
+        preferred_rooms = None
+        if room_pref:
+            preferred_rooms = set(room_pref.selected_options.split(",")) if room_pref.selected_options else set()
+
+        quizzes = member_quiz_statistics(member_id)
+        completed_courses = set()
+        for quiz in quizzes:
+            if quiz.correctly_answered_questions > math.ceil(quiz.total_questions_in_quiz * 0.9):
+                completed_courses.add(quiz.quiz["id"])
+
         return MemberTaskInfo(
             member_id=member.member_id,
             total_completed_tasks=total_completed_tasks,
@@ -399,6 +451,8 @@ class MemberTaskInfo:
             completed_card_ids=completed_card_ids,
             completed_card_names=completed_card_names,
             time_at_space_since_last_task=time_at_space_since_last_task,
+            preferred_rooms=preferred_rooms,
+            completed_courses=completed_courses,
         )
 
 
@@ -522,14 +576,20 @@ class CardCompletionInfo:
             db_session.execute(
                 select(func.count())
                 .select_from(TaskDelegationLog)
-                .where(TaskDelegationLog.card_id == card.id, TaskDelegationLog.action == "completed")
+                .where(
+                    TaskDelegationLog.card_id == card.id,
+                    (TaskDelegationLog.action == "completed")
+                    | (TaskDelegationLog.action == "already_completed_by_someone_else"),
+                )
             ).scalar_one_or_none()
             or 0
         )
 
         last_completed = db_session.execute(
             select(func.max(TaskDelegationLog.created_at)).where(
-                TaskDelegationLog.card_id == card.id, TaskDelegationLog.action == "completed"
+                TaskDelegationLog.card_id == card.id,
+                (TaskDelegationLog.action == "completed")
+                | (TaskDelegationLog.action == "already_completed_by_someone_else"),
             )
         ).scalar_one_or_none()
 
@@ -686,8 +746,24 @@ class CardRequirements:
 
             required.append(
                 (
-                    "Wood workshop is closed to non-developers at the moment",
-                    lambda context: context.member.is_in_group("room_developers_wood"),
+                    "Hasn't completed wood room introduction",
+                    lambda context: context.member.has_completed_course(11),
+                )
+            )
+
+        if has_label("Machine: Tormek T8"):
+            required.append(
+                (
+                    "Hasn't completed Tormek T8 course",
+                    lambda context: context.member.has_completed_course(10),
+                )
+            )
+
+        if has_label("Machine: Bandsaw for wood"):
+            required.append(
+                (
+                    "Hasn't completed Bandsaw for wood course",
+                    lambda context: context.member.has_completed_course(5),
                 )
             )
 
@@ -715,6 +791,21 @@ class CardRequirements:
                 )
             )
 
+            required.append(
+                (
+                    "Hasn't completed Laser course",
+                    lambda context: (context.member.has_completed_course(2)),
+                )
+            )
+
+        if has_label("Machine: Metal cutting saw"):
+            required.append(
+                (
+                    "Hasn't completed Metal Cutting Saw course",
+                    lambda context: (context.member.has_completed_course(14)),
+                )
+            )
+
         if has_label("Board member"):
             required.append(
                 (
@@ -732,6 +823,18 @@ class CardRequirements:
                     ),
                 )
             )
+
+        if has_label("Time: Christmas"):
+            required.append(
+                (
+                    "It's not December",
+                    lambda context: context.time.month == 12,
+                )
+            )
+
+        if has_label("Wiki"):
+            # No specific requirements for wiki tasks yet
+            pass
 
         if has_label("Level: 4"):
             required.append(
@@ -816,6 +919,10 @@ class CardRequirements:
                 if context.member.completed_tasks_with_label("Level: 1") == 1
                 else None
             )
+
+        if has_label("Level: Intro1"):
+            # No specific requirements for Intro1 tasks yet
+            pass
 
         if has_label("Size: Medium"):
             required.append(
@@ -1060,9 +1167,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
@@ -1098,10 +1205,6 @@ def task_score(
         limit_per_member is not None
         and (
             ctx.member.completed_card_ids.get(completion_info.card_id, 0) >= limit_per_member
-            # or (
-            #     completion_info.template_card_id is not None
-            #     and ctx.member.completed_card_ids.get(completion_info.template_card_id, 0) >= limit_per_member
-            # )
             or ctx.member.completed_card_names.get(completion_info.card_name, 0) >= limit_per_member
         )
         and not "Task has already been completed the maximum number of times by this member" in ignore_reasons
@@ -1219,11 +1322,57 @@ def task_score(
         f"{total_assignable_visits} of {len(reference_task_assignment_contexts)} recent visits could've been allocated the task",
     )
 
-    # Make the scores become a bit more readable by humans
-    # score.multiply_score(100, "Make easier to read by humans")
+    # Check room preferences
+    if requirements.location is not None and ctx.member.preferred_rooms is not None:
+        if requirements.location not in ctx.member.preferred_rooms:
+            score.multiply_score(0.1, f"Task is '{requirements.location}' which isn't a preferred room for the member")
 
     # Score: (weight * frequency * (1 + overdue_frequency_intervals)) / (how many members in the past 30 days have been assignable to this task)
     # Can be assigned task: (last completed task size) - (hours spent at space since last completed task)
+
+    # P(using room today OR using machine today) => score multiplier. If chosen, ask for more info if probability < 0.5
+    # P(using machine today) = 0.5 * P(using machine)
+    # P(using room today) = 0.5 * P(using room)
+    # P(using room today|using machine in that room today) = 1.0
+    # P(using room|not opened door leading to room) = 0.05
+    #
+    # Question: Are you using any of these machines today?    => P(using machine|t=today)
+    # Question: Are you using any of these rooms today?       => P(using room|t=today)
+    # Question: Which of these rooms are you using the most?  => P(using machine)
+    # Question: Which of these machines are you using the most? (include "None of these")
+    # Question: Are you using machine X today? => P(using machine|t=today)
+    # Question: Are you using room Y today? => P(using room|t=today)
+    #
+    # Priors
+    # P(A) = ...
+    # P(B) = ...
+    # P(C) = ...
+    # P(A,B|A or B) = 0.5 (alternatively use correlation coefficient)
+    # P(A,C|A or C) = 0.0
+    # P(B,C|B or C) = 0.0
+    #
+    # Given
+    # P((A or B or C) and !D and !E|m) = 1
+    # Find: P(A|m)
+    #
+    #
+    # P(A) = P(A)
+    #
+    #
+    # P1(A) = 1/2
+    # P1(B) = 1/2
+    # P1(C) = 1/2
+    #
+    # P(m|A) = 0.0 = m answered "A" / (total "A" answers)
+    # P(m) = m answers / total answers
+    # P(A) = total "A" answers / total answers
+
+    # Bayes rule
+    # P(A|m) = P(m|A) * P1(A) / P(m)
+    # = (m answered "A" / (total "A" answers)) * (total "A" answers / total answers) / (m answers / total answers)
+    # = m answered "A" / (m answers)
+
+    # P(A) = P(A|B) * P1(B) + P(A|C) * P1(C) + P(A|A) * P1(A)
 
     return score
 
@@ -1453,6 +1602,10 @@ def send_slack_message_to_member(
                             value=f"not_done_no_time",
                         ),
                         Option(
+                            text=PlainTextObject(text="Already done by someone else", emoji=True),
+                            value=f"already_completed_by_someone_else",
+                        ),
+                        Option(
                             text=PlainTextObject(text="Other", emoji=True),
                             value=f"not_done_other",
                         ),
@@ -1500,6 +1653,7 @@ def send_slack_message_to_member(
             ("task_feedback_not_done", "not_done_forgot"),
             ("task_feedback_not_done", "not_done_no_time"),
             ("task_feedback_not_done", "not_done_other"),
+            ("task_feedback_not_done", "already_completed_by_someone_else"),
             ("task_feedback_new_task", "new_task"),
         ]
 
@@ -1585,6 +1739,7 @@ def delegate_task_for_member(
     slack_interaction: SlackInteraction | None = None,
     force: bool = False,
     ignore_reasons: list[str] = [],
+    picked_card: trello.TrelloCard | None = None,
 ) -> Optional[int]:
     ctx = TaskContext.from_member(member_id, datetime.now())
 
@@ -1597,11 +1752,28 @@ def delegate_task_for_member(
         logger.info(f"Member {member_id} received a task recently; skipping delegation")
         return None
 
-    picked_card = select_card_for_member(ctx, ignore_reasons)
+    if picked_card is None:
+        picked_card = select_card_for_member(ctx, ignore_reasons)
 
     print()
     if picked_card:
         print(f"Selected card for member {member_id}: {picked_card.name}")
+
+        # Check if this task requires a room preference and member hasn't answered yet
+        requirements = CardRequirements.from_card(picked_card)
+        if requirements.location is not None and ctx.member.preferred_rooms is None:
+            # Ask for room preferences instead of assigning the task
+            member = db_session.get(Member, member_id)
+            if member:
+                token = config.get("SLACK_BOT_TOKEN")
+                if token:
+                    slack_client = WebClient(token=token)
+                    cards = trello.cached_cards(trello.SOURCE_LIST_NAME)
+                    available_rooms = get_all_room_labels(cards)
+                    ask_room_preference_question(member, slack_client, available_rooms, slack_interaction)
+                    logger.info(f"Asked member {member_id} for room preferences before assigning task")
+                    return None
+
         completion = CardCompletionInfo.from_card(picked_card)
         log_id = assign_task_to_member(ctx, picked_card, completion, slack_interaction)
         return log_id
@@ -1747,3 +1919,77 @@ def process_new_visits() -> None:
 
     redis_connection.set(REDIS_LAST_ID_KEY, str(max_seen))
     db_session.commit()
+
+
+def get_all_room_labels(cards: list[trello.TrelloCard]) -> list[str]:
+    """Extract all unique room labels from cards."""
+    rooms = set()
+    for card in cards:
+        for label in card.labels:
+            if label.name.startswith("Room: "):
+                rooms.add(label.name.split("Room: ")[1])
+    return sorted(list(rooms))
+
+
+def ask_room_preference_question(
+    member: Member,
+    slack_client: WebClient,
+    available_rooms: list[str],
+    slack_interaction: SlackInteraction | None = None,
+) -> Optional[Tuple[str, str]]:
+    """Ask the member about their room preferences via Slack."""
+    slack_user = lookup_slack_user_by_email(member.email, slack_client)
+    if not slack_user:
+        logger.info(f"Member {member.email} does not have a Slack account linked.")
+        return None
+
+    text = f"Hi {member.firstname}! You'll be assigned a small task at the makerspace today. But before we do that, we'd like to know: *Which rooms at the makerspace do you care about the most?*\n\nSelect all that apply. This helps us assign you tasks that are most relevant to you."
+
+    # Create checkboxes for each room
+    options = [Option(text=PlainTextObject(text=room, emoji=True), value=room) for room in available_rooms]
+
+    blocks: list[Block] = [
+        DividerBlock(),
+        SectionBlock(text=MarkdownTextObject(text=text)),
+        ActionsBlock(
+            block_id="room_preferences",
+            elements=[
+                CheckboxesElement(
+                    action_id="room_preference_checkboxes",
+                    options=options,
+                )
+            ],
+        ),
+        ActionsBlock(
+            elements=[
+                ButtonElement(
+                    text=PlainTextObject(text="Submit", emoji=True),
+                    action_id="room_preference_submit",
+                    value="submit",
+                    style="primary",
+                )
+            ]
+        ),
+    ]
+
+    try:
+        if slack_interaction is not None:
+            slack_response = slack_client.chat_update(
+                channel=slack_interaction.channel.id,
+                ts=slack_interaction.message.ts,
+                text=text,
+                blocks=blocks,
+            )
+        else:
+            slack_response = slack_client.chat_postMessage(
+                channel=slack_user,
+                text=text,
+                blocks=blocks,
+            )
+    except SlackApiError as e:
+        logger.error(f"Failed to send room preference question to #{member.member_number}: {e.response['error']}")
+        raise
+
+    channel = slack_response.get("channel", "")
+    ts = slack_response.get("ts", "")
+    return (channel, ts)

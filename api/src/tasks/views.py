@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from logging import getLogger
 from typing import cast, get_args
 
@@ -10,8 +10,9 @@ from serde.json import from_json, to_json
 from service.api_definition import POST, PUBLIC
 from service.config import config
 from service.db import db_session
-from service.error import BadRequest, NotFound
+from service.error import BadRequest, NotFound, UnprocessableEntity
 from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 from slack_sdk.models.blocks import (
     ActionsBlock,
     Block,
@@ -33,10 +34,32 @@ from tasks.delegate import (
     SlackInteraction,
     TaskContext,
     delegate_task_for_member,
+    get_all_room_labels,
+    member_recently_received_task,
+    visit_events_by_member_id,
 )
-from tasks.models import TaskDelegationLog
+from tasks.models import MemberPreference, MemberPreferenceQuestionType, TaskDelegationLog
 
 logger = getLogger("task-delegator")
+
+
+def member_from_slack_user_id(slack_client: WebClient, slack_user_id: str) -> Member | None:
+    """Get Member object from Slack user ID."""
+    try:
+        user_info = slack_client.users_info(user=slack_user_id)
+        email = user_info["user"]["profile"]["email"]
+    except SlackApiError as e:
+        logger.error(f"Failed to get Slack user info: {e.response['error']}")
+        raise BadRequest("Failed to get user info from Slack")
+
+    return db_session.execute(select(Member).where(Member.email == email)).scalar_one_or_none()
+
+
+def get_slack_client() -> WebClient:
+    token = config.get("SLACK_BOT_TOKEN")
+    if not token:
+        raise UnprocessableEntity("Slack bot token not configured")
+    return WebClient(token=token)
 
 
 @service.route("/slack/interaction", method=POST, permission=PUBLIC)  # PUBLIC because Slack posts here
@@ -54,7 +77,139 @@ def slack_interaction() -> dict:
     if not payload.actions:
         raise BadRequest("No actions in payload")
 
-    return slack_handle_task_feedback(payload)
+    action = payload.actions[0]
+
+    if action.action_id == "room_preference_submit":
+        return slack_handle_room_preference_submission(payload)
+    elif action.action_id == "room_preference_checkboxes" or action.action_id == "room_preference_select":
+        # Ignore intermediate actions from the room preference selection
+        # This happens when the user selects/deselects options but hasn't submitted yet
+        return {"message": "Intermediate action ignored"}
+    elif action.action_id == "new_task":
+        return slack_handle_new_task_request(payload)
+    else:
+        return slack_handle_task_feedback(payload)
+
+
+def slack_handle_new_task_request(payload: SlackInteraction) -> dict:
+    """Handle when a member requests a new task."""
+    slack_client = get_slack_client()
+    member = member_from_slack_user_id(slack_client, payload.user.id)
+
+    if not member:
+        raise UnprocessableEntity("Member not found")
+
+    delegate_task_for_member(member.member_id, slack_interaction=payload, force=True)
+
+    return {"message": "New task assigned"}
+
+
+def slack_handle_room_preference_submission(payload: SlackInteraction) -> dict:
+    """Handle when a member submits their room preferences."""
+    slack_client = get_slack_client()
+    member = member_from_slack_user_id(slack_client, payload.user.id)
+
+    if not member:
+        raise UnprocessableEntity("Member not found")
+
+    # Check if the message is too old (>1 month)
+    # Slack message timestamp is in format like "1234567890.123456"
+    message_timestamp = float(payload.message.ts)
+    message_datetime = datetime.fromtimestamp(message_timestamp)
+    now = datetime.now()
+
+    if now - message_datetime > timedelta(days=30):
+        slack_client.chat_update(
+            channel=payload.channel.id,
+            ts=payload.message.ts,
+            text=":information_source: Thanks. But this question was asked too long ago and has expired. If we need this information, we'll ask again.",
+        )
+        logger.info(
+            f"Member {member.member_id} responded to a room preference question that was too old (from {message_datetime})"
+        )
+        return {"message": "Question too old"}
+
+    # Extract selected rooms from the state values
+    # Slack sends checkbox selections in state.values
+    selected_rooms = []
+    if payload.state:
+        state_values = payload.state.values
+        # Look for the room_preferences block
+        if "room_preferences" in state_values:
+            room_prefs = state_values["room_preferences"]
+            # Look for the checkbox action
+            if "room_preference_checkboxes" in room_prefs:
+                checkbox_data = room_prefs["room_preference_checkboxes"]
+                # Extract selected options
+                if checkbox_data.selected_options:
+                    selected_rooms = [opt.value for opt in checkbox_data.selected_options]
+
+    if not selected_rooms:
+        slack_client.chat_postMessage(
+            channel=payload.channel.id,
+            text="Please select at least one room before submitting.",
+        )
+        return {"message": "No rooms selected"}
+
+    # Get all available rooms from cards
+    cards = trello.cached_cards(trello.SOURCE_LIST_NAME)
+
+    available_rooms = get_all_room_labels(cards)
+    # Validate selected rooms
+    for room in selected_rooms:
+        if room not in available_rooms:
+            raise BadRequest(f"Invalid room selected: {room}")
+
+    # Save preference
+    new_pref = MemberPreference(
+        member_id=member.member_id,
+        question_type=MemberPreferenceQuestionType.ROOM_PREFERENCE,
+        available_options=",".join(available_rooms),
+        selected_options=",".join(selected_rooms),
+    )
+    db_session.add(new_pref)
+
+    db_session.commit()
+
+    # Thank the member and assign them a task.
+    # If they have recently received a task or haven't visited in the last 3 hours, just thank them.
+    ctx = TaskContext.from_member(member.member_id, datetime.now())
+    if (
+        member_recently_received_task(ctx)
+        or len(visit_events_by_member_id(now - timedelta(hours=3), now, member.member_id)) == 0
+    ):
+        slack_client.chat_update(
+            channel=payload.channel.id,
+            ts=payload.message.ts,
+            text=f":white_check_mark: Thanks! You've selected: {', '.join(selected_rooms)}. We'll prioritize tasks in these rooms for you.",
+            blocks=[
+                SectionBlock(
+                    text=MarkdownTextObject(
+                        text=f":white_check_mark: Thanks! You've selected: {', '.join(selected_rooms)}. We'll prioritize tasks in these rooms for you."
+                    )
+                ),
+                ActionsBlock(
+                    elements=[
+                        ButtonElement(
+                            text=PlainTextObject(text="↻ Find me a task now", emoji=True),
+                            action_id="new_task",
+                            value="new_task",
+                        ),
+                    ]
+                ),
+            ],
+        )
+    else:
+        slack_client.chat_update(
+            channel=payload.channel.id,
+            ts=payload.message.ts,
+            text=f":white_check_mark: Thanks! You've selected: {', '.join(selected_rooms)}. We'll prioritize tasks in these rooms for you. Let's find you a task now...",
+        )
+
+        # Now assign them a task
+        delegate_task_for_member(member.member_id, slack_interaction=None, force=True)
+
+    return {"message": "Preferences saved and task assigned"}
 
 
 def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[str] = []) -> dict:
@@ -77,12 +232,7 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
     member = db_session.get(Member, log.member_id)
     assert member is not None
 
-    token = config.get("SLACK_BOT_TOKEN")
-    if not token:
-        logger.error("Slack bot token not configured, but we received a Slack interaction request")
-        raise BadRequest("Slack bot token not configured")
-
-    slack_client = WebClient(token=token)
+    slack_client = get_slack_client()
     now = datetime.now()
 
     try:
@@ -159,23 +309,59 @@ def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[s
         log.action = cast(TaskDelegationLog.ACTION_TYPE, sub_action)
         db_session.add(log)
         db_session.commit()
-        trello.add_comment_to_card(
-            log.card_id,
-            f"Member #{member.member_number} {member.firstname} {member.lastname} reported they couldn't do the task: {sub_action}",
-        )
 
-        slack_client.chat_update(
-            channel=payload.channel.id,
-            ts=payload.message.ts,
-            text=f":thumbsup: Can't do the task *{log.card_name}* right now? No worries, thanks for letting us know. We'll give you something else next time.",
-        )
-
-        if TASK_LOG_CHANNEL is not None:
-            slack_client.chat_postMessage(
-                channel=TASK_LOG_CHANNEL,
-                text=f"Member #{member.member_number} {member.firstname} {member.lastname} reported they couldn't do the task <https://trello.com/c/{card.id}|{log.card_name}>: {sub_action}",
+        if sub_action == "already_completed_by_someone_else":
+            trello.add_comment_to_card(
+                log.card_id,
+                f"Member #{member.member_number} {member.firstname} {member.lastname} reported the task was already completed by someone else",
             )
-        return {"message": "Marked as not completed"}
+
+            if TASK_LOG_CHANNEL is not None:
+                slack_client.chat_postMessage(
+                    channel=TASK_LOG_CHANNEL,
+                    text=f"Member #{member.member_number} {member.firstname} {member.lastname} reported the task <https://trello.com/c/{card.id}|{log.card_name}> was already completed by someone else",
+                )
+
+            slack_client.chat_update(
+                channel=payload.channel.id,
+                ts=payload.message.ts,
+                blocks=[
+                    SectionBlock(
+                        text=MarkdownTextObject(
+                            text=f":ballot_box_with_check: Great! Thanks for letting us know that the task *{log.card_name}* was already done by someone else."
+                        )
+                    ),
+                    ActionsBlock(
+                        elements=[
+                            ButtonElement(
+                                text=PlainTextObject(text="↻ I can do something else", emoji=True),
+                                action_id="new_task",
+                                value="new_task",
+                            ),
+                        ]
+                    ),
+                ],
+            )
+
+            return {"message": "Marked as completed by someone else"}
+        else:
+            trello.add_comment_to_card(
+                log.card_id,
+                f"Member #{member.member_number} {member.firstname} {member.lastname} reported they couldn't do the task: {sub_action}",
+            )
+
+            slack_client.chat_update(
+                channel=payload.channel.id,
+                ts=payload.message.ts,
+                text=f":thumbsup: Can't do the task *{log.card_name}* right now? No worries, thanks for letting us know. We'll give you something else next time.",
+            )
+
+            if TASK_LOG_CHANNEL is not None:
+                slack_client.chat_postMessage(
+                    channel=TASK_LOG_CHANNEL,
+                    text=f"Member #{member.member_number} {member.firstname} {member.lastname} reported they couldn't do the task <https://trello.com/c/{card.id}|{log.card_name}>: {sub_action}",
+                )
+            return {"message": "Marked as not completed"}
     elif action_type == "task_feedback_new_task":
         if sub_action != "new_task":
             raise BadRequest(f"Invalid sub-action '{sub_action}'")

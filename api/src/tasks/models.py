@@ -26,6 +26,7 @@ class TaskDelegationLog(Base):
         "not_done_no_time",
         "not_done_other",
         "ignored",
+        "already_completed_by_someone_else",
     ]
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
@@ -52,6 +53,7 @@ class TaskDelegationLog(Base):
             "not_done_no_time",
             "not_done_other",
             "ignored",
+            "already_completed_by_someone_else",
             name="task_action",
         ),
         nullable=False,
@@ -69,3 +71,31 @@ class TaskDelegationLogLabel(Base):
     label: Mapped[str] = mapped_column(Text, primary_key=True, nullable=False)
 
     log: Mapped[TaskDelegationLog] = relationship("TaskDelegationLog", backref="labels", cascade_backrefs=False)
+
+
+class MemberPreferenceQuestionType(enum.Enum):
+    ROOM_PREFERENCE = "ROOM_PREFERENCE"
+    MACHINE_PREFERENCE = "MACHINE_PREFERENCE"
+
+
+class MemberPreference(Base):
+    __tablename__ = "member_preferences"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id: Mapped[int] = mapped_column(ForeignKey("membership_members.member_id"), nullable=False)
+    question_type: Mapped[MemberPreferenceQuestionType] = mapped_column(
+        Enum(MemberPreferenceQuestionType), nullable=False
+    )
+
+    # Comma-separated list of options that were available when the question was asked
+    available_options: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Comma-separated list of options the member selected
+    selected_options: Mapped[str] = mapped_column(Text, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+    member: Mapped[Member] = relationship(Member, cascade_backrefs=False)
