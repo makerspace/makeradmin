@@ -1332,7 +1332,7 @@ def task_score(
         if requirements.location in ctx.member.preferred_rooms:
             score.multiply_score(1.5, f"'{requirements.location}' is a preferred room for the member")
         else:
-            score.multiply_score(0.1, f"'{requirements.location}' isn't a preferred room for the member")
+            score.multiply_score(0.05, f"'{requirements.location}' isn't a preferred room for the member")
 
     # Score: (weight * frequency * (1 + overdue_frequency_intervals)) / (how many members in the past 30 days have been assignable to this task)
     # Can be assigned task: (last completed task size) - (hours spent at space since last completed task)
@@ -1683,7 +1683,6 @@ def send_slack_message_to_member(
 
 
 def select_card_for_member(ctx: TaskContext, ignore_reasons: list[str]) -> Optional[trello.TrelloCard]:
-    member_id = ctx.member.member_id
     visits = visit_events_by_member_id(datetime.now() - timedelta(days=30), datetime.now())
 
     ASSIGN_DELAY = timedelta(minutes=3)
@@ -1720,6 +1719,14 @@ def select_card_for_member(ctx: TaskContext, ignore_reasons: list[str]) -> Optio
         ),
         reverse=True,
     )
+
+    # Filter out scores that are lower than 5% of the maximum to avoid long-tail picks
+    if scores:
+        max_score = scores[0][1].score
+        threshold = max_score * 0.05
+        for s in scores:
+            if s[1].score < threshold and s[1].cannot_be_assigned_reason is None:
+                s[1].multiply_score(0.0, f"Long tail filter (below {threshold:.1f})")
 
     for card, score in scores:
         # Use reservoir sampling to pick a card randomly with weights
