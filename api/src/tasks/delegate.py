@@ -1556,7 +1556,7 @@ def send_slack_message_to_member(
     slack_members = [
         lookup_slack_user_by_email(m.email, slack_client)
         for m in completion.present_members_with_experience[:10]
-        # if m.member_id != member.member_id
+        if m.member_id != member.member_id
     ]
     slack_members = [m for m in slack_members if m is not None]
     if slack_members:
