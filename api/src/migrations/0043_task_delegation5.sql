@@ -1,0 +1,2 @@
+ALTER TABLE task_delegation_log
+MODIFY COLUMN task_size ENUM('TRIVIAL', 'SMALL', 'MEDIUM', 'LARGE', 'VERY_LARGE') NOT NULL;
