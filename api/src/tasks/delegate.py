@@ -7,7 +7,7 @@ from enum import Enum, IntEnum
 from io import BytesIO
 from logging import getLogger
 from random import random
-from typing import Callable, List, Optional, Sequence, Set, Tuple
+from typing import Callable, List, Literal, Optional, Sequence, Set, Tuple
 
 import requests
 from membership.models import Group, Member, member_group
@@ -132,6 +132,7 @@ class SlackInteraction:
 
 
 TASK_SIZE_TO_TIME = {
+    TaskSize.TRIVIAL: timedelta(hours=0),
     TaskSize.SMALL: timedelta(hours=2),
     TaskSize.MEDIUM: timedelta(hours=6),
     TaskSize.LARGE: timedelta(hours=15),
@@ -228,6 +229,17 @@ class MemberTaskInfo:
 
     # Member's room preferences (if they've answered the question)
     preferred_rooms: Optional[set[str]] = None
+
+    # Member's skill level (if they've answered the question)
+    self_reported_skill_level: Optional[str] = None
+
+    def has_self_reported_skill_level_at_least(
+        self, level: Literal["beginner", "intermediate", "advanced", "expert"]
+    ) -> bool:
+        levels = ["auto_beginner", "beginner", "intermediate", "advanced", "expert"]
+        if self.self_reported_skill_level is None:
+            return False
+        return levels.index(self.self_reported_skill_level) >= levels.index(level)
 
     def is_in_group(self, group_name: str) -> bool:
         return group_name in self.groups
@@ -429,6 +441,23 @@ class MemberTaskInfo:
         if room_pref:
             preferred_rooms = set(room_pref.selected_options.split(",")) if room_pref.selected_options else set()
 
+        # Fetch skill level
+        skill_level_pref = db_session.execute(
+            select(MemberPreference)
+            .where(
+                MemberPreference.member_id == member_id,
+                MemberPreference.question_type == MemberPreferenceQuestionType.SKILL_LEVEL,
+                MemberPreference.created_at <= now,
+                # Skill level question is only asked once, so no need to limit by time
+            )
+            .order_by(MemberPreference.created_at.desc())
+            .limit(1)
+        ).scalar_one_or_none()
+
+        self_reported_skill_level = None
+        if skill_level_pref:
+            self_reported_skill_level = skill_level_pref.selected_options if skill_level_pref.selected_options else None
+
         quizzes = member_quiz_statistics(member_id)
         completed_courses = set()
         for quiz in quizzes:
@@ -452,6 +481,7 @@ class MemberTaskInfo:
             completed_card_names=completed_card_names,
             time_at_space_since_last_task=time_at_space_since_last_task,
             preferred_rooms=preferred_rooms,
+            self_reported_skill_level=self_reported_skill_level,
             completed_courses=completed_courses,
         )
 
@@ -840,7 +870,8 @@ class CardRequirements:
             required.append(
                 (
                     "Has not completed Level: 3 tasks at least twice",
-                    lambda context: (context.member.completed_tasks_with_label("Level: 3") >= 2),
+                    lambda context: (context.member.completed_tasks_with_label("Level: 3") >= 2)
+                    or context.member.has_self_reported_skill_level_at_least("expert"),
                 )
             )
             required.append(
@@ -860,7 +891,8 @@ class CardRequirements:
             required.append(
                 (
                     "Has not completed Level: 2 tasks at least twice",
-                    lambda context: (context.member.completed_tasks_with_label("Level: 2") >= 2),
+                    lambda context: (context.member.completed_tasks_with_label("Level: 2") >= 2)
+                    or context.member.has_self_reported_skill_level_at_least("advanced"),
                 )
             )
             required.append(
@@ -888,7 +920,8 @@ class CardRequirements:
             required.append(
                 (
                     "Has not completed Level: 1 tasks at least thrice",
-                    lambda context: (context.member.completed_tasks_with_label("Level: 1") >= 3),
+                    lambda context: (context.member.completed_tasks_with_label("Level: 1") >= 3)
+                    or context.member.has_self_reported_skill_level_at_least("intermediate"),
                 )
             )
 
@@ -910,7 +943,8 @@ class CardRequirements:
             required.append(
                 (
                     "Has not completed Level: Intro1 tasks",
-                    lambda context: (context.member.completed_tasks_with_label("Level: Intro1") >= 1),
+                    lambda context: (context.member.completed_tasks_with_label("Level: Intro1") >= 1)
+                    or context.member.has_self_reported_skill_level_at_least("intermediate"),
                 )
             )
 
@@ -926,7 +960,11 @@ class CardRequirements:
 
         if has_label("Size: Medium"):
             required.append(
-                ("Has completed fewer than 5 tasks", lambda context: (context.member.total_completed_tasks >= 5))
+                (
+                    "Has completed fewer than 5 tasks",
+                    lambda context: (context.member.total_completed_tasks >= 5)
+                    or context.member.has_self_reported_skill_level_at_least("intermediate"),
+                )
             )
             size = TaskSize.MEDIUM
 
@@ -936,7 +974,11 @@ class CardRequirements:
 
         if has_label("Size: Large"):
             required.append(
-                ("Has completed fewer than 10 tasks", lambda context: (context.member.total_completed_tasks >= 10))
+                (
+                    "Has completed fewer than 10 tasks",
+                    lambda context: (context.member.total_completed_tasks >= 10)
+                    or context.member.has_self_reported_skill_level_at_least("advanced"),
+                )
             )
             size = TaskSize.LARGE
 
@@ -1172,9 +1214,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
@@ -1532,7 +1574,7 @@ def send_slack_message_to_member(
     requirements = CardRequirements.from_card(trello_card)
 
     if slack_interaction is None:
-        size_str = " small" if requirements.size == TaskSize.SMALL else ""
+        size_str = " small" if (requirements.size == TaskSize.SMALL or requirements.size == TaskSize.TRIVIAL) else ""
         text = f"Hi {member.firstname}! While you're at the makerspace you've been assigned a{size_str} task:\n\n*{trello_card.name}*\n{trello_card.desc}\n\nPlease try to do it while you're here."
     else:
         text = f"Ok, here's a new task:\n\n*{trello_card.name}*\n{trello_card.desc}"
@@ -1773,14 +1815,20 @@ def delegate_task_for_member(
     if picked_card:
         print(f"Selected card for member {member_id}: {picked_card.name}")
 
-        # Check if this task requires a room preference and member hasn't answered yet
-        requirements = CardRequirements.from_card(picked_card)
-        if requirements.location is not None and ctx.member.preferred_rooms is None:
-            # Ask for room preferences instead of assigning the task
-            member = db_session.get(Member, member_id)
-            if member:
-                token = config.get("SLACK_BOT_TOKEN")
-                if token:
+        member = db_session.get(Member, member_id)
+        if member:
+            token = config.get("SLACK_BOT_TOKEN")
+            if token:
+                # Check if this task requires a room preference and member hasn't answered yet
+                requirements = CardRequirements.from_card(picked_card)
+                if requirements.size != TaskSize.TRIVIAL and ctx.member.self_reported_skill_level is None:
+                    slack_client = WebClient(token=token)
+                    ask_skill_level_question(member, slack_client, slack_interaction, force=force)
+                    logger.info(f"Asked member {member_id} for skill level before assigning task")
+                    return None
+
+                if requirements.location is not None and ctx.member.preferred_rooms is None:
+                    # Ask for room preferences instead of assigning the task
                     slack_client = WebClient(token=token)
                     cards = trello.cached_cards(trello.SOURCE_LIST_NAME)
                     available_rooms = get_all_room_labels(cards)
@@ -1945,6 +1993,24 @@ def get_all_room_labels(cards: list[trello.TrelloCard]) -> list[str]:
     return sorted(list(rooms))
 
 
+def has_pending_question(member_id: int) -> bool:
+    """Check if member has a pending unanswered question that was asked recently."""
+    cache_key = f"question_pending:{member_id}"
+    return redis_connection.exists(cache_key) > 0
+
+
+def set_pending_question(member_id: int) -> None:
+    """Mark that a member has been asked a question."""
+    cache_key = f"question_pending:{member_id}"
+    redis_connection.setex(cache_key, timedelta(hours=2), "1")
+
+
+def clear_pending_question(member_id: int) -> None:
+    """Clear the pending question flag when member answers."""
+    cache_key = f"question_pending:{member_id}"
+    redis_connection.delete(cache_key)
+
+
 def ask_room_preference_question(
     member: Member,
     slack_client: WebClient,
@@ -1952,6 +2018,11 @@ def ask_room_preference_question(
     slack_interaction: SlackInteraction | None = None,
 ) -> Optional[Tuple[str, str]]:
     """Ask the member about their room preferences via Slack."""
+    # Check if member already has a pending question
+    if has_pending_question(member.member_id):
+        logger.info(f"Member {member.member_id} already has a pending question, not asking again")
+        return None
+
     slack_user = lookup_slack_user_by_email(member.email, slack_client)
     if not slack_user:
         logger.info(f"Member {member.email} does not have a Slack account linked.")
@@ -2003,6 +2074,106 @@ def ask_room_preference_question(
     except SlackApiError as e:
         logger.error(f"Failed to send room preference question to #{member.member_number}: {e.response['error']}")
         raise
+
+    # Mark that we've asked this member a question
+    set_pending_question(member.member_id)
+
+    channel = slack_response.get("channel", "")
+    ts = slack_response.get("ts", "")
+    return (channel, ts)
+
+
+def ask_skill_level_question(
+    member: Member,
+    slack_client: WebClient,
+    slack_interaction: SlackInteraction | None = None,
+    force: bool = False,
+) -> Optional[Tuple[str, str]]:
+    """Ask the member about skill level via Slack."""
+    # Check if member joined within the past 2 months - if so, automatically mark as beginner
+    if member.created_at and datetime.now() - member.created_at < timedelta(days=60):
+        logger.info(f"Member {member.member_id} joined recently ({member.created_at}), auto-marking as beginner")
+        valid_skill_levels = ["beginner", "intermediate", "advanced", "expert"]
+        new_pref = MemberPreference(
+            member_id=member.member_id,
+            question_type=MemberPreferenceQuestionType.SKILL_LEVEL,
+            available_options=",".join(valid_skill_levels),
+            selected_options="auto_beginner",
+        )
+        db_session.add(new_pref)
+        db_session.commit()
+        return None
+
+    # Check if member already has a pending question
+    if has_pending_question(member.member_id) and not force:
+        logger.info(f"Member {member.member_id} already has a pending question, not asking again")
+        return None
+
+    slack_user = lookup_slack_user_by_email(member.email, slack_client)
+    if not slack_user:
+        logger.info(f"Member {member.email} does not have a Slack account linked.")
+        return None
+
+    text = f"Hi {member.firstname}! You'll be assigned a small task at the makerspace today. But before we do that, we'd like to know: *How much experience do you have with the makerspace?*\n\nThis will help us assign you tasks that are most relevant to your skill level."
+
+    blocks: list[Block] = [
+        DividerBlock(),
+        SectionBlock(text=MarkdownTextObject(text=text)),
+        SectionBlock(
+            text=MarkdownTextObject(
+                text="• *Beginner* - New member, still learning the basics\n"
+                "• *Intermediate* - Comfortable with some machines and areas\n"
+                "• *Advanced* - Familiar with many machines and how things work\n"
+                "• *Expert* - Deep knowledge of machines and the association"
+            )
+        ),
+        ActionsBlock(
+            block_id="skill_level",
+            elements=[
+                ButtonElement(
+                    text=PlainTextObject(text="Beginner", emoji=True),
+                    action_id="skill_level_submit_beginner",
+                    value="beginner",
+                ),
+                ButtonElement(
+                    text=PlainTextObject(text="Intermediate", emoji=True),
+                    action_id="skill_level_submit_intermediate",
+                    value="intermediate",
+                ),
+                ButtonElement(
+                    text=PlainTextObject(text="Advanced", emoji=True),
+                    action_id="skill_level_submit_advanced",
+                    value="advanced",
+                ),
+                ButtonElement(
+                    text=PlainTextObject(text="Expert", emoji=True),
+                    action_id="skill_level_submit_expert",
+                    value="expert",
+                ),
+            ],
+        ),
+    ]
+
+    try:
+        if slack_interaction is not None:
+            slack_response = slack_client.chat_update(
+                channel=slack_interaction.channel.id,
+                ts=slack_interaction.message.ts,
+                text="How much experience do you have with the makerspace?",
+                blocks=blocks,
+            )
+        else:
+            slack_response = slack_client.chat_postMessage(
+                channel=slack_user,
+                text="How much experience do you have with the makerspace?",
+                blocks=blocks,
+            )
+    except SlackApiError as e:
+        logger.error(f"Failed to send skill level question to #{member.member_number}: {e.response['error']}")
+        raise
+
+    # Mark that we've asked this member a question
+    set_pending_question(member.member_id)
 
     channel = slack_response.get("channel", "")
     ts = slack_response.get("ts", "")

@@ -33,6 +33,7 @@ from tasks.delegate import (
     CardRequirements,
     SlackInteraction,
     TaskContext,
+    clear_pending_question,
     delegate_task_for_member,
     get_all_room_labels,
     member_recently_received_task,
@@ -81,6 +82,8 @@ def slack_interaction() -> dict:
 
     if action.action_id == "room_preference_submit":
         return slack_handle_room_preference_submission(payload)
+    elif action.action_id.startswith("skill_level_submit"):
+        return slack_handle_skill_level_submission(payload)
     elif action.action_id == "room_preference_checkboxes" or action.action_id == "room_preference_select":
         # Ignore intermediate actions from the room preference selection
         # This happens when the user selects/deselects options but hasn't submitted yet
@@ -171,6 +174,9 @@ def slack_handle_room_preference_submission(payload: SlackInteraction) -> dict:
 
     db_session.commit()
 
+    # Clear the pending question flag
+    clear_pending_question(member.member_id)
+
     # Thank the member and assign them a task.
     # If they have recently received a task or haven't visited in the last 3 hours, just thank them.
     ctx = TaskContext.from_member(member.member_id, datetime.now())
@@ -210,6 +216,109 @@ def slack_handle_room_preference_submission(payload: SlackInteraction) -> dict:
         delegate_task_for_member(member.member_id, slack_interaction=None, force=True)
 
     return {"message": "Preferences saved and task assigned"}
+
+
+def slack_handle_skill_level_submission(payload: SlackInteraction) -> dict:
+    """Handle when a member submits their skill level."""
+    slack_client = get_slack_client()
+    member = member_from_slack_user_id(slack_client, payload.user.id)
+
+    if not member:
+        raise UnprocessableEntity("Member not found")
+
+    # Check if the message is too old (>1 month)
+    # Slack message timestamp is in format like "1234567890.123456"
+    message_timestamp = float(payload.message.ts)
+    message_datetime = datetime.fromtimestamp(message_timestamp)
+    now = datetime.now()
+
+    if now - message_datetime > timedelta(days=30):
+        slack_client.chat_update(
+            channel=payload.channel.id,
+            ts=payload.message.ts,
+            text=":information_source: Thanks. But this question was asked too long ago and has expired. If we need this information, we'll ask again.",
+        )
+        logger.info(
+            f"Member {member.member_id} responded to a skill level question that was too old (from {message_datetime})"
+        )
+        return {"message": "Question too old"}
+
+    # Extract selected skill level from button action
+    action = payload.actions[0]
+    selected_skill_level = action.value
+
+    if not selected_skill_level:
+        slack_client.chat_postMessage(
+            channel=payload.channel.id,
+            text="Please select your skill level.",
+        )
+        return {"message": "No skill level selected"}
+
+    # Validate selected skill level
+    valid_skill_levels = ["beginner", "intermediate", "advanced", "expert"]
+    if selected_skill_level not in valid_skill_levels:
+        raise BadRequest(f"Invalid skill level selected: {selected_skill_level}")
+
+    # Save preference
+    new_pref = MemberPreference(
+        member_id=member.member_id,
+        question_type=MemberPreferenceQuestionType.SKILL_LEVEL,
+        available_options=",".join(valid_skill_levels),
+        selected_options=selected_skill_level,
+    )
+    db_session.add(new_pref)
+
+    db_session.commit()
+
+    # Clear the pending question flag
+    clear_pending_question(member.member_id)
+
+    # Post in the global channel that the member has selected a skill level
+    if TASK_LOG_CHANNEL is not None:
+        slack_client.chat_postMessage(
+            channel=TASK_LOG_CHANNEL,
+            text=f"Member #{member.member_number} {member.firstname} {member.lastname} selected skill level: {selected_skill_level}",
+        )
+
+    # Thank the member and assign them a task.
+    # If they have recently received a task or haven't visited in the last 3 hours, just thank them.
+    ctx = TaskContext.from_member(member.member_id, datetime.now())
+    if (
+        member_recently_received_task(ctx)
+        or len(visit_events_by_member_id(now - timedelta(hours=3), now, member.member_id)) == 0
+    ):
+        slack_client.chat_update(
+            channel=payload.channel.id,
+            ts=payload.message.ts,
+            text=f":white_check_mark: Thanks! You've selected skill level: {selected_skill_level}. We'll assign tasks that match your experience.",
+            blocks=[
+                SectionBlock(
+                    text=MarkdownTextObject(
+                        text=f":white_check_mark: Thanks! You've selected skill level: {selected_skill_level}. We'll start by assigning tasks that match your experience level. But you'll be given more advanced tasks as you gain experience."
+                    )
+                ),
+                ActionsBlock(
+                    elements=[
+                        ButtonElement(
+                            text=PlainTextObject(text="↻ Find me a task now", emoji=True),
+                            action_id="new_task",
+                            value="new_task",
+                        ),
+                    ]
+                ),
+            ],
+        )
+    else:
+        slack_client.chat_update(
+            channel=payload.channel.id,
+            ts=payload.message.ts,
+            text=f":white_check_mark: Thanks! You've selected skill level: {selected_skill_level}. We'll start by assigning tasks that match your experience level. But you'll be given more advanced tasks as you gain experience. Let's find you a task now...",
+        )
+
+        # Now assign them a task
+        delegate_task_for_member(member.member_id, slack_interaction=None, force=True)
+
+    return {"message": "Skill level saved and task assigned"}
 
 
 def slack_handle_task_feedback(payload: SlackInteraction, ignore_reasons: list[str] = []) -> dict:

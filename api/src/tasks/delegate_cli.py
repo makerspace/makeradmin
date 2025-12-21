@@ -13,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from tasks.delegate import (
     TASK_LOG_CHANNEL,
     CardCompletionInfo,
+    CardRequirements,
     SlackChannel,
     SlackInteraction,
     SlackInteractionAction,
@@ -238,12 +239,13 @@ def main() -> None:
                 elif len(matching_cards) > 1:
                     raise RuntimeError(f"Multiple tasks found with name '{cli_args.task_name}'")
                 card = matching_cards[0]
+                requirements = CardRequirements.from_card(card)
 
                 if cli_args.done:
                     log = TaskDelegationLog(
                         member_id=None,
                         card_id=card.id,
-                        task_size=TaskSize.SMALL,
+                        task_size=requirements.size,
                         slack_channel_id=None,
                         slack_message_ts=None,
                         card_name=card.name,

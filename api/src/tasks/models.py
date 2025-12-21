@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class TaskSize(enum.Enum):
+    TRIVIAL = "TRIVIAL"
     SMALL = "SMALL"
     MEDIUM = "MEDIUM"
     LARGE = "LARGE"
@@ -78,6 +79,7 @@ class TaskDelegationLogLabel(Base):
 class MemberPreferenceQuestionType(enum.Enum):
     ROOM_PREFERENCE = "ROOM_PREFERENCE"
     MACHINE_PREFERENCE = "MACHINE_PREFERENCE"
+    SKILL_LEVEL = "SKILL_LEVEL"
 
 
 class MemberPreference(Base):
@@ -92,7 +94,7 @@ class MemberPreference(Base):
     # Comma-separated list of options that were available when the question was asked
     available_options: Mapped[str] = mapped_column(Text, nullable=False)
 
-    # Comma-separated list of options the member selected
+    # Comma-separated list of options the member selected. Or single value for single-choice questions.
     selected_options: Mapped[str] = mapped_column(Text, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
