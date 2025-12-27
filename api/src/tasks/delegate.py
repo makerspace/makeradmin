@@ -54,7 +54,7 @@ REDIS_LAST_ID_KEY = "task_delegator_last_id"
 # Delay assigning tasks until a short while after the member opens the first door of the makerspace.
 # This is to allow time to open other doors, which can provide hints of what areas of the space they are visiting,
 # and as such, what tasks would be most relevant to assign.
-ASSIGNMENT_DELAY_AFTER_START_OF_VISIT = timedelta(minutes=3)
+ASSIGNMENT_DELAY_AFTER_START_OF_VISIT = timedelta(minutes=5)
 
 # Increment this when the structure or semantics of MemberTaskInfo changes, to avoid using stale cached data.
 CACHE_VERSION = 7
@@ -75,6 +75,13 @@ YELLOW_ANSI = "\033[93m"
 RED_ANSI = "\033[91m"
 BLUE_ANSI = "\033[94m"
 RESET_ANSI = "\033[0m"
+
+MAIN_ENTRANCE = "12de92e7-9763-4ebb-9642-2969b6713406"
+SIDE_ENTRANCE = "8b3e4c05-9b52-4b2b-b699-cca3ba907762"
+BACK_ENTRANCE = "fd735422-07e7-47b9-b55c-9ff1254f40ec"
+STORAGE_ROOM = "9dc5c8c5-6254-4b68-9290-acdd13e17e0b"
+METAL_WORKSHOP_AND_CORRIDOR = "243dcac3-107f-4b92-b91d-412e0653755e"
+CORRIDOR_NEAR_ELEVATOR = "ffda9ff6-89b4-4a72-8052-25a46316ebbf"
 
 
 @serde
@@ -752,8 +759,10 @@ class CardRequirements:
             required.append(
                 (
                     "Hasn't entered lower floor",
-                    lambda context: context.member.has_opened_door("243dcac3-107f-4b92-b91d-412e0653755e")
-                    or context.member.has_opened_door("ffda9ff6-89b4-4a72-8052-25a46316ebbf"),
+                    lambda context: context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
+                    or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
+                    or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
+                    or context.member.has_opened_door(MAIN_ENTRANCE),  # Always leads to lower floor
                 )
             )
 
@@ -769,8 +778,10 @@ class CardRequirements:
             required.append(
                 (
                     "Hasn't entered lower floor",
-                    lambda context: context.member.has_opened_door("243dcac3-107f-4b92-b91d-412e0653755e")
-                    or context.member.has_opened_door("ffda9ff6-89b4-4a72-8052-25a46316ebbf"),
+                    lambda context: context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
+                    or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
+                    or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
+                    or context.member.has_opened_door(MAIN_ENTRANCE),  # Always leads to lower floor
                 )
             )
 
@@ -801,15 +812,19 @@ class CardRequirements:
             required.append(
                 (
                     "Hasn't entered lower floor/metal workshop",
-                    lambda context: context.member.has_opened_door("243dcac3-107f-4b92-b91d-412e0653755e"),
+                    lambda context: context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR),
                 )
             )
 
         if has_label("Room: Storage room"):
             required.append(
                 (
-                    "Hasn't entered storage room",
-                    lambda context: context.member.has_opened_door("9dc5c8c5-6254-4b68-9290-acdd13e17e0b"),
+                    "Hasn't entered lower floor",
+                    lambda context: context.member.has_opened_door(STORAGE_ROOM)
+                    or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
+                    or context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
+                    or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
+                    or context.member.has_opened_door(MAIN_ENTRANCE),  # Always leads to lower floor
                 )
             )
 
@@ -884,6 +899,7 @@ class CardRequirements:
             completion_message.append(
                 lambda context: "Congratulations on completing your *first Level 4 task*! You're becoming a true makerspace hero! :star_struck:"
                 if context.member.completed_tasks_with_label("Level: 4") == 1
+                and context.member.total_completed_tasks > 5
                 else None
             )
 
@@ -957,6 +973,9 @@ class CardRequirements:
         if has_label("Level: Intro1"):
             # No specific requirements for Intro1 tasks yet
             pass
+
+        if has_label("Size: Trivial"):
+            size = TaskSize.TRIVIAL
 
         if has_label("Size: Medium"):
             required.append(
@@ -1214,9 +1233,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
