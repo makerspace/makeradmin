@@ -1832,10 +1832,13 @@ def delegate_task_for_member(
 
     print()
     if picked_card:
-        print(f"Selected card for member {member_id}: {picked_card.name}")
-
         member = db_session.get(Member, member_id)
+
         if member:
+            print(
+                f"Selected card for member #{member.member_number} ({member.firstname} {member.lastname}): {picked_card.name}"
+            )
+
             token = config.get("SLACK_BOT_TOKEN")
             if token:
                 # Check if this task requires a room preference and member hasn't answered yet
