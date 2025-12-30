@@ -18,6 +18,7 @@
         completed_count: "Slutförda",
         last_completed: "Senast slutförd",
         last_completer: "Senast slutförd av",
+        overdue: "Försenad",
         score: "Poäng",
         never: "Aldrig",
         no_cards: "Inga uppgifter tillgängliga.",

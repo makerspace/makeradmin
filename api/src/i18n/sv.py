@@ -53,6 +53,7 @@ LOCALE = {
     "task_statistics:cards.last_completer": "Senast slutförd av",
     "task_statistics:cards.never": "Aldrig",
     "task_statistics:cards.no_cards": "Inga uppgifter tillgängliga.",
+    "task_statistics:cards.overdue": "Försenad",
     "task_statistics:cards.score": "Poäng",
     "task_statistics:cards.task": "Uppgift",
     "task_statistics:cards.title": "Alla uppgifter",

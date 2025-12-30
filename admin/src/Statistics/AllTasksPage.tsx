@@ -14,6 +14,7 @@ interface CardInfo {
     last_completer_id: number | null;
     last_completer_name: string | null;
     score: number;
+    overdue_days: number | null;
 }
 
 interface AllTasksResponse {
@@ -69,6 +70,7 @@ export default function AllTasksPage() {
                         <th>{t("cards.completed_count")}</th>
                         <th>{t("cards.last_completed")}</th>
                         <th>{t("cards.last_completer")}</th>
+                        <th>{t("cards.overdue")}</th>
                         <th>{t("cards.score")}</th>
                     </tr>
                 </thead>
@@ -105,6 +107,13 @@ export default function AllTasksPage() {
                                 ) : (
                                     "-"
                                 )}
+                            </td>
+                            <td>
+                                {card.overdue_days !== null
+                                    ? t_time("duration.days", {
+                                          count: Math.round(card.overdue_days),
+                                      })
+                                    : "-"}
                             </td>
                             <td>{card.score}</td>
                         </tr>

@@ -18,6 +18,7 @@
         completed_count: "Completed",
         last_completed: "Last Completed",
         last_completer: "Last Completed By",
+        overdue: "Overdue",
         score: "Score",
         never: "Never",
         no_cards: "No tasks available.",

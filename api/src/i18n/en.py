@@ -53,6 +53,7 @@ LOCALE = {
     "task_statistics:cards.last_completer": "Last Completed By",
     "task_statistics:cards.never": "Never",
     "task_statistics:cards.no_cards": "No tasks available.",
+    "task_statistics:cards.overdue": "Overdue",
     "task_statistics:cards.score": "Score",
     "task_statistics:cards.task": "Task",
     "task_statistics:cards.title": "All Tasks",

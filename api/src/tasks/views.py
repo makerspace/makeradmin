@@ -207,6 +207,15 @@ def get_global_task_statistics() -> dict:
         # Calculate the base score for this task
         score = task_score_base(requirements, completion_info, now)
 
+        # Calculate overdue days
+        overdue_days: float | None = None
+        if requirements.repeat_interval is not None:
+            last_time = completion_info.last_completed or completion_info.first_available_at
+            elapsed = now - last_time
+            overdue_seconds = elapsed.total_seconds() - requirements.repeat_interval.total_seconds()
+            if overdue_seconds > 0:
+                overdue_days = overdue_seconds / 86400  # seconds per day
+
         cards_info.append(
             {
                 "card_id": completion_info.card_id,
@@ -225,6 +234,7 @@ def get_global_task_statistics() -> dict:
                 if completion_info.last_completer
                 else None,
                 "score": round(score.score, 2),
+                "overdue_days": overdue_days,
             }
         )
 
