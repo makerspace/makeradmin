@@ -1,13 +1,13 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { RouteObject } from "react-router-dom";
 import { RedirectToSubpage } from "../Components/Routes";
 import AccessLogPage from "./AccessLogPage";
+import AllTasksPage from "./AllTasksPage";
 import MembershipPage from "./MembershipPage";
 import MembersOfInterestPage from "./MembersOfInterestPage";
 import QuizPage from "./QuizPage";
 import SalesByCategoryPage from "./SalesByCategoryPage";
 import SalesByProductPage from "./SalesByProductPage";
-import { RouteObject } from "react-router-dom";
+import TaskActivityPage from "./TaskActivityPage";
 
 const routes: RouteObject[] = [
     {
@@ -37,6 +37,14 @@ const routes: RouteObject[] = [
     {
         path: "members_of_interest",
         element: <MembersOfInterestPage />,
+    },
+    {
+        path: "tasks",
+        element: <AllTasksPage />,
+    },
+    {
+        path: "task_activity",
+        element: <TaskActivityPage />,
     },
 ];
 

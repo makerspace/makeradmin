@@ -24,16 +24,4 @@
         labels: "Etiketter",
         no_tasks: "Inga uppgifter har tilldelats ännu.",
     },
-    actions: {
-        assigned: "Tilldelad",
-        completed: "Slutförd",
-        not_done_did_something_else: "Ej slutförd (gjorde annat)",
-        not_done_confused: "Ej slutförd (förvirrad)",
-        not_done_forgot: "Ej slutförd (glömde)",
-        not_done_no_time: "Ej slutförd (ingen tid)",
-        not_done_other: "Ej slutförd (annat)",
-        not_done_rerolled: "Bytte uppgift",
-        ignored: "Ignorerad",
-        already_completed_by_someone_else: "Redan slutförd av annan",
-    },
 }

@@ -35,11 +35,17 @@ class member_quizzesTranslator(Protocol):
     def __call__(self, key: Literal["error_loading","loading","no_quizzes","table.completion","table.correctly_answered","table.quiz","member_quizzes:error_loading","member_quizzes:loading","member_quizzes:no_quizzes","member_quizzes:table.completion","member_quizzes:table.correctly_answered","member_quizzes:table.quiz"]) -> str: ...
 
 class member_tasksTranslator(Protocol):
+    def __call__(self, key: Literal["by_label.count","by_label.label","by_label.no_labels","by_label.title","error_loading","history.date","history.labels","history.no_tasks","history.status","history.task","history.title","loading","no_data","summary.not_specified","summary.preferred_rooms","summary.skill_level","summary.time_at_space","summary.title","summary.total_completed","member_tasks:by_label.count","member_tasks:by_label.label","member_tasks:by_label.no_labels","member_tasks:by_label.title","member_tasks:error_loading","member_tasks:history.date","member_tasks:history.labels","member_tasks:history.no_tasks","member_tasks:history.status","member_tasks:history.task","member_tasks:history.title","member_tasks:loading","member_tasks:no_data","member_tasks:summary.not_specified","member_tasks:summary.preferred_rooms","member_tasks:summary.skill_level","member_tasks:summary.time_at_space","member_tasks:summary.title","member_tasks:summary.total_completed"]) -> str: ...
+
+class task_statisticsTranslator(Protocol):
+    def __call__(self, key: Literal["cards.completed_count","cards.last_completed","cards.last_completer","cards.never","cards.no_cards","cards.score","cards.task","cards.title","error_loading","loading","task_log.date","task_log.member","task_log.no_logs","task_log.room","task_log.status","task_log.task","task_log.title","title","task_statistics:cards.completed_count","task_statistics:cards.last_completed","task_statistics:cards.last_completer","task_statistics:cards.never","task_statistics:cards.no_cards","task_statistics:cards.score","task_statistics:cards.task","task_statistics:cards.title","task_statistics:error_loading","task_statistics:loading","task_statistics:task_log.date","task_statistics:task_log.member","task_statistics:task_log.no_logs","task_statistics:task_log.room","task_statistics:task_log.status","task_statistics:task_log.task","task_statistics:task_log.title","task_statistics:title"]) -> str: ...
+
+class tasksTranslator(Protocol):
     @overload
-    def __call__(self, key: Literal["actions.already_completed_by_someone_else","actions.assigned","actions.completed","actions.ignored","actions.not_done_confused","actions.not_done_did_something_else","actions.not_done_forgot","actions.not_done_no_time","actions.not_done_rerolled","by_label.count","by_label.label","by_label.no_labels","by_label.title","error_loading","history.date","history.labels","history.no_tasks","history.status","history.task","history.title","loading","no_data","summary.not_specified","summary.preferred_rooms","summary.skill_level","summary.time_at_space","summary.title","summary.total_completed","member_tasks:actions.already_completed_by_someone_else","member_tasks:actions.assigned","member_tasks:actions.completed","member_tasks:actions.ignored","member_tasks:actions.not_done_confused","member_tasks:actions.not_done_did_something_else","member_tasks:actions.not_done_forgot","member_tasks:actions.not_done_no_time","member_tasks:actions.not_done_rerolled","member_tasks:by_label.count","member_tasks:by_label.label","member_tasks:by_label.no_labels","member_tasks:by_label.title","member_tasks:error_loading","member_tasks:history.date","member_tasks:history.labels","member_tasks:history.no_tasks","member_tasks:history.status","member_tasks:history.task","member_tasks:history.title","member_tasks:loading","member_tasks:no_data","member_tasks:summary.not_specified","member_tasks:summary.preferred_rooms","member_tasks:summary.skill_level","member_tasks:summary.time_at_space","member_tasks:summary.title","member_tasks:summary.total_completed"]) -> str: ...
+    def __call__(self, key: Literal["actions.already_completed_by_someone_else","actions.assigned","actions.completed","actions.ignored","actions.not_done_confused","actions.not_done_did_something_else","actions.not_done_forgot","actions.not_done_no_time","actions.not_done_rerolled","tasks:actions.already_completed_by_someone_else","tasks:actions.assigned","tasks:actions.completed","tasks:actions.ignored","tasks:actions.not_done_confused","tasks:actions.not_done_did_something_else","tasks:actions.not_done_forgot","tasks:actions.not_done_no_time","tasks:actions.not_done_rerolled"]) -> str: ...
 
     @overload
-    def __call__(self, key: Literal["actions.not_done","member_tasks:actions.not_done"], *, count: int) -> str: ...
+    def __call__(self, key: Literal["actions.not_done","tasks:actions.not_done"], *, count: int) -> str: ...
 
 def __call__(self, key: str, **kwargs: Any) -> str: ...
 
@@ -77,11 +83,19 @@ def translate(key: Literal["error_loading","loading","no_quizzes","table.complet
 
 
 @overload
-def translate(key: Literal["actions.already_completed_by_someone_else","actions.assigned","actions.completed","actions.ignored","actions.not_done_confused","actions.not_done_did_something_else","actions.not_done_forgot","actions.not_done_no_time","actions.not_done_rerolled","by_label.count","by_label.label","by_label.no_labels","by_label.title","error_loading","history.date","history.labels","history.no_tasks","history.status","history.task","history.title","loading","no_data","summary.not_specified","summary.preferred_rooms","summary.skill_level","summary.time_at_space","summary.title","summary.total_completed","member_tasks:actions.already_completed_by_someone_else","member_tasks:actions.assigned","member_tasks:actions.completed","member_tasks:actions.ignored","member_tasks:actions.not_done_confused","member_tasks:actions.not_done_did_something_else","member_tasks:actions.not_done_forgot","member_tasks:actions.not_done_no_time","member_tasks:actions.not_done_rerolled","member_tasks:by_label.count","member_tasks:by_label.label","member_tasks:by_label.no_labels","member_tasks:by_label.title","member_tasks:error_loading","member_tasks:history.date","member_tasks:history.labels","member_tasks:history.no_tasks","member_tasks:history.status","member_tasks:history.task","member_tasks:history.title","member_tasks:loading","member_tasks:no_data","member_tasks:summary.not_specified","member_tasks:summary.preferred_rooms","member_tasks:summary.skill_level","member_tasks:summary.time_at_space","member_tasks:summary.title","member_tasks:summary.total_completed"]) -> str: ...
+def translate(key: Literal["by_label.count","by_label.label","by_label.no_labels","by_label.title","error_loading","history.date","history.labels","history.no_tasks","history.status","history.task","history.title","loading","no_data","summary.not_specified","summary.preferred_rooms","summary.skill_level","summary.time_at_space","summary.title","summary.total_completed","member_tasks:by_label.count","member_tasks:by_label.label","member_tasks:by_label.no_labels","member_tasks:by_label.title","member_tasks:error_loading","member_tasks:history.date","member_tasks:history.labels","member_tasks:history.no_tasks","member_tasks:history.status","member_tasks:history.task","member_tasks:history.title","member_tasks:loading","member_tasks:no_data","member_tasks:summary.not_specified","member_tasks:summary.preferred_rooms","member_tasks:summary.skill_level","member_tasks:summary.time_at_space","member_tasks:summary.title","member_tasks:summary.total_completed"]) -> str: ...
 
 
 @overload
-def translate(key: Literal["actions.not_done","member_tasks:actions.not_done"], *, count: int) -> str: ...
+def translate(key: Literal["cards.completed_count","cards.last_completed","cards.last_completer","cards.never","cards.no_cards","cards.score","cards.task","cards.title","error_loading","loading","task_log.date","task_log.member","task_log.no_logs","task_log.room","task_log.status","task_log.task","task_log.title","title","task_statistics:cards.completed_count","task_statistics:cards.last_completed","task_statistics:cards.last_completer","task_statistics:cards.never","task_statistics:cards.no_cards","task_statistics:cards.score","task_statistics:cards.task","task_statistics:cards.title","task_statistics:error_loading","task_statistics:loading","task_statistics:task_log.date","task_statistics:task_log.member","task_statistics:task_log.no_logs","task_statistics:task_log.room","task_statistics:task_log.status","task_statistics:task_log.task","task_statistics:task_log.title","task_statistics:title"]) -> str: ...
+
+
+@overload
+def translate(key: Literal["actions.already_completed_by_someone_else","actions.assigned","actions.completed","actions.ignored","actions.not_done_confused","actions.not_done_did_something_else","actions.not_done_forgot","actions.not_done_no_time","actions.not_done_rerolled","tasks:actions.already_completed_by_someone_else","tasks:actions.assigned","tasks:actions.completed","tasks:actions.ignored","tasks:actions.not_done_confused","tasks:actions.not_done_did_something_else","tasks:actions.not_done_forgot","tasks:actions.not_done_no_time","tasks:actions.not_done_rerolled"]) -> str: ...
+
+
+@overload
+def translate(key: Literal["actions.not_done","tasks:actions.not_done"], *, count: int) -> str: ...
 
 
 @overload
@@ -132,6 +146,14 @@ def translator(prefix: Literal['member_quizzes']) -> member_quizzesTranslator: .
 
 @overload
 def translator(prefix: Literal['member_tasks']) -> member_tasksTranslator: ...
+
+
+@overload
+def translator(prefix: Literal['task_statistics']) -> task_statisticsTranslator: ...
+
+
+@overload
+def translator(prefix: Literal['tasks']) -> tasksTranslator: ...
 
 
 @overload

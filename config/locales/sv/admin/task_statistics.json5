@@ -1,0 +1,24 @@
+{
+    title: "Statistik för delegerade uppgifter",
+    loading: "Laddar...",
+    error_loading: "Kunde inte ladda uppgiftsstatistik",
+    task_log: {
+        title: "Senaste uppgiftsaktivitet",
+        date: "Datum",
+        member: "Medlem",
+        task: "Uppgift",
+        status: "Status",
+        room: "Rum",
+        no_logs: "Ingen uppgiftsaktivitet ännu.",
+    },
+    cards: {
+        title: "Alla uppgifter",
+        task: "Uppgift",
+        completed_count: "Slutförda",
+        last_completed: "Senast slutförd",
+        last_completer: "Senast slutförd av",
+        score: "Poäng",
+        never: "Aldrig",
+        no_cards: "Inga uppgifter tillgängliga.",
+    },
+}

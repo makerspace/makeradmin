@@ -585,6 +585,9 @@ class CardCompletionInfo:
     # The last time this task was completed by any member.
     last_completed: datetime | None
 
+    # The member who last completed this task.
+    last_completer: Member | None
+
     @staticmethod
     def from_card(card: trello.TrelloCard) -> "CardCompletionInfo":
         # Find the first time this card was assigned to the member
@@ -622,13 +625,23 @@ class CardCompletionInfo:
             or 0
         )
 
-        last_completed = db_session.execute(
-            select(func.max(TaskDelegationLog.created_at)).where(
+        last_completion_log = db_session.execute(
+            select(TaskDelegationLog)
+            .where(
                 TaskDelegationLog.card_id == card.id,
                 (TaskDelegationLog.action == "completed")
                 | (TaskDelegationLog.action == "already_completed_by_someone_else"),
             )
+            .order_by(TaskDelegationLog.created_at.desc())
+            .limit(1)
         ).scalar_one_or_none()
+
+        last_completed = last_completion_log.created_at if last_completion_log else None
+        last_completer = (
+            db_session.get(Member, last_completion_log.member_id)
+            if last_completion_log and last_completion_log.member_id
+            else None
+        )
 
         present_members_with_experience = list(
             db_session.execute(
@@ -659,6 +672,7 @@ class CardCompletionInfo:
             completed_count=completed_count,
             present_members_with_experience=[pair[0] for pair in present_members_with_experience],
             last_completed=last_completed,
+            last_completer=last_completer,
         )
 
 
@@ -1233,10 +1247,53 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
+
+
+def task_score_base(
+    requirements: CardRequirements,
+    completion_info: CardCompletionInfo,
+    time: datetime,
+) -> TaskScore:
+    if requirements.repeat_interval is not None:
+        assert requirements.repeat_interval.total_seconds() > 0
+        elapsed_periods = (
+            time - (completion_info.last_completed or completion_info.first_available_at)
+        ).total_seconds() / requirements.repeat_interval.total_seconds()
+        if elapsed_periods < 0:
+            logger.warning(
+                f"Negative elapsed periods for task {completion_info.card_id}. Now={time}, last_completed={completion_info.last_completed}, first_available_at={completion_info.first_available_at}, repeat_interval={requirements.repeat_interval}"
+            )
+            elapsed_periods = 0
+        equivalent_repeat_interval = requirements.repeat_interval
+    else:
+        if requirements.infinitely_repeatable:
+            # Assign a default repeat interval for infinitely repeatable one-off tasks
+            equivalent_repeat_interval = timedelta(days=30)
+        else:
+            # Assign a default repeat interval for one-off tasks
+            equivalent_repeat_interval = timedelta(days=180)
+        elapsed_periods = 0
+
+    frequency_days_per_year = float(
+        round(timedelta(days=365).total_seconds() / equivalent_repeat_interval.total_seconds())
+    )
+
+    score = TaskScore(True, None, 0.0)
+
+    # A task that is done once per month should be selected more often than a task that is done once per year.
+    score.add_score(
+        math.sqrt(frequency_days_per_year),
+        f"Base score from task frequency ({frequency_days_per_year:.1f} times per year)",
+    )
+
+    # A task that is not getting done in time should have its score increased
+    score.multiply_score(1 + elapsed_periods, f"Overdue multiplier from {elapsed_periods:.1f} elapsed periods")
+
+    return score
 
 
 def task_score(
@@ -1285,51 +1342,18 @@ def task_score(
     if reasons:
         return TaskScore.from_reason(CannotAssignReason(", ".join(reasons)))
 
-    if ctx.time < completion_info.first_available_at + timedelta(minutes=10):
-        # Don't assign tasks that just became available, as they may be manually created and might still be manually edited
-        return TaskScore.from_reason(CannotAssignReason("Task just became available"))
-
-    if requirements.repeat_interval is not None:
-        assert requirements.repeat_interval.total_seconds() > 0
-        elapsed_periods = (
-            ctx.time - (completion_info.last_completed or completion_info.first_available_at)
-        ).total_seconds() / requirements.repeat_interval.total_seconds()
-        if elapsed_periods < 0:
-            logger.warning(
-                f"Negative elapsed periods for task {completion_info.card_id}. Now={ctx.time}, last_completed={completion_info.last_completed}, first_available_at={completion_info.first_available_at}, repeat_interval={requirements.repeat_interval}"
-            )
-            elapsed_periods = 0
-        equivalent_repeat_interval = requirements.repeat_interval
-    else:
-        if requirements.infinitely_repeatable:
-            # Assign a default repeat interval for infinitely repeatable one-off tasks
-            equivalent_repeat_interval = timedelta(days=30)
-        else:
-            # Assign a default repeat interval for one-off tasks
-            equivalent_repeat_interval = timedelta(days=180)
-        elapsed_periods = 0
-
-    frequency_days_per_year = float(
-        round(timedelta(days=365).total_seconds() / equivalent_repeat_interval.total_seconds())
-    )
-
-    score = TaskScore(True, None, 0.0)
-
-    # A task that is done once per month should be selected more often than a task that is done once per year.
-    score.add_score(
-        math.sqrt(frequency_days_per_year),
-        f"Base score from task frequency ({frequency_days_per_year:.1f} times per year)",
-    )
-
-    # A task that is not getting done in time should have its score increased
-    score.multiply_score(1 + elapsed_periods, f"Overdue multiplier from {elapsed_periods:.1f} elapsed periods")
-
     # Avoid assigning the same task twice in a row (regardless of completion status)
     # and avoid assigning the same task as the last completed task
     same_as_last_assigned_task = any(t.matches(completion_info) for t in ctx.member.last_assigned_tasks)
     same_as_last_completed_task = ctx.member.last_completed_task is not None and ctx.member.last_completed_task.matches(
         completion_info
     )
+
+    if ctx.time < completion_info.first_available_at + timedelta(minutes=10):
+        # Don't assign tasks that just became available, as they may be manually created and might still be manually edited
+        return TaskScore.from_reason(CannotAssignReason("Task just became available"))
+
+    score = task_score_base(requirements, completion_info, ctx.time)
 
     if same_as_last_assigned_task or same_as_last_completed_task:
         score.multiply_score(0.1, "Avoid assigning the same task multiple times in a row")

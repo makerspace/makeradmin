@@ -1,16 +1,7 @@
 import { useJson } from "Hooks/useJson";
 import { Translator, useTranslation } from "i18n/hooks";
+import { ACTION_INFO, formatDate, TaskLogEntry } from "Models/taskActions";
 import { useParams } from "react-router-dom";
-
-interface TaskLogEntry {
-    id: number;
-    card_id: string;
-    card_name: string;
-    card_url: string;
-    action: string;
-    created_at: string;
-    labels: string[];
-}
 
 interface MemberTaskInfoResponse {
     task_logs: TaskLogEntry[];
@@ -19,51 +10,6 @@ interface MemberTaskInfoResponse {
     completed_tasks_by_label: Record<string, number>;
     time_at_space_since_last_task_hours: number;
     total_completed_tasks: number;
-}
-
-type ActionKey =
-    | "actions.assigned"
-    | "actions.completed"
-    | "actions.not_done_did_something_else"
-    | "actions.not_done_confused"
-    | "actions.not_done_forgot"
-    | "actions.not_done_no_time"
-    | "actions.not_done_other"
-    | "actions.not_done_rerolled"
-    | "actions.ignored"
-    | "actions.already_completed_by_someone_else";
-
-const ACTION_INFO: Record<string, { key: ActionKey; isCompleted: boolean }> = {
-    assigned: { key: "actions.assigned", isCompleted: false },
-    completed: { key: "actions.completed", isCompleted: true },
-    not_done_did_something_else: {
-        key: "actions.not_done_did_something_else",
-        isCompleted: false,
-    },
-    not_done_confused: {
-        key: "actions.not_done_confused",
-        isCompleted: false,
-    },
-    not_done_forgot: { key: "actions.not_done_forgot", isCompleted: false },
-    not_done_no_time: { key: "actions.not_done_no_time", isCompleted: false },
-    not_done_other: { key: "actions.not_done_other", isCompleted: false },
-    not_done_rerolled: { key: "actions.not_done_rerolled", isCompleted: false },
-    ignored: { key: "actions.ignored", isCompleted: false },
-    already_completed_by_someone_else: {
-        key: "actions.already_completed_by_someone_else",
-        isCompleted: true,
-    },
-};
-
-function formatDate(isoDate: string): string {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString("sv-SE", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
 }
 
 function formatHours(hours: number, t_time: Translator<"time">): string {
@@ -83,6 +29,7 @@ function MemberBoxTasks() {
     const { member_id } = useParams<{ member_id: string }>();
     const { t } = useTranslation("member_tasks");
     const { t: t_time } = useTranslation("time");
+    const { t: t_tasks } = useTranslation("tasks");
 
     const { data, isLoading, error } = useJson<MemberTaskInfoResponse>({
         url: `/tasks/member/${member_id}/task_info`,
@@ -201,7 +148,7 @@ function MemberBoxTasks() {
                         {data.task_logs.map((log) => {
                             const actionMeta = ACTION_INFO[log.action];
                             const actionLabel = actionMeta
-                                ? t(actionMeta.key as any)
+                                ? t_tasks(actionMeta.key as any)
                                 : log.action;
                             const isCompleted =
                                 actionMeta?.isCompleted ?? false;

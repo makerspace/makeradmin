@@ -1,0 +1,24 @@
+{
+    title: "Delegated Tasks Statistics",
+    loading: "Loading...",
+    error_loading: "Could not load task statistics",
+    task_log: {
+        title: "Recent Task Activity",
+        date: "Date",
+        member: "Member",
+        task: "Task",
+        status: "Status",
+        room: "Room",
+        no_logs: "No task activity yet.",
+    },
+    cards: {
+        title: "All Tasks",
+        task: "Task",
+        completed_count: "Completed",
+        last_completed: "Last Completed",
+        last_completer: "Last Completed By",
+        score: "Score",
+        never: "Never",
+        no_cards: "No tasks available.",
+    },
+}

@@ -42,18 +42,6 @@
         }
     },
     "member_tasks": {
-        "actions": {
-            "already_completed_by_someone_else": "Already completed by someone else",
-            "assigned": "Assigned",
-            "completed": "Completed",
-            "ignored": "Ignored",
-            "not_done_confused": "Not done (confused)",
-            "not_done_did_something_else": "Not done (did something else)",
-            "not_done_forgot": "Not done (forgot)",
-            "not_done_no_time": "Not done (no time)",
-            "not_done_other": "Not done (other)",
-            "not_done_rerolled": "Changed task"
-        },
         "by_label": {
             "count": "Count",
             "label": "Label",
@@ -78,6 +66,44 @@
             "time_at_space": "Time at space since last task",
             "title": "Summary",
             "total_completed": "Total completed tasks"
+        }
+    },
+    "task_statistics": {
+        "cards": {
+            "completed_count": "Completed",
+            "last_completed": "Last Completed",
+            "last_completer": "Last Completed By",
+            "never": "Never",
+            "no_cards": "No tasks available.",
+            "score": "Score",
+            "task": "Task",
+            "title": "All Tasks"
+        },
+        "error_loading": "Could not load task statistics",
+        "loading": "Loading...",
+        "task_log": {
+            "date": "Date",
+            "member": "Member",
+            "no_logs": "No task activity yet.",
+            "room": "Room",
+            "status": "Status",
+            "task": "Task",
+            "title": "Recent Task Activity"
+        },
+        "title": "Delegated Tasks Statistics"
+    },
+    "tasks": {
+        "actions": {
+            "already_completed_by_someone_else": "Already completed",
+            "assigned": "Assigned",
+            "completed": "Completed",
+            "ignored": "Ignored",
+            "not_done_confused": "Not done (confused)",
+            "not_done_did_something_else": "Not done (did something else)",
+            "not_done_forgot": "Not done (forgot)",
+            "not_done_no_time": "Not done (no time)",
+            "not_done_other": "Not done (other)",
+            "not_done_rerolled": "Changed task"
         }
     },
     "time": {

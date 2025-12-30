@@ -152,6 +152,14 @@ const nav = {
                     text: "Members of Interest",
                     target: "/statistics/members_of_interest",
                 },
+                {
+                    text: "All Tasks",
+                    target: "/statistics/tasks",
+                },
+                {
+                    text: "Task Activity",
+                    target: "/statistics/task_activity",
+                },
             ],
         },
         {

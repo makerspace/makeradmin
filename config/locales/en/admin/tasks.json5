@@ -1,0 +1,14 @@
+{
+    actions: {
+        assigned: "Assigned",
+        completed: "Completed",
+        not_done_did_something_else: "Not done (did something else)",
+        not_done_confused: "Not done (confused)",
+        not_done_forgot: "Not done (forgot)",
+        not_done_no_time: "Not done (no time)",
+        not_done_other: "Not done (other)",
+        not_done_rerolled: "Changed task",
+        ignored: "Ignored",
+        already_completed_by_someone_else: "Already completed",
+    },
+}

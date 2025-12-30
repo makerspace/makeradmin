@@ -42,18 +42,6 @@
         }
     },
     "member_tasks": {
-        "actions": {
-            "already_completed_by_someone_else": "Redan slutförd av annan",
-            "assigned": "Tilldelad",
-            "completed": "Slutförd",
-            "ignored": "Ignorerad",
-            "not_done_confused": "Ej slutförd (förvirrad)",
-            "not_done_did_something_else": "Ej slutförd (gjorde annat)",
-            "not_done_forgot": "Ej slutförd (glömde)",
-            "not_done_no_time": "Ej slutförd (ingen tid)",
-            "not_done_other": "Ej slutförd (annat)",
-            "not_done_rerolled": "Bytte uppgift"
-        },
         "by_label": {
             "count": "Antal",
             "label": "Etikett",
@@ -78,6 +66,44 @@
             "time_at_space": "Tid på spacet sedan senaste uppgift",
             "title": "Sammanfattning",
             "total_completed": "Totalt slutförda uppgifter"
+        }
+    },
+    "task_statistics": {
+        "cards": {
+            "completed_count": "Slutförda",
+            "last_completed": "Senast slutförd",
+            "last_completer": "Senast slutförd av",
+            "never": "Aldrig",
+            "no_cards": "Inga uppgifter tillgängliga.",
+            "score": "Poäng",
+            "task": "Uppgift",
+            "title": "Alla uppgifter"
+        },
+        "error_loading": "Kunde inte ladda uppgiftsstatistik",
+        "loading": "Laddar...",
+        "task_log": {
+            "date": "Datum",
+            "member": "Medlem",
+            "no_logs": "Ingen uppgiftsaktivitet ännu.",
+            "room": "Rum",
+            "status": "Status",
+            "task": "Uppgift",
+            "title": "Senaste uppgiftsaktivitet"
+        },
+        "title": "Statistik för delegerade uppgifter"
+    },
+    "tasks": {
+        "actions": {
+            "already_completed_by_someone_else": "Redan slutförd av annan",
+            "assigned": "Tilldelad",
+            "completed": "Slutförd",
+            "ignored": "Ignorerad",
+            "not_done_confused": "Ej slutförd (förvirrad)",
+            "not_done_did_something_else": "Ej slutförd (gjorde annat)",
+            "not_done_forgot": "Ej slutförd (glömde)",
+            "not_done_no_time": "Ej slutförd (ingen tid)",
+            "not_done_other": "Ej slutförd (annat)",
+            "not_done_rerolled": "Bytte uppgift"
         }
     },
     "time": {

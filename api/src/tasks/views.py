@@ -39,6 +39,7 @@ from tasks.delegate import (
     delegate_task_for_member,
     get_all_room_labels,
     member_recently_received_task,
+    task_score_base,
     visit_events_by_member_id,
 )
 from tasks.models import MemberPreference, MemberPreferenceQuestionType, TaskDelegationLog, TaskDelegationLogLabel
@@ -138,6 +139,98 @@ def get_member_task_info(member_id: int) -> dict:
         "completed_tasks_by_label": sorted_completed_by_label,
         "time_at_space_since_last_task_hours": member_info.time_at_space_since_last_task.total_seconds() / 3600,
         "total_completed_tasks": member_info.total_completed_tasks,
+    }
+
+
+@service.route("/statistics", method=GET, permission=MEMBER_VIEW)
+def get_global_task_statistics() -> dict:
+    """Get global task delegation statistics."""
+    # Get all task logs, ordered by date descending, limited to recent entries
+    logs = (
+        db_session.execute(select(TaskDelegationLog).order_by(TaskDelegationLog.created_at.desc()).limit(500))
+        .scalars()
+        .all()
+    )
+
+    # Get cached cards from Trello (used for both task logs and card info)
+    cards: list[trello.TrelloCard] = []
+    try:
+        cards = trello.cached_cards(trello.SOURCE_LIST_NAME)
+    except Exception as e:
+        logger.warning(f"Failed to fetch Trello cards: {e}")
+
+    # Build a lookup dict for cards by id
+    cards_by_id = {card.id: card for card in cards}
+
+    task_logs: list[dict] = []
+    for log in logs:
+        # Get labels from Trello card if it exists, otherwise fall back to database
+        card = cards_by_id.get(log.card_id)
+        if card:
+            labels = [label.name for label in card.labels]
+        else:
+            # Card doesn't exist in Trello (maybe deleted), fall back to database
+            labels = list(
+                db_session.execute(select(TaskDelegationLogLabel.label).where(TaskDelegationLogLabel.log_id == log.id))
+                .scalars()
+                .all()
+            )
+
+        # Get member name if available
+        member_name = None
+        if log.member_id:
+            member = db_session.get(Member, log.member_id)
+            if member:
+                member_name = f"{member.firstname} {member.lastname}"
+
+        task_logs.append(
+            {
+                "id": log.id,
+                "card_id": log.card_id,
+                "card_name": log.card_name,
+                "card_url": f"https://trello.com/c/{log.card_id}",
+                "action": log.action,
+                "created_at": log.created_at.isoformat(),
+                "labels": labels,
+                "member_id": log.member_id,
+                "member_name": member_name,
+            }
+        )
+
+    # Get card completion info for all cards from Trello
+    cards_info: list[dict] = []
+    now = datetime.now()
+    for card in cards:
+        completion_info = CardCompletionInfo.from_card(card)
+        requirements = CardRequirements.from_card(card)
+
+        # Calculate the base score for this task
+        score = task_score_base(requirements, completion_info, now)
+
+        cards_info.append(
+            {
+                "card_id": completion_info.card_id,
+                "card_name": completion_info.card_name,
+                "card_url": f"https://trello.com/c/{completion_info.card_id}",
+                "first_available_at": completion_info.first_available_at.isoformat(),
+                "assigned_count": completion_info.assigned_count,
+                "completed_count": completion_info.completed_count,
+                "last_completed": completion_info.last_completed.isoformat()
+                if completion_info.last_completed
+                else None,
+                "last_completer_id": completion_info.last_completer.member_id
+                if completion_info.last_completer
+                else None,
+                "last_completer_name": f"{completion_info.last_completer.firstname} {completion_info.last_completer.lastname}"
+                if completion_info.last_completer
+                else None,
+                "score": round(score.score, 2),
+            }
+        )
+
+    return {
+        "task_logs": task_logs,
+        "cards": cards_info,
     }
 
 
