@@ -19,6 +19,7 @@ import MemberBoxMessages from "./MemberBoxMessages";
 import MemberBoxNewMessage from "./MemberBoxNewMessage";
 import MemberBoxOrders from "./MemberBoxOrders";
 import MemberBoxPermissions from "./MemberBoxPermissions";
+import MemberBoxQuizzes from "./MemberBoxQuizzes";
 import MemberBoxSpans from "./MemberBoxSpans";
 import MemberBoxStatistics from "./MemberBoxStatistics";
 import MemberExport from "./MemberExport";
@@ -115,6 +116,10 @@ const Member = {
         {
             path: "statistics",
             element: <MemberBoxStatistics />,
+        },
+        {
+            path: "quizzes",
+            element: <MemberBoxQuizzes />,
         },
     ],
 };

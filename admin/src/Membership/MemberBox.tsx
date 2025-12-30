@@ -54,6 +54,9 @@ function MemberBox() {
                     <NavItem to={`/membership/members/${member_id}/statistics`}>
                         Statistik
                     </NavItem>
+                    <NavItem to={`/membership/members/${member_id}/quizzes`}>
+                        Quiz
+                    </NavItem>
                 </ul>
                 <Outlet />
             </div>

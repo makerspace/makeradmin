@@ -4,7 +4,7 @@ from typing import Any, List
 from dataclasses_json import DataClassJsonMixin
 from flask import g, request
 from membership.models import Member
-from service.api_definition import GET, POST, PUBLIC, QUIZ_EDIT, USER
+from service.api_definition import GET, MEMBER_VIEW, POST, PUBLIC, QUIZ_EDIT, USER
 from service.db import db_session
 from service.entity import OrmSingeRelation
 from sqlalchemy import distinct, exists, func, text
@@ -184,6 +184,11 @@ def member_quiz_statistics(member_id: int) -> list[MemberQuizStatistic]:
         )
         for quiz in quizzes
     ]
+
+
+@service.route("/member/<int:member_id>/statistics", method=GET, permission=MEMBER_VIEW)
+def member_quiz_statistics_route(member_id: int):
+    return [stat.to_dict() for stat in member_quiz_statistics(member_id)]
 
 
 @service.route("/unfinished/<int:quiz_id>", method=GET, permission=PUBLIC)
