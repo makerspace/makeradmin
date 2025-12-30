@@ -62,6 +62,7 @@ LOCALE = {
     "task_statistics:task_log.member": "Member",
     "task_statistics:task_log.no_logs": "No task activity yet.",
     "task_statistics:task_log.room": "Room",
+    "task_statistics:task_log.show_only_completed": "Show only completed",
     "task_statistics:task_log.status": "Status",
     "task_statistics:task_log.task": "Task",
     "task_statistics:task_log.title": "Recent Task Activity",

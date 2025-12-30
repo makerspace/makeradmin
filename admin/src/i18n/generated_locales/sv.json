@@ -86,6 +86,7 @@
             "member": "Medlem",
             "no_logs": "Ingen uppgiftsaktivitet ännu.",
             "room": "Rum",
+            "show_only_completed": "Visa endast slutförda",
             "status": "Status",
             "task": "Uppgift",
             "title": "Senaste uppgiftsaktivitet"

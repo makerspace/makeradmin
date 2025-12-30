@@ -10,6 +10,7 @@
         status: "Status",
         room: "Rum",
         no_logs: "Ingen uppgiftsaktivitet ännu.",
+        show_only_completed: "Visa endast slutförda",
     },
     cards: {
         title: "Alla uppgifter",

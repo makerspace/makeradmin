@@ -10,6 +10,7 @@
         status: "Status",
         room: "Room",
         no_logs: "No task activity yet.",
+        show_only_completed: "Show only completed",
     },
     cards: {
         title: "All Tasks",

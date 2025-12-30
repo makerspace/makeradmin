@@ -62,6 +62,7 @@ LOCALE = {
     "task_statistics:task_log.member": "Medlem",
     "task_statistics:task_log.no_logs": "Ingen uppgiftsaktivitet ännu.",
     "task_statistics:task_log.room": "Rum",
+    "task_statistics:task_log.show_only_completed": "Visa endast slutförda",
     "task_statistics:task_log.status": "Status",
     "task_statistics:task_log.task": "Uppgift",
     "task_statistics:task_log.title": "Senaste uppgiftsaktivitet",

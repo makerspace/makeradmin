@@ -86,6 +86,7 @@
             "member": "Member",
             "no_logs": "No task activity yet.",
             "room": "Room",
+            "show_only_completed": "Show only completed",
             "status": "Status",
             "task": "Task",
             "title": "Recent Task Activity"
