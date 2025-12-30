@@ -20,9 +20,14 @@ import sv from "./generated_locales/sv.json";
 ((key: "billing_address" | "email" | "homepage_url" | "makerspace_name" | "organization_number") => string)
 	"common":
 ((key: "todo") => string)
+	"member_quizzes":
+((key: "error_loading" | "loading" | "no_quizzes" | "table.completion" | "table.correctly_answered" | "table.quiz") => string)
+	"member_tasks":
+((key: "actions.already_completed_by_someone_else" | "actions.assigned" | "actions.completed" | "actions.ignored" | "actions.not_done_confused" | "actions.not_done_did_something_else" | "actions.not_done_forgot" | "actions.not_done_no_time" | "actions.not_done_rerolled" | "by_label.count" | "by_label.label" | "by_label.no_labels" | "by_label.title" | "error_loading" | "history.date" | "history.labels" | "history.no_tasks" | "history.status" | "history.task" | "history.title" | "loading" | "no_data" | "summary.not_specified" | "summary.preferred_rooms" | "summary.skill_level" | "summary.time_at_space" | "summary.title" | "summary.total_completed") => string)
+		& ((key: "actions.not_done", args: { "count": string | number}) => string)
 	"time":
 ((key: "relative_generic.now") => string)
-		& ((key: "relative_generic.days_ago" | "relative_generic.hours_ago" | "relative_generic.in_days" | "relative_generic.in_hours" | "relative_generic.in_minutes" | "relative_generic.minutes_ago", args: { "count": string | number}) => string)
+		& ((key: "duration.days" | "duration.hours" | "duration.minutes" | "relative_generic.days_ago" | "relative_generic.hours_ago" | "relative_generic.in_days" | "relative_generic.in_hours" | "relative_generic.in_minutes" | "relative_generic.minutes_ago", args: { "count": string | number}) => string)
 		& ((key: "relative_generic.date_future" | "relative_generic.date_past", args: { "date": string | number}) => string)
 };
 
@@ -31,7 +36,10 @@ export type LOCALE_SCHEMA_GLOBAL = (
 		& ((key: "box_terminator:can_be_terminated_in" | "box_terminator:expires_future" | "box_terminator:expires_past", args: { "relative_time": string | number}) => string)
 		& ((key: "brand:billing_address" | "brand:email" | "brand:homepage_url" | "brand:makerspace_name" | "brand:organization_number") => string)
 		& ((key: "common:todo") => string)
+		& ((key: "member_quizzes:error_loading" | "member_quizzes:loading" | "member_quizzes:no_quizzes" | "member_quizzes:table.completion" | "member_quizzes:table.correctly_answered" | "member_quizzes:table.quiz") => string)
+		& ((key: "member_tasks:actions.already_completed_by_someone_else" | "member_tasks:actions.assigned" | "member_tasks:actions.completed" | "member_tasks:actions.ignored" | "member_tasks:actions.not_done_confused" | "member_tasks:actions.not_done_did_something_else" | "member_tasks:actions.not_done_forgot" | "member_tasks:actions.not_done_no_time" | "member_tasks:actions.not_done_rerolled" | "member_tasks:by_label.count" | "member_tasks:by_label.label" | "member_tasks:by_label.no_labels" | "member_tasks:by_label.title" | "member_tasks:error_loading" | "member_tasks:history.date" | "member_tasks:history.labels" | "member_tasks:history.no_tasks" | "member_tasks:history.status" | "member_tasks:history.task" | "member_tasks:history.title" | "member_tasks:loading" | "member_tasks:no_data" | "member_tasks:summary.not_specified" | "member_tasks:summary.preferred_rooms" | "member_tasks:summary.skill_level" | "member_tasks:summary.time_at_space" | "member_tasks:summary.title" | "member_tasks:summary.total_completed") => string)
+		& ((key: "member_tasks:actions.not_done", args: { "count": string | number}) => string)
 		& ((key: "time:relative_generic.now") => string)
-		& ((key: "time:relative_generic.days_ago" | "time:relative_generic.hours_ago" | "time:relative_generic.in_days" | "time:relative_generic.in_hours" | "time:relative_generic.in_minutes" | "time:relative_generic.minutes_ago", args: { "count": string | number}) => string)
+		& ((key: "time:duration.days" | "time:duration.hours" | "time:duration.minutes" | "time:relative_generic.days_ago" | "time:relative_generic.hours_ago" | "time:relative_generic.in_days" | "time:relative_generic.in_hours" | "time:relative_generic.in_minutes" | "time:relative_generic.minutes_ago", args: { "count": string | number}) => string)
 		& ((key: "time:relative_generic.date_future" | "time:relative_generic.date_past", args: { "date": string | number}) => string)
 );

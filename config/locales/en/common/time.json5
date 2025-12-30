@@ -10,4 +10,12 @@
         date_future: "{{date}}",
         date_past: "{{date}}",
     },
+    duration: {
+        minutes_one: "{{count}} minute",
+        minutes_other: "{{count}} minutes",
+        hours_one: "{{count}} hour",
+        hours_other: "{{count}} hours",
+        days_one: "{{count}} day",
+        days_other: "{{count}} days",
+    },
 }

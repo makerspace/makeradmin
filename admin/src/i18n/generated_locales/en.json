@@ -31,7 +31,64 @@
     "common": {
         "todo": "should really add some translation for the admin interface too"
     },
+    "member_quizzes": {
+        "error_loading": "Could not load quiz statistics",
+        "loading": "Loading...",
+        "no_quizzes": "No quizzes available.",
+        "table": {
+            "completion": "Completion",
+            "correctly_answered": "Correctly answered questions",
+            "quiz": "Quiz"
+        }
+    },
+    "member_tasks": {
+        "actions": {
+            "already_completed_by_someone_else": "Already completed by someone else",
+            "assigned": "Assigned",
+            "completed": "Completed",
+            "ignored": "Ignored",
+            "not_done_confused": "Not done (confused)",
+            "not_done_did_something_else": "Not done (did something else)",
+            "not_done_forgot": "Not done (forgot)",
+            "not_done_no_time": "Not done (no time)",
+            "not_done_other": "Not done (other)",
+            "not_done_rerolled": "Changed task"
+        },
+        "by_label": {
+            "count": "Count",
+            "label": "Label",
+            "no_labels": "No completed tasks with labels.",
+            "title": "Completed tasks by label"
+        },
+        "error_loading": "Could not load task info",
+        "history": {
+            "date": "Date",
+            "labels": "Labels",
+            "no_tasks": "No tasks have been assigned yet.",
+            "status": "Status",
+            "task": "Task",
+            "title": "Task history"
+        },
+        "loading": "Loading...",
+        "no_data": "No task info available.",
+        "summary": {
+            "not_specified": "Not specified",
+            "preferred_rooms": "Preferred rooms",
+            "skill_level": "Self-reported skill level",
+            "time_at_space": "Time at space since last task",
+            "title": "Summary",
+            "total_completed": "Total completed tasks"
+        }
+    },
     "time": {
+        "duration": {
+            "days_one": "{{count}} day",
+            "days_other": "{{count}} days",
+            "hours_one": "{{count}} hour",
+            "hours_other": "{{count}} hours",
+            "minutes_one": "{{count}} minute",
+            "minutes_other": "{{count}} minutes"
+        },
         "relative_generic": {
             "date_future": "{{date}}",
             "date_past": "{{date}}",

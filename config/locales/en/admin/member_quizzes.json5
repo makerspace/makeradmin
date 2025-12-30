@@ -1,0 +1,10 @@
+{
+    loading: "Loading...",
+    error_loading: "Could not load quiz statistics",
+    no_quizzes: "No quizzes available.",
+    table: {
+        quiz: "Quiz",
+        correctly_answered: "Correctly answered questions",
+        completion: "Completion",
+    },
+}

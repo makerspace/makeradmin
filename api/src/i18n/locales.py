@@ -31,12 +31,25 @@ class brandTranslator(Protocol):
 class commonTranslator(Protocol):
     def __call__(self, key: Literal["todo","common:todo"]) -> str: ...
 
+class member_quizzesTranslator(Protocol):
+    def __call__(self, key: Literal["error_loading","loading","no_quizzes","table.completion","table.correctly_answered","table.quiz","member_quizzes:error_loading","member_quizzes:loading","member_quizzes:no_quizzes","member_quizzes:table.completion","member_quizzes:table.correctly_answered","member_quizzes:table.quiz"]) -> str: ...
+
+class member_tasksTranslator(Protocol):
+    @overload
+    def __call__(self, key: Literal["actions.already_completed_by_someone_else","actions.assigned","actions.completed","actions.ignored","actions.not_done_confused","actions.not_done_did_something_else","actions.not_done_forgot","actions.not_done_no_time","actions.not_done_rerolled","by_label.count","by_label.label","by_label.no_labels","by_label.title","error_loading","history.date","history.labels","history.no_tasks","history.status","history.task","history.title","loading","no_data","summary.not_specified","summary.preferred_rooms","summary.skill_level","summary.time_at_space","summary.title","summary.total_completed","member_tasks:actions.already_completed_by_someone_else","member_tasks:actions.assigned","member_tasks:actions.completed","member_tasks:actions.ignored","member_tasks:actions.not_done_confused","member_tasks:actions.not_done_did_something_else","member_tasks:actions.not_done_forgot","member_tasks:actions.not_done_no_time","member_tasks:actions.not_done_rerolled","member_tasks:by_label.count","member_tasks:by_label.label","member_tasks:by_label.no_labels","member_tasks:by_label.title","member_tasks:error_loading","member_tasks:history.date","member_tasks:history.labels","member_tasks:history.no_tasks","member_tasks:history.status","member_tasks:history.task","member_tasks:history.title","member_tasks:loading","member_tasks:no_data","member_tasks:summary.not_specified","member_tasks:summary.preferred_rooms","member_tasks:summary.skill_level","member_tasks:summary.time_at_space","member_tasks:summary.title","member_tasks:summary.total_completed"]) -> str: ...
+
+    @overload
+    def __call__(self, key: Literal["actions.not_done","member_tasks:actions.not_done"], *, count: int) -> str: ...
+
+def __call__(self, key: str, **kwargs: Any) -> str: ...
+
+
 class timeTranslator(Protocol):
     @overload
     def __call__(self, key: Literal["relative_generic.now","time:relative_generic.now"]) -> str: ...
 
     @overload
-    def __call__(self, key: Literal["relative_generic.days_ago","relative_generic.hours_ago","relative_generic.in_days","relative_generic.in_hours","relative_generic.in_minutes","relative_generic.minutes_ago","time:relative_generic.days_ago","time:relative_generic.hours_ago","time:relative_generic.in_days","time:relative_generic.in_hours","time:relative_generic.in_minutes","time:relative_generic.minutes_ago"], *, count: int) -> str: ...
+    def __call__(self, key: Literal["duration.days","duration.hours","duration.minutes","relative_generic.days_ago","relative_generic.hours_ago","relative_generic.in_days","relative_generic.in_hours","relative_generic.in_minutes","relative_generic.minutes_ago","time:duration.days","time:duration.hours","time:duration.minutes","time:relative_generic.days_ago","time:relative_generic.hours_ago","time:relative_generic.in_days","time:relative_generic.in_hours","time:relative_generic.in_minutes","time:relative_generic.minutes_ago"], *, count: int) -> str: ...
 
     @overload
     def __call__(self, key: Literal["relative_generic.date_future","relative_generic.date_past","time:relative_generic.date_future","time:relative_generic.date_past"], *, date: str | int | float) -> str: ...
@@ -60,11 +73,23 @@ def translate(key: Literal["todo","common:todo"]) -> str: ...
 
 
 @overload
+def translate(key: Literal["error_loading","loading","no_quizzes","table.completion","table.correctly_answered","table.quiz","member_quizzes:error_loading","member_quizzes:loading","member_quizzes:no_quizzes","member_quizzes:table.completion","member_quizzes:table.correctly_answered","member_quizzes:table.quiz"]) -> str: ...
+
+
+@overload
+def translate(key: Literal["actions.already_completed_by_someone_else","actions.assigned","actions.completed","actions.ignored","actions.not_done_confused","actions.not_done_did_something_else","actions.not_done_forgot","actions.not_done_no_time","actions.not_done_rerolled","by_label.count","by_label.label","by_label.no_labels","by_label.title","error_loading","history.date","history.labels","history.no_tasks","history.status","history.task","history.title","loading","no_data","summary.not_specified","summary.preferred_rooms","summary.skill_level","summary.time_at_space","summary.title","summary.total_completed","member_tasks:actions.already_completed_by_someone_else","member_tasks:actions.assigned","member_tasks:actions.completed","member_tasks:actions.ignored","member_tasks:actions.not_done_confused","member_tasks:actions.not_done_did_something_else","member_tasks:actions.not_done_forgot","member_tasks:actions.not_done_no_time","member_tasks:actions.not_done_rerolled","member_tasks:by_label.count","member_tasks:by_label.label","member_tasks:by_label.no_labels","member_tasks:by_label.title","member_tasks:error_loading","member_tasks:history.date","member_tasks:history.labels","member_tasks:history.no_tasks","member_tasks:history.status","member_tasks:history.task","member_tasks:history.title","member_tasks:loading","member_tasks:no_data","member_tasks:summary.not_specified","member_tasks:summary.preferred_rooms","member_tasks:summary.skill_level","member_tasks:summary.time_at_space","member_tasks:summary.title","member_tasks:summary.total_completed"]) -> str: ...
+
+
+@overload
+def translate(key: Literal["actions.not_done","member_tasks:actions.not_done"], *, count: int) -> str: ...
+
+
+@overload
 def translate(key: Literal["relative_generic.now","time:relative_generic.now"]) -> str: ...
 
 
 @overload
-def translate(key: Literal["relative_generic.days_ago","relative_generic.hours_ago","relative_generic.in_days","relative_generic.in_hours","relative_generic.in_minutes","relative_generic.minutes_ago","time:relative_generic.days_ago","time:relative_generic.hours_ago","time:relative_generic.in_days","time:relative_generic.in_hours","time:relative_generic.in_minutes","time:relative_generic.minutes_ago"], *, count: int) -> str: ...
+def translate(key: Literal["duration.days","duration.hours","duration.minutes","relative_generic.days_ago","relative_generic.hours_ago","relative_generic.in_days","relative_generic.in_hours","relative_generic.in_minutes","relative_generic.minutes_ago","time:duration.days","time:duration.hours","time:duration.minutes","time:relative_generic.days_ago","time:relative_generic.hours_ago","time:relative_generic.in_days","time:relative_generic.in_hours","time:relative_generic.in_minutes","time:relative_generic.minutes_ago"], *, count: int) -> str: ...
 
 
 @overload
@@ -99,6 +124,14 @@ def translator(prefix: Literal['brand']) -> brandTranslator: ...
 
 @overload
 def translator(prefix: Literal['common']) -> commonTranslator: ...
+
+
+@overload
+def translator(prefix: Literal['member_quizzes']) -> member_quizzesTranslator: ...
+
+
+@overload
+def translator(prefix: Literal['member_tasks']) -> member_tasksTranslator: ...
 
 
 @overload

@@ -1,0 +1,10 @@
+{
+    loading: "Laddar...",
+    error_loading: "Kunde inte ladda quiz-statistik",
+    no_quizzes: "Inga quiz finns tillgängliga.",
+    table: {
+        quiz: "Quiz",
+        correctly_answered: "Rätt besvarade frågor",
+        completion: "Slutförande",
+    },
+}

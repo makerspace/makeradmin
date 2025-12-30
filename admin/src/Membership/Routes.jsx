@@ -22,6 +22,7 @@ import MemberBoxPermissions from "./MemberBoxPermissions";
 import MemberBoxQuizzes from "./MemberBoxQuizzes";
 import MemberBoxSpans from "./MemberBoxSpans";
 import MemberBoxStatistics from "./MemberBoxStatistics";
+import MemberBoxTasks from "./MemberBoxTasks";
 import MemberExport from "./MemberExport";
 import MemberList from "./MemberList";
 import SpanList from "./SpanList";
@@ -120,6 +121,10 @@ const Member = {
         {
             path: "quizzes",
             element: <MemberBoxQuizzes />,
+        },
+        {
+            path: "tasks",
+            element: <MemberBoxTasks />,
         },
     ],
 };

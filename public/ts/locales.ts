@@ -66,7 +66,7 @@ import sv from "./generated_locales/sv.json";
 		& ((key: "access_starter_pack.renewal" | "labaccess_subscription.renewal" | "membership_subscription.renewal" | "single_labaccess_month.renewal" | "single_membership_year.renewal", args: { "price": string | number}) => string)
 	"time": 
 ((key: "relative_generic.now") => string) 
-		& ((key: "relative_generic.days_ago" | "relative_generic.hours_ago" | "relative_generic.in_days" | "relative_generic.in_hours" | "relative_generic.in_minutes" | "relative_generic.minutes_ago", args: { "count": string | number}) => string) 
+		& ((key: "duration.days" | "duration.hours" | "duration.minutes" | "relative_generic.days_ago" | "relative_generic.hours_ago" | "relative_generic.in_days" | "relative_generic.in_hours" | "relative_generic.in_minutes" | "relative_generic.minutes_ago", args: { "count": string | number}) => string) 
 		& ((key: "relative_generic.date_future" | "relative_generic.date_past", args: { "date": string | number}) => string)
 };
 
@@ -110,6 +110,6 @@ export type LOCALE_SCHEMA_GLOBAL = (
 		& ((key: "special_products:renewal", args: { "count": string | number}) => string) 
 		& ((key: "special_products:access_starter_pack.renewal" | "special_products:labaccess_subscription.renewal" | "special_products:membership_subscription.renewal" | "special_products:single_labaccess_month.renewal" | "special_products:single_membership_year.renewal", args: { "price": string | number}) => string) 
 		& ((key: "time:relative_generic.now") => string) 
-		& ((key: "time:relative_generic.days_ago" | "time:relative_generic.hours_ago" | "time:relative_generic.in_days" | "time:relative_generic.in_hours" | "time:relative_generic.in_minutes" | "time:relative_generic.minutes_ago", args: { "count": string | number}) => string) 
+		& ((key: "time:duration.days" | "time:duration.hours" | "time:duration.minutes" | "time:relative_generic.days_ago" | "time:relative_generic.hours_ago" | "time:relative_generic.in_days" | "time:relative_generic.in_hours" | "time:relative_generic.in_minutes" | "time:relative_generic.minutes_ago", args: { "count": string | number}) => string) 
 		& ((key: "time:relative_generic.date_future" | "time:relative_generic.date_past", args: { "date": string | number}) => string)
 );

@@ -472,6 +472,14 @@
         }
     },
     "time": {
+        "duration": {
+            "days_one": "{{count}} day",
+            "days_other": "{{count}} days",
+            "hours_one": "{{count}} hour",
+            "hours_other": "{{count}} hours",
+            "minutes_one": "{{count}} minute",
+            "minutes_other": "{{count}} minutes"
+        },
         "relative_generic": {
             "date_future": "{{date}}",
             "date_past": "{{date}}",

@@ -1,13 +1,14 @@
 import json
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from logging import getLogger
-from typing import cast, get_args
+from typing import Optional, cast, get_args
 
 from flask import request
 from membership.models import Member
 from serde import from_dict, serde
 from serde.json import from_json, to_json
-from service.api_definition import POST, PUBLIC
+from service.api_definition import GET, MEMBER_VIEW, POST, PUBLIC
 from service.config import config
 from service.db import db_session
 from service.error import BadRequest, NotFound, UnprocessableEntity
@@ -31,6 +32,7 @@ from tasks.delegate import (
     TASK_LOG_CHANNEL,
     CardCompletionInfo,
     CardRequirements,
+    MemberTaskInfo,
     SlackInteraction,
     TaskContext,
     clear_pending_question,
@@ -39,7 +41,7 @@ from tasks.delegate import (
     member_recently_received_task,
     visit_events_by_member_id,
 )
-from tasks.models import MemberPreference, MemberPreferenceQuestionType, TaskDelegationLog
+from tasks.models import MemberPreference, MemberPreferenceQuestionType, TaskDelegationLog, TaskDelegationLogLabel
 
 logger = getLogger("task-delegator")
 
@@ -61,6 +63,82 @@ def get_slack_client() -> WebClient:
     if not token:
         raise UnprocessableEntity("Slack bot token not configured")
     return WebClient(token=token)
+
+
+@dataclass
+class TaskLogEntry:
+    """A single task log entry for display in the admin UI."""
+
+    id: int
+    card_id: str
+    card_name: str
+    card_url: str
+    action: str
+    created_at: str
+    labels: list[str]
+
+
+@dataclass
+class MemberTaskInfoResponse:
+    """Response for the member task info endpoint."""
+
+    task_logs: list[TaskLogEntry]
+    preferred_rooms: Optional[list[str]]
+    self_reported_skill_level: Optional[str]
+    completed_tasks_by_label: dict[str, int]
+    time_at_space_since_last_task_hours: float
+    total_completed_tasks: int
+
+
+@service.route("/member/<int:member_id>/task_info", method=GET, permission=MEMBER_VIEW)
+def get_member_task_info(member_id: int) -> dict:
+    """Get task delegation info for a member."""
+    now = datetime.now()
+    member_info = MemberTaskInfo.from_member(member_id, now)
+
+    # Get all task logs for this member, ordered by date descending
+    logs = (
+        db_session.execute(
+            select(TaskDelegationLog)
+            .where(TaskDelegationLog.member_id == member_id)
+            .order_by(TaskDelegationLog.created_at.desc())
+        )
+        .scalars()
+        .all()
+    )
+
+    task_logs: list[dict] = []
+    for log in logs:
+        # Get labels for this log entry
+        labels = (
+            db_session.execute(select(TaskDelegationLogLabel.label).where(TaskDelegationLogLabel.log_id == log.id))
+            .scalars()
+            .all()
+        )
+
+        task_logs.append(
+            {
+                "id": log.id,
+                "card_id": log.card_id,
+                "card_name": log.card_name,
+                "card_url": f"https://trello.com/c/{log.card_id}",
+                "action": log.action,
+                "created_at": log.created_at.isoformat(),
+                "labels": list(labels),
+            }
+        )
+
+    # Sort completed_tasks_by_label by label name
+    sorted_completed_by_label = dict(sorted(member_info.completed_tasks_by_label.items()))
+
+    return {
+        "task_logs": task_logs,
+        "preferred_rooms": sorted(member_info.preferred_rooms) if member_info.preferred_rooms else None,
+        "self_reported_skill_level": member_info.self_reported_skill_level,
+        "completed_tasks_by_label": sorted_completed_by_label,
+        "time_at_space_since_last_task_hours": member_info.time_at_space_since_last_task.total_seconds() / 3600,
+        "total_completed_tasks": member_info.total_completed_tasks,
+    }
 
 
 @service.route("/slack/interaction", method=POST, permission=PUBLIC)  # PUBLIC because Slack posts here

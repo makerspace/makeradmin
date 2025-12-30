@@ -31,7 +31,64 @@
     "common": {
         "todo": "should really add some translation for the admin interface too"
     },
+    "member_quizzes": {
+        "error_loading": "Kunde inte ladda quiz-statistik",
+        "loading": "Laddar...",
+        "no_quizzes": "Inga quiz finns tillgängliga.",
+        "table": {
+            "completion": "Slutförande",
+            "correctly_answered": "Rätt besvarade frågor",
+            "quiz": "Quiz"
+        }
+    },
+    "member_tasks": {
+        "actions": {
+            "already_completed_by_someone_else": "Redan slutförd av annan",
+            "assigned": "Tilldelad",
+            "completed": "Slutförd",
+            "ignored": "Ignorerad",
+            "not_done_confused": "Ej slutförd (förvirrad)",
+            "not_done_did_something_else": "Ej slutförd (gjorde annat)",
+            "not_done_forgot": "Ej slutförd (glömde)",
+            "not_done_no_time": "Ej slutförd (ingen tid)",
+            "not_done_other": "Ej slutförd (annat)",
+            "not_done_rerolled": "Bytte uppgift"
+        },
+        "by_label": {
+            "count": "Antal",
+            "label": "Etikett",
+            "no_labels": "Inga slutförda uppgifter med etiketter.",
+            "title": "Slutförda uppgifter per etikett"
+        },
+        "error_loading": "Kunde inte ladda uppgiftsinfo",
+        "history": {
+            "date": "Datum",
+            "labels": "Etiketter",
+            "no_tasks": "Inga uppgifter har tilldelats ännu.",
+            "status": "Status",
+            "task": "Uppgift",
+            "title": "Uppgiftshistorik"
+        },
+        "loading": "Laddar...",
+        "no_data": "Ingen uppgiftsinfo tillgänglig.",
+        "summary": {
+            "not_specified": "Ej angiven",
+            "preferred_rooms": "Föredragna rum",
+            "skill_level": "Självrapporterad färdighetsnivå",
+            "time_at_space": "Tid på spacet sedan senaste uppgift",
+            "title": "Sammanfattning",
+            "total_completed": "Totalt slutförda uppgifter"
+        }
+    },
     "time": {
+        "duration": {
+            "days_one": "{{count}} dag",
+            "days_other": "{{count}} dagar",
+            "hours_one": "{{count}} timme",
+            "hours_other": "{{count}} timmar",
+            "minutes_one": "{{count}} minut",
+            "minutes_other": "{{count}} minuter"
+        },
         "relative_generic": {
             "date_future": "{{date}}",
             "date_past": "{{date}}",

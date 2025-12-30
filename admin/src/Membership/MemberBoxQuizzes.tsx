@@ -1,4 +1,5 @@
 import { useJson } from "Hooks/useJson";
+import { useTranslation } from "i18n/hooks";
 import { Link, useParams } from "react-router-dom";
 
 interface Quiz {
@@ -15,19 +16,20 @@ interface MemberQuizStatistic {
 
 function MemberBoxQuizzes() {
     const { member_id } = useParams<{ member_id: string }>();
+    const { t } = useTranslation("member_quizzes");
 
     const { data, isLoading, error } = useJson<MemberQuizStatistic[]>({
         url: `/quiz/member/${member_id}/statistics`,
     });
 
     if (isLoading) {
-        return <div className="uk-margin-top">Laddar...</div>;
+        return <div className="uk-margin-top">{t("loading")}</div>;
     }
 
     if (error) {
         return (
             <div className="uk-margin-top uk-alert-danger">
-                Kunde inte ladda quiz-statistik
+                {t("error_loading")}
             </div>
         );
     }
@@ -35,7 +37,7 @@ function MemberBoxQuizzes() {
     if (!data || data.length === 0) {
         return (
             <div className="uk-margin-top">
-                <p>Inga quiz finns tillgängliga.</p>
+                <p>{t("no_quizzes")}</p>
             </div>
         );
     }
@@ -58,9 +60,9 @@ function MemberBoxQuizzes() {
             <table className="uk-table uk-table-small uk-table-striped uk-table-hover">
                 <thead>
                     <tr>
-                        <th>Quiz</th>
-                        <th>Rätt besvarade frågor</th>
-                        <th>Slutförande</th>
+                        <th>{t("table.quiz")}</th>
+                        <th>{t("table.correctly_answered")}</th>
+                        <th>{t("table.completion")}</th>
                     </tr>
                 </thead>
                 <tbody>

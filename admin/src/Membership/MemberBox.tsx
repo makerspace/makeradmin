@@ -57,6 +57,9 @@ function MemberBox() {
                     <NavItem to={`/membership/members/${member_id}/quizzes`}>
                         Quiz
                     </NavItem>
+                    <NavItem to={`/membership/members/${member_id}/tasks`}>
+                        Delegerade uppgifter
+                    </NavItem>
                 </ul>
                 <Outlet />
             </div>
