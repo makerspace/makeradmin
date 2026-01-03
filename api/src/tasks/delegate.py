@@ -891,6 +891,10 @@ class CardRequirements:
                 )
             )
 
+        if has_label("Cleaning"):
+            # No specific requirements for cleaning tasks yet
+            pass
+
         if has_label("Wiki"):
             # No specific requirements for wiki tasks yet
             pass
@@ -1247,9 +1251,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
