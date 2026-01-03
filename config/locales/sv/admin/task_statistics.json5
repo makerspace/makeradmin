@@ -23,4 +23,14 @@
         never: "Aldrig",
         no_cards: "Inga uppgifter tillgängliga.",
     },
+    member_preferences: {
+        title: "Medlemspreferenser",
+        description: "Statistik om enkätfrågor som ställs till medlemmar av uppgiftssystemet.",
+        no_data: "Inga preferensdata tillgängliga ännu.",
+        no_responses: "Inga svar ännu.",
+        total_respondents: "{{count}} medlemmar har svarat på denna fråga",
+        option: "Alternativ",
+        count: "Antal",
+        percentage: "Procent",
+    },
 }

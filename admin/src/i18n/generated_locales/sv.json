@@ -82,6 +82,16 @@
         },
         "error_loading": "Kunde inte ladda uppgiftsstatistik",
         "loading": "Laddar...",
+        "member_preferences": {
+            "count": "Antal",
+            "description": "Statistik om enkätfrågor som ställs till medlemmar av uppgiftssystemet.",
+            "no_data": "Inga preferensdata tillgängliga ännu.",
+            "no_responses": "Inga svar ännu.",
+            "option": "Alternativ",
+            "percentage": "Procent",
+            "title": "Medlemspreferenser",
+            "total_respondents": "{{count}} medlemmar har svarat på denna fråga"
+        },
         "task_log": {
             "date": "Datum",
             "member": "Medlem",

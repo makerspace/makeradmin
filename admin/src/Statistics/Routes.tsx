@@ -2,6 +2,7 @@ import { RouteObject } from "react-router-dom";
 import { RedirectToSubpage } from "../Components/Routes";
 import AccessLogPage from "./AccessLogPage";
 import AllTasksPage from "./AllTasksPage";
+import MemberPreferencesPage from "./MemberPreferencesPage";
 import MembershipPage from "./MembershipPage";
 import MembersOfInterestPage from "./MembersOfInterestPage";
 import QuizPage from "./QuizPage";
@@ -45,6 +46,10 @@ const routes: RouteObject[] = [
     {
         path: "task_activity",
         element: <TaskActivityPage />,
+    },
+    {
+        path: "member_preferences",
+        element: <MemberPreferencesPage />,
     },
 ];
 

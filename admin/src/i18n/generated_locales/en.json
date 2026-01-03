@@ -82,6 +82,16 @@
         },
         "error_loading": "Could not load task statistics",
         "loading": "Loading...",
+        "member_preferences": {
+            "count": "Count",
+            "description": "Statistics about survey questions asked to members by the task system.",
+            "no_data": "No preference data available yet.",
+            "no_responses": "No responses yet.",
+            "option": "Option",
+            "percentage": "Percentage",
+            "title": "Member Preferences",
+            "total_respondents": "{{count}} members have answered this question"
+        },
         "task_log": {
             "date": "Date",
             "member": "Member",

@@ -160,6 +160,10 @@ const nav = {
                     text: "Task Activity",
                     target: "/statistics/task_activity",
                 },
+                {
+                    text: "Member Preferences",
+                    target: "/statistics/member_preferences",
+                },
             ],
         },
         {

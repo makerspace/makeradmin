@@ -244,6 +244,65 @@ def get_global_task_statistics() -> dict:
     }
 
 
+@service.route("/statistics/member_preferences", method=GET, permission=MEMBER_VIEW)
+def get_member_preference_statistics() -> dict:
+    """Get statistics about member preferences/survey responses."""
+    from sqlalchemy import distinct, func
+
+    stats_by_question_type: dict[str, dict] = {}
+
+    for question_type in MemberPreferenceQuestionType:
+        # Get the most recent preference for each member for this question type
+        # Using a subquery to get the latest preference per member
+        latest_pref_subquery = (
+            db_session.query(
+                MemberPreference.member_id,
+                func.max(MemberPreference.id).label("max_id"),
+            )
+            .filter(MemberPreference.question_type == question_type)
+            .group_by(MemberPreference.member_id)
+            .subquery()
+        )
+
+        # Get the actual preferences using the subquery
+        latest_prefs = (
+            db_session.execute(
+                select(MemberPreference)
+                .join(
+                    latest_pref_subquery,
+                    (MemberPreference.member_id == latest_pref_subquery.c.member_id)
+                    & (MemberPreference.id == latest_pref_subquery.c.max_id),
+                )
+                .where(MemberPreference.question_type == question_type)
+            )
+            .scalars()
+            .all()
+        )
+
+        # Count responses by option
+        option_counts: dict[str, int] = {}
+        total_respondents = len(latest_prefs)
+
+        for pref in latest_prefs:
+            # Handle comma-separated multi-select options
+            selected = pref.selected_options.split(",") if pref.selected_options else []
+            for option in selected:
+                option = option.strip()
+                if option:
+                    option_counts[option] = option_counts.get(option, 0) + 1
+
+        # Sort options by count descending
+        sorted_options = sorted(option_counts.items(), key=lambda x: (-x[1], x[0]))
+
+        stats_by_question_type[question_type.value] = {
+            "question_type": question_type.value,
+            "total_respondents": total_respondents,
+            "options": [{"option": opt, "count": count} for opt, count in sorted_options],
+        }
+
+    return {"preference_statistics": stats_by_question_type}
+
+
 @service.route("/slack/interaction", method=POST, permission=PUBLIC)  # PUBLIC because Slack posts here
 def slack_interaction() -> dict:
     """
