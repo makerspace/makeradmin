@@ -959,7 +959,8 @@ class CardRequirements:
                 required.append(
                     (
                         "Has not completed wood workshop tasks at least twice",
-                        lambda context: (context.member.completed_tasks_with_label("Room: Wood workshop") >= 2),
+                        lambda context: (context.member.completed_tasks_with_label("Room: Wood workshop") >= 2)
+                        or context.member.has_self_reported_skill_level_at_least("advanced"),
                     )
                 )
 
@@ -972,8 +973,8 @@ class CardRequirements:
         if has_label("Level: 2"):
             required.append(
                 (
-                    "Has not completed Level: 1 tasks at least thrice",
-                    lambda context: (context.member.completed_tasks_with_label("Level: 1") >= 3)
+                    "Has not completed Level: 1 tasks at least twice",
+                    lambda context: (context.member.completed_tasks_with_label("Level: 1") >= 2)
                     or context.member.has_self_reported_skill_level_at_least("intermediate"),
                 )
             )
@@ -982,7 +983,8 @@ class CardRequirements:
                 required.append(
                     (
                         "Has not completed wood workshop tasks at least once",
-                        lambda context: (context.member.completed_tasks_with_label("Room: Wood workshop") >= 1),
+                        lambda context: (context.member.completed_tasks_with_label("Room: Wood workshop") >= 1)
+                        or context.member.has_self_reported_skill_level_at_least("intermediate"),
                     )
                 )
 
@@ -1017,8 +1019,8 @@ class CardRequirements:
         if has_label("Size: Medium"):
             required.append(
                 (
-                    "Has completed fewer than 5 tasks",
-                    lambda context: (context.member.total_completed_tasks >= 5)
+                    "Has completed fewer than 4 tasks",
+                    lambda context: (context.member.total_completed_tasks >= 4)
                     or context.member.has_self_reported_skill_level_at_least("intermediate"),
                 )
             )
@@ -1031,8 +1033,8 @@ class CardRequirements:
         if has_label("Size: Large"):
             required.append(
                 (
-                    "Has completed fewer than 10 tasks",
-                    lambda context: (context.member.total_completed_tasks >= 10)
+                    "Has completed fewer than 6 tasks",
+                    lambda context: (context.member.total_completed_tasks >= 6)
                     or context.member.has_self_reported_skill_level_at_least("advanced"),
                 )
             )
