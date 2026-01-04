@@ -710,6 +710,9 @@ class CardRequirements:
     # How many times an individual member can complete this task.
     limit_per_member: Optional[int]
 
+    # Task score multiplier
+    priority: float
+
     def can_satisfy(self, context: TaskContext) -> bool:
         for _, req in self.required:
             if not req(context):
@@ -749,6 +752,7 @@ class CardRequirements:
         location = None
         machine = None
         checked_labels: Set[str] = set()
+        priority = 1.0
 
         def has_label(label_name: str) -> bool:
             if label_name in labels:
@@ -768,6 +772,13 @@ class CardRequirements:
                 if machine is not None:
                     logger.warning(f"Multiple machine labels on card {card.id}: {machine} and {label}")
                 machine = label.split("Machine: ")[1]
+
+            if label.startswith("Priority: "):
+                checked_labels.add(label)
+                try:
+                    priority = float(label.split("Priority: ")[1])
+                except ValueError:
+                    logger.warning(f"Invalid priority label on card {card.id}: {label}")
 
         if has_label("Room: Big room") or has_label("Room: 3D-printers") or has_label("Room: Painting room"):
             required.append(
@@ -1115,6 +1126,7 @@ class CardRequirements:
             infinitely_repeatable=infinitely_repeatable,
             repeat_interval=repeat_interval,
             limit_per_member=limit_per_member,
+            priority=priority,
         )
 
 
@@ -1296,6 +1308,9 @@ def task_score_base(
 
     # A task that is not getting done in time should have its score increased
     score.multiply_score(1 + elapsed_periods, f"Overdue multiplier from {elapsed_periods:.1f} elapsed periods")
+
+    if requirements.priority != 1.0:
+        score.multiply_score(requirements.priority, f"Priority multiplier {requirements.priority}")
 
     return score
 
