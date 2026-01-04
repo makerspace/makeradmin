@@ -236,9 +236,9 @@ class MemberTaskInfo:
     # IDs of courses that this member has completed
     completed_courses: Set[int]
 
-    # Number of hours spent at the space since the day after the last task was either assigned or completed
+    # Number of hours spent at the space since the day after the last task was completed
     # If the member has never completed a task, this will be a very large value.
-    time_at_space_since_last_task: timedelta = field(
+    time_at_space_since_last_task_completed: timedelta = field(
         serializer=lambda td: td.total_seconds(), deserializer=lambda seconds: timedelta(seconds=seconds)
     )
 
@@ -377,22 +377,28 @@ class MemberTaskInfo:
         if last_completed_task is not None:
             assert len(last_assigned_tasks) > 0
 
-        if last_assigned_tasks:
-            day_after_last_task = last_assigned_tasks[0].created_at
-            day_after_last_task += timedelta(days=1)
-            day_after_last_task.replace(hour=0, minute=0, second=0, microsecond=0)
+        if last_completed_task:
+            after_last_task = last_completed_task.created_at
+            # Start counting time spent at the space from when the last task was completed, plus some buffer time based on the task size.
+            # 1. A member should never be automatically be delegated a task twice in a day
+            # 2. If a member spends a lot of time at the space after completing a task, they should get a new task on their next visit
+            # 3. If they don't spend much time at the space after completing a task, the may not get a new task on their next visit
+            # 4. Larger tasks should have more buffer time, since they likely took more time and effort to complete.
+            # 5. Trivial tasks should make the member get a new task immediately.
+            after_last_task += TASK_SIZE_TO_TIME.get(last_completed_task.task_size, timedelta())
+            # day_after_last_task += timedelta(days=1)
+            # day_after_last_task.replace(hour=0, minute=0, second=0, microsecond=0)
 
-            # Count all visits after the day after the last task was assigned or completed.
             # and before the current time minus some margin to avoid counting ongoing visits.
             # This prevents us from assigning a task in the middle of a visit, instead of at the start.
-            visits = visit_events_by_member_id(day_after_last_task, now - timedelta(hours=18), member_id=member_id).get(
+            visits = visit_events_by_member_id(after_last_task, now - timedelta(hours=18), member_id=member_id).get(
                 member_id, []
             )
-            time_at_space_since_last_task = timedelta()
+            time_at_space_since_last_task_completed = timedelta()
             for _, duration in visits:
-                time_at_space_since_last_task += duration
+                time_at_space_since_last_task_completed += duration
         else:
-            time_at_space_since_last_task = timedelta(days=365 * 10)  # A large value representing "infinity"
+            time_at_space_since_last_task_completed = timedelta(days=365 * 10)  # A large value representing "infinity"
 
         purchased_product_time_cutoff = now - timedelta(days=365)
         purchased_product_count_by_name = {}
@@ -494,7 +500,7 @@ class MemberTaskInfo:
             purchased_product_count_by_name=purchased_product_count_by_name,
             completed_card_ids=completed_card_ids,
             completed_card_names=completed_card_names,
-            time_at_space_since_last_task=time_at_space_since_last_task,
+            time_at_space_since_last_task_completed=time_at_space_since_last_task_completed,
             preferred_rooms=preferred_rooms,
             self_reported_skill_level=self_reported_skill_level,
             completed_courses=completed_courses,
@@ -1144,7 +1150,7 @@ def member_recently_received_task(ctx: TaskContext) -> bool:
     # If a member has completed a task recently, don't assign them another one too soon.
     # The wait depends on the size of the task
     if ctx.member.last_completed_task is not None:
-        if ctx.member.time_at_space_since_last_task < TASK_SIZE_TO_TIME[ctx.member.last_completed_task.size]:
+        if ctx.member.time_at_space_since_last_task_completed < TASK_SIZE_TO_TIME[ctx.member.last_completed_task.size]:
             return True
 
     last_assigned_task = ctx.member.last_assigned_tasks[0] if ctx.member.last_assigned_tasks else None
@@ -1273,9 +1279,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 

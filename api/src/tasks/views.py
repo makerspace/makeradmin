@@ -139,7 +139,8 @@ def get_member_task_info(member_id: int) -> dict:
         "preferred_rooms": sorted(member_info.preferred_rooms) if member_info.preferred_rooms else None,
         "self_reported_skill_level": member_info.self_reported_skill_level,
         "completed_tasks_by_label": sorted_completed_by_label,
-        "time_at_space_since_last_task_hours": member_info.time_at_space_since_last_task.total_seconds() / 3600,
+        "time_at_space_since_last_task_hours": member_info.time_at_space_since_last_task_completed.total_seconds()
+        / 3600,
         "total_completed_tasks": member_info.total_completed_tasks,
     }
 
