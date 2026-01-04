@@ -83,6 +83,14 @@ STORAGE_ROOM = "9dc5c8c5-6254-4b68-9290-acdd13e17e0b"
 METAL_WORKSHOP_AND_CORRIDOR = "243dcac3-107f-4b92-b91d-412e0653755e"
 CORRIDOR_NEAR_ELEVATOR = "ffda9ff6-89b4-4a72-8052-25a46316ebbf"
 
+# List of door-related requirement names that can be ignored when scoring tasks for a specific member
+# (e.g. when previewing what tasks would be assigned to a member from the admin UI)
+DOOR_REQUIREMENT_NAMES = [
+    "Hasn't entered lower floor",
+    "Hasn't entered upper floor",
+    "Hasn't entered lower floor/metal workshop",
+]
+
 
 @serde
 class SlackFile:
@@ -1263,9 +1271,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 

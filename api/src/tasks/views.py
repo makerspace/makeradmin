@@ -29,6 +29,7 @@ from sqlalchemy import select
 
 from tasks import service, trello
 from tasks.delegate import (
+    DOOR_REQUIREMENT_NAMES,
     TASK_LOG_CHANNEL,
     CardCompletionInfo,
     CardRequirements,
@@ -39,6 +40,7 @@ from tasks.delegate import (
     delegate_task_for_member,
     get_all_room_labels,
     member_recently_received_task,
+    task_score,
     task_score_base,
     visit_events_by_member_id,
 )
@@ -144,7 +146,14 @@ def get_member_task_info(member_id: int) -> dict:
 
 @service.route("/statistics", method=GET, permission=MEMBER_VIEW)
 def get_global_task_statistics() -> dict:
-    """Get global task delegation statistics."""
+    """Get global task delegation statistics.
+
+    If a member_id query parameter is provided, the score will be calculated
+    for that specific member using the full task_score function (ignoring door requirements).
+    Otherwise, the base score is used.
+    """
+    member_id = request.args.get("member_id", type=int)
+
     # Get all task logs, ordered by date descending, limited to recent entries
     logs = (
         db_session.execute(select(TaskDelegationLog).order_by(TaskDelegationLog.created_at.desc()).limit(500))
@@ -197,15 +206,49 @@ def get_global_task_statistics() -> dict:
             }
         )
 
+    # Prepare member context if member_id is provided
+    now = datetime.now()
+    member_ctx = None
+    reference_task_assignment_contexts: list[TaskContext] = []
+
+    if member_id is not None:
+        member_ctx = TaskContext.from_member(member_id, now)
+
+        # Build reference contexts for scoring (same as in select_card_for_member)
+        visits = visit_events_by_member_id(now - timedelta(days=30), now)
+        ASSIGN_DELAY = timedelta(minutes=3)
+        reference_task_assignment_contexts = [
+            TaskContext.from_cache(m, visit_time + ASSIGN_DELAY)
+            for m, visit_times in visits.items()
+            for (visit_time, _) in visit_times
+        ]
+
     # Get card completion info for all cards from Trello
     cards_info: list[dict] = []
-    now = datetime.now()
     for card in cards:
         completion_info = CardCompletionInfo.from_card(card)
         requirements = CardRequirements.from_card(card)
 
-        # Calculate the base score for this task
-        score = task_score_base(requirements, completion_info, now)
+        # Calculate the score for this task
+        if member_ctx is not None:
+            # Use full task_score for member-specific scoring, ignoring door requirements
+            score_result = task_score(
+                requirements,
+                completion_info,
+                member_ctx,
+                reference_task_assignment_contexts,
+                ignore_reasons=DOOR_REQUIREMENT_NAMES,
+                all_cards=cards,
+            )
+            final_score = round(score_result.score, 2)
+            cannot_be_assigned_reason = (
+                score_result.cannot_be_assigned_reason.reason if score_result.cannot_be_assigned_reason else None
+            )
+        else:
+            # Use base score when no member is specified
+            score_result = task_score_base(requirements, completion_info, now)
+            final_score = round(score_result.score, 2)
+            cannot_be_assigned_reason = None
 
         # Calculate overdue days
         overdue_days: float | None = None
@@ -233,14 +276,24 @@ def get_global_task_statistics() -> dict:
                 "last_completer_name": f"{completion_info.last_completer.firstname} {completion_info.last_completer.lastname}"
                 if completion_info.last_completer
                 else None,
-                "score": round(score.score, 2),
+                "score": final_score,
                 "overdue_days": overdue_days,
+                "cannot_be_assigned_reason": cannot_be_assigned_reason,
+                "score_calculation": [
+                    {
+                        "operation": op.operation.value,
+                        "value": op.value,
+                        "description": op.description,
+                    }
+                    for op in score_result.score_calculation
+                ],
             }
         )
 
     return {
         "task_logs": task_logs,
         "cards": cards_info,
+        "member_id": member_id,
     }
 
 

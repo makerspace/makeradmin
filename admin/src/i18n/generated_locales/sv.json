@@ -77,6 +77,10 @@
             "no_cards": "Inga uppgifter tillgängliga.",
             "overdue": "Försenad",
             "score": "Poäng",
+            "score_for_member": "Beräkna poäng för medlem",
+            "search_member_placeholder": "Sök efter medlem...",
+            "showing_scores_for_member": "Visar poäng beräknade för {{name}}",
+            "status": "Status",
             "task": "Uppgift",
             "title": "Alla uppgifter"
         },

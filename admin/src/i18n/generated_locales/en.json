@@ -77,6 +77,10 @@
             "no_cards": "No tasks available.",
             "overdue": "Overdue",
             "score": "Score",
+            "score_for_member": "Calculate score for member",
+            "search_member_placeholder": "Search for member...",
+            "showing_scores_for_member": "Showing scores calculated for {{name}}",
+            "status": "Status",
             "task": "Task",
             "title": "All Tasks"
         },
