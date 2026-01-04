@@ -57,7 +57,7 @@ REDIS_LAST_ID_KEY = "task_delegator_last_id"
 ASSIGNMENT_DELAY_AFTER_START_OF_VISIT = timedelta(minutes=5)
 
 # Increment this when the structure or semantics of MemberTaskInfo changes, to avoid using stale cached data.
-CACHE_VERSION = 7
+CACHE_VERSION = 8
 IMAGE_CACHE_VERSION = 5
 
 TASK_LOG_CHANNEL = config.get("SLACK_TASK_LOG_CHANNEL_ID")
