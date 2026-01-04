@@ -1199,12 +1199,12 @@ def visit_events_by_member_id(
         visits = []
         start_of_current_visit = None
 
-        def add_visit(start: datetime, end: datetime) -> None:
-            duration = end - start
+        def add_visit(visit_start: datetime, visit_end: datetime) -> None:
+            duration = visit_end - visit_start
             duration += DURATION_AT_SPACE_HEURISTIC  # Assume some extra time after last door open
-            # Clamp duration to not go beyond 'end'
-            duration = min(start + duration, end) - start
-            visits.append((start, duration))
+            # Clamp duration to not go beyond (global) 'end'
+            duration = min(visit_start + duration, end) - visit_start
+            visits.append((visit_start, duration))
 
         for event in events:
             if last_event is None or (event.invoked_at - last_event.invoked_at) > timedelta(hours=4):
@@ -1279,9 +1279,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
