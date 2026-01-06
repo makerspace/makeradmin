@@ -482,7 +482,7 @@ class MemberTaskInfo:
         quizzes = member_quiz_statistics(member_id)
         completed_courses = set()
         for quiz in quizzes:
-            if quiz.correctly_answered_questions > math.ceil(quiz.total_questions_in_quiz * 0.9):
+            if quiz.ever_completed:
                 completed_courses.add(quiz.quiz["id"])
 
         return MemberTaskInfo(

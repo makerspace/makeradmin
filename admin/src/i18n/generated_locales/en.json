@@ -38,7 +38,9 @@
         "table": {
             "completion": "Completion",
             "correctly_answered": "Correctly answered questions",
-            "quiz": "Quiz"
+            "max_achieved": "max achieved",
+            "quiz": "Quiz",
+            "status": "Status"
         }
     },
     "member_tasks": {

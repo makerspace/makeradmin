@@ -12,6 +12,8 @@ interface MemberQuizStatistic {
     quiz: Quiz;
     total_questions_in_quiz: number;
     correctly_answered_questions: number;
+    max_pass_rate: number;
+    ever_completed: boolean;
 }
 
 function MemberBoxQuizzes() {
@@ -42,17 +44,12 @@ function MemberBoxQuizzes() {
         );
     }
 
-    // Sort by completion ratio (descending)
+    // Sort by max pass rate (descending), with ever_completed items first
     const sortedData = [...data].sort((a, b) => {
-        const ratioA =
-            a.total_questions_in_quiz > 0
-                ? a.correctly_answered_questions / a.total_questions_in_quiz
-                : 0;
-        const ratioB =
-            b.total_questions_in_quiz > 0
-                ? b.correctly_answered_questions / b.total_questions_in_quiz
-                : 0;
-        return ratioB - ratioA;
+        if (a.ever_completed !== b.ever_completed) {
+            return a.ever_completed ? -1 : 1;
+        }
+        return b.max_pass_rate - a.max_pass_rate;
     });
 
     return (
@@ -63,11 +60,12 @@ function MemberBoxQuizzes() {
                         <th>{t("table.quiz")}</th>
                         <th>{t("table.correctly_answered")}</th>
                         <th>{t("table.completion")}</th>
+                        <th>{t("table.status")}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {sortedData.map((stat) => {
-                        const completionPercentage =
+                        const currentPercentage =
                             stat.total_questions_in_quiz > 0
                                 ? Math.round(
                                       (stat.correctly_answered_questions /
@@ -75,11 +73,6 @@ function MemberBoxQuizzes() {
                                           100,
                                   )
                                 : 0;
-
-                        const isComplete =
-                            stat.total_questions_in_quiz > 0 &&
-                            stat.correctly_answered_questions >=
-                                stat.total_questions_in_quiz;
 
                         return (
                             <tr key={stat.quiz.id}>
@@ -93,9 +86,17 @@ function MemberBoxQuizzes() {
                                     {stat.total_questions_in_quiz}
                                 </td>
                                 <td>
-                                    {isComplete ? "✅ " : ""}
-                                    {completionPercentage}%
+                                    {currentPercentage}%
+                                    {stat.max_pass_rate >
+                                        currentPercentage + 1 && (
+                                        <span className="uk-text-muted">
+                                            {" "}
+                                            ({t("table.max_achieved")}:{" "}
+                                            {Math.round(stat.max_pass_rate)}%)
+                                        </span>
+                                    )}
                                 </td>
+                                <td>{stat.ever_completed ? `✅` : ""}</td>
                             </tr>
                         );
                     })}

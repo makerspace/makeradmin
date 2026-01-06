@@ -617,12 +617,14 @@ def quiz_reminders() -> None:
         quiz_member = quiz_members_dict.get(member.member_id, None)
         if quiz_member is None:
             quiz_member = QuizMemberStat(
-                member_id=member.member_id, remaining_questions=total_quiz_questions, correctly_answered_questions=0
+                member_id=member.member_id,
+                remaining_questions=total_quiz_questions,
+                correctly_answered_questions=0,
+                ever_completed=False,
             )
 
-        # Don't bother members who have answered all questions correctly
-        # Or if we have added just a few questions to the quiz after they finished it.
-        if quiz_member.remaining_questions > 2:
+        # Don't bother members who have ever completed the quiz (even if new questions were added later)
+        if not quiz_member.ever_completed:
             member_data = id_to_member.get(member.member_id)
             assert member_data is not None
             member, membership = member_data
