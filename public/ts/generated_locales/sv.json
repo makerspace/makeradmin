@@ -36,6 +36,10 @@
     "courses": {
         "course_completed": "Genomförd",
         "course_continue": "Fortsätt",
+        "course_new_version": "Ny version tillgänglig",
+        "course_new_version_description": "Kursen har uppdaterats sedan du slutförde den. Vänligen gör om den för att hålla dig uppdaterad.",
+        "course_retake": "Gör om kursen",
+        "course_retry": "Försök igen",
         "course_take": "Ta kursen",
         "description": "Här hittar du alla digitala kurser som $t(brand:makerspace_name) har. De flesta kurser sker på plats och annonseras i facebook-gruppen och på slack. Men vissa har en digital variant som du kan ta när du vill.",
         "title": "Kurser"

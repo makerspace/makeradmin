@@ -22,6 +22,9 @@ interface Question {
         answer_description?: string;
         correct?: boolean;
     }[];
+    quiz_failed?: boolean;
+    incorrect_count?: number;
+    max_allowed_incorrect?: number;
 }
 
 export interface Quiz {
@@ -36,6 +39,7 @@ interface Attempt {
     quiz_id: number;
     created_at: string | null;
     last_answer_at: string | null;
+    failed: boolean;
 }
 
 interface State {
@@ -167,14 +171,25 @@ class QuizManager extends Component<QuizManagerProps, State> {
         if (!attempt) {
             return "Start quiz";
         }
+        if (attempt.failed) {
+            return "Retake quiz";
+        }
         if (this.isAttemptStale()) {
             return "Start new quiz";
         }
         return "Continue quiz";
     }
 
+    shouldStartNewAttempt(): boolean {
+        const attempt = this.state.currentAttempt;
+        if (!attempt) {
+            return false;
+        }
+        return attempt.failed || this.isAttemptStale();
+    }
+
     async handleStartClick() {
-        if (this.isAttemptStale()) {
+        if (this.shouldStartNewAttempt()) {
             await this.startNewAttempt();
         } else {
             await this.start();
@@ -296,8 +311,12 @@ class QuizManager extends Component<QuizManagerProps, State> {
                 </div>
             );
         } else {
+            const quizFailed = this.state.question.quiz_failed;
             return (
-                <div id="content" className="quizpage">
+                <div
+                    id="content"
+                    className={`quizpage ${quizFailed ? "quiz-failed" : ""}`}
+                >
                     <h1>{this.state.quiz.name}</h1>
                     <div
                         className="question-text"
@@ -334,6 +353,13 @@ class QuizManager extends Component<QuizManagerProps, State> {
                                 <div className="question-answer-info question-answer-info-correct">
                                     Great! You answered correctly!
                                 </div>
+                            ) : this.state.question.quiz_failed ? (
+                                <div className="question-answer-info question-answer-info-incorrect">
+                                    Unfortunately you answered incorrectly and
+                                    have exceeded the maximum number of allowed
+                                    incorrect answers. Please review the
+                                    material and try again.
+                                </div>
                             ) : (
                                 // : <div className="question-answer-info question-answer-info-incorrect">Du svarade tyvärr fel. Men oroa dig inte, den här frågan kommer komma igen senare så att du kan svara rätt nu när du vet vad rätt svar är.</div>
                                 <div className="question-answer-info question-answer-info-incorrect">
@@ -352,12 +378,23 @@ class QuizManager extends Component<QuizManagerProps, State> {
                                     ),
                                 }}
                             ></div>
-                            <a
-                                className="uk-button uk-button-primary question-submit"
-                                onClick={() => this.start()}
-                            >
-                                Next Question
-                            </a>
+                            {this.state.question.quiz_failed ? (
+                                <a
+                                    className="uk-button uk-button-danger question-submit"
+                                    href={url(
+                                        `/member/quiz/${this.state.quiz!.id}`,
+                                    )}
+                                >
+                                    Back to Course Page
+                                </a>
+                            ) : (
+                                <a
+                                    className="uk-button uk-button-primary question-submit"
+                                    onClick={() => this.start()}
+                                >
+                                    Next Question
+                                </a>
+                            )}
                         </>
                     )}
                 </div>
@@ -383,6 +420,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
         const correct = fullQuestion.options.find(
             (x) => x.id == option_id,
         )!.correct!;
+
         this.setState({
             question: fullQuestion,
             answer: { selected: option_id, correct },

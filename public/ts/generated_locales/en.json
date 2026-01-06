@@ -36,6 +36,10 @@
     "courses": {
         "course_completed": "Completed",
         "course_continue": "Continue",
+        "course_new_version": "New version available",
+        "course_new_version_description": "This course has been updated since you completed it. Please retake it to stay current.",
+        "course_retake": "Retake course",
+        "course_retry": "Retry course",
         "course_take": "Take course",
         "description": "Here you can find all online courses that $t(brand:makerspace_name) provides.     Most courses are held physically and will instead be announced in our Slack group #events.     But some have a digital variant that you can find here, and take whenever you want.",
         "title": "Courses"

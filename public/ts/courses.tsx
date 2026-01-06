@@ -11,29 +11,45 @@ interface QuizInfo {
     quiz: Quiz;
     total_questions_in_quiz: number;
     correctly_answered_questions: number;
+    max_pass_rate: number;
+    last_pass_rate: number;
+    ever_completed: boolean;
+    last_attempt_failed: boolean;
 }
 
 const CourseButton = ({ quizInfo }: { quizInfo: QuizInfo }) => {
     const { t } = useTranslation("courses");
-    const completed =
+    const currentlyComplete =
         quizInfo.correctly_answered_questions >=
         quizInfo.total_questions_in_quiz;
+    const hasNewVersion = quizInfo.ever_completed && !currentlyComplete;
 
     let actionBtn;
-    if (completed) {
+    if (currentlyComplete) {
         actionBtn = (
             <div class="course-completed">
                 {t("course_completed")}{" "}
                 <span uk-icon="icon: check; ratio: 1.5" />
             </div>
         );
-    } else if (quizInfo.correctly_answered_questions > 0) {
-        const completed_fraction =
-            quizInfo.correctly_answered_questions /
-            quizInfo.total_questions_in_quiz;
+    } else if (quizInfo.ever_completed) {
+        actionBtn = (
+            <div class="course-completed">
+                {t("course_retake")}{" "}
+                <span uk-icon="icon: chevron-right; ratio: 1.5"></span>
+            </div>
+        );
+    } else if (quizInfo.last_attempt_failed) {
+        actionBtn = (
+            <div class="course-failed">
+                {t("course_retry")}{" "}
+                <span uk-icon="icon: chevron-right; ratio: 1.5"></span>
+            </div>
+        );
+    } else if (quizInfo.last_pass_rate > 0) {
         actionBtn = (
             <div class="course-not-completed">
-                {t("course_continue")} ({Math.round(completed_fraction * 100)}%){" "}
+                {t("course_continue")} ({Math.round(quizInfo.last_pass_rate)}%){" "}
                 <span uk-icon="icon: chevron-right; ratio: 1.5"></span>
             </div>
         );
@@ -45,11 +61,29 @@ const CourseButton = ({ quizInfo }: { quizInfo: QuizInfo }) => {
             </div>
         );
     }
+
+    if (hasNewVersion) {
+        return (
+            <div class="course-item-wrapper course-item-wrapper-new-version">
+                <a
+                    href={common.url(`/member/quiz/${quizInfo.quiz.id}`)}
+                    className="course-item"
+                >
+                    <span>{quizInfo.quiz.name}</span>
+                    {actionBtn}
+                </a>
+                <div class="course-new-version-message">
+                    {t("course_new_version_description")}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <a
             href={common.url(`/member/quiz/${quizInfo.quiz.id}`)}
             className={`course-item ${
-                completed ? "course-item-completed" : ""
+                currentlyComplete ? "course-item-completed" : ""
             }`}
         >
             <span>{quizInfo.quiz.name}</span>

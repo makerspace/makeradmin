@@ -11,6 +11,9 @@ class Quiz(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(Text, nullable=False)
     description = Column(Text, nullable=False)
+    # Optional required pass rate (0.0 to 1.0). If set, a member fails the quiz if they have
+    # more than (1 - required_pass_rate) * total_questions incorrect answers.
+    required_pass_rate = Column(Numeric, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
