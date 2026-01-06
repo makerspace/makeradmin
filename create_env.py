@@ -60,6 +60,7 @@ config = {
     "ELKS46_API_USER": "",
     "ELKS46_API_KEY": "",
     "MAKERSPACE_LOCAL_TIMEZONE": makerspace_local_timezone,
+    "GLOBAL_BANNER_TEXT": "",
 }
 
 whitelist = ["COMPOSE_PROJECT_NAME"]
