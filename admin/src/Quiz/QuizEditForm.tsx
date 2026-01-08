@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import Icon from "../Components/icons";
 import Textarea from "../Components/Textarea";
 import TextInput from "../Components/TextInput";
@@ -13,8 +13,16 @@ interface Props {
 export default (props: Props) => {
     const { quiz } = props;
     const { onSave, onDelete } = props;
+    const [version, setVersion] = useState(0);
 
     if (quiz == null) return null;
+
+    useEffect(() => {
+        const unsub = quiz.subscribe(() => setVersion((v) => v + 1));
+        return () => {
+            unsub();
+        };
+    }, [quiz]);
 
     return (
         <div className="uk-margin-top">
@@ -40,6 +48,18 @@ export default (props: Props) => {
                             <i>
                                 Du kan använda markdown eller html för att lägga
                                 extra funktionalitet och bilder
+                            </i>
+                            <TextInput
+                                model={quiz}
+                                name="required_pass_rate"
+                                title="Krav på godkänd andel (0-1)"
+                                type="number"
+                                placeholder="0.8"
+                            />
+                            <i>
+                                Quizzet mislyckas om medlemmen svarar fel på
+                                fler än {100 - 100 * quiz.required_pass_rate}%
+                                av frågorna.
                             </i>
                         </>
                     )}

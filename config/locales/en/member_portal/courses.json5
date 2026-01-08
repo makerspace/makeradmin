@@ -6,4 +6,8 @@
     course_completed: "Completed",
     course_continue: "Continue",
     course_take: "Take course",
+    course_retake: "Retake course",
+    course_retry: "Retry course",
+    course_new_version: "New version available",
+    course_new_version_description: "This course has been updated since you completed it. Please retake it to stay current.",
 }

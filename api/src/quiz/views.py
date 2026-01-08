@@ -90,6 +90,48 @@ def get_or_create_current_attempt(member_id: int, quiz_id: int) -> QuizAttempt:
     return attempt
 
 
+def check_attempt_failed(attempt_id: int, quiz: Quiz) -> tuple[bool, int, int]:
+    """
+    Check if an attempt has failed based on the quiz's required_pass_rate.
+
+    Returns (failed, incorrect_count, max_allowed_incorrect)
+    """
+    if quiz.required_pass_rate is None:
+        return (False, 0, 0)
+
+    # Count total questions in the quiz
+    total_questions = (
+        db_session.query(func.count(QuizQuestion.id))
+        .filter(QuizQuestion.quiz_id == quiz.id, QuizQuestion.deleted_at == None)
+        .scalar()
+        or 0
+    )
+
+    if total_questions == 0:
+        return (False, 0, 0)
+
+    # Calculate max allowed incorrect answers
+    # required_pass_rate is stored as a fraction (0.0 to 1.0)
+    # If required_pass_rate is 0.8, member can have at most 20% incorrect answers
+    max_allowed_incorrect = int((1 - float(quiz.required_pass_rate)) * total_questions)
+
+    # Count distinct questions answered incorrectly in this attempt
+    # Multiple incorrect answers for the same question count multiple times
+    incorrect_count = (
+        db_session.query(func.count(QuizAnswer.id))
+        .filter(
+            QuizAnswer.attempt_id == attempt_id,
+            QuizAnswer.correct == False,
+            QuizAnswer.deleted_at == None,
+        )
+        .scalar()
+        or 0
+    )
+
+    failed = incorrect_count > max_allowed_incorrect
+    return (failed, incorrect_count, max_allowed_incorrect)
+
+
 @service.route("/quiz/<int:quiz_id>/attempt", method=GET, permission=USER)
 def get_current_attempt(quiz_id: int):
     """Get the current attempt for the logged-in user on a quiz."""
@@ -97,6 +139,8 @@ def get_current_attempt(quiz_id: int):
 
     if attempt is None:
         return None
+
+    quiz = db_session.get(Quiz, quiz_id)
 
     # Get the timestamp of the last answer in this attempt
     last_answer = (
@@ -109,11 +153,17 @@ def get_current_attempt(quiz_id: int):
         .first()
     )
 
+    # Check if this attempt has failed
+    failed = False
+    if quiz and quiz.required_pass_rate is not None:
+        failed, _, _ = check_attempt_failed(attempt.id, quiz)
+
     return {
         "id": attempt.id,
         "quiz_id": attempt.quiz_id,
         "created_at": attempt.created_at.isoformat() if attempt.created_at else None,
         "last_answer_at": last_answer.created_at.isoformat() if last_answer and last_answer.created_at else None,
+        "failed": failed,
     }
 
 
@@ -155,6 +205,10 @@ def answer_question(question_id):
     if question is None:
         return (400, f"Question id {question_id} not found")
 
+    quiz = db_session.get(Quiz, question.quiz_id)
+    if quiz is None:
+        return (400, f"Quiz not found for question id {question_id}")
+
     attempt = get_or_create_current_attempt(g.user_id, int(question.quiz_id))
 
     db_session.add(
@@ -178,6 +232,14 @@ def answer_question(question_id):
     for option in options:
         option = quiz_question_option_entity.to_obj(option)
         json["options"].append(option)
+
+    # Check if the member has failed the quiz based on required_pass_rate
+    if quiz.required_pass_rate is not None:
+        failed, incorrect_count, max_allowed = check_attempt_failed(attempt.id, quiz)
+        if failed:
+            json["quiz_failed"] = True
+            json["incorrect_count"] = incorrect_count
+            json["max_allowed_incorrect"] = max_allowed
 
     return json
 
@@ -234,12 +296,18 @@ def mapify(rows):
 @dataclass
 class MemberQuizStatistic(DataClassJsonMixin):
     quiz: Any
+    # Current number of questions in the quiz
     total_questions_in_quiz: int
+    # Current number of correctly answered questions, across all attempts, of the currently existing questions
     correctly_answered_questions: int
     # Maximum pass rate ever achieved (percentage from 0-100)
     max_pass_rate: float
+    # Pass rate of the last attempt (percentage from 0-100), which could be in progress. 0 if no attempts.
+    last_pass_rate: float
     # Whether the member has ever fully completed the quiz
     ever_completed: bool
+    # Whether the last attempt has failed
+    last_attempt_failed: bool
 
 
 def calculate_max_pass_rates_cached(member_ids: list[int], quiz_id: int) -> list[tuple[float, bool]]:
@@ -315,50 +383,58 @@ def calculate_max_pass_rate(member_id: int, quiz_id: int) -> tuple[float, bool]:
     ever_completed = False
 
     for attempt in attempts:
-        # Get all correct answers from this attempt
-        correct_answers = (
-            db_session.query(QuizAnswer)
-            .join(QuizAnswer.question)
-            .filter(
-                QuizAnswer.attempt_id == attempt.id,
-                QuizAnswer.correct == True,
-                QuizAnswer.deleted_at == None,
-            )
-            .order_by(QuizAnswer.created_at)
-            .all()
-        )
-
-        if not correct_answers:
-            continue
-
-        # Find the timestamp of the last answer in this attempt
-        last_answer_time = max(a.created_at for a in correct_answers)
-
-        # Count questions that existed at the time of the last answer
-        questions_at_time = [
-            q
-            for q in questions
-            if q.created_at <= last_answer_time and (q.deleted_at is None or q.deleted_at > last_answer_time)
-        ]
-        if not questions_at_time:
-            continue
-
-        # Count correctly answered questions in this attempt
-        correctly_answered_question_ids = set(a.question_id for a in correct_answers)
-        question_ids_at_time = set(q.id for q in questions_at_time)
-
-        correct_count = len(correctly_answered_question_ids & question_ids_at_time)
-        total_count = len(question_ids_at_time)
-
-        pass_rate = (correct_count / total_count) * 100
+        pass_rate, completed = calculate_pass_rate_for_attempt(attempt.id, quiz_id, questions)
 
         if pass_rate > max_pass_rate:
             max_pass_rate = pass_rate
 
-        if correct_count >= total_count:
+        if completed:
             ever_completed = True
 
     return (max_pass_rate, ever_completed)
+
+
+def calculate_pass_rate_for_attempt(attempt_id: int, quiz: Quiz, questions: list[QuizQuestion]) -> tuple[float, bool]:
+    # Get all correct answers from this attempt
+    correct_answers = (
+        db_session.query(QuizAnswer)
+        .join(QuizAnswer.question)
+        .filter(
+            QuizAnswer.attempt_id == attempt_id,
+            QuizAnswer.correct == True,
+            QuizAnswer.deleted_at == None,
+        )
+        .order_by(QuizAnswer.created_at)
+        .all()
+    )
+
+    if not correct_answers:
+        return (0.0, False)
+
+    # Find the timestamp of the last answer in this attempt
+    last_answer_time = max(a.created_at for a in correct_answers)
+
+    # Count questions that existed at the time of the last answer
+    questions_at_time = [
+        q
+        for q in questions
+        if q.created_at <= last_answer_time and (q.deleted_at is None or q.deleted_at > last_answer_time)
+    ]
+    if not questions_at_time:
+        return (0.0, False)
+
+    # Count correctly answered questions in this attempt
+    correctly_answered_question_ids = set(a.question_id for a in correct_answers)
+    question_ids_at_time = set(q.id for q in questions_at_time)
+
+    correct_count = len(correctly_answered_question_ids & question_ids_at_time)
+    total_count = len(question_ids_at_time)
+
+    pass_rate = (correct_count / total_count) * 100
+
+    completed = correct_count >= total_count
+
+    return pass_rate, completed
 
 
 def member_quiz_statistics(member_id: int) -> list[MemberQuizStatistic]:
@@ -394,13 +470,31 @@ def member_quiz_statistics(member_id: int) -> list[MemberQuizStatistic]:
     result = []
     for quiz in quizzes:
         max_pass_rate, ever_completed = calculate_max_pass_rate(member_id, quiz.id)
+        last_pass_rate = 0.0
+
+        last_attempt = _find_current_attempt(member_id, quiz.id)
+        failed = False
+        if last_attempt:
+            # Get all questions for this quiz, ordered by creation time
+            questions = (
+                db_session.query(QuizQuestion)
+                .filter(QuizQuestion.quiz_id == quiz.id)
+                .order_by(QuizQuestion.created_at)
+                .all()
+            )
+
+            failed, _incorrect_count, _max_allowed_incorrect = check_attempt_failed(last_attempt.id, quiz)
+            last_pass_rate, _ = calculate_pass_rate_for_attempt(last_attempt.id, quiz, questions)
+
         result.append(
             MemberQuizStatistic(
                 quiz=quiz_entity.to_obj(quiz),
                 total_questions_in_quiz=total_questions_in_quiz.get(quiz.id, 0),
                 correctly_answered_questions=answered_questions_per_quiz.get(quiz.id, 0),
                 max_pass_rate=max_pass_rate,
+                last_pass_rate=last_pass_rate,
                 ever_completed=ever_completed,
+                last_attempt_failed=failed,
             )
         )
 

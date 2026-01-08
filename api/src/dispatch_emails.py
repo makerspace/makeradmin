@@ -722,7 +722,7 @@ if __name__ == "__main__":
         domain = config.get("MAILGUN_DOMAIN")
         sender = config.get("MAILGUN_FROM")
         to_override = config.get("MAILGUN_TO_OVERRIDE")
-        last_reminder_check = 0.0
+        last_reminder_check = -10000
 
         # Don't send emails immediately, to avoid clobbering up the logs
         exit.wait(2)

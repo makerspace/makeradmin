@@ -4,4 +4,8 @@
     course_completed: "Genomförd",
     course_continue: "Fortsätt",
     course_take: "Ta kursen",
+    course_retake: "Gör om kursen",
+    course_retry: "Försök igen",
+    course_new_version: "Ny version tillgänglig",
+    course_new_version_description: "Kursen har uppdaterats sedan du slutförde den. Vänligen gör om den för att hålla dig uppdaterad.",
 }
