@@ -31,6 +31,13 @@ export interface Quiz {
     deleted_at: string | null;
 }
 
+interface Attempt {
+    id: number;
+    quiz_id: number;
+    created_at: string | null;
+    last_answer_at: string | null;
+}
+
 interface State {
     question: Question | null;
     state: "intro" | "started" | "done";
@@ -41,6 +48,7 @@ interface State {
         selected: number;
     };
     quiz: Quiz | null;
+    currentAttempt: Attempt | null;
 }
 
 interface QuizManagerProps {
@@ -59,6 +67,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             loginState: "pending",
             state: "intro",
             quiz: null,
+            currentAttempt: null,
         };
     }
 
@@ -83,10 +92,24 @@ class QuizManager extends Component<QuizManagerProps, State> {
                 null,
             );
             this.setState({ loginState: "logged in" });
+            // Load current attempt after confirming login
+            await this.loadCurrentAttempt();
         } catch (error: any) {
             if (error.status == "unauthorized") {
                 this.setState({ loginState: "logged out" });
             }
+        }
+    }
+
+    async loadCurrentAttempt() {
+        try {
+            const attempt: ServerResponse<Attempt | null> = await common.ajax(
+                "GET",
+                `${window.apiBasePath}/quiz/quiz/${this.props.quiz_id}/attempt`,
+            );
+            this.setState({ currentAttempt: attempt.data });
+        } catch (error) {
+            // No attempt yet, that's fine
         }
     }
 
@@ -108,6 +131,53 @@ class QuizManager extends Component<QuizManagerProps, State> {
             if (data.status == "unauthorized") {
                 window.location.href = url("/member");
             }
+        }
+    }
+
+    async startNewAttempt() {
+        try {
+            // Create a new attempt
+            const attempt: ServerResponse<Attempt> = await common.ajax(
+                "POST",
+                `${window.apiBasePath}/quiz/quiz/${this.props.quiz_id}/start_new_attempt`,
+            );
+            this.setState({ currentAttempt: attempt.data, state: "intro" });
+            // Then start the quiz
+            await this.start();
+        } catch (data: any) {
+            if (data.status == "unauthorized") {
+                window.location.href = url("/member");
+            }
+        }
+    }
+
+    isAttemptStale(): boolean {
+        const attempt = this.state.currentAttempt;
+        if (!attempt || !attempt.last_answer_at) {
+            return false;
+        }
+        const lastAnswerDate = new Date(attempt.last_answer_at);
+        const sixtyDaysAgo = new Date();
+        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+        return lastAnswerDate < sixtyDaysAgo;
+    }
+
+    getStartButtonText(): string {
+        const attempt = this.state.currentAttempt;
+        if (!attempt) {
+            return "Start quiz";
+        }
+        if (this.isAttemptStale()) {
+            return "Start new quiz";
+        }
+        return "Continue quiz";
+    }
+
+    async handleStartClick() {
+        if (this.isAttemptStale()) {
+            await this.startNewAttempt();
+        } else {
+            await this.start();
         }
     }
 
@@ -140,12 +210,21 @@ class QuizManager extends Component<QuizManagerProps, State> {
                         you good luck with all your exciting projects at
                         Stockholm Makerspace!
                     </p>
-                    <div>
+                    <div
+                        className="quiz-actions uk-flex uk-flex-wrap"
+                        style={{ gap: "10px" }}
+                    >
                         <a
                             className="uk-button uk-button-primary"
                             href={url("/shop/member/courses")}
                         >
                             Check out more online courses
+                        </a>
+                        <a
+                            className="uk-button uk-button-secondary"
+                            onClick={() => this.startNewAttempt()}
+                        >
+                            Retake Quiz
                         </a>
                     </div>
                     {/* Vi hoppas att det var lärorikt och önskar dig lycka till med alla spännande projekt på Stockholm Makerspace */}
@@ -208,9 +287,9 @@ class QuizManager extends Component<QuizManagerProps, State> {
                             <p>Alright, are you ready to get started?</p>
                             <a
                                 className="uk-button uk-button-primary quiz-button-start"
-                                onClick={() => this.start()}
+                                onClick={() => this.handleStartClick()}
                             >
-                                Start!
+                                {this.getStartButtonText()}
                             </a>
                         </>
                     )}

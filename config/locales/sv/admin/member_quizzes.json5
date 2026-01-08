@@ -6,5 +6,7 @@
         quiz: "Quiz",
         correctly_answered: "Rätt besvarade frågor",
         completion: "Slutförande",
+        status: "Status",
+        max_achieved: "max uppnått",
     },
 }

@@ -19,6 +19,24 @@ class Quiz(Base):
         return f"Quiz(id={self.id}, name={self.name})"
 
 
+class QuizAttempt(Base):
+    """Tracks when a member starts or restarts a quiz attempt."""
+
+    __tablename__ = "quiz_attempts"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
+    quiz_id = Column(Integer, ForeignKey(Quiz.id), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
+    deleted_at = Column(DateTime)
+
+    quiz = relationship(Quiz, backref="attempts", cascade_backrefs=False)
+
+    def __repr__(self):
+        return f"QuizAttempt(id={self.id}, member_id={self.member_id}, quiz_id={self.quiz_id})"
+
+
 class QuizQuestion(Base):
     __tablename__ = "quiz_questions"
 
@@ -60,6 +78,7 @@ class QuizAnswer(Base):
     member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
     question_id = Column(Integer, ForeignKey(QuizQuestion.id), nullable=False)
     option_id = Column(Integer, ForeignKey(QuizQuestionOption.id), nullable=False)
+    attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
     correct = Column(Boolean, nullable=False)
 
     created_at = Column(DateTime, server_default=func.now())
@@ -67,6 +86,7 @@ class QuizAnswer(Base):
     deleted_at = Column(DateTime)
 
     question = relationship(QuizQuestion, backref="answers", cascade_backrefs=False)
+    attempt = relationship(QuizAttempt, backref="answers", cascade_backrefs=False)
 
     def __repr__(self):
         return f"QuizAnswer(id={self.id})"

@@ -6,5 +6,7 @@
         quiz: "Quiz",
         correctly_answered: "Correctly answered questions",
         completion: "Completion",
+        status: "Status",
+        max_achieved: "max achieved",
     },
 }
