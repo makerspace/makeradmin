@@ -725,7 +725,8 @@ if __name__ == "__main__":
         last_reminder_check = -10000.0
 
         # Don't send emails immediately, to avoid clobbering up the logs
-        exit.wait(2)
+        # And also for API to start up and any migrations to run
+        exit.wait(10)
 
         while not exit.is_set():
             try:

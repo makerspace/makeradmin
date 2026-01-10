@@ -175,6 +175,7 @@ def check_and_send_quiz_completion_message(member_id: int, quiz_id: int) -> bool
     - The member has completed the quiz
     - A message hasn't been sent before for this quiz/member combination
     - There are other members at the space who have also completed the quiz
+    - The quiz has send_help_notifications enabled
 
     Args:
         member_id: The ID of the member to potentially send the message to
@@ -188,6 +189,15 @@ def check_and_send_quiz_completion_message(member_id: int, quiz_id: int) -> bool
     # We only send it if the user completed the quiz within the last 2 months in any case.
     # TODO: We should store all slack messages in the database, to allow a proper check here.
     if has_quiz_completion_message_been_sent(member_id, quiz_id):
+        return False
+
+    # Check if the quiz has help notifications enabled
+    quiz = db_session.get(Quiz, quiz_id)
+    if not quiz:
+        logger.error(f"Could not find quiz {quiz_id}")
+        return False
+
+    if not quiz.send_help_notifications:
         return False
 
     # Check if the member has actually completed this quiz within the last 2 months
@@ -222,12 +232,11 @@ def check_and_send_quiz_completion_message(member_id: int, quiz_id: int) -> bool
         )
         return False
 
-    # Get member and quiz objects
+    # Get member object
     member = db_session.get(Member, member_id)
-    quiz = db_session.get(Quiz, quiz_id)
 
-    if not member or not quiz:
-        logger.error(f"Could not find member {member_id} or quiz {quiz_id}")
+    if not member:
+        logger.error(f"Could not find member {member_id}")
         return False
 
     # Send the message

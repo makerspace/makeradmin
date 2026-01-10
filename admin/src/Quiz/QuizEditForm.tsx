@@ -61,6 +61,25 @@ export default (props: Props) => {
                                 fler än {100 - 100 * quiz.required_pass_rate}%
                                 av frågorna.
                             </i>
+                            <div className="uk-margin-top">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        className="uk-checkbox uk-margin-small-right"
+                                        checked={quiz.send_help_notifications}
+                                        onChange={(e) => {
+                                            quiz.send_help_notifications =
+                                                e.target.checked;
+                                        }}
+                                    />
+                                    Skicka hjälpmeddelanden vid slutförande
+                                </label>
+                                <span
+                                    className="uk-margin-small-left"
+                                    uk-icon="icon: info"
+                                    uk-tooltip="Skickar ett meddelande till medlemmar när de har slutfört quizet, med info om vilka andra medlemmar i lokalen de kan fråga om hjälp"
+                                />
+                            </div>
                         </>
                     )}
                 </fieldset>

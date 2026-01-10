@@ -129,6 +129,9 @@ def main(exit: Event) -> None:
         engine = create_mysql_engine(**get_mysql_config())
         session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+        # Wait for API to start up and any migrations to run
+        exit.wait(10)
+
         match args.command:
             case x if x == COMMAND_SHIP:
                 ship_orders()
