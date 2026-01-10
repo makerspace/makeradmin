@@ -1,24 +1,26 @@
-from membership.models import Member
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, func
-from sqlalchemy.orm import configure_mappers, declarative_base, relationship
+from datetime import datetime
+from decimal import Decimal
+from typing import Optional
 
-Base = declarative_base()
+from membership.models import Base, Member
+from sqlalchemy import ForeignKey, Text, func
+from sqlalchemy.orm import Mapped, configure_mappers, declarative_base, mapped_column, relationship
 
 
 class Quiz(Base):
     __tablename__ = "quiz_quizzes"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(Text, nullable=False)
-    description = Column(Text, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
     # Optional required pass rate (0.0 to 1.0). If set, a member fails the quiz if they have
     # more than (1 - required_pass_rate) * total_questions incorrect answers.
-    required_pass_rate = Column(Numeric, nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    required_pass_rate: Mapped[float]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(default=None)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Quiz(id={self.id}, name={self.name})"
 
 
@@ -27,71 +29,71 @@ class QuizAttempt(Base):
 
     __tablename__ = "quiz_attempts"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
-    quiz_id = Column(Integer, ForeignKey(Quiz.id), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    member_id: Mapped[int] = mapped_column(ForeignKey(Member.member_id))
+    quiz_id: Mapped[int] = mapped_column(ForeignKey(Quiz.id))
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(default=None)
 
     quiz = relationship(Quiz, backref="attempts", cascade_backrefs=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"QuizAttempt(id={self.id}, member_id={self.member_id}, quiz_id={self.quiz_id})"
 
 
 class QuizQuestion(Base):
     __tablename__ = "quiz_questions"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    quiz_id = Column(Integer, ForeignKey(Quiz.id), nullable=False)
-    question = Column(Text, nullable=False)
-    answer_description = Column(Text, nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    quiz_id: Mapped[int] = mapped_column(ForeignKey(Quiz.id))
+    question: Mapped[str] = mapped_column(Text)
+    answer_description: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(default=None)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"QuizQuestion(id={self.id}, question={self.question}, quiz={self.quiz_id})"
 
 
 class QuizQuestionOption(Base):
     __tablename__ = "quiz_question_options"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    question_id = Column(Integer, ForeignKey(QuizQuestion.id), nullable=False)
-    description = Column(Text, nullable=False)
-    answer_description = Column(Text, nullable=False)
-    correct = Column(Boolean, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    question_id: Mapped[int] = mapped_column(ForeignKey(QuizQuestion.id))
+    description: Mapped[str] = mapped_column(Text)
+    answer_description: Mapped[str] = mapped_column(Text)
+    correct: Mapped[bool]
 
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(default=None)
 
     question = relationship(QuizQuestion, backref="options", cascade_backrefs=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"QuizQuestionOption(id={self.id}, description={self.description})"
 
 
 class QuizAnswer(Base):
     __tablename__ = "quiz_answers"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
-    question_id = Column(Integer, ForeignKey(QuizQuestion.id), nullable=False)
-    option_id = Column(Integer, ForeignKey(QuizQuestionOption.id), nullable=False)
-    attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
-    correct = Column(Boolean, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    member_id: Mapped[int] = mapped_column(ForeignKey(Member.member_id))
+    question_id: Mapped[int] = mapped_column(ForeignKey(QuizQuestion.id))
+    option_id: Mapped[int] = mapped_column(ForeignKey(QuizQuestionOption.id))
+    attempt_id: Mapped[int] = mapped_column(ForeignKey("quiz_attempts.id"))
+    correct: Mapped[bool]
 
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(default=None)
 
     question = relationship(QuizQuestion, backref="answers", cascade_backrefs=False)
     attempt = relationship(QuizAttempt, backref="answers", cascade_backrefs=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"QuizAnswer(id={self.id})"
 
 
