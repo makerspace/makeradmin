@@ -226,6 +226,12 @@ def handle_event(event: AccessyWebhookEvent) -> None:
         )
         db_session.commit()
         deferred_delegate()
+
+        # Check if member has any pending quiz completion messages to send
+        if member_id is not None:
+            from quiz.help_messages import check_pending_quiz_completions_for_member
+
+            check_pending_quiz_completions_for_member(member_id)
     elif isinstance(event, AccessyWebhookEventMembership_Created):
         # Expire the cache if an invitation was likely used.
         # This seems to happen when a user accepts an invitation.

@@ -1,6 +1,6 @@
 import time
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from logging import getLogger
 from typing import Any, List, Optional
 
@@ -187,7 +187,7 @@ def answer_question(question_id):
     data = request.json
     option_id = int(data["option_id"])
 
-    option = (
+    selected_option = (
         db_session.query(QuizQuestionOption)
         .join(QuizQuestionOption.question)
         .filter(
@@ -197,7 +197,7 @@ def answer_question(question_id):
         )
         .one_or_none()
     )
-    if option == None:
+    if selected_option == None:
         return (400, f"Option id {option_id} is not an option for question id {question_id}")
 
     # Get the quiz_id for this question and ensure we have a current attempt
@@ -216,11 +216,11 @@ def answer_question(question_id):
             question_id=question_id,
             option_id=option_id,
             member_id=g.user_id,
-            correct=option.correct,
+            correct=selected_option.correct,
             attempt_id=attempt.id,
         )
     )
-    db_session.flush()
+    db_session.commit()
 
     json = quiz_question_entity.to_obj(question)
     json["options"] = []
@@ -240,6 +240,12 @@ def answer_question(question_id):
             json["quiz_failed"] = True
             json["incorrect_count"] = incorrect_count
             json["max_allowed_incorrect"] = max_allowed
+
+    # If the answer was correct, check if this completed the quiz, and if so send a message
+    if selected_option.correct:
+        from quiz.help_messages import check_and_send_quiz_completion_message
+
+        check_and_send_quiz_completion_message(g.user_id, quiz.id)
 
     return json
 
@@ -327,8 +333,9 @@ def calculate_max_pass_rates_cached(member_ids: list[int], quiz_id: int) -> list
     )
     last_answer_ids_map = {member_id: last_answer_id for (member_id, last_answer_id) in last_answer_ids}
 
+    # v2 cache key format to bust old cache after adding completion_date
     redis_keys = [
-        f"quiz:max_pass_rate:{member_id}:{quiz_id}:{last_answer_ids_map.get(member_id, None)}"
+        f"quiz:max_pass_rate:v2:{member_id}:{quiz_id}:{last_answer_ids_map.get(member_id, None)}"
         for member_id in member_ids
     ]
     results: list[tuple[float, bool]] = []
@@ -336,17 +343,18 @@ def calculate_max_pass_rates_cached(member_ids: list[int], quiz_id: int) -> list
     for member_id, cached, redis_key in zip(member_ids, cached_values, redis_keys):
         if cached is not None:
             parts = cached.decode("utf-8").split(",")
+            # Note: We don't return completion_date from cached version as it's not needed for bulk queries
             results.append((float(parts[0]), parts[1] == "1"))
             continue
 
-        (max_pass_rate, ever_completed) = calculate_max_pass_rate(member_id, quiz_id)
+        (max_pass_rate, ever_completed, _completion_date) = calculate_max_pass_rate(member_id, quiz_id)
 
         redis_connection.setex(redis_key, timedelta(days=7), f"{max_pass_rate},{1 if ever_completed else 0}")
         results.append((max_pass_rate, ever_completed))
     return results
 
 
-def calculate_max_pass_rate(member_id: int, quiz_id: int) -> tuple[float, bool]:
+def calculate_max_pass_rate(member_id: int, quiz_id: int) -> tuple[float, bool, Optional[datetime]]:
     """
     Calculate the maximum pass rate a member has ever achieved on a quiz.
 
@@ -354,8 +362,9 @@ def calculate_max_pass_rate(member_id: int, quiz_id: int) -> tuple[float, bool]:
     the quiz. For each attempt, we calculate the pass rate based on the questions that
     existed at the time of the last answer in that attempt, and return the maximum.
 
-    Returns (max_pass_rate_percentage, ever_completed)
+    Returns (max_pass_rate_percentage, ever_completed, first_completion_date)
     """
+
     # Get all attempts for this member on this quiz
     attempts = (
         db_session.query(QuizAttempt)
@@ -368,7 +377,7 @@ def calculate_max_pass_rate(member_id: int, quiz_id: int) -> tuple[float, bool]:
     )
 
     if not attempts:
-        return (0.0, False)
+        return (0.0, False, None)
 
     # Get all questions for this quiz, ordered by creation time
     questions = (
@@ -376,24 +385,33 @@ def calculate_max_pass_rate(member_id: int, quiz_id: int) -> tuple[float, bool]:
     )
 
     if not questions:
-        return (0.0, False)
+        return (0.0, False, None)
 
     max_pass_rate = 0.0
     ever_completed = False
+    first_completion_date: datetime | None = None
+
+    quiz = db_session.get(Quiz, quiz_id)
+    if not quiz:
+        return (0.0, False, None)
 
     for attempt in attempts:
-        pass_rate, completed = calculate_pass_rate_for_attempt(attempt.id, quiz_id, questions)
+        pass_rate, completed, completion_date = calculate_pass_rate_for_attempt(attempt.id, quiz, questions)
 
         if pass_rate > max_pass_rate:
             max_pass_rate = pass_rate
 
         if completed:
             ever_completed = True
+            if first_completion_date is None or (completion_date and completion_date < first_completion_date):
+                first_completion_date = completion_date
 
-    return (max_pass_rate, ever_completed)
+    return (max_pass_rate, ever_completed, first_completion_date)
 
 
-def calculate_pass_rate_for_attempt(attempt_id: int, quiz: Quiz, questions: list[QuizQuestion]) -> tuple[float, bool]:
+def calculate_pass_rate_for_attempt(
+    attempt_id: int, quiz: Quiz, questions: list[QuizQuestion]
+) -> tuple[float, bool, Optional[datetime]]:
     # Get all correct answers from this attempt
     correct_answers = (
         db_session.query(QuizAnswer)
@@ -407,7 +425,7 @@ def calculate_pass_rate_for_attempt(attempt_id: int, quiz: Quiz, questions: list
     )
 
     if not correct_answers:
-        return (0.0, False)
+        return (0.0, False, None)
 
     # Find the timestamp of the last answer in this attempt
     last_answer_time = max(a.created_at for a in correct_answers)
@@ -419,7 +437,7 @@ def calculate_pass_rate_for_attempt(attempt_id: int, quiz: Quiz, questions: list
         if q.created_at <= last_answer_time and (q.deleted_at is None or q.deleted_at > last_answer_time)
     ]
     if not questions_at_time:
-        return (0.0, False)
+        return (0.0, False, None)
 
     # Count correctly answered questions in this attempt
     correctly_answered_question_ids = set(a.question_id for a in correct_answers)
@@ -431,8 +449,9 @@ def calculate_pass_rate_for_attempt(attempt_id: int, quiz: Quiz, questions: list
     pass_rate = (correct_count / total_count) * 100
 
     completed = correct_count >= total_count
+    completion_date: datetime | None = last_answer_time if completed else None
 
-    return pass_rate, completed
+    return pass_rate, completed, completion_date
 
 
 def member_quiz_statistics(member_id: int) -> list[MemberQuizStatistic]:
@@ -467,7 +486,7 @@ def member_quiz_statistics(member_id: int) -> list[MemberQuizStatistic]:
 
     result = []
     for quiz in quizzes:
-        max_pass_rate, ever_completed = calculate_max_pass_rate(member_id, quiz.id)
+        max_pass_rate, ever_completed, _completion_date = calculate_max_pass_rate(member_id, quiz.id)
         last_pass_rate = 0.0
 
         last_attempt = _find_current_attempt(member_id, quiz.id)
@@ -482,7 +501,7 @@ def member_quiz_statistics(member_id: int) -> list[MemberQuizStatistic]:
             )
 
             failed, _incorrect_count, _max_allowed_incorrect = check_attempt_failed(last_attempt.id, quiz)
-            last_pass_rate, _ = calculate_pass_rate_for_attempt(last_attempt.id, quiz, questions)
+            last_pass_rate, _, _ = calculate_pass_rate_for_attempt(last_attempt.id, quiz, questions)
 
         result.append(
             MemberQuizStatistic(

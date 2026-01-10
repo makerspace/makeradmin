@@ -52,6 +52,15 @@ def lookup_slack_user_by_email(slack_client: WebClient, email: str) -> Optional[
         return None
 
 
+def lookup_slack_users(slack_client: WebClient, member: list[Member]) -> list[str]:
+    slack_user_ids: list[str] = []
+    for m in member:
+        slack_user_id = lookup_slack_user_by_email(slack_client, m.email)
+        if slack_user_id:
+            slack_user_ids.append(slack_user_id)
+    return slack_user_ids
+
+
 def get_slack_client() -> WebClient:
     token = config.get("SLACK_BOT_TOKEN")
     if not token:
@@ -144,3 +153,28 @@ def convert_trello_markdown_to_slack_markdown(text: str) -> str:
     text = re.sub(r"\*\*(.*?)\*\*", r"*\1*", text)
 
     return text
+
+
+def format_member_mention_list(
+    slack_members: list[str],
+) -> str:
+    """
+    Format a list of members as Slack user mentions.
+
+    Args:
+        slack_client: The Slack client to use for looking up users
+        members: List of Member objects
+        max_members: Maximum number of members to mention
+
+    Returns:
+        A formatted string like "<@user1>, <@user2> or <@user3>", or an empty string if no members found
+    """
+    if not slack_members:
+        return ""
+
+    if len(slack_members) == 1:
+        return f"<@{slack_members[0]}>"
+    else:
+        result = ", ".join(f"<@{m}>" for m in slack_members[:-1])
+        result += f" or <@{slack_members[-1]}>"
+        return result

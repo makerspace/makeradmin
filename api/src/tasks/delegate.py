@@ -24,7 +24,9 @@ from shop.models import Product, Transaction, TransactionContent
 from slack.types import SlackChannel, SlackInteraction, SlackInteractionAction, SlackMessage, SlackUser
 from slack.util import (
     convert_trello_markdown_to_slack_markdown,
+    format_member_mention_list,
     lookup_slack_user_by_email,
+    lookup_slack_users,
     upload_image_to_slack,
 )
 from slack_sdk import WebClient
@@ -1517,23 +1519,12 @@ def send_slack_message_to_member(
                 )
 
     help_block = None
-    slack_members = [
-        lookup_slack_user_by_email(slack_client, m.email)
-        for m in completion.present_members_with_experience[:10]
-        if m.member_id != member.member_id
+    experienced_members = [m for m in completion.present_members_with_experience if m.member_id != member.member_id][
+        :10
     ]
-    slack_members = [m for m in slack_members if m is not None]
-    if slack_members:
-        slack_members = slack_members[:3]
-
-        if len(slack_members) == 1:
-            experienced_members = f"<@{slack_members[0]}>"
-        else:
-            experienced_members = ", ".join(f"<@{m}>" for m in slack_members[:-1])
-            if len(slack_members) > 1:
-                experienced_members += f" or <@{slack_members[-1]}>"
-
-        help_text = f"If you need help with this task, you can ask {experienced_members} who have done it before. They should be at the space right now."
+    experienced_members_slack = lookup_slack_users(slack_client, experienced_members)[:3]
+    if experienced_members_slack:
+        help_text = f"If you need help with this task, you can ask {format_member_mention_list(experienced_members_slack)} who have done it before. They should be at the space right now."
         help_block = SectionBlock(text=MarkdownTextObject(text=help_text))
 
     blocks: list[Block] = [

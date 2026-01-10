@@ -5,6 +5,7 @@ from decimal import Decimal
 from logging import getLogger
 from math import ceil
 from typing import Any, Callable, Dict, Mapping, Type, TypeVar, Union
+from zoneinfo import ZoneInfo
 
 from flask import request
 from sqlalchemy import (
@@ -12,6 +13,7 @@ from sqlalchemy import (
     Boolean,
     Date,
     DateTime,
+    Float,
     Integer,
     LargeBinary,
     Numeric,
@@ -26,7 +28,6 @@ from sqlalchemy import (
 from sqlalchemy import (
     Enum as DbEnum,
 )
-from zoneinfo import ZoneInfo
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, Enum, boolean, natural0, natural1, symbol
 from service.db import db_session
@@ -98,6 +99,7 @@ to_model_converters: Dict[Type, Callable] = {
     Boolean: to_model_wrap(bool),
     LargeBinary: to_model_wrap(base64decode),
     JSON: to_model_wrap(identity),
+    Float: to_model_wrap(float),
 }
 
 
@@ -112,6 +114,7 @@ to_obj_converters: Dict[Type, Callable] = {
     Boolean: identity,
     LargeBinary: base64encode,
     JSON: identity,
+    Float: identity,
 }
 
 
