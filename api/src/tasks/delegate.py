@@ -21,6 +21,12 @@ from serde.json import from_json, to_json
 from service.config import config, get_api_url, get_mysql_config
 from service.db import create_mysql_engine, db_session
 from shop.models import Product, Transaction, TransactionContent
+from slack.types import SlackChannel, SlackInteraction, SlackInteractionAction, SlackMessage, SlackUser
+from slack.util import (
+    convert_trello_markdown_to_slack_markdown,
+    lookup_slack_user_by_email,
+    upload_image_to_slack,
+)
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.models.blocks import (
@@ -37,8 +43,8 @@ from slack_sdk.models.blocks import (
     StaticSelectElement,
 )
 from sqlalchemy import distinct, func, select
+from trello import trello
 
-from tasks import trello
 from tasks.models import (
     MemberPreference,
     MemberPreferenceQuestionType,
@@ -58,7 +64,6 @@ ASSIGNMENT_DELAY_AFTER_START_OF_VISIT = timedelta(minutes=5)
 
 # Increment this when the structure or semantics of MemberTaskInfo changes, to avoid using stale cached data.
 CACHE_VERSION = 8
-IMAGE_CACHE_VERSION = 5
 
 TASK_LOG_CHANNEL = config.get("SLACK_TASK_LOG_CHANNEL_ID")
 if TASK_LOG_CHANNEL == "":
@@ -90,60 +95,6 @@ DOOR_REQUIREMENT_NAMES = [
     "Hasn't entered upper floor",
     "Hasn't entered lower floor/metal workshop",
 ]
-
-
-@serde
-class SlackFile:
-    id: str
-    url: str
-
-
-@serde
-class SlackSelectedOption:
-    value: str
-
-
-@serde
-class SlackInteractionAction:
-    action_id: str
-    value: str | None = None
-    selected_option: SlackSelectedOption | None = None
-
-
-@serde
-class SlackMessage:
-    ts: str
-
-
-@serde
-class SlackUser:
-    id: str
-
-
-@serde
-class SlackChannel:
-    id: str
-
-
-@serde
-class SlackViewStateValue:
-    type: str
-    selected_options: Optional[list[SlackSelectedOption]] = None
-
-
-@serde
-class SlackViewState:
-    values: dict[str, dict[str, SlackViewStateValue]]
-
-
-@serde
-class SlackInteraction:
-    actions: list[SlackInteractionAction]
-    user: SlackUser
-    message: SlackMessage
-    trigger_id: str
-    channel: SlackChannel
-    state: Optional[SlackViewState] = None
 
 
 TASK_SIZE_TO_TIME = {
@@ -1279,9 +1230,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
@@ -1504,23 +1455,6 @@ def task_score(
     return score
 
 
-def lookup_slack_user_by_email(email: str, slack_client: WebClient) -> Optional[str]:
-    # Look up Slack user by email
-    cache_key = f"slack_user_id:{email}"
-    cached_id = redis_connection.get(cache_key)
-    if cached_id:
-        return cached_id.decode("utf-8")
-
-    try:
-        response = slack_client.users_lookupByEmail(email=email)
-        id: str = response["user"]["id"]
-        redis_connection.setex(cache_key, timedelta(hours=24), id)
-        return id
-    except SlackApiError as e:
-        logger.error(f"Failed to look up Slack user by email {email}: {e.response['error']}")
-        return None
-
-
 @dataclass
 class DownloadedAttachment:
     url: str
@@ -1541,96 +1475,6 @@ class DownloadedAttachment:
 #     return DownloadedAttachment(url=attachment.url, data=data, mime_type=attachment.mime_type)
 
 
-def convert_trello_markdown_to_slack_markdown(text: str) -> str:
-    """Ah, yes. Markdown. The one true universal format that everyone agrees on..."""
-    # Convert markdown links to Slack format
-    # [link text](url "optional title") -> <url|link text>
-    text = re.sub(r'\[(.*?)\]\((\S+)(?:\s+".*?")?\)', r"<\2|\1>", text)
-
-    # Convert Trello bold (**bold**) to Slack bold (*bold*)
-    text = re.sub(r"\*\*(.*?)\*\*", r"*\1*", text)
-
-    return text
-
-
-SLACK_UPLOADED_FILE_TTL = timedelta(days=60)
-
-
-def upload_image_to_slack(trello_attachment: trello.TrelloAttachment, slack_client: WebClient) -> Optional[str]:
-    """
-    Download an image from Trello and upload it to Slack. Cache the Slack URL in Redis.
-    """
-    logger.info(f"Uploading Trello image {trello_attachment.url} to Slack...")
-    cache_key = f"slack_image_cache:{IMAGE_CACHE_VERSION}:{trello_attachment.url}"
-    cached_slack_url = redis_connection.get(cache_key)
-
-    if cached_slack_url:
-        # Refresh the expiration time for the cached Slack URL
-        redis_connection.expire(cache_key, SLACK_UPLOADED_FILE_TTL)
-        return cached_slack_url.decode("utf-8")
-
-    # Download the image from Trello
-    try:
-        data = trello.download_attachment(trello_attachment)
-    except requests.RequestException as e:
-        logger.error(f"Failed to download Trello attachment {trello_attachment.url}: {e}")
-        return None
-
-    logger.info(f"\tDownloaded {len(data)} bytes from Trello.")
-
-    # Resize the image to at most 1000px wide or tall
-    try:
-        image = Image.open(BytesIO(data))
-        original_size = image.size
-        image.thumbnail((1000, 1000), Image.Resampling.LANCZOS)
-        resized_buffer = BytesIO()
-        image.save(resized_buffer, format="PNG" if image.has_transparency_data else image.format or "JPEG")
-        data = resized_buffer.getvalue()
-        logger.info(f"Resized image from {original_size} to {image.size}")
-    except Exception as e:
-        logger.error(f"Failed to resize image: {e}")
-        return None
-
-    # Upload the image to Slack
-    try:
-        slack_response = slack_client.files_upload_v2(
-            file=data,
-            filename=trello_attachment.name,
-            title=trello_attachment.name,
-        )
-        slack_url: str | None = slack_response["file"]["permalink"]
-        slack_image_id: str | None = slack_response["file"]["id"]
-        if not slack_url or not slack_image_id:
-            logger.error(f"Failed to upload image to Slack: {slack_response}")
-            return None
-
-        # Poll the file info until the mimetype is set. The upload is asynchronous and will fail if we try to use the file too quickly.
-        # See https://github.com/slackapi/java-slack-sdk/issues/1349
-        for _ in range(10):  # Retry up to 10 times
-            try:
-                file_info = slack_client.files_info(file=slack_image_id)
-                mime_type = file_info["file"].get("mimetype")
-                if mime_type:
-                    break
-            except SlackApiError as e:
-                logger.error(f"Failed to fetch file info for Slack file {slack_image_id}: {e.response['error']}")
-                return None
-            time.sleep(2)  # Wait for 2 seconds before retrying
-        else:
-            logger.error(f"Timed out waiting for mimetype to be set for Slack file {slack_image_id}")
-            return None
-
-        # Cache the Slack URL in Redis
-        # res = SlackFile(id=slack_image_id, url=slack_url)
-        redis_connection.setex(cache_key, SLACK_UPLOADED_FILE_TTL, slack_url)
-
-        logger.info(f"\tUploaded image to Slack: {slack_url} (id={slack_image_id})")
-        return slack_url
-    except SlackApiError as e:
-        logger.error(f"Failed to upload image to Slack: {e.response['error']}")
-        return None
-
-
 def send_slack_message_to_member(
     member: Member,
     ctx: TaskContext,
@@ -1644,7 +1488,7 @@ def send_slack_message_to_member(
         return None
 
     slack_client = WebClient(token=token)
-    slack_user = lookup_slack_user_by_email(member.email, slack_client)
+    slack_user = lookup_slack_user_by_email(slack_client, member.email)
     if not slack_user:
         logger.info(f"Member {member.email} does not have a Slack account linked.")
         return None
@@ -1663,7 +1507,7 @@ def send_slack_message_to_member(
     image_blocks = []
     for attachment in trello_card.attachments or []:
         if attachment.mimeType.startswith("image/"):
-            slack_file = upload_image_to_slack(attachment, slack_client)
+            slack_file = upload_image_to_slack(slack_client, attachment)
             if slack_file:
                 image_blocks.append(
                     ImageBlock(
@@ -1674,7 +1518,7 @@ def send_slack_message_to_member(
 
     help_block = None
     slack_members = [
-        lookup_slack_user_by_email(m.email, slack_client)
+        lookup_slack_user_by_email(slack_client, m.email)
         for m in completion.present_members_with_experience[:10]
         if m.member_id != member.member_id
     ]
@@ -2104,7 +1948,7 @@ def ask_room_preference_question(
         logger.info(f"Member {member.member_id} already has a pending question, not asking again")
         return None
 
-    slack_user = lookup_slack_user_by_email(member.email, slack_client)
+    slack_user = lookup_slack_user_by_email(slack_client, member.email)
     if not slack_user:
         logger.info(f"Member {member.email} does not have a Slack account linked.")
         return None
@@ -2190,7 +2034,7 @@ def ask_skill_level_question(
         logger.info(f"Member {member.member_id} already has a pending question, not asking again")
         return None
 
-    slack_user = lookup_slack_user_by_email(member.email, slack_client)
+    slack_user = lookup_slack_user_by_email(slack_client, member.email)
     if not slack_user:
         logger.info(f"Member {member.email} does not have a Slack account linked.")
         return None

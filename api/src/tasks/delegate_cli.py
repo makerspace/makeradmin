@@ -9,6 +9,15 @@ from service.db import create_mysql_engine, db_session
 from slack_sdk import WebClient
 from sqlalchemy import delete, select
 from sqlalchemy.orm import sessionmaker
+from trello.trello import (
+    SOURCE_LIST_NAME,
+    TRELLO_API_BASE,
+    _auth_params,
+    cached_cards,
+    delete_card,
+    get_list_id_by_name,
+    refresh_cache,
+)
 
 from tasks.delegate import (
     TASK_LOG_CHANNEL,
@@ -22,15 +31,6 @@ from tasks.delegate import (
     delegate_task_for_member,
 )
 from tasks.models import TaskDelegationLog, TaskSize
-from tasks.trello import (
-    SOURCE_LIST_NAME,
-    TRELLO_API_BASE,
-    _auth_params,
-    cached_cards,
-    delete_card,
-    get_list_id_by_name,
-    refresh_cache,
-)
 from tasks.views import slack_handle_task_feedback
 
 

@@ -1,0 +1,146 @@
+import logging
+import re
+import time
+from datetime import timedelta
+from io import BytesIO
+from typing import Optional
+
+import requests
+from membership.models import Member
+from PIL import Image
+from redis_cache import redis_connection
+from service.config import config
+from service.db import db_session
+from service.error import BadRequest, UnprocessableEntity
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+from sqlalchemy import select
+from trello import trello
+
+logger = logging.getLogger("slack")
+
+IMAGE_CACHE_VERSION = 5
+SLACK_UPLOADED_FILE_TTL = timedelta(days=60)
+
+
+def member_from_slack_user_id(slack_client: WebClient, slack_user_id: str) -> Member | None:
+    """Get Member object from Slack user ID."""
+    try:
+        user_info = slack_client.users_info(user=slack_user_id)
+        email = user_info["user"]["profile"]["email"]
+    except SlackApiError as e:
+        logger.error(f"Failed to get Slack user info: {e.response['error']}")
+        raise BadRequest("Failed to get user info from Slack")
+
+    return db_session.execute(select(Member).where(Member.email == email)).scalar_one_or_none()
+
+
+def lookup_slack_user_by_email(slack_client: WebClient, email: str) -> Optional[str]:
+    # Look up Slack user by email
+    cache_key = f"slack_user_id:{email}"
+    cached_id = redis_connection.get(cache_key)
+    if cached_id:
+        return cached_id.decode("utf-8")
+
+    try:
+        response = slack_client.users_lookupByEmail(email=email)
+        id: str = response["user"]["id"]
+        redis_connection.setex(cache_key, timedelta(hours=24), id)
+        return id
+    except SlackApiError as e:
+        logger.error(f"Failed to look up Slack user by email {email}: {e.response['error']}")
+        return None
+
+
+def get_slack_client() -> WebClient:
+    token = config.get("SLACK_BOT_TOKEN")
+    if not token:
+        raise UnprocessableEntity("Slack bot token not configured")
+    return WebClient(token=token)
+
+
+def upload_image_to_slack(slack_client: WebClient, trello_attachment: trello.TrelloAttachment) -> Optional[str]:
+    """
+    Download an image from Trello and upload it to Slack. Cache the Slack URL in Redis.
+    """
+    logger.info(f"Uploading Trello image {trello_attachment.url} to Slack...")
+    cache_key = f"slack_image_cache:{IMAGE_CACHE_VERSION}:{trello_attachment.url}"
+    cached_slack_url = redis_connection.get(cache_key)
+
+    if cached_slack_url:
+        # Refresh the expiration time for the cached Slack URL
+        redis_connection.expire(cache_key, SLACK_UPLOADED_FILE_TTL)
+        return cached_slack_url.decode("utf-8")
+
+    # Download the image from Trello
+    try:
+        data = trello.download_attachment(trello_attachment)
+    except requests.RequestException as e:
+        logger.error(f"Failed to download Trello attachment {trello_attachment.url}: {e}")
+        return None
+
+    logger.info(f"\tDownloaded {len(data)} bytes from Trello.")
+
+    # Resize the image to at most 1000px wide or tall
+    try:
+        image = Image.open(BytesIO(data))
+        original_size = image.size
+        image.thumbnail((1000, 1000), Image.Resampling.LANCZOS)
+        resized_buffer = BytesIO()
+        image.save(resized_buffer, format="PNG" if image.has_transparency_data else image.format or "JPEG")
+        data = resized_buffer.getvalue()
+        logger.info(f"Resized image from {original_size} to {image.size}")
+    except Exception as e:
+        logger.error(f"Failed to resize image: {e}")
+        return None
+
+    # Upload the image to Slack
+    try:
+        slack_response = slack_client.files_upload_v2(
+            file=data,
+            filename=trello_attachment.name,
+            title=trello_attachment.name,
+        )
+        slack_url: str | None = slack_response["file"]["permalink"]
+        slack_image_id: str | None = slack_response["file"]["id"]
+        if not slack_url or not slack_image_id:
+            logger.error(f"Failed to upload image to Slack: {slack_response}")
+            return None
+
+        # Poll the file info until the mimetype is set. The upload is asynchronous and will fail if we try to use the file too quickly.
+        # See https://github.com/slackapi/java-slack-sdk/issues/1349
+        for _ in range(10):  # Retry up to 10 times
+            try:
+                file_info = slack_client.files_info(file=slack_image_id)
+                mime_type = file_info["file"].get("mimetype")
+                if mime_type:
+                    break
+            except SlackApiError as e:
+                logger.error(f"Failed to fetch file info for Slack file {slack_image_id}: {e.response['error']}")
+                return None
+            time.sleep(2)  # Wait for 2 seconds before retrying
+        else:
+            logger.error(f"Timed out waiting for mimetype to be set for Slack file {slack_image_id}")
+            return None
+
+        # Cache the Slack URL in Redis
+        # res = SlackFile(id=slack_image_id, url=slack_url)
+        redis_connection.setex(cache_key, SLACK_UPLOADED_FILE_TTL, slack_url)
+
+        logger.info(f"\tUploaded image to Slack: {slack_url} (id={slack_image_id})")
+        return slack_url
+    except SlackApiError as e:
+        logger.error(f"Failed to upload image to Slack: {e.response['error']}")
+        return None
+
+
+def convert_trello_markdown_to_slack_markdown(text: str) -> str:
+    """Ah, yes. Markdown. The one true universal format that everyone agrees on..."""
+    # Convert markdown links to Slack format
+    # [link text](url "optional title") -> <url|link text>
+    text = re.sub(r'\[(.*?)\]\((\S+)(?:\s+".*?")?\)', r"<\2|\1>", text)
+
+    # Convert Trello bold (**bold**) to Slack bold (*bold*)
+    text = re.sub(r"\*\*(.*?)\*\*", r"*\1*", text)
+
+    return text

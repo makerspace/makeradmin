@@ -9,9 +9,10 @@ from membership.models import Member
 from serde import from_dict, serde
 from serde.json import from_json, to_json
 from service.api_definition import GET, MEMBER_VIEW, POST, PUBLIC
-from service.config import config
 from service.db import db_session
 from service.error import BadRequest, NotFound, UnprocessableEntity
+from slack.types import SlackInteraction
+from slack.util import get_slack_client, member_from_slack_user_id
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.models.blocks import (
@@ -26,8 +27,9 @@ from slack_sdk.models.blocks import (
     StaticSelectElement,
 )
 from sqlalchemy import select
+from trello import trello
 
-from tasks import service, trello
+from tasks import service
 from tasks.delegate import (
     DOOR_REQUIREMENT_NAMES,
     TASK_LOG_CHANNEL,
@@ -47,25 +49,6 @@ from tasks.delegate import (
 from tasks.models import MemberPreference, MemberPreferenceQuestionType, TaskDelegationLog, TaskDelegationLogLabel
 
 logger = getLogger("task-delegator")
-
-
-def member_from_slack_user_id(slack_client: WebClient, slack_user_id: str) -> Member | None:
-    """Get Member object from Slack user ID."""
-    try:
-        user_info = slack_client.users_info(user=slack_user_id)
-        email = user_info["user"]["profile"]["email"]
-    except SlackApiError as e:
-        logger.error(f"Failed to get Slack user info: {e.response['error']}")
-        raise BadRequest("Failed to get user info from Slack")
-
-    return db_session.execute(select(Member).where(Member.email == email)).scalar_one_or_none()
-
-
-def get_slack_client() -> WebClient:
-    token = config.get("SLACK_BOT_TOKEN")
-    if not token:
-        raise UnprocessableEntity("Slack bot token not configured")
-    return WebClient(token=token)
 
 
 @dataclass
