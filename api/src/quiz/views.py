@@ -364,7 +364,6 @@ def calculate_max_pass_rate(member_id: int, quiz_id: int) -> tuple[float, bool]:
             QuizAttempt.quiz_id == quiz_id,
             QuizAttempt.deleted_at == None,
         )
-        .order_by(QuizAttempt.created_at)
         .all()
     )
 
@@ -398,7 +397,6 @@ def calculate_pass_rate_for_attempt(attempt_id: int, quiz: Quiz, questions: list
     # Get all correct answers from this attempt
     correct_answers = (
         db_session.query(QuizAnswer)
-        .join(QuizAnswer.question)
         .filter(
             QuizAnswer.attempt_id == attempt_id,
             QuizAnswer.correct == True,
