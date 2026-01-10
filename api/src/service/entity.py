@@ -5,7 +5,6 @@ from decimal import Decimal
 from logging import getLogger
 from math import ceil
 from typing import Any, Callable, Dict, Mapping, Type, TypeVar, Union
-from zoneinfo import ZoneInfo
 
 from flask import request
 from sqlalchemy import (
@@ -28,6 +27,7 @@ from sqlalchemy import (
 from sqlalchemy import (
     Enum as DbEnum,
 )
+from zoneinfo import ZoneInfo
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, Enum, boolean, natural0, natural1, symbol
 from service.db import db_session
