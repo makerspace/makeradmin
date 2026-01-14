@@ -373,6 +373,12 @@ def slack_events() -> dict:
             if event.get("bot_id"):
                 return {"ok": True}
 
+            # Only handle regular new messages (not edits, thread replies, etc.)
+            # Regular messages have no subtype or subtype is None
+            subtype = event.get("subtype")
+            if subtype is not None:
+                return {"ok": True}
+
             # Check if message contains @theSpace or @thespace
             text = event.get("text", "").lower()
             if (
