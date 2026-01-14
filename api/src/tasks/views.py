@@ -388,6 +388,40 @@ def slack_events() -> dict:
     return {"ok": True}
 
 
+def get_all_channel_members(slack_client: WebClient, channel_id: str) -> set[str]:
+    """
+    Get all member IDs in a Slack channel, handling pagination.
+
+    Args:
+        slack_client: The Slack WebClient instance
+        channel_id: The channel ID to fetch members from
+
+    Returns:
+        A set of member IDs in the channel
+
+    Raises:
+        SlackApiError: If the API call fails
+    """
+    channel_member_ids = set()
+    cursor = None
+
+    while True:
+        response = slack_client.conversations_members(
+            channel=channel_id,
+            limit=200,
+            cursor=cursor
+        )
+        channel_member_ids.update(response.get("members", []))
+
+        # Check if there are more results to fetch
+        next_cursor = response.get("response_metadata", {}).get("next_cursor")
+        if not next_cursor:
+            break
+        cursor = next_cursor
+
+    return channel_member_ids
+
+
 def handle_thespace_mention(event: dict) -> None:
     """Handle when someone mentions @theSpace in a message."""
     from tasks.delegate import DURATION_AT_SPACE_HEURISTIC
@@ -417,8 +451,7 @@ def handle_thespace_mention(event: dict) -> None:
 
         # Get channel members to filter the list
         try:
-            channel_members_response = slack_client.conversations_members(channel=channel_id)
-            channel_member_ids = set(channel_members_response.get("members", []))
+            channel_member_ids = get_all_channel_members(slack_client, channel_id)
         except SlackApiError as e:
             # If we can't get channel members (e.g., DM or private channel), skip filtering
             logger.warning(f"Could not get channel members for {channel_id}: {e.response['error']}")
