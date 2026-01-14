@@ -26,6 +26,12 @@
         status: "Status",
         never: "Aldrig",
         no_cards: "Inga uppgifter tillgängliga.",
+        actions: "Åtgärder",
+        assign_to_member: "Tilldela",
+        assign_task_modal_title: "Tilldela uppgift till medlem",
+        select_member_to_assign: "Välj medlem",
+        assign: "Tilldela",
+        cancel: "Avbryt",
     },
     member_preferences: {
         title: "Medlemspreferenser",

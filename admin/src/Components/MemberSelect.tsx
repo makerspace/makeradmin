@@ -23,6 +23,8 @@ interface MemberSelectProps {
     name?: string;
     /** Tab index for keyboard navigation */
     tabIndex?: number;
+    /** Menu portal target for rendering menu outside of container (useful in modals) */
+    menuPortalTarget?: HTMLElement | null;
 }
 
 /**
@@ -67,6 +69,7 @@ export default function MemberSelect({
     isClearable = true,
     name = "member-select",
     tabIndex = 1,
+    menuPortalTarget = null,
 }: MemberSelectProps) {
     const loadOptions = useCallback(
         (inputValue: string, callback: (options: MemberOption[]) => void) => {
@@ -91,6 +94,14 @@ export default function MemberSelect({
             }
             loadOptions={loadOptions}
             onChange={(member) => onChange(member as MemberOption | null)}
+            menuPortalTarget={menuPortalTarget}
+            styles={
+                menuPortalTarget
+                    ? {
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                      }
+                    : undefined
+            }
         />
     );
 }

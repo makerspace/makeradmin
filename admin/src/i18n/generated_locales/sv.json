@@ -72,6 +72,11 @@
     },
     "task_statistics": {
         "cards": {
+            "actions": "Åtgärder",
+            "assign": "Tilldela",
+            "assign_task_modal_title": "Tilldela uppgift till medlem",
+            "assign_to_member": "Tilldela",
+            "cancel": "Avbryt",
             "completed_count": "Slutförda",
             "last_completed": "Senast slutförd",
             "last_completer": "Senast slutförd av",
@@ -81,6 +86,7 @@
             "score": "Poäng",
             "score_for_member": "Beräkna poäng för medlem",
             "search_member_placeholder": "Sök efter medlem...",
+            "select_member_to_assign": "Välj medlem",
             "showing_scores_for_member": "Visar poäng beräknade för {{name}}",
             "status": "Status",
             "task": "Uppgift",

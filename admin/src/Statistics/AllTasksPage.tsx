@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import MemberSelect, { MemberOption } from "../Components/MemberSelect";
 import { dateToRelative } from "../utils/dateUtils";
+import { post } from "../gateway";
+import { showSuccess, showError } from "../message";
+import UIkit from "uikit";
 
 interface ScoreOperation {
     operation: "add" | "multiply" | "set";
@@ -93,13 +96,80 @@ export default function AllTasksPage() {
         null,
     );
     const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+    const [assigningCardId, setAssigningCardId] = useState<string | null>(null);
+    const [modalSelectedMember, setModalSelectedMember] =
+        useState<MemberOption | null>(null);
 
-    const { data, isLoading, error } = useJson<AllTasksResponse>({
+    const { data, isLoading, error, refresh } = useJson<AllTasksResponse>({
         url: `/tasks/statistics`,
         params: selectedMember
             ? { member_id: selectedMember.member_id }
             : { member_id: undefined },
     });
+
+    const handleAssignTask = async (
+        cardId: string,
+        cardName: string,
+        memberToAssign: MemberOption | null,
+    ) => {
+        if (!memberToAssign) {
+            // Show member selection modal
+            setAssigningCardId(cardId);
+            setModalSelectedMember(null); // Reset modal selection
+            const modal = UIkit.modal("#assign-task-modal");
+            modal.show();
+            return;
+        }
+
+        // Assign the task directly if member is already selected
+        try {
+            await post({
+                url: `/tasks/assign`,
+                data: {
+                    card_id: cardId,
+                    member_id: memberToAssign.member_id,
+                    ignore_reasons: [],
+                },
+                expectedDataStatus: null,
+            });
+            showSuccess(
+                `Task "${cardName}" has been assigned to ${memberToAssign.firstname} ${memberToAssign.lastname}`,
+            );
+            refresh();
+        } catch (err) {
+            showError(`Failed to assign task: ${err}`);
+        }
+    };
+
+    const handleModalAssign = async () => {
+        if (!assigningCardId || !modalSelectedMember) {
+            return;
+        }
+
+        const card = data?.cards.find((c) => c.card_id === assigningCardId);
+        if (!card) return;
+
+        try {
+            await post({
+                url: `/tasks/assign`,
+                data: {
+                    card_id: assigningCardId,
+                    member_id: modalSelectedMember.member_id,
+                    ignore_reasons: [],
+                },
+                expectedDataStatus: null,
+            });
+            showSuccess(
+                `Task "${card.card_name}" has been assigned to ${modalSelectedMember.firstname} ${modalSelectedMember.lastname}`,
+            );
+            UIkit.modal("#assign-task-modal").hide();
+            setAssigningCardId(null);
+            setModalSelectedMember(null);
+            refresh();
+        } catch (err) {
+            showError(`Failed to assign task: ${err}`);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -156,6 +226,47 @@ export default function AllTasksPage() {
                 )}
             </div>
 
+            {/* Modal for assigning task to a member */}
+            <div id="assign-task-modal" uk-modal="container: false">
+                <div className="uk-modal-dialog uk-modal-body">
+                    <button
+                        className="uk-modal-close-default"
+                        type="button"
+                        uk-close=""
+                    ></button>
+                    <h2 className="uk-modal-title">
+                        {t("cards.assign_task_modal_title")}
+                    </h2>
+                    <div className="uk-margin">
+                        <label className="uk-form-label">
+                            {t("cards.select_member_to_assign")}
+                        </label>
+                        <MemberSelect
+                            name="assign-member-select"
+                            placeholder={t("cards.search_member_placeholder")}
+                            value={modalSelectedMember}
+                            onChange={setModalSelectedMember}
+                        />
+                    </div>
+                    <div className="uk-modal-footer uk-text-right">
+                        <button
+                            className="uk-button uk-button-default uk-modal-close"
+                            type="button"
+                        >
+                            {t("cards.cancel")}
+                        </button>
+                        <button
+                            className="uk-button uk-button-primary"
+                            type="button"
+                            onClick={handleModalAssign}
+                            disabled={!modalSelectedMember}
+                        >
+                            {t("cards.assign")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <table className="uk-table uk-table-small uk-table-striped uk-table-hover">
                 <thead>
                     <tr>
@@ -166,6 +277,7 @@ export default function AllTasksPage() {
                         <th>{t("cards.overdue")}</th>
                         <th>{t("cards.score")}</th>
                         {selectedMember && <th>{t("cards.status")}</th>}
+                        <th>{t("cards.actions")}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -253,11 +365,26 @@ export default function AllTasksPage() {
                                         )}
                                     </td>
                                 )}
+                                <td>
+                                    <button
+                                        className="uk-button uk-button-small uk-button-primary"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleAssignTask(
+                                                card.card_id,
+                                                card.card_name,
+                                                selectedMember,
+                                            );
+                                        }}
+                                    >
+                                        {t("cards.assign_to_member")}
+                                    </button>
+                                </td>
                             </tr>
                             {expandedCardId === card.card_id && (
                                 <tr key={`${card.card_id}-details`}>
                                     <td
-                                        colSpan={selectedMember ? 7 : 6}
+                                        colSpan={selectedMember ? 8 : 7}
                                         style={{
                                             padding: "0.5rem 1rem",
                                             backgroundColor: "#f8f8f8",

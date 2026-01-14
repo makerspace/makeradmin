@@ -26,6 +26,12 @@
         status: "Status",
         never: "Never",
         no_cards: "No tasks available.",
+        actions: "Actions",
+        assign_to_member: "Assign",
+        assign_task_modal_title: "Assign Task to Member",
+        select_member_to_assign: "Select member",
+        assign: "Assign",
+        cancel: "Cancel",
     },
     member_preferences: {
         title: "Member Preferences",

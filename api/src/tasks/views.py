@@ -406,11 +406,7 @@ def get_all_channel_members(slack_client: WebClient, channel_id: str) -> set[str
     cursor = None
 
     while True:
-        response = slack_client.conversations_members(
-            channel=channel_id,
-            limit=200,
-            cursor=cursor
-        )
+        response = slack_client.conversations_members(channel=channel_id, limit=200, cursor=cursor)
         channel_member_ids.update(response.get("members", []))
 
         # Check if there are more results to fetch
@@ -515,6 +511,53 @@ def handle_thespace_mention(event: dict) -> None:
         logger.error(f"Failed to respond to @theSpace mention: {e.response['error']}")
     except Exception as e:
         logger.exception(f"Error handling @theSpace mention: {e}")
+
+
+@service.route("/assign", method=POST, permission=MEMBER_VIEW)
+def assign_task_to_member() -> dict:
+    """
+    Assign a task to a specific member via admin UI.
+
+    Expects JSON body with:
+    - card_id: Trello card ID
+    - member_id: Member ID to assign the task to
+    - ignore_reasons: Optional list of requirement names to ignore (e.g., door requirements)
+    """
+    data = request.get_json()
+    if not data:
+        raise BadRequest("Missing JSON body")
+
+    card_id = data.get("card_id")
+    member_id = data.get("member_id")
+    ignore_reasons = data.get("ignore_reasons", [])
+
+    if not card_id:
+        raise BadRequest("Missing card_id")
+    if not member_id:
+        raise BadRequest("Missing member_id")
+
+    # Validate member exists
+    member = db_session.get(Member, member_id)
+    if not member:
+        raise NotFound(f"Member {member_id} not found")
+
+    # Fetch the card from Trello
+    try:
+        cards = trello.cached_cards(trello.SOURCE_LIST_NAME)
+        card = next((c for c in cards if c.id == card_id), None)
+        if not card:
+            raise NotFound(f"Card {card_id} not found")
+    except Exception as e:
+        logger.error(f"Failed to fetch Trello cards: {e}")
+        raise BadRequest("Failed to fetch Trello card")
+
+    # Delegate the task
+    log_id = delegate_task_for_member(member_id=member_id, force=True, ignore_reasons=ignore_reasons, picked_card=card)
+
+    if log_id is None:
+        raise UnprocessableEntity("Failed to assign task to member. Check if member has a Slack account linked.")
+
+    return {"status": "success", "log_id": log_id, "message": f"Task assigned to member #{member.member_number}"}
 
 
 @service.route("/slack/interaction", method=POST, permission=PUBLIC)  # PUBLIC because Slack posts here

@@ -72,6 +72,11 @@
     },
     "task_statistics": {
         "cards": {
+            "actions": "Actions",
+            "assign": "Assign",
+            "assign_task_modal_title": "Assign Task to Member",
+            "assign_to_member": "Assign",
+            "cancel": "Cancel",
             "completed_count": "Completed",
             "last_completed": "Last Completed",
             "last_completer": "Last Completed By",
@@ -81,6 +86,7 @@
             "score": "Score",
             "score_for_member": "Calculate score for member",
             "search_member_placeholder": "Search for member...",
+            "select_member_to_assign": "Select member",
             "showing_scores_for_member": "Showing scores calculated for {{name}}",
             "status": "Status",
             "task": "Task",
