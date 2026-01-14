@@ -1,12 +1,13 @@
 import logging
 import re
 import time
-from datetime import timedelta
+from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Optional
 
 import requests
 from membership.models import Member
+from multiaccessy.models import PhysicalAccessEntry
 from PIL import Image
 from redis_cache import redis_connection
 from service.config import config
@@ -14,7 +15,7 @@ from service.db import db_session
 from service.error import BadRequest, UnprocessableEntity
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-from sqlalchemy import select
+from sqlalchemy import distinct, select
 from trello import trello
 
 logger = logging.getLogger("slack")
@@ -178,3 +179,37 @@ def format_member_mention_list(
         result = ", ".join(f"<@{m}>" for m in slack_members[:-1])
         result += f" or <@{slack_members[-1]}>"
         return result
+
+
+def get_members_currently_at_space(duration_at_space_heuristic: timedelta) -> list[Member]:
+    """
+    Get all members who are currently at the space based on recent door entries.
+
+    Args:
+        duration_at_space_heuristic: How long after a door entry a member is considered "at the space"
+
+    Returns:
+        List of Member objects currently at the space
+    """
+    cutoff_time = datetime.now() - duration_at_space_heuristic
+
+    # Get all members who have opened a door recently
+    member_ids = (
+        db_session.execute(
+            select(distinct(PhysicalAccessEntry.member_id)).where(
+                PhysicalAccessEntry.member_id.isnot(None),
+                PhysicalAccessEntry.created_at >= cutoff_time,
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    # Fetch the actual Member objects
+    members = []
+    for member_id in member_ids:
+        member = db_session.get(Member, member_id)
+        if member:
+            members.append(member)
+
+    return members

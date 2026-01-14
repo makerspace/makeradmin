@@ -340,6 +340,109 @@ def get_member_preference_statistics() -> dict:
     return {"preference_statistics": stats_by_question_type}
 
 
+@service.route("/slack/events", method=POST, permission=PUBLIC)  # PUBLIC because Slack posts here
+def slack_events() -> dict:
+    """
+    Slack Events API endpoint.
+    Handles URL verification and message events.
+    """
+    data = request.get_json()
+    if not data:
+        raise BadRequest("Missing JSON body")
+
+    # Handle URL verification challenge (Slack sends this when setting up the endpoint)
+    if data.get("type") == "url_verification":
+        return {"challenge": data.get("challenge")}
+
+    # Handle events
+    if data.get("type") == "event_callback":
+        event = data.get("event", {})
+        event_type = event.get("type")
+
+        # Handle message events
+        if event_type == "message":
+            # Ignore bot messages to avoid loops
+            if event.get("bot_id"):
+                return {"ok": True}
+
+            # Check if message contains @theSpace or @thespace
+            text = event.get("text", "").lower()
+            if (
+                "@thespace" in text
+                or "someone at the space" in text
+                or "anyone at makerspace now" in text
+                or "anyone at the makerspace right now" in text
+            ):
+                handle_thespace_mention(event)
+
+        return {"ok": True}
+
+    return {"ok": True}
+
+
+def handle_thespace_mention(event: dict) -> None:
+    """Handle when someone mentions @theSpace in a message."""
+    from tasks.delegate import DURATION_AT_SPACE_HEURISTIC
+
+    slack_client = get_slack_client()
+    if not slack_client:
+        logger.error("Slack client not available")
+        return
+
+    channel_id = event.get("channel")
+    if not channel_id:
+        return
+
+    try:
+        # Get members currently at the space
+        from slack.util import format_member_mention_list, get_members_currently_at_space, lookup_slack_user_by_email
+
+        members_at_space = get_members_currently_at_space(DURATION_AT_SPACE_HEURISTIC)
+
+        if not members_at_space:
+            slack_client.chat_postMessage(
+                channel=channel_id,
+                text="No one is currently at the space (or at least, no one has entered recently).",
+                thread_ts=event.get("ts"),  # Reply in thread if it's a thread message
+            )
+            return
+
+        # Look up Slack user IDs for all members
+        slack_user_ids = []
+        for member in members_at_space:
+            slack_user_id = lookup_slack_user_by_email(slack_client, member.email)
+            if slack_user_id:
+                slack_user_ids.append(slack_user_id)
+
+        if not slack_user_ids:
+            slack_client.chat_postMessage(
+                channel=channel_id,
+                text=f"{len(members_at_space)} member(s) at the space, but couldn't find their Slack accounts.",
+                thread_ts=event.get("ts"),
+            )
+            return
+
+        # Format the message nicely using the helper function
+        mentions = format_member_mention_list(slack_user_ids)
+        if len(slack_user_ids) == 1:
+            message = f"Here's who is at the space right now: {mentions}"
+        else:
+            message = f"Here's everyone who is at the space right now: {mentions}"
+
+        slack_client.chat_postMessage(
+            channel=channel_id,
+            text=message,
+            thread_ts=event.get("ts"),  # Reply in thread if it's a thread message
+        )
+
+        logger.info(f"Responded to @theSpace mention in channel {channel_id} with {len(slack_user_ids)} members")
+
+    except SlackApiError as e:
+        logger.error(f"Failed to respond to @theSpace mention: {e.response['error']}")
+    except Exception as e:
+        logger.exception(f"Error handling @theSpace mention: {e}")
+
+
 @service.route("/slack/interaction", method=POST, permission=PUBLIC)  # PUBLIC because Slack posts here
 def slack_interaction() -> dict:
     """
