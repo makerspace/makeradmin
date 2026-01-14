@@ -407,14 +407,28 @@ def handle_thespace_mention(event: dict) -> None:
             )
             return
 
+        # Get channel members to filter the list
+        try:
+            channel_members_response = slack_client.conversations_members(channel=channel_id)
+            channel_member_ids = set(channel_members_response.get("members", []))
+        except SlackApiError as e:
+            # If we can't get channel members (e.g., DM or private channel), skip filtering
+            logger.warning(f"Could not get channel members for {channel_id}: {e.response['error']}")
+            channel_member_ids = None
+
         # Look up Slack user IDs for all members
         slack_user_ids = []
+        slack_user_ids_not_in_channel = []
         for member in members_at_space:
             slack_user_id = lookup_slack_user_by_email(slack_client, member.email)
             if slack_user_id:
-                slack_user_ids.append(slack_user_id)
+                # Filter to only members in this channel (if we have that info)
+                if channel_member_ids is None or slack_user_id in channel_member_ids:
+                    slack_user_ids.append(slack_user_id)
+                else:
+                    slack_user_ids_not_in_channel.append(slack_user_id)
 
-        if not slack_user_ids:
+        if not slack_user_ids and not slack_user_ids_not_in_channel:
             slack_client.chat_postMessage(
                 channel=channel_id,
                 text=f"{len(members_at_space)} member(s) at the space, but couldn't find their Slack accounts.",
@@ -423,11 +437,27 @@ def handle_thespace_mention(event: dict) -> None:
             return
 
         # Format the message nicely using the helper function
-        mentions = format_member_mention_list(slack_user_ids)
-        if len(slack_user_ids) == 1:
-            message = f"Here's who is at the space right now: {mentions}"
+        if slack_user_ids:
+            mentions = format_member_mention_list(slack_user_ids)
+            if len(slack_user_ids) == 1:
+                message = f"Here's who is at the space right now: {mentions}"
+            else:
+                message = f"Here's everyone who is at the space right now: {mentions}"
+
+            # Add note about additional members not in this channel
+            if slack_user_ids_not_in_channel:
+                count = len(slack_user_ids_not_in_channel)
+                if count == 1:
+                    message += " (and 1 other member who is not in this channel)"
+                else:
+                    message += f" (and {count} other members who are not in this channel)"
         else:
-            message = f"Here's everyone who is at the space right now: {mentions}"
+            # Everyone at the space is not in this channel
+            count = len(slack_user_ids_not_in_channel)
+            if count == 1:
+                message = "1 member is at the space, but they are not in this channel."
+            else:
+                message = f"{count} members are at the space, but they are not in this channel."
 
         slack_client.chat_postMessage(
             channel=channel_id,
@@ -435,7 +465,10 @@ def handle_thespace_mention(event: dict) -> None:
             thread_ts=event.get("ts"),  # Reply in thread if it's a thread message
         )
 
-        logger.info(f"Responded to @theSpace mention in channel {channel_id} with {len(slack_user_ids)} members")
+        logger.info(
+            f"Responded to @theSpace mention in channel {channel_id}: "
+            f"{len(slack_user_ids)} in channel, {len(slack_user_ids_not_in_channel)} not in channel"
+        )
 
     except SlackApiError as e:
         logger.error(f"Failed to respond to @theSpace mention: {e.response['error']}")
