@@ -145,6 +145,19 @@ def main(exit: Event) -> None:
                 schedule.every().day.at("04:00").do(daily_job)
                 schedule.every().hour.do(hourly_job)
 
+                # Join all public Slack channels at startup so the bot can respond to @theSpace mentions
+                try:
+                    from slack.util import get_slack_client, join_all_public_channels
+
+                    slack_client = get_slack_client()
+                    if slack_client:
+                        logger.info("Joining all public Slack channels...")
+                        join_all_public_channels(slack_client)
+                    else:
+                        logger.warning("Slack client not available, skipping channel join")
+                except Exception as e:
+                    logger.exception(f"Failed to join Slack channels at startup: {e}")
+
                 while not exit.is_set():
                     schedule.run_pending()
                     run_queued_commands()

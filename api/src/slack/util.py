@@ -213,3 +213,57 @@ def get_members_currently_at_space(duration_at_space_heuristic: timedelta) -> li
             members.append(member)
 
     return members
+
+
+def join_all_public_channels(slack_client: WebClient) -> None:
+    """
+    Have the bot join all public channels in the workspace.
+    This allows the bot to respond to @theSpace mentions in all channels.
+
+    Note: This only works for public channels. Private channels still require manual invitation.
+    """
+    try:
+        # Get list of all public channels
+        cursor = None
+        joined_count = 0
+        skipped_count = 0
+
+        while True:
+            response = slack_client.conversations_list(
+                types="public_channel",
+                exclude_archived=True,
+                limit=200,
+                cursor=cursor,
+            )
+
+            channels = response.get("channels", [])
+
+            for channel in channels:
+                channel_id = channel["id"]
+                channel_name = channel["name"]
+                is_member = channel.get("is_member", False)
+
+                if not is_member:
+                    try:
+                        slack_client.conversations_join(channel=channel_id)
+                        logger.info(f"Joined public channel: #{channel_name}")
+                        joined_count += 1
+                    except SlackApiError as e:
+                        if e.response["error"] == "already_in_channel":
+                            skipped_count += 1
+                        else:
+                            logger.warning(f"Could not join #{channel_name}: {e.response['error']}")
+                else:
+                    skipped_count += 1
+
+            # Check if there are more channels to fetch
+            cursor = response.get("response_metadata", {}).get("next_cursor")
+            if not cursor:
+                break
+
+        logger.info(f"Finished joining public channels: {joined_count} joined, {skipped_count} already a member")
+
+    except SlackApiError as e:
+        logger.error(f"Failed to join public channels: {e.response['error']}")
+    except Exception as e:
+        logger.exception(f"Error joining public channels: {e}")
