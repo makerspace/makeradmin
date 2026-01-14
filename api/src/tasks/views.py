@@ -328,12 +328,20 @@ def get_member_preference_statistics() -> dict:
                 if option:
                     option_counts[option] = option_counts.get(option, 0) + 1
 
+        # Calculate how many members haven't answered this question
+        # Get total number of active (non-deleted) members
+        total_members = db_session.execute(
+            select(func.count(Member.member_id)).where(Member.deleted_at.is_(None))
+        ).scalar()
+        unanswered_count = total_members - total_respondents
+
         # Sort options by count descending
         sorted_options = sorted(option_counts.items(), key=lambda x: (-x[1], x[0]))
 
         stats_by_question_type[question_type.value] = {
             "question_type": question_type.value,
             "total_respondents": total_respondents,
+            "unanswered": unanswered_count,
             "options": [{"option": opt, "count": count} for opt, count in sorted_options],
         }
 

@@ -9,6 +9,7 @@ interface OptionCount {
 interface QuestionTypeStats {
     question_type: string;
     total_respondents: number;
+    unanswered: number;
     options: OptionCount[];
 }
 
@@ -21,6 +22,7 @@ const QUESTION_TYPE_NAMES: Record<string, string> = {
     ROOM_PREFERENCE: "Room Preferences",
     MACHINE_PREFERENCE: "Machine Preferences",
     SKILL_LEVEL: "Self-Reported Skill Level",
+    TASK_DELEGATION_ENABLED: "Task Delegation",
 };
 
 export default function MemberPreferencesPage() {
@@ -82,7 +84,8 @@ export default function MemberPreferencesPage() {
                             })}
                         </p>
 
-                        {stats.options.length === 0 ? (
+                        {stats.options.length === 0 &&
+                        stats.unanswered === 0 ? (
                             <p className="uk-text-muted">
                                 {t("member_preferences.no_responses")}
                             </p>
@@ -103,11 +106,19 @@ export default function MemberPreferencesPage() {
                                 </thead>
                                 <tbody>
                                     {stats.options.map((optionData) => {
+                                        // For TASK_DELEGATION_ENABLED, include unanswered in percentage calculation (they default to enabled)
+                                        // For other question types, only use total_respondents
+                                        const totalMembers =
+                                            questionType ===
+                                            "TASK_DELEGATION_ENABLED"
+                                                ? stats.total_respondents +
+                                                  stats.unanswered
+                                                : stats.total_respondents;
                                         const percentage =
-                                            stats.total_respondents > 0
+                                            totalMembers > 0
                                                 ? (
                                                       (optionData.count /
-                                                          stats.total_respondents) *
+                                                          totalMembers) *
                                                       100
                                                   ).toFixed(1)
                                                 : "0";
@@ -156,6 +167,66 @@ export default function MemberPreferencesPage() {
                                             </tr>
                                         );
                                     })}
+                                    {stats.unanswered > 0 &&
+                                        questionType ===
+                                            "TASK_DELEGATION_ENABLED" && (
+                                            <tr>
+                                                <td>
+                                                    <em>Enabled (default)</em>
+                                                </td>
+                                                <td>{stats.unanswered}</td>
+                                                <td>
+                                                    <div
+                                                        style={{
+                                                            display: "flex",
+                                                            alignItems:
+                                                                "center",
+                                                            gap: "8px",
+                                                        }}
+                                                    >
+                                                        <div
+                                                            style={{
+                                                                width: "80px",
+                                                                height: "16px",
+                                                                backgroundColor:
+                                                                    "#e5e5e5",
+                                                                borderRadius:
+                                                                    "4px",
+                                                                overflow:
+                                                                    "hidden",
+                                                            }}
+                                                        >
+                                                            <div
+                                                                style={{
+                                                                    width: `${(
+                                                                        (stats.unanswered /
+                                                                            (stats.total_respondents +
+                                                                                stats.unanswered)) *
+                                                                        100
+                                                                    ).toFixed(
+                                                                        1,
+                                                                    )}%`,
+                                                                    height: "100%",
+                                                                    backgroundColor:
+                                                                        "#1e87f0",
+                                                                    transition:
+                                                                        "width 0.3s ease",
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span>
+                                                            {(
+                                                                (stats.unanswered /
+                                                                    (stats.total_respondents +
+                                                                        stats.unanswered)) *
+                                                                100
+                                                            ).toFixed(1)}
+                                                            %
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
                                 </tbody>
                             </table>
                         )}
