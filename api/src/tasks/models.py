@@ -80,6 +80,7 @@ class MemberPreferenceQuestionType(enum.Enum):
     ROOM_PREFERENCE = "ROOM_PREFERENCE"
     MACHINE_PREFERENCE = "MACHINE_PREFERENCE"
     SKILL_LEVEL = "SKILL_LEVEL"
+    TASK_DELEGATION_ENABLED = "TASK_DELEGATION_ENABLED"
 
 
 class MemberPreference(Base):

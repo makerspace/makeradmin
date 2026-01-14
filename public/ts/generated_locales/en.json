@@ -237,6 +237,17 @@
         "send_accessy_invite_msg": "Install the Accessy app on your phone. You can use this to unlock doors at the makerspace.",
         "set_password": "Set",
         "set_password_alert": "We've sent an email to {{email}} with a link for changing your password.",
+        "slack": {
+            "email_reminder": "Make sure to use the same email address ({{email}}) when joining Slack.",
+            "join_button": "Join Slack",
+            "slack_description": "Slack is our primary communication platform. Join to ask questions, get news, and connect with other members.",
+            "status_connected": "Account connected",
+            "status_not_connected": "Not connected",
+            "task_delegation_description": "A bot will occasionally send you small tasks on Slack to help maintain the makerspace. These are suggestions and helpful advice. Unchecking this does not free you from the obligation that all members have to help maintain the makerspace.",
+            "task_delegation_enabled": "Receive task suggestions",
+            "task_delegation_header": "Task Delegation",
+            "title": "Slack"
+        },
         "subscriptions": {
             "activate_auto_renewal": "Activate auto-renewal: {{price}} {{unit}}",
             "add_to_cart": "Add {{count}} {{unit}} to cart: {{price}} kr",

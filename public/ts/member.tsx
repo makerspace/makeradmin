@@ -36,7 +36,7 @@ import {
     getCurrentSubscriptions,
 } from "./subscriptions";
 import { UnitNames, translateUnit } from "./translations";
-import { URL_CALENDLY_BOOK, URL_MEMBERBOOTH } from "./urls";
+import { URL_CALENDLY_BOOK, URL_MEMBERBOOTH, URL_SLACK_SIGNUP } from "./urls";
 declare var UIkit: any;
 
 type fn_past_enddate = (enddate: date_t, remaining_days: number) => JSX.Element;
@@ -878,6 +878,141 @@ function Address({ member }: { member: member_t }) {
     );
 }
 
+function SlackSettings({ member }: { member: { email: string } }) {
+    const { t } = useTranslation("member_page");
+    const [slackEnabled, setSlackEnabled] = useState<boolean>(false);
+    const [hasSlackAccount, setHasSlackAccount] = useState<boolean>(false);
+    const [taskDelegationEnabled, setTaskDelegationEnabled] =
+        useState<boolean>(true);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        common
+            .ajax(
+                "GET",
+                `${window.apiBasePath}/member/current/slack_status`,
+                null,
+            )
+            .then(
+                (
+                    response: common.ServerResponse<{
+                        slack_enabled: boolean;
+                        has_slack_account: boolean;
+                        task_delegation_enabled: boolean;
+                    }>,
+                ) => {
+                    setSlackEnabled(response.data.slack_enabled);
+                    setHasSlackAccount(response.data.has_slack_account);
+                    setTaskDelegationEnabled(
+                        response.data.task_delegation_enabled,
+                    );
+                    setLoading(false);
+                },
+            )
+            .catch((e) => {
+                console.error("Failed to load Slack status:", e);
+                setLoading(false);
+            });
+    }, []);
+
+    const handleTaskDelegationChange = async (e: Event) => {
+        const target = e.target as HTMLInputElement;
+        const newEnabled = target.checked;
+
+        try {
+            await common.ajax(
+                "POST",
+                `${window.apiBasePath}/member/current/task_delegation_enabled`,
+                { enabled: newEnabled },
+            );
+            setTaskDelegationEnabled(newEnabled);
+        } catch (e) {
+            console.error("Failed to update task delegation setting:", e);
+            UIkit.modal.alert(
+                `<h2>Failed to update setting</h2><b class="uk-text-danger">${get_error(e)}</b>`,
+            );
+            // Revert the checkbox
+            target.checked = !newEnabled;
+        }
+    };
+
+    if (loading || !slackEnabled) {
+        return null;
+    }
+
+    return (
+        <fieldset>
+            <legend>
+                <i uk-icon="comment"></i> {t("slack.title")}
+            </legend>
+            <div class="uk-card uk-card-default uk-card-small uk-card-body">
+                {hasSlackAccount ? (
+                    <div class="uk-flex uk-flex-middle">
+                        <i
+                            uk-icon="icon: check; ratio: 0.8"
+                            class="uk-text-success"
+                        ></i>
+                        <span class="uk-margin-small-left">
+                            {t("slack.status_connected")}
+                        </span>
+                    </div>
+                ) : (
+                    <>
+                        <div class="uk-flex uk-flex-middle uk-margin-small-bottom">
+                            <i
+                                uk-icon="icon: close; ratio: 0.8"
+                                class="uk-text-warning"
+                            ></i>
+                            <span class="uk-margin-small-left uk-text-warning">
+                                {t("slack.status_not_connected")}
+                            </span>
+                        </div>
+                        <p class="uk-text-small uk-text-muted uk-margin-small-bottom">
+                            {t("slack.slack_description")}
+                        </p>
+                        <p class="uk-text-small uk-text-muted uk-margin-small-bottom">
+                            <strong>
+                                {t("slack.email_reminder", {
+                                    email: member.email,
+                                })}
+                            </strong>
+                        </p>
+                        <a
+                            href={URL_SLACK_SIGNUP}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="uk-button uk-button-primary uk-button-small"
+                        >
+                            {t("slack.join_button")}
+                        </a>
+                    </>
+                )}
+            </div>
+            {hasSlackAccount && (
+                <div class="uk-margin-top">
+                    <div class="uk-card uk-card-default uk-card-small uk-card-body">
+                        <h6 class="uk-margin-remove-top uk-margin-small-bottom">
+                            {t("slack.task_delegation_header")}
+                        </h6>
+                        <p class="uk-text-small uk-text-muted uk-margin-small-bottom">
+                            {t("slack.task_delegation_description")}
+                        </p>
+                        <label>
+                            <input
+                                type="checkbox"
+                                class="uk-checkbox"
+                                checked={taskDelegationEnabled}
+                                onChange={handleTaskDelegationChange}
+                            />{" "}
+                            {t("slack.task_delegation_enabled")}
+                        </label>
+                    </div>
+                </div>
+            )}
+        </fieldset>
+    );
+}
+
 function SubscriptionPayment({
     sub,
     membership,
@@ -1274,6 +1409,7 @@ function MemberPage({
                         }
                     />
                     <Address member={member} />
+                    <SlackSettings member={member} />
                     <Accessy
                         member={member}
                         membership={membership}

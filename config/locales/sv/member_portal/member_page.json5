@@ -101,4 +101,15 @@
         sign_contract: "Du måste delta på en <1>medlemintroduktion</1>. Du hittar dem i <0>kalendern</0>.",
         missing_phone_number: "Du måste lägga in ditt <0>telefonnummer</0> i personuppgifterna nedan.",
     },
+    slack: {
+        title: "Slack",
+        status_connected: "Konto anslutet",
+        status_not_connected: "Inte ansluten",
+        join_button: "Gå med i Slack",
+        task_delegation_header: "Uppgiftsdelegering",
+        task_delegation_enabled: "Ta emot uppgiftsförslag",
+        task_delegation_description: "En bot kommer ibland skicka dig små uppgifter på Slack för att hjälpa till att underhålla makerspacet. Dessa är förslag och hjälpsamma råd. Att avmarkera detta befriar dig inte från skyldigheten som alla medlemmar har att hjälpa till att underhålla makerspacet.",
+        slack_description: "Slack är vår primära kommunikationsplattform. Gå med för att få ställa frågor, få nyheter, och kommunicera med andra medlemmar.",
+        email_reminder: "Se till att använda samma e-postadress ({{email}}) när du går med i Slack.",
+    },
 }

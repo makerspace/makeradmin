@@ -397,37 +397,14 @@ class MemberTaskInfo:
             #     completed_card_ids[log.template_card_id] = completed_card_ids.get(log.template_card_id, 0) + 1
             completed_card_names[log.card_name] = completed_card_names.get(log.card_name, 0) + 1
 
-        # Fetch room preferences
-        room_pref = db_session.execute(
-            select(MemberPreference)
-            .where(
-                MemberPreference.member_id == member_id,
-                MemberPreference.question_type == MemberPreferenceQuestionType.ROOM_PREFERENCE,
-                MemberPreference.created_at <= now,
-                # Only consider room preferences up-to-date for 1 year
-                MemberPreference.created_at > now - timedelta(days=365),
-            )
-            .order_by(MemberPreference.created_at.desc())
-            .limit(1)
-        ).scalar_one_or_none()
-
+        # Fetch room preferences (only valid for 1 year)
+        room_pref = get_member_preference(member_id, MemberPreferenceQuestionType.ROOM_PREFERENCE, now)
         preferred_rooms = None
-        if room_pref:
+        if room_pref and room_pref.created_at > now - timedelta(days=365):
             preferred_rooms = set(room_pref.selected_options.split(",")) if room_pref.selected_options else set()
 
         # Fetch skill level
-        skill_level_pref = db_session.execute(
-            select(MemberPreference)
-            .where(
-                MemberPreference.member_id == member_id,
-                MemberPreference.question_type == MemberPreferenceQuestionType.SKILL_LEVEL,
-                MemberPreference.created_at <= now,
-                # Skill level question is only asked once, so no need to limit by time
-            )
-            .order_by(MemberPreference.created_at.desc())
-            .limit(1)
-        ).scalar_one_or_none()
-
+        skill_level_pref = get_member_preference(member_id, MemberPreferenceQuestionType.SKILL_LEVEL, now)
         self_reported_skill_level = None
         if skill_level_pref:
             self_reported_skill_level = skill_level_pref.selected_options if skill_level_pref.selected_options else None
@@ -1099,6 +1076,52 @@ class CardRequirements:
         )
 
 
+def get_member_preference(
+    member_id: int, question_type: MemberPreferenceQuestionType, now: datetime | None = None
+) -> MemberPreference | None:
+    """
+    Get the most recent preference for a member.
+
+    Args:
+        member_id: The member ID
+        question_type: The type of preference to fetch
+        now: Optional time constraint (only fetch preferences created before this time)
+
+    Returns:
+        The most recent preference, or None if not found
+    """
+    query = (
+        select(MemberPreference)
+        .where(
+            MemberPreference.member_id == member_id,
+            MemberPreference.question_type == question_type,
+        )
+        .order_by(MemberPreference.created_at.desc())
+        .limit(1)
+    )
+
+    if now is not None:
+        query = query.where(MemberPreference.created_at <= now)
+
+    return db_session.execute(query).scalar_one_or_none()
+
+
+def is_task_delegation_enabled(member_id: int) -> bool:
+    """
+    Check if task delegation is enabled for a member.
+
+    Returns:
+        True if enabled (default), False if the member has explicitly disabled it
+    """
+    pref = get_member_preference(member_id, MemberPreferenceQuestionType.TASK_DELEGATION_ENABLED)
+
+    if pref is None:
+        # No preference set, default to enabled
+        return True
+
+    return pref.selected_options == "true"
+
+
 def member_recently_received_task(ctx: TaskContext) -> bool:
     # If a member has completed a task recently, don't assign them another one too soon.
     # The wait depends on the size of the task
@@ -1232,9 +1255,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
@@ -1712,9 +1735,11 @@ def delegate_task_for_member(
 ) -> Optional[int]:
     ctx = TaskContext.from_member(member_id, datetime.now())
 
-    if not ctx.member.is_in_group("task_beta_testers"):
-        logger.info(f"Skipping task delegation for member {member_id} (not in test list)")
-        return None
+    # Check if member has disabled task delegation
+    if not force and slack_interaction is None:
+        if not is_task_delegation_enabled(member_id):
+            logger.info(f"Member {member_id} has disabled task delegation; skipping delegation")
+            return None
 
     # skip if recently got a task
     if member_recently_received_task(ctx) and not force and slack_interaction is None:

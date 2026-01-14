@@ -237,6 +237,17 @@
         "send_accessy_invite_msg": "Installera Accessy-appen på din telefon. Du använder den för att låsa upp dörrar på makerspacet.",
         "set_password": "Välj",
         "set_password_alert": "Vi har skickat ett email till {{email}} med en länk för att byta ditt lösenord.",
+        "slack": {
+            "email_reminder": "Se till att använda samma e-postadress ({{email}}) när du går med i Slack.",
+            "join_button": "Gå med i Slack",
+            "slack_description": "Slack är vår primära kommunikationsplattform. Gå med för att få ställa frågor, få nyheter, och kommunicera med andra medlemmar.",
+            "status_connected": "Konto anslutet",
+            "status_not_connected": "Inte ansluten",
+            "task_delegation_description": "En bot kommer ibland skicka dig små uppgifter på Slack för att hjälpa till att underhålla makerspacet. Dessa är förslag och hjälpsamma råd. Att avmarkera detta befriar dig inte från skyldigheten som alla medlemmar har att hjälpa till att underhålla makerspacet.",
+            "task_delegation_enabled": "Ta emot uppgiftsförslag",
+            "task_delegation_header": "Uppgiftsdelegering",
+            "title": "Slack"
+        },
         "subscriptions": {
             "activate_auto_renewal": "Aktivera automatisk förnyelse: {{price}} {{unit}}",
             "add_to_cart": "Lägg till {{count}} {{unit}} till din varukorg: {{price}} kr",

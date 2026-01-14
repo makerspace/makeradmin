@@ -101,4 +101,15 @@
         sign_contract: "You must attend a <1>member introduction</1>. You can find them in the <0>calendar</0>.",
         missing_phone_number: "You must enter your <0>phone number</0> in the personal data below.",
     },
+    slack: {
+        title: "Slack",
+        status_connected: "Account connected",
+        status_not_connected: "Not connected",
+        join_button: "Join Slack",
+        task_delegation_header: "Task Delegation",
+        task_delegation_enabled: "Receive task suggestions",
+        task_delegation_description: "A bot will occasionally send you small tasks on Slack to help maintain the makerspace. These are suggestions and helpful advice. Unchecking this does not free you from the obligation that all members have to help maintain the makerspace.",
+        slack_description: "Slack is our primary communication platform. Join to ask questions, get news, and connect with other members.",
+        email_reminder: "Make sure to use the same email address ({{email}}) when joining Slack.",
+    },
 }

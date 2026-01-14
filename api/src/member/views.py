@@ -10,6 +10,8 @@ from quiz.views import member_quiz_statistics
 from service.api_definition import GET, MESSAGE_SEND, POST, PUBLIC, USER, Arg, natural1, non_empty_str
 from service.db import db_session
 from service.error import Unauthorized
+from sqlalchemy import select
+from tasks.models import MemberPreference, MemberPreferenceQuestionType
 
 from member import service
 from member.member import (
@@ -94,6 +96,55 @@ def request_change_phone_number(member_id: int | None = Arg(int, required=False)
     if member_id is not None and member_id != g.user_id:
         raise Unauthorized("You can only change your own phone number.")
     return change_phone_request(member_id, phone)
+
+
+@service.route("/current/slack_status", method=GET, permission=USER)
+def get_slack_status():
+    """Get Slack account status and task delegation preference for the current member."""
+    from service.config import config
+    from slack.util import lookup_slack_user_by_email
+    from slack_sdk import WebClient
+    from tasks.delegate import is_task_delegation_enabled
+
+    member = db_session.get(Member, g.user_id)
+    assert member is not None
+
+    token = config.get("SLACK_BOT_TOKEN")
+    slack_enabled = token is not None and token != ""
+
+    has_slack_account = False
+    if slack_enabled and member.email:
+        try:
+            slack_client = WebClient(token=token)
+            slack_user_id = lookup_slack_user_by_email(slack_client, member.email)
+            has_slack_account = slack_user_id is not None
+        except Exception:
+            # If we can't check, assume they don't have an account
+            pass
+
+    return {
+        "slack_enabled": slack_enabled,
+        "has_slack_account": has_slack_account,
+        "task_delegation_enabled": is_task_delegation_enabled(g.user_id),
+    }
+
+
+@service.route("/current/task_delegation_enabled", method=POST, permission=USER)
+def set_task_delegation_enabled(enabled: bool = Arg(bool)):
+    """
+    Enable or disable task delegation for the current member.
+    This creates a new preference record.
+    """
+    pref = MemberPreference(
+        member_id=g.user_id,
+        question_type=MemberPreferenceQuestionType.TASK_DELEGATION_ENABLED,
+        available_options="true,false",
+        selected_options="true" if enabled else "false",
+    )
+    db_session.add(pref)
+    db_session.commit()
+
+    return {"enabled": enabled}
 
 
 @service.route("/validate_phone_number", method=POST, permission=PUBLIC)
