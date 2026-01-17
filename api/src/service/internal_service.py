@@ -76,7 +76,10 @@ class InternalService(Blueprint):
                         has_permission = permission in g.permissions
 
                         if not has_permission:
-                            raise Forbidden(message=f"'{permission}' permission is required for this operation.")
+                            raise Forbidden(
+                                message=f"'{permission}' permission is required for this operation.",
+                                what=permission,
+                            )
                     else:
                         try:
                             authenticate_request()

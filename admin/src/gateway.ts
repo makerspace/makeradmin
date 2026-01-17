@@ -81,7 +81,7 @@ export function request({
             }
 
             if (response.status === 403) {
-                showPermissionDenied();
+                showPermissionDenied(responseData);
                 return null;
             }
 
