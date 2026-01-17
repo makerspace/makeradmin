@@ -339,7 +339,30 @@ export default function AllTasksPage() {
                                           })
                                         : "-"}
                                 </td>
-                                <td>{card.score}</td>
+                                <td>
+                                    {card.cannot_be_assigned_reason ? (
+                                        selectedMember ? (
+                                            "-"
+                                        ) : (
+                                            <span
+                                                className="uk-text-muted"
+                                                title={
+                                                    card.cannot_be_assigned_reason
+                                                }
+                                            >
+                                                {card.cannot_be_assigned_reason
+                                                    .length > 40
+                                                    ? card.cannot_be_assigned_reason.substring(
+                                                          0,
+                                                          40,
+                                                      ) + "..."
+                                                    : card.cannot_be_assigned_reason}
+                                            </span>
+                                        )
+                                    ) : (
+                                        card.score.toFixed(2)
+                                    )}
+                                </td>
                                 {selectedMember && (
                                     <td>
                                         {card.cannot_be_assigned_reason ? (

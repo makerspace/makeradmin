@@ -224,15 +224,14 @@ def get_global_task_statistics() -> dict:
                 ignore_reasons=DOOR_REQUIREMENT_NAMES,
                 all_cards=cards,
             )
-            final_score = round(score_result.score, 2)
-            cannot_be_assigned_reason = (
-                score_result.cannot_be_assigned_reason.reason if score_result.cannot_be_assigned_reason else None
-            )
         else:
             # Use base score when no member is specified
-            score_result = task_score_base(requirements, completion_info, now)
-            final_score = round(score_result.score, 2)
-            cannot_be_assigned_reason = None
+            score_result = task_score_base(requirements, completion_info, now, [])
+
+        final_score = score_result.score
+        cannot_be_assigned_reason = (
+            score_result.cannot_be_assigned_reason.reason if score_result.cannot_be_assigned_reason else None
+        )
 
         # Calculate overdue days
         overdue_days: float | None = None

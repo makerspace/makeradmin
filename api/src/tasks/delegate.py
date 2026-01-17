@@ -1255,17 +1255,15 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
-def task_score_base(
-    requirements: CardRequirements,
-    completion_info: CardCompletionInfo,
-    time: datetime,
-) -> TaskScore:
+def calculate_elapsed_periods(
+    requirements: CardRequirements, completion_info: CardCompletionInfo, time: datetime
+) -> tuple[float, timedelta]:
     if requirements.repeat_interval is not None:
         assert requirements.repeat_interval.total_seconds() > 0
         elapsed_periods = (
@@ -1276,6 +1274,7 @@ def task_score_base(
                 f"Negative elapsed periods for task {completion_info.card_id}. Now={time}, last_completed={completion_info.last_completed}, first_available_at={completion_info.first_available_at}, repeat_interval={requirements.repeat_interval}"
             )
             elapsed_periods = 0
+
         equivalent_repeat_interval = requirements.repeat_interval
     else:
         if requirements.infinitely_repeatable:
@@ -1285,6 +1284,28 @@ def task_score_base(
             # Assign a default repeat interval for one-off tasks
             equivalent_repeat_interval = timedelta(days=180)
         elapsed_periods = 0
+
+    return (elapsed_periods, equivalent_repeat_interval)
+
+
+def task_score_base(
+    requirements: CardRequirements,
+    completion_info: CardCompletionInfo,
+    time: datetime,
+    ignore_reasons: List[str],
+) -> TaskScore:
+    # If someone completes a task, we don't want to try to assign the same task again.
+    if (
+        completion_info.last_completed is not None
+        and not requirements.infinitely_repeatable
+        and (
+            requirements.repeat_interval is None or completion_info.last_completed + requirements.repeat_interval > time
+        )
+        and not "Task has already been completed" in ignore_reasons
+    ):
+        return TaskScore.from_reason(CannotAssignReason("Task has already been completed"))
+
+    elapsed_periods, equivalent_repeat_interval = calculate_elapsed_periods(requirements, completion_info, time)
 
     frequency_days_per_year = float(
         round(timedelta(days=365).total_seconds() / equivalent_repeat_interval.total_seconds())
@@ -1322,18 +1343,6 @@ def task_score(
     ):
         return TaskScore.from_reason(CannotAssignReason("Task has already been assigned"))
 
-    # If someone completes a task, we don't want to try to assign the same task again.
-    if (
-        completion_info.last_completed is not None
-        and not requirements.infinitely_repeatable
-        and (
-            requirements.repeat_interval is None
-            or completion_info.last_completed + requirements.repeat_interval > ctx.time
-        )
-        and not "Task has already been completed" in ignore_reasons
-    ):
-        return TaskScore.from_reason(CannotAssignReason("Task has already been completed"))
-
     limit_per_member = requirements.limit_per_member
     if (
         limit_per_member is not None
@@ -1364,7 +1373,7 @@ def task_score(
         # Don't assign tasks that just became available, as they may be manually created and might still be manually edited
         return TaskScore.from_reason(CannotAssignReason("Task just became available"))
 
-    score = task_score_base(requirements, completion_info, ctx.time)
+    score = task_score_base(requirements, completion_info, ctx.time, ignore_reasons=ignore_reasons)
 
     if same_as_last_assigned_task or same_as_last_completed_task:
         score.multiply_score(0.1, "Avoid assigning the same task multiple times in a row")
