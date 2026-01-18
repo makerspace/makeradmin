@@ -67,11 +67,20 @@ module.exports = (env, args) => {
                 allowedHosts: "all",
                 port: 80,
                 static: "/static/js",
-                proxy: {
-                    "/": "http://localhost:81",
-                    "/member": "http://localhost:81",
-                    "/shop": "http://localhost:81",
-                },
+                proxy: [
+                    {
+                        context: ["/"],
+                        target: "http://localhost:81",
+                    },
+                    {
+                        context: ["/member"],
+                        target: "http://localhost:81",
+                    },
+                    {
+                        context: ["/shop"],
+                        target: "http://localhost:81",
+                    },
+                ],
             },
             infrastructureLogging: {
                 level: "error",
