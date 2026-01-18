@@ -12,6 +12,7 @@
     "devDependencies": {
         "@types/d3": "^7.4.3",
         "@types/d3-sankey": "^0.12.4",
+        "frontend_common": "file:../frontend_common",
         "json5": "^2.2",
         "sass": "^1.85.0",
         "sass-loader": "^16.0.5",
@@ -20,9 +21,8 @@
         "typescript": "^5.7.3",
         "webpack": "^5.98.0",
         "webpack-cli": "^5.0.1",
-        "webpack-dev-server": "^4.11.1",
-        "webpack-merge": "^5.8.0",
-        "frontend_common": "file:../frontend_common"
+        "webpack-dev-server": "^5.2.3",
+        "webpack-merge": "^5.8.0"
     },
     "dependencies": {
         "@types/markdown-it": "^12.2.1",
