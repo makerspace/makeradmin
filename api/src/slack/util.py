@@ -62,10 +62,10 @@ def lookup_slack_users(slack_client: WebClient, member: list[Member]) -> list[st
     return slack_user_ids
 
 
-def get_slack_client() -> WebClient:
+def get_slack_client() -> Optional[WebClient]:
     token = config.get("SLACK_BOT_TOKEN")
     if not token:
-        raise UnprocessableEntity("Slack bot token not configured")
+        return None
     return WebClient(token=token)
 
 
