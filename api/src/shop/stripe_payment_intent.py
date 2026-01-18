@@ -4,6 +4,7 @@ from decimal import Decimal
 from enum import Enum
 from logging import getLogger
 from typing import Dict, List, Optional
+from zoneinfo import ZoneInfo
 
 import stripe
 from dataclasses_json import DataClassJsonMixin
@@ -13,7 +14,6 @@ from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
 from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
 from typing_extensions import Never
-from zoneinfo import ZoneInfo
 
 from shop.models import StripePending, Transaction
 from shop.stripe_constants import (

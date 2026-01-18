@@ -1,6 +1,7 @@
 from datetime import datetime
 from logging import getLogger
 from typing import Dict, List
+from zoneinfo import ZoneInfo
 
 from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod
@@ -8,7 +9,6 @@ from membership.models import Member
 from service.config import get_makerspace_local_timezone
 from service.db import db_session
 from service.error import InternalServerError
-from zoneinfo import ZoneInfo
 
 from shop.accounting.accounting import (
     AccountingError,
