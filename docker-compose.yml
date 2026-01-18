@@ -20,10 +20,8 @@ services:
   api:
     image: makeradmin/api:1.0
     build:
-      context: ./api
-      additional_contexts:
-        config: ./config
-        scripts: ./scripts
+      context: .
+      dockerfile: api/Dockerfile
     volumes:
       - ./logs/api:/work/logs
       - ./data/licenses:/work/data/licenses
@@ -80,11 +78,6 @@ services:
       - makeradmin
   email-dispatcher:
     image: makeradmin/api:1.0
-    build:
-      context: ./api
-      additional_contexts:
-        config: ./config
-        scripts: ./scripts
     volumes:
       - ./logs/email_dispatcher:/work/logs
     command:
@@ -111,11 +104,6 @@ services:
 
   accessy-syncer:
     image: makeradmin/api:1.0
-    build:
-      context: ./api
-      additional_contexts:
-        config: ./config
-        scripts: ./scripts
     volumes:
       - ./logs/accessy_syncer:/work/logs
     command:
@@ -153,11 +141,8 @@ services:
     volumes:
       - "./.webshop_product_images:/work/static/product_images"
     build:
-      context: ./public
-      additional_contexts:
-        frontend_common: ./frontend_common
-        config: ./config
-        scripts: ./scripts
+      context: .
+      dockerfile: public/Dockerfile
     environment:
       APIGATEWAY: "api"
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
@@ -174,11 +159,8 @@ services:
   admin:
     image: makeradmin/admin:1.0
     build:
-      context: ./admin
-      additional_contexts:
-        frontend_common: ./frontend_common
-        config: ./config
-        scripts: ./scripts
+      context: .
+      dockerfile: admin/Dockerfile
     environment:
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
       VIRTUAL_HOST: "${HOST_FRONTEND}"

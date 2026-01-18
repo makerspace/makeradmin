@@ -45,7 +45,7 @@ init-npm:
 	cd public && npm ci --install-links=false
 
 init-pip:
-	python3 -m pip install --upgrade -r requirements.txt
+	uv sync
 
 init-pre-commit:
 	pre-commit install --install-hooks

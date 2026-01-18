@@ -20,18 +20,23 @@ RUN mkdir -p /work/ && mkdir -p /work/logs
 
 VOLUME /work/logs
 
-COPY default-product-image.png /work
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-COPY requirements.txt /work
-COPY --from=config . /config
-COPY --from=scripts build_locales.py /scripts/
+COPY api/default-product-image.png /work
 
-RUN pip install -U pip
-RUN pip install -r /work/requirements.txt
+COPY pyproject.toml uv.lock /work/
+COPY config /config
+COPY scripts/build_locales.py /scripts/
 
-COPY run.sh dispatch_emails.sh accessy_syncer.sh /work/
+WORKDIR /work
+RUN uv sync --no-dev --frozen
 
-COPY src /work/src
+# Activate the virtual environment for subsequent commands
+ENV PATH="/work/.venv/bin:$PATH"
+
+COPY api/run.sh api/dispatch_emails.sh api/accessy_syncer.sh /work/
+
+COPY api/src /work/src
 
 RUN python3 /scripts/build_locales.py --locale-path=/config/locales/ --locale-override-path=/config/locale_overrides --output-py=/work/src/i18n --default-locale=en --modules admin common
 

@@ -89,7 +89,15 @@ docker compose version
 Makeradmin uses Python 3.11.
 
 ```bash
-sudo apt-get install python3.11-dev python3.11-doc python3-pip python3.11-venv
+sudo apt-get install python3.11-dev python3.11-doc
+```
+
+### uv
+
+We use [uv](https://docs.astral.sh/uv/) for Python package management, which is faster and more reliable than pip.
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ### npm
@@ -103,13 +111,19 @@ sudo apt-get install npm
 Clone this git repository to a suitable place on your computer / server
 
 > [!TIP]
-> Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder.
-> This makes sure that the packages used for Makeradmin are isolated into its own "environment" (i.e. in the local directory), and will not interfere with packages already installed.
+> MakerAdmin uses `uv` for Python dependency management. All dependencies are defined in `pyproject.toml`.
+>
+> Start by initializing a virtual python environment in the cloned folder:
 >
 > ```bash
-> python3 -m venv .venv
+> # Create a virtual environment with Python 3.11
+> uv venv --python 3.11
+>
+> # Activate the virtual environment
 > source .venv/bin/activate
 > ```
+>
+> Dependencies will be automatically installed when you run `make firstrun` below.
 
 Run the firstrun script
 
@@ -133,18 +147,47 @@ docker compose up -d --build
 
 ## Start MakerAdmin, web shop, etc.
 
-Run all services locally (but you will have to insert data, see below):
+### Development mode
 
-```bash
-make run
-```
-
-You can also run in dev mode where source directories are mounted inside the containers and sources are
+For development, run in dev mode where source directories are mounted inside the containers and sources are
 reloaded when changed (in most cases):
 
 ```bash
 make dev
 ```
+
+This will expose the services on:
+
+- Admin interface: http://localhost:8009
+- API: http://localhost:8010
+- Member portal/shop: http://localhost:8011
+
+### Production mode
+
+For production deployments, you need to use a reverse proxy to route traffic to the services. We recommend using [nginx-proxy](https://hub.docker.com/r/jwilder/nginx-proxy/):
+
+```bash
+docker run -d -p 80:80 -p 443:443 \
+  --name nginx-proxy \
+  -v /var/run/docker.sock:/tmp/docker.sock:ro \
+  jwilder/nginx-proxy
+```
+
+Then configure the `HOST_BACKEND`, `HOST_FRONTEND` and `HOST_PUBLIC` variables in the `.env` file to match your domain names, and start the services.
+These are important to make sure links work, but also to handle CORS in the browser.
+The `HOST_*` variables should contain only the hostname (without protocol). For example:
+
+```
+HOST_BACKEND=api.makerspace.se
+HOST_FRONTEND=admin.makerspace.se
+HOST_PUBLIC=makerspace.se
+```
+
+```bash
+make run
+```
+
+The services will be available at the hostnames you configured in the `.env` file.
 
 ### Adding new users that can access MakerAdmin
 
@@ -196,9 +239,6 @@ The `.env` file includes a number of variables that are unset by default.
 
 If you want emails to be sent, you'll need to set the `MAILGUN_DOMAIN`, `MAILGUN_KEY` and `MAILGUN_FROM` variables.
 You will also want to set the `ADMIN_EMAIL` variable to some mailbox that you monitor.
-
-To deploy on any host which is not localhost, you'll need to change the `HOST_BACKEND`, `HOST_FRONTEND` and `HOST_PUBLIC` variables.
-These are important to make sure links work, but also to handle CORS in the browser.
 
 ## Tests
 

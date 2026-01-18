@@ -37,10 +37,8 @@ services:
   test:
     image: makeradmin/test:1.0
     build:
-      context: ./api
-      dockerfile: TestDockerfile
-      additional_contexts:
-        config: ./config
+      context: .
+      dockerfile: api/TestDockerfile
     ports:
       - "5678:5678"
     networks:

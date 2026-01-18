@@ -7,25 +7,26 @@ ENV TZ=Europe/Stockholm
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
 
 # Copy package file first, to avoid having to install dependencies every time a source file is updated
-COPY ./webpack.config.js ./tsconfig.json ./package.json ./package-lock.json /work/
+COPY admin/webpack.config.js admin/tsconfig.json admin/package.json admin/package-lock.json /work/
 
 WORKDIR /work
 
 RUN npm ci --install-links=false
 
-COPY ./webpack.config.js /work/
+COPY admin/webpack.config.js /work/
 
-COPY --from=frontend_common . /frontend_common
-COPY --from=config . /config
-COPY --from=scripts build_locales.py /scripts/
-COPY  ./src/ /work/src
+COPY frontend_common /frontend_common
+COPY config /config
+COPY scripts/build_locales.py /scripts/
+COPY admin/src/ /work/src
 
 # compile-bytecode makes the script start faster when run later (not sure if the difference is noticeable)
 RUN uv run --compile-bytecode /scripts/build_locales.py --locale-path=/config/locales --locale-override-path=/config/locale_overrides --output-json=/work/src/i18n/generated_locales --output-ts-type-definitions=/work/src/i18n/locales.ts --default-locale=en --modules admin common
 
-COPY  ./dist/ /work/dist
+# Create dist directory - actual files will be mounted as volume in dev mode
+RUN mkdir -p /work/dist
 
 EXPOSE 80
 
-COPY ./docker/docker_entrypoint.sh /usr/local/myscripts/docker_entrypoint.sh
+COPY admin/docker/docker_entrypoint.sh /usr/local/myscripts/docker_entrypoint.sh
 CMD ["/usr/local/myscripts/docker_entrypoint.sh"]

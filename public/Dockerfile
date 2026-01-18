@@ -16,31 +16,35 @@ RUN apk update \
 
 RUN npm install -g npm@9.2.0
 
-RUN pip3 install flask gunicorn pyjson5
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
 
+# Install Python dependencies for the public server
+# (Only 3 simple packages for serving static files)
+RUN uv pip install --system --no-cache flask gunicorn pyjson5
+
 # Copy package file first, to avoid having to install dependencies every time a source file is updated
-COPY ./package.json ./package-lock.json /work/
+COPY public/package.json public/package-lock.json /work/
 
 WORKDIR /work
 
-COPY --from=frontend_common . /frontend_common
+COPY frontend_common /frontend_common
 RUN npm ci --install-links=false
 
-COPY --from=scripts build_locales.py /scripts/
-COPY --from=config . /config
-COPY ./webpack.config.js /work/
+COPY scripts/build_locales.py /scripts/
+COPY config /config
+COPY public/webpack.config.js /work/
 
-COPY ts /work/ts
+COPY public/ts /work/ts
 
-COPY static /work/static
+COPY public/static /work/static
 
-COPY scss /work/scss
+COPY public/scss /work/scss
 
-COPY src /work/src
+COPY public/src /work/src
 
-COPY run.sh /work/run.sh
+COPY public/run.sh /work/run.sh
 
 RUN npm exec sass scss/style.scss static/style.css
 

@@ -19,11 +19,15 @@ RUN mkdir -p /work/
 
 WORKDIR /work
 
-RUN pip install -U pip
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-COPY --from=config . /config
-COPY test_run.sh .
+COPY pyproject.toml uv.lock /work/
+RUN uv sync --frozen
 
-COPY src ./src
+# Activate the virtual environment for subsequent commands
+ENV PATH="/work/.venv/bin:$PATH"
+
+COPY config /config
+COPY api/test_run.sh .
+
+COPY api/src ./src

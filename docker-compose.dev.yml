@@ -49,7 +49,7 @@ services:
 
   admin:
     build:
-      dockerfile: DevServerDockerfile
+      dockerfile: admin/DevServerDockerfile
     ports:
       - "8009:80"
     volumes:
