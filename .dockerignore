@@ -1,0 +1,73 @@
+# Python
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.mypy_cache
+.pytest_cache
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+admin/dist
+public/dist
+public/static/js
+
+# IDE
+.idea
+.vscode
+*.swp
+.project
+.pydevproject
+.buildpath
+.settings
+
+# Git
+.git
+.gitignore
+
+# Logs
+logs/
+*.log
+
+# Test
+.test/
+
+# Data
+data/
+.webshop_product_images/
+
+# Documentation
+docs/
+site/
+
+# Environment
+.env
+.env.*
+.envrc
+
+# Backups
+*.sql
+db_*.sql
+
+# Temporary
+*.tmp
+*.temp
+local.mk
+
+# Other
+memberbooth/
+blah/
+blah.json
+*.json.backup
+events.json
+events_backup.json
+workspace.code-workspace
