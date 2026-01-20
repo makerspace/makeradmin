@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Icon from "../Components/icons";
 import Textarea from "../Components/Textarea";
 import TextInput from "../Components/TextInput";
 import Quiz from "../Models/Quiz";
+import { PasteImageHandler } from "../Components/PasteImageHandler";
+import { notifyError } from "../message";
 
 interface Props {
     quiz: Quiz | null;
@@ -14,6 +16,7 @@ export default (props: Props) => {
     const { quiz } = props;
     const { onSave, onDelete } = props;
     const [version, setVersion] = useState(0);
+    const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
     if (quiz == null) return null;
 
@@ -40,14 +43,26 @@ export default (props: Props) => {
                         <>
                             <TextInput model={quiz} name="name" title="Namn" />
                             <Textarea
+                                ref={descriptionRef}
                                 model={quiz}
                                 name="description"
                                 title="Beskrivning"
-                                rows="14"
+                                rows={14}
+                            />
+                            <PasteImageHandler
+                                textAreaRef={descriptionRef}
+                                model={quiz}
+                                fieldName="description"
+                                onUploadComplete={() => {}}
+                                onUploadError={(error) => {
+                                    notifyError(error);
+                                }}
                             />
                             <i>
                                 Du kan använda markdown eller html för att lägga
-                                extra funktionalitet och bilder
+                                extra funktionalitet och bilder. Klistra in
+                                eller dra en bild direkt i textfältet för att
+                                lägga till den.
                             </i>
                             <TextInput
                                 model={quiz}

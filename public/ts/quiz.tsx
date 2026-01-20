@@ -12,6 +12,29 @@ const markdown_engine = markdown({
     html: true,
 });
 
+/**
+ * Process HTML content to convert relative image URLs to absolute URLs.
+ * Replaces /storage/image/* with full API URL.
+ */
+function processImageUrls(html: string): string {
+    if (!html) return html;
+
+    // Replace relative /storage/image/ URLs with absolute API URLs
+    // Matches <img src="/storage/image/..." in the rendered HTML
+    return html.replace(
+        /(<img[^>]+src=["'])\/storage\/image\//g,
+        `$1${window.apiBasePath}/storage/image/`,
+    );
+}
+
+/**
+ * Render markdown and process image URLs to be absolute.
+ */
+function renderMarkdown(content: string): string {
+    const html = markdown_engine.render(content);
+    return processImageUrls(html);
+}
+
 interface Question {
     id: number;
     question: string;
@@ -273,9 +296,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
                     <h1>{this.state.quiz.name}</h1>
                     <span
                         dangerouslySetInnerHTML={{
-                            __html: markdown_engine.render(
-                                this.state.quiz.description,
-                            ),
+                            __html: renderMarkdown(this.state.quiz.description),
                         }}
                     ></span>
                     <p>
@@ -318,14 +339,15 @@ class QuizManager extends Component<QuizManagerProps, State> {
                     className={`quizpage ${quizFailed ? "quiz-failed" : ""}`}
                 >
                     <h1>{this.state.quiz.name}</h1>
-                    <div
-                        className="question-text"
-                        dangerouslySetInnerHTML={{
-                            __html: markdown_engine.render(
-                                this.state.question.question,
-                            ),
-                        }}
-                    ></div>
+                    <div className="question-text">
+                        <div
+                            dangerouslySetInnerHTML={{
+                                __html: renderMarkdown(
+                                    this.state.question.question,
+                                ),
+                            }}
+                        ></div>
+                    </div>
                     <ul className="question-options">
                         {this.state.question.options.map((option) => (
                             <li
@@ -373,7 +395,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
                             <div
                                 className="question-answer-description"
                                 dangerouslySetInnerHTML={{
-                                    __html: markdown_engine.render(
+                                    __html: renderMarkdown(
                                         this.state.question.answer_description!,
                                     ),
                                 }}

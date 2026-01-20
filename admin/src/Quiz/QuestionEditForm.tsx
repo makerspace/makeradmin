@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useRef } from "react";
 import Icon from "../Components/icons";
 import Textarea from "../Components/Textarea";
 import QuizQuestion from "../Models/QuizQuestion";
 import QuestionOptionList from "./QuestionOptionList";
+import { PasteImageHandler } from "../Components/PasteImageHandler";
+import { notifyError } from "../message";
 
 interface Props {
     question: QuizQuestion | null;
@@ -14,6 +16,8 @@ interface Props {
 export default (props: Props) => {
     const { question } = props;
     const { onSave, onDelete, onNew } = props;
+    const questionRef = useRef<HTMLTextAreaElement>(null);
+    const answerDescriptionRef = useRef<HTMLTextAreaElement>(null);
 
     if (question == null) return null;
 
@@ -44,20 +48,42 @@ export default (props: Props) => {
                     {question && (
                         <>
                             <Textarea
+                                ref={questionRef}
                                 model={question}
                                 name="question"
                                 title="Fråga"
-                                rows="4"
+                                rows={4}
+                            />
+                            <PasteImageHandler
+                                textAreaRef={questionRef}
+                                model={question}
+                                fieldName="question"
+                                onUploadComplete={() => {}}
+                                onUploadError={(error) => {
+                                    notifyError(error);
+                                }}
                             />
                             <Textarea
+                                ref={answerDescriptionRef}
                                 model={question}
                                 name="answer_description"
                                 title="Lösningsbeskrivning"
-                                rows="14"
+                                rows={14}
+                            />
+                            <PasteImageHandler
+                                textAreaRef={answerDescriptionRef}
+                                model={question}
+                                fieldName="answer_description"
+                                onUploadComplete={() => {}}
+                                onUploadError={(error) => {
+                                    notifyError(error);
+                                }}
                             />
                             <i>
                                 Du kan använda markdown eller html för att lägga
-                                extra funktionalitet och bilder
+                                extra funktionalitet och bilder. Klistra in
+                                eller dra en bild direkt i textfältet för att
+                                lägga till den.
                             </i>
                         </>
                     )}

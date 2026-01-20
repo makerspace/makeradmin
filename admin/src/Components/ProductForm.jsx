@@ -134,7 +134,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                         model={product}
                         name="description"
                         title="Beskrivning"
-                        rows="4"
+                        rows={4}
                     />
                     <TextInput model={product} name="unit" title="Enhet" />
                     <TextInput

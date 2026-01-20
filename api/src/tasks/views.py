@@ -50,6 +50,11 @@ from tasks.models import MemberPreference, MemberPreferenceQuestionType, TaskDel
 
 logger = getLogger("task-delegator")
 
+# Event deduplication cache: stores processed event_ids with their timestamp
+# Format: {event_id: timestamp}
+_processed_events: dict[str, datetime] = {}
+_PROCESSED_EVENTS_TTL = timedelta(hours=1)  # Keep event IDs for 1 hour
+
 
 @dataclass
 class TaskLogEntry:
@@ -363,6 +368,23 @@ def slack_events() -> dict:
 
     # Handle events
     if data.get("type") == "event_callback":
+        # Check for duplicate events using event_id
+        event_id = data.get("event_id")
+        now = datetime.now()
+
+        if event_id:
+            # Clean up old event IDs (older than TTL)
+            global _processed_events
+            _processed_events = {eid: ts for eid, ts in _processed_events.items() if now - ts < _PROCESSED_EVENTS_TTL}
+
+            # Check if we've already processed this event
+            if event_id in _processed_events:
+                logger.info(f"Ignoring duplicate event {event_id}")
+                return {"ok": True}
+
+            # Mark this event as processed
+            _processed_events[event_id] = now
+
         event = data.get("event", {})
         event_type = event.get("type")
 

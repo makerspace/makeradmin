@@ -57,3 +57,7 @@ export function confirmModal(content) {
 export function notifySuccess(message) {
     UIkit.notification(message, { status: "success" });
 }
+
+export function notifyError(message) {
+    UIkit.notification(message, { status: "danger" });
+}

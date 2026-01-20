@@ -8,7 +8,7 @@ from dataclasses_json import DataClassJsonMixin
 from flask import g, request
 from membership.models import Member
 from redis_cache import redis_connection
-from service.api_definition import GET, MEMBER_VIEW, POST, PUBLIC, QUIZ_EDIT, USER
+from service.api_definition import DELETE, GET, MEMBER_VIEW, POST, PUBLIC, QUIZ_EDIT, USER
 from service.db import db_session
 from service.entity import OrmSingeRelation
 from sqlalchemy import distinct, exists, func, select, text

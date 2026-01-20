@@ -12,6 +12,7 @@ import multiaccessy
 import quiz
 import shop
 import shop.accounting
+import storage
 import tasks
 
 Instance = namedtuple("Instance", "path,service")
@@ -34,4 +35,5 @@ services = (
     Instance(path="/box_terminator", service=box_terminator.service),
     Instance(path="/tasks", service=tasks.service),
     Instance(path="/alerts", service=alerts.service),
+    Instance(path="/storage", service=storage.service),
 )
