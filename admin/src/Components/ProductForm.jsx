@@ -4,6 +4,7 @@ import ProductAction, { ACTION_TYPES } from "../Models/ProductAction";
 import CheckboxInput from "./CheckboxInput";
 import DateTimeInput from "./DateTimeInput";
 import SelectInput from "./SelectInput";
+import ProductImageSelect from "./ProductImageSelect";
 import TextInput from "./TextInput";
 import Textarea from "./Textarea";
 import Icon from "./icons";
@@ -149,14 +150,32 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                         title="Multipel "
                         type="number"
                     />
-                    <SelectInput
-                        nullOption={{ id: 0 }}
+                    <ProductImageSelect
+                        nullOption={{ id: 0, name: "Ingen bild" }}
                         model={product}
                         name="image_id"
                         title="Bild"
-                        getLabel={(o) => (
-                            <div style={{ height: "40px", width: "40px" }}>
-                                {o.id ? (
+                        getLabel={(o) => {
+                            // Special rendering for upload option
+                            if (o.id === -1) {
+                                return <span>{o.name}</span>;
+                            }
+                            // Null option (no image)
+                            if (o.id === 0) {
+                                return (
+                                    <span
+                                        style={{
+                                            fontStyle: "italic",
+                                            color: "#999",
+                                        }}
+                                    >
+                                        {o.name}
+                                    </span>
+                                );
+                            }
+                            // Regular image options
+                            return (
+                                <div style={{ height: "40px", width: "40px" }}>
                                     <img
                                         src={imageSrc(o)}
                                         style={{
@@ -165,13 +184,10 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                                         }}
                                         alt={o.name}
                                     />
-                                ) : (
-                                    ""
-                                )}
-                            </div>
-                        )}
+                                </div>
+                            );
+                        }}
                         getValue={(o) => o.id}
-                        dataSource={"/webshop/product_image"}
                     />
                 </fieldset>
                 <fieldset className="uk-margin-top">
