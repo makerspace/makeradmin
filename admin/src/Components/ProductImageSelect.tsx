@@ -1,4 +1,4 @@
-import classNames from "classnames/bind";
+import classNames from "classnames";
 import React, { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import { get, post } from "../gateway";
@@ -187,8 +187,13 @@ const ProductImageSelect: React.FC<ProductImageSelectProps> = (props) => {
                     className="uk-width-1-1"
                     options={options}
                     value={currentValue}
-                    getOptionValue={props.getValue}
-                    getOptionLabel={props.getLabel}
+                    getOptionValue={(option) => String(props.getValue(option))}
+                    getOptionLabel={(option) => {
+                        const label = props.getLabel(option);
+                        return typeof label === "string"
+                            ? label
+                            : String(label);
+                    }}
                     onChange={handleSelectChange}
                     isDisabled={!options.length || uploading}
                     isLoading={uploading}
