@@ -31,8 +31,8 @@ pyjson5
 slack_sdk
 
 # Test requirements
-pytest<7.2.0 # https://github.com/pytest-dev/pytest/issues/10420 remove version limitation when fixed
-pytest-parallel<7.2.0 # https://github.com/pytest-dev/pytest/issues/10420 remove version limitation when fixed
+pytest # https://github.com/pytest-dev/pytest/issues/10420 remove version limitation when fixed
+pytest-xdist # https://github.com/pytest-dev/pytest/issues/10420 remove version limitation when fixed
 selenium
 faker
 dataclasses_json
