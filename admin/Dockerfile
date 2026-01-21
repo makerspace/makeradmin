@@ -18,6 +18,7 @@ COPY config /config
 COPY scripts/build_locales.py /scripts/
 COPY admin/src/ /work/src
 COPY admin/jestSetup.js /work/
+COPY admin/dist/ /work/dist/
 
 RUN npm run build
 RUN echo tsc --version
