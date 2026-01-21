@@ -17,7 +17,7 @@ npm-debug.log
 yarn-error.log
 
 # Build outputs
-admin/dist
+admin/dist/js
 public/dist
 public/static/js
 
