@@ -39,6 +39,7 @@ class MessageTemplate(enum.Enum):
     MEMBERBOOTH_BOX_CLEANED_AWAY_SMS = "memberbooth_box_cleaned_away_sms"
     MEMBERBOOTH_BOX_EXPIRED = "memberbooth_box_expired"
     MEMBERBOOTH_BOX_EXPIRING_SOON = "memberbooth_box_expiring_soon"
+    QUIZ_COMPLETION = "quiz_completion"
 
 
 class Message(Base):
@@ -53,7 +54,9 @@ class Message(Base):
     subject: Mapped[str] = mapped_column(Text, nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     member_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(Member.member_id))
-    recipient_type: Mapped[Literal["email", "sms"]] = mapped_column(Enum("email", "sms"), nullable=False)
+    recipient_type: Mapped[Literal["email", "sms", "slack"]] = mapped_column(
+        Enum("email", "sms", "slack"), nullable=False
+    )
     recipient: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[STATUS] = mapped_column(Enum(QUEUED, SENT, FAILED), nullable=False)
     template: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)

@@ -76,12 +76,12 @@ services:
       - "--loglevel warning"
     networks:
       - makeradmin
-  email-dispatcher:
+  message-dispatcher:
     image: makeradmin/api:1.0
     volumes:
-      - ./logs/email_dispatcher:/work/logs
+      - ./logs/message_dispatcher:/work/logs
     command:
-      - "/work/dispatch_emails.sh"
+      - "/work/dispatch_messages.sh"
     environment:
       MYSQL_HOST: db2
       MYSQL_DB:
@@ -94,11 +94,13 @@ services:
       MAILGUN_TO_OVERRIDE:
       ELKS46_API_USER:
       ELKS46_API_KEY:
+      SLACK_BOT_TOKEN:
       HOST_PUBLIC: "${PROTOCOL}://${HOST_PUBLIC}"
       HOST_FRONTEND: "${PROTOCOL}://${HOST_FRONTEND}"
       HOST_BACKEND: "${PROTOCOL}://${HOST_BACKEND}"
     depends_on:
       - api
+      - redis
     networks:
       - makeradmin
 

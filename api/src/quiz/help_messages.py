@@ -6,18 +6,17 @@ This module handles two scenarios:
 2. Member completed a quiz earlier and now opens a door -> send message on door open
 """
 
+import json
 from datetime import datetime, timedelta
 from logging import getLogger
 
 from membership.models import Member
+from messages.message import send_message
+from messages.models import Message, MessageTemplate
 from multiaccessy.models import PhysicalAccessEntry
-from redis_cache import redis_connection
-from service.config import config
 from service.db import db_session
-from slack.util import format_member_mention_list, get_slack_client, lookup_slack_user_by_email, lookup_slack_users
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
-from slack_sdk.models.blocks import Block, DividerBlock, MarkdownTextObject, SectionBlock
+from slack.util import format_member_mention_list, get_slack_client, lookup_slack_users
+from slack_sdk.models.blocks import DividerBlock, MarkdownTextObject, SectionBlock
 from sqlalchemy import select
 
 from quiz.models import Quiz
@@ -27,21 +26,19 @@ logger = getLogger("quiz-help-messages")
 # Duration for which a member is considered "at the space" after having opened a door.
 DURATION_AT_SPACE_HEURISTIC = timedelta(minutes=90)
 
-# Redis key prefix for tracking which quiz completion messages have been sent
-QUIZ_COMPLETION_MESSAGE_SENT_PREFIX = "quiz_completion_message_sent"
-
 
 def has_quiz_completion_message_been_sent(member_id: int, quiz_id: int) -> bool:
     """Check if we've already sent a completion message for this quiz to this member."""
-    cache_key = f"{QUIZ_COMPLETION_MESSAGE_SENT_PREFIX}:{member_id}:{quiz_id}"
-    return redis_connection.exists(cache_key) > 0
-
-
-def mark_quiz_completion_message_sent(member_id: int, quiz_id: int) -> None:
-    """Mark that we've sent a completion message for this quiz to this member."""
-    cache_key = f"{QUIZ_COMPLETION_MESSAGE_SENT_PREFIX}:{member_id}:{quiz_id}"
-    # Store indefinitely - we only want to send this message once ever
-    redis_connection.set(cache_key, "1")
+    # Check the Message table for an existing QUIZ_COMPLETION message
+    # with the quiz_id stored in associated_id
+    existing_message = db_session.execute(
+        select(Message.id).where(
+            Message.member_id == member_id,
+            Message.template == MessageTemplate.QUIZ_COMPLETION.value,
+            Message.associated_id == quiz_id,
+        )
+    ).first()
+    return existing_message is not None
 
 
 def is_member_at_space(member_id: int, now: datetime | None = None) -> bool:
@@ -105,62 +102,62 @@ def send_quiz_completion_message(
     slack_members: list[str],
 ) -> bool:
     """
-    Send a Slack message congratulating the member on completing a quiz,
+    Queue a Slack message congratulating the member on completing a quiz,
     and letting them know about other members who can help.
 
     Args:
         member: The member who completed the quiz
         quiz: The quiz that was completed
-        experienced_members: List of members at the space who have also done the quiz
+        slack_members: List of Slack user IDs for members at the space who have also done the quiz
 
     Returns:
-        True if the message was sent successfully, False otherwise
+        True if the message was queued successfully, False otherwise
     """
-    token = config.get("SLACK_BOT_TOKEN")
-    if not token:
-        logger.warning("No SLACK_BOT_TOKEN configured; skipping Slack send")
-        return False
-
-    slack_client = WebClient(token=token)
-    slack_user = lookup_slack_user_by_email(slack_client, member.email)
-    if not slack_user:
-        logger.info(f"Member {member.email} does not have a Slack account linked.")
-        return False
-
-    name = quiz.name
-    if "Course" not in name and "Quiz" not in name:
-        name += " Course"
-
-    text = f"Congratulations {member.firstname}! :tada: I see you recently completed the *{name}*!\n\n"
-
     experienced_members_text = format_member_mention_list(slack_members)
 
-    blocks: list[Block] = [
-        DividerBlock(),
-        SectionBlock(text=MarkdownTextObject(text=text)),
-    ]
-
-    if experienced_members_text:
-        help_text = f"If you need help getting started, you can ask {experienced_members_text} who have also completed this course. They should be at the space right now."
-        blocks.append(SectionBlock(text=MarkdownTextObject(text=help_text)))
-    else:
+    if not experienced_members_text:
         logger.info(
             f"No experienced members to help for member #{member.member_number} on quiz {quiz.id}. Trying again next time they open a door."
         )
         return False
 
-    try:
-        slack_client.chat_postMessage(
-            channel=slack_user,
-            text=text,
-            blocks=blocks,
-        )
-        logger.info(f"Sent quiz completion message to member #{member.member_number} for quiz {quiz.id}")
-        mark_quiz_completion_message_sent(member.member_id, quiz.id)
-        return True
-    except SlackApiError as e:
-        logger.error(f"Failed to send Slack message to #{member.member_number}: {e.response['error']}")
-        return False
+    # Format the message as Slack blocks
+    quiz_name = quiz.name
+    if "Course" not in quiz_name and "Quiz" not in quiz_name:
+        quiz_name += " Course"
+
+    congratulations_text = (
+        f"Congratulations {member.firstname}! :tada: I see you recently completed the *{quiz_name}*!\n\n"
+    )
+    help_text = f"If you need help getting started, you can ask {experienced_members_text} who have also completed this course. They should be at the space right now."
+
+    blocks = [
+        DividerBlock(),
+        SectionBlock(text=MarkdownTextObject(text=congratulations_text)),
+        SectionBlock(text=MarkdownTextObject(text=help_text)),
+    ]
+
+    # Serialize blocks to JSON for database storage
+    body = json.dumps([block.to_dict() for block in blocks])
+
+    # Subject is used as fallback text for notifications
+    subject = f"Congratulations on completing {quiz.name}!"
+
+    # Queue the message in the database
+    # The dispatch_slack.py service will pick it up and send it
+    send_message(
+        template=MessageTemplate.QUIZ_COMPLETION,
+        member=member,
+        db_session=db_session,
+        recipient=member.email,  # Slack dispatcher will look up user by email
+        recipient_type="slack",
+        associated_id=quiz.id,  # Store quiz_id for tracking
+        subject=subject,
+        body=body,
+    )
+
+    logger.info(f"Queued quiz completion message to member #{member.member_number} for quiz {quiz.id}")
+    return True
 
 
 def check_and_send_quiz_completion_message(member_id: int, quiz_id: int) -> bool:
@@ -173,9 +170,10 @@ def check_and_send_quiz_completion_message(member_id: int, quiz_id: int) -> bool
 
     The message will only be sent if:
     - The member has completed the quiz
-    - A message hasn't been sent before for this quiz/member combination
+    - A message hasn't been sent before for this quiz/member combination (tracked in database)
     - There are other members at the space who have also completed the quiz
     - The quiz has send_help_notifications enabled
+    - The quiz was completed within the last 2 months
 
     Args:
         member_id: The ID of the member to potentially send the message to
@@ -184,10 +182,7 @@ def check_and_send_quiz_completion_message(member_id: int, quiz_id: int) -> bool
     Returns:
         True if a message was sent, False otherwise
     """
-    # Check if we've already sent this message
-    # We store this in redis, which is a bit ephemeral, but it's acceptable to potentially resend if we ever lose it
-    # We only send it if the user completed the quiz within the last 2 months in any case.
-    # TODO: We should store all slack messages in the database, to allow a proper check here.
+    # Check if we've already sent this message by looking in the Message table
     if has_quiz_completion_message_been_sent(member_id, quiz_id):
         return False
 

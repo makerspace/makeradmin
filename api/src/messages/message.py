@@ -23,37 +23,47 @@ def send_message(
     db_session: Any = None,
     recipient: str | None = None,
     *,
-    sms: bool = False,
+    recipient_type: str = "email",
     associated_id: int | None = None,
+    subject: str | None = None,
+    body: str | None = None,
     **kwargs: Any,
 ) -> None:
-    recipient_type = "sms" if sms else "email"
     if recipient is None:
-        recipient = member.phone if sms else member.email
+        if recipient_type == "slack":
+            recipient = member.email  # Slack dispatcher looks up user by email
+        elif recipient_type == "sms":
+            recipient = member.phone
+        else:
+            recipient = member.email
 
-    subject = (
-        render_template(
-            f"{template.value}.subject.html",
+    # Allow custom subject and body (for Slack messages with pre-formatted blocks)
+    # Otherwise render from templates
+    if subject is None:
+        subject = (
+            render_template(
+                f"{template.value}.subject.html",
+                public_url=get_public_url,
+                admin_url=get_admin_url,
+                member=member,
+                translate=translate,
+                **kwargs,
+            )
+            if recipient_type == "email"
+            else ""
+        )
+        if subject:
+            subject = unescape(subject)
+
+    if body is None:
+        body = render_template(
+            f"{template.value}.body.html",
             public_url=get_public_url,
             admin_url=get_admin_url,
             member=member,
             translate=translate,
             **kwargs,
         )
-        if not sms
-        else ""
-    )
-    if subject:
-        subject = unescape(subject)
-
-    body = render_template(
-        f"{template.value}.body.html",
-        public_url=get_public_url,
-        admin_url=get_admin_url,
-        member=member,
-        translate=translate,
-        **kwargs,
-    )
 
     if not db_session:
         from service.db import db_session

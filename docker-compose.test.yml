@@ -28,7 +28,7 @@ services:
     volumes:
       - /dev/shm:/dev/shm
 
-  email-dispatcher:
+  message-dispatcher:
     command: ["/bin/sleep", "3600"]
     environment:
       MAILGUN_DOMAIN: ""

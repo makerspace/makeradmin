@@ -34,7 +34,7 @@ RUN uv sync --no-dev --frozen
 # Activate the virtual environment for subsequent commands
 ENV PATH="/work/.venv/bin:$PATH"
 
-COPY api/run.sh api/dispatch_emails.sh api/accessy_syncer.sh /work/
+COPY api/run.sh api/dispatch_messages.sh api/accessy_syncer.sh /work/
 
 COPY api/src /work/src
 

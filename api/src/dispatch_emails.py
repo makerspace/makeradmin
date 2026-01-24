@@ -65,7 +65,7 @@ class SendMessage:
     template: MessageTemplate
     member: Member
     recipient: str | None = None
-    sms: bool = False
+    recipient_type: str = "email"
     associated_id: int | None = None
     additional_template_args: dict[str, Any] | None = None
 
@@ -73,6 +73,7 @@ class SendMessage:
 def send_messages(mailgun_key: Optional[str], domain: str, sender: str, to_override: Optional[str], limit: int) -> None:
     query = db_session.query(Message)
     query = query.filter(Message.status == Message.QUEUED)
+    query = query.filter(Message.recipient_type.in_(["email", "sms"]))
     query = query.limit(limit)
 
     skipped_emails = []
@@ -175,7 +176,7 @@ def schedule_messages(messages: list[SendMessage]) -> None:
             member=msg.member,
             db_session=db_session,
             recipient=msg.recipient,
-            sms=msg.sms,
+            recipient_type=msg.recipient_type,
             associated_id=msg.associated_id,
             **(msg.additional_template_args or {}),
         )
@@ -317,9 +318,9 @@ def memberbooth_labels(
         # )
 
         if action.action == "reported":
-            for tp, sms in [
-                (MessageTemplate.MEMBERBOOTH_LABEL_REPORT, False),
-                (MessageTemplate.MEMBERBOOTH_LABEL_REPORT_SMS, True),
+            for tp, recipient_type in [
+                (MessageTemplate.MEMBERBOOTH_LABEL_REPORT, "email"),
+                (MessageTemplate.MEMBERBOOTH_LABEL_REPORT_SMS, "sms"),
             ]:
                 logger.info(f"Sending message {tp} for label {label.id} to member {member.member_id}")
                 messages_to_send.append(
@@ -327,7 +328,7 @@ def memberbooth_labels(
                         associated_id=action.id,
                         template=tp,
                         member=member,
-                        sms=sms,
+                        recipient_type=recipient_type,
                         additional_template_args=common_kws
                         | {
                             "action": action,
@@ -337,22 +338,22 @@ def memberbooth_labels(
                 )
         elif action.action == "cleaned_away":
             tps = [
-                (MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY, False),
-                (MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY_SMS, True),
+                (MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY, "email"),
+                (MessageTemplate.MEMBERBOOTH_LABEL_CLEANED_AWAY_SMS, "sms"),
             ]
             if isinstance(deserialized_label, BoxLabel):
                 tps = [
-                    (MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY, False),
-                    (MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY_SMS, True),
+                    (MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY, "email"),
+                    (MessageTemplate.MEMBERBOOTH_BOX_CLEANED_AWAY_SMS, "sms"),
                 ]
-            for tp, sms in tps:
+            for tp, recipient_type in tps:
                 logger.info(f"Sending message {tp} for label {label.id} to member {member.member_id}")
                 messages_to_send.append(
                     SendMessage(
                         associated_id=action.id,
                         template=tp,
                         member=member,
-                        sms=sms,
+                        recipient_type=recipient_type,
                         additional_template_args=common_kws | {"action": action},
                     )
                 )
@@ -690,63 +691,4 @@ def get_login_link(member: Member, browser: str, path: str) -> str:
     return get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
 
 
-if __name__ == "__main__":
-    exit = Event()
-
-    def handle_signal(signum: int, frame: Any) -> None:
-        logger.error(f"Got signal {signum}, exiting...")
-        exit.set()
-
-    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
-        signal.signal(sig, handle_signal)
-
-    with log_exception(status=1), stoppable():
-        parser = ArgumentParser(
-            description="Dispatch emails in db send queue.", formatter_class=ArgumentDefaultsHelpFormatter
-        )
-
-        parser.add_argument("--sleep", default=1, help="Sleep time (in seconds) between doing ant work.")
-        parser.add_argument("--limit", default=4, help="Max messages to send every time checking for messages.")
-
-        args = parser.parse_args()
-
-        engine = create_mysql_engine(**get_mysql_config())
-        session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-        logger.info(f"checking for emails to send every {args.sleep} seconds, limit is {args.limit}")
-
-        key = config.get("MAILGUN_KEY", log_value=False)
-        if key is not None and key.strip() == "":
-            key = None
-
-        domain = config.get("MAILGUN_DOMAIN")
-        sender = config.get("MAILGUN_FROM")
-        to_override = config.get("MAILGUN_TO_OVERRIDE")
-        last_reminder_check = -10000.0
-
-        # Don't send emails immediately, to avoid clobbering up the logs
-        # And also for API to start up and any migrations to run
-        exit.wait(10)
-
-        while not exit.is_set():
-            try:
-                if time.time() - last_reminder_check > 60 * 60:
-                    # These checks are kinda slow (takes a few hundred ms)
-                    # so don't do them as often. They are not time critical anyway.
-                    last_reminder_check = time.time()
-                    logger.info("checking for reminders to send")
-                    labaccess_reminder()
-                    membership_reminder()
-                    quiz_reminders()
-
-                    db_session.commit()
-
-                schedule_messages(memberbooth_labels(observation_send_delay=timedelta(minutes=5)))
-                send_messages(key, domain, sender, to_override, args.limit)
-                db_session.commit()
-            except DatabaseError as e:
-                logger.warning(f"failed to do db query. ignoring: {e}")
-            finally:
-                db_session.remove()
-
-            exit.wait(args.sleep)
+# Main loop removed - this module is now imported by dispatch_messages.py

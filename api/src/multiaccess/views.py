@@ -9,7 +9,6 @@ import flask
 import serde
 import serde.json
 from dataclasses_json import DataClassJsonMixin
-from dispatch_emails import memberbooth_labels
 from flask import Response, g, redirect, request
 from membership.member_entity import MemberEntity
 from membership.membership import MembershipData, get_membership_summary
@@ -315,6 +314,8 @@ def memberbooth_label_action(
         if message is None and img is None:
             # If the previous action is identical, or has more info than this one, just return the old one
             # This is the common case for observations
+            from dispatch_emails import memberbooth_labels
+
             messages_to_send = memberbooth_labels(prev_action.id)
             return serde.to_dict(
                 LabelActionResponse(
@@ -328,6 +329,8 @@ def memberbooth_label_action(
 
     db_session.add(db_action)
     db_session.flush()
+
+    from dispatch_emails import memberbooth_labels
 
     messages_to_send = memberbooth_labels(db_action.id)
 
