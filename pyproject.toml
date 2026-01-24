@@ -21,6 +21,7 @@ dependencies = [
     "jinja2",
     "ipython",
     "Pillow",
+    "qrcode[pil]>=7.4.2",
     "Phonenumbers",
     "schedule",
     "python-dateutil",
@@ -35,6 +36,7 @@ dependencies = [
     "pyserde",
     "pyjson5",
     "slack-sdk",
+    "colorama>=0.4.6",
 ]
 
 [project.optional-dependencies]
