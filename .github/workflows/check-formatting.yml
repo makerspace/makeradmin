@@ -1,49 +1,49 @@
 name: Check formatting of source code
 
 on:
-    push:
-        branches: [master, main]
-    pull_request:
-        types: [synchronize, opened]
+  push:
+    branches: [master, main]
+  pull_request:
+    types: [synchronize, opened]
 
 jobs:
-    ruff:
-        strategy:
-            matrix:
-                ruff_args: ["format --diff", "check"]
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: Setup Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: 3.11
-            - name: Install uv
-              uses: astral-sh/setup-uv@v5
-            - name: Install packages
-              run: uv sync
-            - name: Check formatting
-              run: |
-                  uv run ruff ${{ matrix.ruff_args }}
-            - name: Inform about how to fix failure
-              if: failure()
-              run: |
-                  echo '::notice::To auto-fix the formatting error, run `make format`'
-    prettier:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 18.x
-                  cache: "npm"
-            - name: Install packages
-              run: |
-                  npm ci --install-links=false
-            - name: Check formatting
-              run: |
-                  npx prettier --check .
-            - name: Inform about how to fix failure
-              if: failure()
-              run: |
-                  echo '::notice::To auto-fix the formatting error, run `make format`'
+  ruff:
+    strategy:
+      matrix:
+        ruff_args: ["format --diff", "check"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Install packages
+        run: uv sync
+      - name: Check formatting
+        run: |
+          uv run ruff ${{ matrix.ruff_args }}
+      - name: Inform about how to fix failure
+        if: failure()
+        run: |
+          echo '::notice::To auto-fix the formatting error, run `make format`'
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: "npm"
+      - name: Install packages
+        run: |
+          npm ci --install-links=false
+      - name: Check formatting
+        run: |
+          npx prettier --check .
+      - name: Inform about how to fix failure
+        if: failure()
+        run: |
+          echo '::notice::To auto-fix the formatting error, run `make format`'

@@ -1,50 +1,50 @@
 name: Documentation
 on:
-    push:
-        branches: [main]
-    pull_request:
-        types: [synchronize, opened]
+  push:
+    branches: [main]
+  pull_request:
+    types: [synchronize, opened]
 
 jobs:
-    build:
-        name: Build documentation
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout branch
-              uses: actions/checkout@v4
+  build:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
 
-            - name: Setup Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: 3.12.6
-                  cache: "pip"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12.6
+          cache: "pip"
 
-            - run: pip install -r docs/requirements.txt
-            - name: Build docs
-              shell: sh
-              run: mkdocs build -f ./docs/mkdocs.yml
+      - run: pip install -r docs/requirements.txt
+      - name: Build docs
+        shell: sh
+        run: mkdocs build -f ./docs/mkdocs.yml
 
-            - name: Upload Artifact
-              uses: actions/upload-pages-artifact@v3
-              with:
-                  path: site/
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
 
-    deploy:
-        if: ${{ github.event_name == 'push' }}
-        name: Publish the documentation
-        needs: build
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    name: Publish the documentation
+    needs: build
 
-        permissions:
-            pages: write
-            id-token: write # to verify the deployment originates from an appropriate source
+    permissions:
+      pages: write
+      id-token: write # to verify the deployment originates from an appropriate source
 
-        # Deploy to the github-pages environment
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-        runs-on: ubuntu-latest
-        steps:
-            - name: Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v4
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
