@@ -25,8 +25,7 @@ def raise_from_stripe_invalid_request_error(e: InvalidRequestError) -> Never:
 def charge_transaction(transaction: Transaction, charge: stripe.Charge) -> None:
     if ChargeStatus(charge.status) != ChargeStatus.SUCCEEDED:
         raise InternalServerError(
-            log=f"unexpected charge status '{charge.status}' for transaction {transaction.id} "
-            f"this should be handled"
+            log=f"unexpected charge status '{charge.status}' for transaction {transaction.id} this should be handled"
         )
 
     payment_success(transaction)

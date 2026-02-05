@@ -72,8 +72,7 @@ def login(ip, browser, username, password):
 
     if count > 10:
         raise TooManyRequests(
-            "Your have reached your maximum number of failed login attempts for the last hour."
-            " Please try again later."
+            "Your have reached your maximum number of failed login attempts for the last hour. Please try again later."
         )
 
     try:

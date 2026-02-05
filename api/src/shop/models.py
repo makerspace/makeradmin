@@ -180,8 +180,7 @@ class TransactionAction(Base):
 
     def __repr__(self) -> str:
         return (
-            f"TransactionAction(id={self.id}, value={self.value}, status={self.status},"
-            f" action_type={self.action_type})"
+            f"TransactionAction(id={self.id}, value={self.value}, status={self.status}, action_type={self.action_type})"
         )
 
 

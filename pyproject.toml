@@ -41,7 +41,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "ruff==0.6.9",
+    "ruff==0.15.0",
     "pre-commit",
 ]
 test = [
@@ -54,7 +54,7 @@ test = [
 
 [tool.uv]
 dev-dependencies = [
-    "ruff==0.6.9",
+    "ruff==0.15.0",
     "pre-commit",
     "pytest<7.2.0",
     "pytest-parallel<7.2.0",

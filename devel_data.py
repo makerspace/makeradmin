@@ -18,7 +18,7 @@ env = dotenv_values()
 
 
 headers = {
-    "Authorization": f'Bearer {env.get("TEST_SERVICE_TOKEN")}',
+    "Authorization": f"Bearer {env.get('TEST_SERVICE_TOKEN')}",
 }
 
 

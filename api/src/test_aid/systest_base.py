@@ -169,7 +169,7 @@ class SeleniumTest(ApiTest):
             if not os.path.exists(SELENIUM_SCREENSHOT_DIR):
                 os.makedirs(SELENIUM_SCREENSHOT_DIR)
                 os.chmod(SELENIUM_SCREENSHOT_DIR, 0o777)
-            filename = f'{SELENIUM_SCREENSHOT_DIR}/{self.id()}--{self.now.strftime("%Y-%m-%dT%H-%M-%S")}'
+            filename = f"{SELENIUM_SCREENSHOT_DIR}/{self.id()}--{self.now.strftime('%Y-%m-%dT%H-%M-%S')}"
 
             print(f"saving screenshot to {filename}.png", file=sys.stderr)
             try:

@@ -414,9 +414,9 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         self.advance_clock(clock, now + time_delta(days=1))
 
         # Note that the scheduled subscription is not the same as the real subscription.
-        assert (
-            member.stripe_membership_subscription_id == subscription_schedule_id
-        ), "The member should have a scheduled subscription"
+        assert member.stripe_membership_subscription_id == subscription_schedule_id, (
+            "The member should have a scheduled subscription"
+        )
 
         self.advance_clock(clock, noon(sub_start + time_delta(days=5)))
 
@@ -448,9 +448,9 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         )
 
         # Note that the scheduled subscription is not the same as the real subscription.
-        assert (
-            member.stripe_membership_subscription_id == subscription_schedule_id
-        ), "The member should have a scheduled subscription"
+        assert member.stripe_membership_subscription_id == subscription_schedule_id, (
+            "The member should have a scheduled subscription"
+        )
 
         self.advance_clock(clock, now + time_delta(days=11))
 
@@ -653,9 +653,9 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         self.advance_clock(clock, now + time_delta(days=1))
 
         summary = get_membership_summary(member.member_id, clock.date)
-        assert (
-            summary.membership_active
-        ), "The subscription was paid with a valid card the first time, so the member should have active membership"
+        assert summary.membership_active, (
+            "The subscription was paid with a valid card the first time, so the member should have active membership"
+        )
 
         self.set_payment_method(member, FakeCardPmToken.DeclineAfterAttach, clock)
 
@@ -666,12 +666,12 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         self.advance_clock(clock, now + time_delta(years=1, days=20))
 
         summary = get_membership_summary(member.member_id, clock.date)
-        assert (
-            not summary.membership_active
-        ), "The subscription was not paid, so the member should not have active membership"
-        assert (
-            member.stripe_membership_subscription_id is None
-        ), "The subscription should have been cancelled at this point"
+        assert not summary.membership_active, (
+            "The subscription was not paid, so the member should not have active membership"
+        )
+        assert member.stripe_membership_subscription_id is None, (
+            "The subscription should have been cancelled at this point"
+        )
 
     def test_subscriptions_retry_card(self) -> None:
         """
@@ -688,9 +688,9 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         self.advance_clock(clock, now + time_delta(days=1))
 
         summary = get_membership_summary(member.member_id, clock.date)
-        assert (
-            summary.membership_active
-        ), "The subscription was paid with a valid card the first time, so the member should have active membership"
+        assert summary.membership_active, (
+            "The subscription was paid with a valid card the first time, so the member should have active membership"
+        )
 
         self.set_payment_method(member, FakeCardPmToken.DeclineAfterAttach, clock)
 

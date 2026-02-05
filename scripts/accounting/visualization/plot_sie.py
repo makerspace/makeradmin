@@ -165,9 +165,9 @@ def process_sie(sie: parse_sie.SIEFile) -> PlottingInput:
         if account in accounts:
             assert accounts[account] == expected_value
         else:
-            assert (
-                expected_value == 0
-            ), f"Expected outgoing balance for account {account} to be 0, but found {expected_value}"
+            assert expected_value == 0, (
+                f"Expected outgoing balance for account {account} to be 0, but found {expected_value}"
+            )
 
     return PlottingInput(
         expenses_by_month=expenses_by_month,
@@ -284,7 +284,7 @@ def main():
     sns.set_theme(style="whitegrid")
     sns.set_style("whitegrid")
 
-    currency_formatter = FuncFormatter(lambda p, _: f"{p/1000:.0f}k")
+    currency_formatter = FuncFormatter(lambda p, _: f"{p / 1000:.0f}k")
 
     months = [pd.Timestamp(m) for m in input.months]
     month_subset = data["amount"][months]

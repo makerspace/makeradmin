@@ -450,8 +450,7 @@ def validate_order(
     # Ensure that the frontend hasn't calculated the amount to pay incorrectly
     if abs(total_amount - Decimal(expected_amount)) > Decimal("0.01"):
         raise BadRequest(
-            f"Expected total amount to pay to be {expected_amount} "
-            f"but the cart items actually sum to {total_amount}.",
+            f"Expected total amount to pay to be {expected_amount} but the cart items actually sum to {total_amount}.",
             what=NON_MATCHING_SUMS,
         )
 

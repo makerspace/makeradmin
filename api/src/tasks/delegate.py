@@ -729,10 +729,12 @@ class CardRequirements:
             required.append(
                 (
                     "Hasn't entered lower floor",
-                    lambda context: context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
-                    or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
-                    or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
-                    or context.member.has_opened_door(MAIN_ENTRANCE),  # Always leads to lower floor
+                    lambda context: (
+                        context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
+                        or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
+                        or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
+                        or context.member.has_opened_door(MAIN_ENTRANCE)
+                    ),  # Always leads to lower floor
                 )
             )
 
@@ -748,10 +750,12 @@ class CardRequirements:
             required.append(
                 (
                     "Hasn't entered lower floor",
-                    lambda context: context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
-                    or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
-                    or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
-                    or context.member.has_opened_door(MAIN_ENTRANCE),  # Always leads to lower floor
+                    lambda context: (
+                        context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
+                        or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
+                        or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
+                        or context.member.has_opened_door(MAIN_ENTRANCE)
+                    ),  # Always leads to lower floor
                 )
             )
 
@@ -790,11 +794,13 @@ class CardRequirements:
             required.append(
                 (
                     "Hasn't entered lower floor",
-                    lambda context: context.member.has_opened_door(STORAGE_ROOM)
-                    or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
-                    or context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
-                    or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
-                    or context.member.has_opened_door(MAIN_ENTRANCE),  # Always leads to lower floor
+                    lambda context: (
+                        context.member.has_opened_door(STORAGE_ROOM)
+                        or context.member.has_opened_door(CORRIDOR_NEAR_ELEVATOR)
+                        or context.member.has_opened_door(METAL_WORKSHOP_AND_CORRIDOR)
+                        or context.member.has_opened_door(BACK_ENTRANCE)  # Always leads to lower floor
+                        or context.member.has_opened_door(MAIN_ENTRANCE)
+                    ),  # Always leads to lower floor
                 )
             )
 
@@ -802,14 +808,14 @@ class CardRequirements:
             required.append(
                 (
                     "Hasn't purchased Laser cutter usage recently",
-                    lambda context: (context.member.purchased_product_count("Laser cutter usage") > 50),
+                    lambda context: context.member.purchased_product_count("Laser cutter usage") > 50,
                 )
             )
 
             required.append(
                 (
                     "Hasn't completed Laser course",
-                    lambda context: (context.member.has_completed_course(2)),
+                    lambda context: context.member.has_completed_course(2),
                 )
             )
 
@@ -817,7 +823,7 @@ class CardRequirements:
             required.append(
                 (
                     "Hasn't completed Metal Cutting Saw course",
-                    lambda context: (context.member.has_completed_course(14)),
+                    lambda context: context.member.has_completed_course(14),
                 )
             )
 
@@ -859,36 +865,42 @@ class CardRequirements:
             required.append(
                 (
                     "Has not completed Level: 3 tasks at least twice",
-                    lambda context: (context.member.completed_tasks_with_label("Level: 3") >= 2)
-                    or context.member.has_self_reported_skill_level_at_least("expert"),
+                    lambda context: (
+                        (context.member.completed_tasks_with_label("Level: 3") >= 2)
+                        or context.member.has_self_reported_skill_level_at_least("expert")
+                    ),
                 )
             )
             required.append(
                 (
                     "Has visited the space fewer than 6 unique months",
-                    lambda context: (context.member.unique_months_visited >= 6),
+                    lambda context: context.member.unique_months_visited >= 6,
                 )
             )
 
             completion_message.append(
-                lambda context: "Congratulations on completing your *first Level 4 task*! You're becoming a true makerspace hero! :star_struck:"
-                if context.member.completed_tasks_with_label("Level: 4") == 1
-                and context.member.total_completed_tasks > 5
-                else None
+                lambda context: (
+                    "Congratulations on completing your *first Level 4 task*! You're becoming a true makerspace hero! :star_struck:"
+                    if context.member.completed_tasks_with_label("Level: 4") == 1
+                    and context.member.total_completed_tasks > 5
+                    else None
+                )
             )
 
         if has_label("Level: 3"):
             required.append(
                 (
                     "Has not completed Level: 2 tasks at least twice",
-                    lambda context: (context.member.completed_tasks_with_label("Level: 2") >= 2)
-                    or context.member.has_self_reported_skill_level_at_least("advanced"),
+                    lambda context: (
+                        (context.member.completed_tasks_with_label("Level: 2") >= 2)
+                        or context.member.has_self_reported_skill_level_at_least("advanced")
+                    ),
                 )
             )
             required.append(
                 (
                     "Has visited the space fewer than 3 unique months",
-                    lambda context: (context.member.unique_months_visited >= 3),
+                    lambda context: context.member.unique_months_visited >= 3,
                 )
             )
 
@@ -896,23 +908,29 @@ class CardRequirements:
                 required.append(
                     (
                         "Has not completed wood workshop tasks at least twice",
-                        lambda context: (context.member.completed_tasks_with_label("Room: Wood workshop") >= 2)
-                        or context.member.has_self_reported_skill_level_at_least("advanced"),
+                        lambda context: (
+                            (context.member.completed_tasks_with_label("Room: Wood workshop") >= 2)
+                            or context.member.has_self_reported_skill_level_at_least("advanced")
+                        ),
                     )
                 )
 
             completion_message.append(
-                lambda context: "Congratulations on completing your *first Level 3 task*! Thanks for contributing to keeping the makerspace running! :sunglasses:"
-                if context.member.completed_tasks_with_label("Level: 3") == 1
-                else None
+                lambda context: (
+                    "Congratulations on completing your *first Level 3 task*! Thanks for contributing to keeping the makerspace running! :sunglasses:"
+                    if context.member.completed_tasks_with_label("Level: 3") == 1
+                    else None
+                )
             )
 
         if has_label("Level: 2"):
             required.append(
                 (
                     "Has not completed Level: 1 tasks at least twice",
-                    lambda context: (context.member.completed_tasks_with_label("Level: 1") >= 2)
-                    or context.member.has_self_reported_skill_level_at_least("intermediate"),
+                    lambda context: (
+                        (context.member.completed_tasks_with_label("Level: 1") >= 2)
+                        or context.member.has_self_reported_skill_level_at_least("intermediate")
+                    ),
                 )
             )
 
@@ -920,30 +938,38 @@ class CardRequirements:
                 required.append(
                     (
                         "Has not completed wood workshop tasks at least once",
-                        lambda context: (context.member.completed_tasks_with_label("Room: Wood workshop") >= 1)
-                        or context.member.has_self_reported_skill_level_at_least("intermediate"),
+                        lambda context: (
+                            (context.member.completed_tasks_with_label("Room: Wood workshop") >= 1)
+                            or context.member.has_self_reported_skill_level_at_least("intermediate")
+                        ),
                     )
                 )
 
             completion_message.append(
-                lambda context: "Congratulations on completing your *first Level 2 task*! Thanks for contributing to keeping the makerspace running! :tada:"
-                if context.member.completed_tasks_with_label("Level: 2") == 1
-                else None
+                lambda context: (
+                    "Congratulations on completing your *first Level 2 task*! Thanks for contributing to keeping the makerspace running! :tada:"
+                    if context.member.completed_tasks_with_label("Level: 2") == 1
+                    else None
+                )
             )
 
         if has_label("Level: 1"):
             required.append(
                 (
                     "Has not completed Level: Intro1 tasks",
-                    lambda context: (context.member.completed_tasks_with_label("Level: Intro1") >= 1)
-                    or context.member.has_self_reported_skill_level_at_least("intermediate"),
+                    lambda context: (
+                        (context.member.completed_tasks_with_label("Level: Intro1") >= 1)
+                        or context.member.has_self_reported_skill_level_at_least("intermediate")
+                    ),
                 )
             )
 
             completion_message.append(
-                lambda context: "Congratulations on completing your *first Level 1 task*! Thanks a lot for helping out! :star2:"
-                if context.member.completed_tasks_with_label("Level: 1") == 1
-                else None
+                lambda context: (
+                    "Congratulations on completing your *first Level 1 task*! Thanks a lot for helping out! :star2:"
+                    if context.member.completed_tasks_with_label("Level: 1") == 1
+                    else None
+                )
             )
 
         if has_label("Level: Intro1"):
@@ -957,43 +983,57 @@ class CardRequirements:
             required.append(
                 (
                     "Has completed fewer than 4 tasks",
-                    lambda context: (context.member.total_completed_tasks >= 4)
-                    or context.member.has_self_reported_skill_level_at_least("intermediate"),
+                    lambda context: (
+                        (context.member.total_completed_tasks >= 4)
+                        or context.member.has_self_reported_skill_level_at_least("intermediate")
+                    ),
                 )
             )
             size = TaskSize.MEDIUM
 
             introduction_message.append(
-                lambda context: "This is a medium-sized task, which may require some additional effort compared to smaller tasks. Thank you for taking the time to help out! If you complete this, it will take longer until you are given another task."
+                lambda context: (
+                    "This is a medium-sized task, which may require some additional effort compared to smaller tasks. Thank you for taking the time to help out! If you complete this, it will take longer until you are given another task."
+                )
             )
 
         if has_label("Size: Large"):
             required.append(
                 (
                     "Has completed fewer than 6 tasks",
-                    lambda context: (context.member.total_completed_tasks >= 6)
-                    or context.member.has_self_reported_skill_level_at_least("advanced"),
+                    lambda context: (
+                        (context.member.total_completed_tasks >= 6)
+                        or context.member.has_self_reported_skill_level_at_least("advanced")
+                    ),
                 )
             )
             size = TaskSize.LARGE
 
             introduction_message.append(
-                lambda context: "This is a large task, which may require additional effort and time to complete. Completing this task will mean that you won't be assigned another task for a longer period."
+                lambda context: (
+                    "This is a large task, which may require additional effort and time to complete. Completing this task will mean that you won't be assigned another task for a longer period."
+                )
             )
             completion_message.append(
-                lambda context: "Congratulations on completing a large task! Your effort is greatly appreciated and helps keep the makerspace running smoothly! :tada:"
+                lambda context: (
+                    "Congratulations on completing a large task! Your effort is greatly appreciated and helps keep the makerspace running smoothly! :tada:"
+                )
             )
 
         if has_label("Needs documentation"):
             introduction_message.append(
-                lambda context: f":construction: This task is not yet documented. If you know how to do it, your task is to do it and document it well for future members. This includes writing a step-by-step guide for how to do it, and taking good photos of the process. Send the results to {TASK_RESPONSIBLE} so that the task can be updated. The goal is that a reasonable member should be able to do the task without prior instructions or help from others."
+                lambda context: (
+                    f":construction: This task is not yet documented. If you know how to do it, your task is to do it and document it well for future members. This includes writing a step-by-step guide for how to do it, and taking good photos of the process. Send the results to {TASK_RESPONSIBLE} so that the task can be updated. The goal is that a reasonable member should be able to do the task without prior instructions or help from others."
+                )
             )
             if size == TaskSize.SMALL:
                 size = TaskSize.MEDIUM  # Documentation tasks are at least medium size
 
         if has_label("Needs better image"):
             introduction_message.append(
-                lambda context: f":camera_flash: This task needs better images. If you complete this task, please take clear and well-lit photos that illustrate the steps involved. Send the photos to {TASK_RESPONSIBLE} so that the task can be updated."
+                lambda context: (
+                    f":camera_flash: This task needs better images. If you complete this task, please take clear and well-lit photos that illustrate the steps involved. Send the photos to {TASK_RESPONSIBLE} so that the task can be updated."
+                )
             )
 
         # Extract "Requires" instructions from the card description
@@ -1256,9 +1296,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 

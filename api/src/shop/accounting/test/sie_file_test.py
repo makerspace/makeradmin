@@ -87,7 +87,7 @@ class SieFileWithVerificationTest(FlaskTestBase):
             types: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], AccountingEntryType] = {}
 
             for j in range(self.number_of_transactions):
-                iter_price = Decimal(f"{(i+1) * (j+1) + (j+1)}")
+                iter_price = Decimal(f"{(i + 1) * (j + 1) + (j + 1)}")
                 if j % 2 == 0:
                     entry_type = AccountingEntryType.DEBIT
                     amount = Decimal("1000") + iter_price

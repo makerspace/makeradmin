@@ -82,7 +82,7 @@ def request(
         response = requests.request(method, ACCESSY_URL + path, data=data, headers=headers)
         if response.status_code == 429:
             logger.warning(
-                f"requesting accessy returned 429, too many requests, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}"
+                f"requesting accessy returned 429, too many requests, try {i + 1}/{max_tries}, retrying in {backoff}s, {path=}"
             )
             sleep(backoff * (0.5 + 1.0 * random()))
             backoff *= 1.5
