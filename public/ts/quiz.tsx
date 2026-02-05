@@ -54,6 +54,7 @@ export interface Quiz {
     id: number;
     name: string;
     description: string;
+    visible?: boolean;
     deleted_at: string | null;
 }
 
@@ -231,6 +232,16 @@ class QuizManager extends Component<QuizManagerProps, State> {
                 <div id="content" className="quizpage">
                     <h1>{this.state.quiz.name}</h1>
                     <p>This quiz has been deleted :(</p>
+                </div>
+            );
+        } else if (this.state.quiz.visible === false) {
+            return (
+                <div id="content" className="quizpage">
+                    <h1>{this.state.quiz.name}</h1>
+                    <p>This quiz is currently hidden.</p>
+                    <p>
+                        <a href={url("/member/courses")}>Back to courses</a>
+                    </p>
                 </div>
             );
         }

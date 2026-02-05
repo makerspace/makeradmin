@@ -129,7 +129,11 @@ common.documentLoaded().then(() => {
     future1
         .then((quizzesJson: ServerResponse<QuizInfo[]>) => {
             rootElement.innerHTML = "";
-            render(<CoursesPage courses={quizzesJson.data} />, rootElement);
+            // Filter out invisible quizzes
+            const visibleCourses = quizzesJson.data.filter(
+                (quizInfo) => quizInfo.quiz.visible !== false,
+            );
+            render(<CoursesPage courses={visibleCourses} />, rootElement);
         })
         .catch((json) => {
             // Probably Unauthorized, redirect to login page.

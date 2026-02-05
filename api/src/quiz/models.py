@@ -18,6 +18,8 @@ class Quiz(Base):
     required_pass_rate: Mapped[float]
     # Whether to send help notifications to members when they complete this quiz
     send_help_notifications: Mapped[bool] = mapped_column(default=True)
+    # Whether this quiz is visible to members (False hides it from member portal)
+    visible: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
     deleted_at: Mapped[Optional[datetime]] = mapped_column(default=None)

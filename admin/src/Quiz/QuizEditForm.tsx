@@ -1,10 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Icon from "../Components/icons";
+import { PasteImageHandler } from "../Components/PasteImageHandler";
 import Textarea from "../Components/Textarea";
 import TextInput from "../Components/TextInput";
-import Quiz from "../Models/Quiz";
-import { PasteImageHandler } from "../Components/PasteImageHandler";
 import { notifyError } from "../message";
+import Quiz from "../Models/Quiz";
 
 interface Props {
     quiz: Quiz | null;
@@ -93,6 +93,24 @@ export default (props: Props) => {
                                     className="uk-margin-small-left"
                                     uk-icon="icon: info"
                                     uk-tooltip="Skickar ett meddelande till medlemmar när de har slutfört quizet, med info om vilka andra medlemmar i lokalen de kan fråga om hjälp"
+                                />
+                            </div>
+                            <div className="uk-margin-top">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        className="uk-checkbox uk-margin-small-right"
+                                        checked={quiz.visible}
+                                        onChange={(e) => {
+                                            quiz.visible = e.target.checked;
+                                        }}
+                                    />
+                                    Synligt för medlemmar
+                                </label>
+                                <span
+                                    className="uk-margin-small-left"
+                                    uk-icon="icon: info"
+                                    uk-tooltip="Kontrollerar om quizet är synligt för medlemmar i medlemsportalen"
                                 />
                             </div>
                         </>

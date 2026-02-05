@@ -5,6 +5,7 @@ export default class Quiz extends Base<Quiz> {
     description!: string;
     required_pass_rate!: number;
     send_help_notifications!: boolean;
+    visible!: boolean;
     created_at!: string;
     updated_at!: string;
     deleted_at!: string | null;
@@ -17,6 +18,7 @@ export default class Quiz extends Base<Quiz> {
             description: "",
             required_pass_rate: 0,
             send_help_notifications: true,
+            visible: true,
             deleted_at: null,
         },
     };
