@@ -12,6 +12,10 @@
 /public/ts/generated_locales
 /api/src/i18n
 
+# Cache directories
+/.ruff_cache
+/.prettiercache
+
 # Jinja2 templates do not work well for some reason
 /config/messages
 
