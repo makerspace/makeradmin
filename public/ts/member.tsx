@@ -885,34 +885,65 @@ function SlackSettings({ member }: { member: { email: string } }) {
     const [taskDelegationEnabled, setTaskDelegationEnabled] =
         useState<boolean>(true);
     const [loading, setLoading] = useState(true);
+    const [slackOverrideEmail, setSlackOverrideEmail] = useState<string | null>(
+        null,
+    );
+    const [effectiveSlackEmail, setEffectiveSlackEmail] = useState<string>("");
+    const [slackUsername, setSlackUsername] = useState<string | null>(null);
+    const [editingEmail, setEditingEmail] = useState(false);
+    const [newSlackEmail, setNewSlackEmail] = useState("");
+    const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        common
-            .ajax(
+    const loadSlackInfo = () => {
+        setLoading(true);
+        Promise.all([
+            common.ajax(
                 "GET",
                 `${window.apiBasePath}/member/current/slack_status`,
                 null,
-            )
+            ),
+            common.ajax(
+                "GET",
+                `${window.apiBasePath}/member/current/slack_email`,
+                null,
+            ),
+        ])
             .then(
-                (
-                    response: common.ServerResponse<{
+                ([statusResponse, emailResponse]: [
+                    common.ServerResponse<{
                         slack_enabled: boolean;
                         has_slack_account: boolean;
                         task_delegation_enabled: boolean;
                     }>,
-                ) => {
-                    setSlackEnabled(response.data.slack_enabled);
-                    setHasSlackAccount(response.data.has_slack_account);
+                    common.ServerResponse<{
+                        slack_override_email: string | null;
+                        effective_slack_email: string;
+                        slack_username: string | null;
+                    }>,
+                ]) => {
+                    setSlackEnabled(statusResponse.data.slack_enabled);
+                    setHasSlackAccount(statusResponse.data.has_slack_account);
                     setTaskDelegationEnabled(
-                        response.data.task_delegation_enabled,
+                        statusResponse.data.task_delegation_enabled,
                     );
+                    setSlackOverrideEmail(
+                        emailResponse.data.slack_override_email,
+                    );
+                    setEffectiveSlackEmail(
+                        emailResponse.data.effective_slack_email,
+                    );
+                    setSlackUsername(emailResponse.data.slack_username);
                     setLoading(false);
                 },
             )
             .catch((e) => {
-                console.error("Failed to load Slack status:", e);
+                console.error("Failed to load Slack info:", e);
                 setLoading(false);
             });
+    };
+
+    useEffect(() => {
+        loadSlackInfo();
     }, []);
 
     const handleTaskDelegationChange = async (e: Event) => {
@@ -936,6 +967,72 @@ function SlackSettings({ member }: { member: { email: string } }) {
         }
     };
 
+    const handleSaveSlackEmail = async () => {
+        if (!newSlackEmail.trim()) {
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const response = (await common.ajax(
+                "POST",
+                `${window.apiBasePath}/member/current/slack_email`,
+                { slack_email: newSlackEmail.trim() },
+            )) as unknown as common.ServerResponse<{
+                status?: string;
+                slack_email?: string;
+            }>;
+
+            // Check if verification was sent
+            if (response.data && response.data.status === "verification_sent") {
+                // Show modal instructing user to check Slack
+                UIkit.modal.alert(
+                    `<h2>${t("slack.verification_sent_title" as any)}</h2>` +
+                        `<p>${t("slack.verification_sent_message" as any, { email: response.data.slack_email } as any)}</p>` +
+                        `<p class="uk-text-muted">${t("slack.verification_check_slack" as any)}</p>`,
+                );
+
+                // Close edit mode and reload after a short delay
+                setEditingEmail(false);
+                setNewSlackEmail("");
+                setTimeout(() => {
+                    loadSlackInfo();
+                }, 2000);
+            } else {
+                // Legacy response format (shouldn't happen with new code)
+                setEditingEmail(false);
+                setNewSlackEmail("");
+                loadSlackInfo();
+            }
+        } catch (e) {
+            console.error("Failed to save Slack email:", e);
+            UIkit.modal.alert(
+                `<h2>${t("slack.save_email_error_title")}</h2><b class="uk-text-danger">${get_error(e)}</b>`,
+            );
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleClearSlackEmail = async () => {
+        setSaving(true);
+        try {
+            await common.ajax(
+                "DELETE",
+                `${window.apiBasePath}/member/current/slack_email`,
+                null,
+            );
+            loadSlackInfo();
+        } catch (e) {
+            console.error("Failed to clear Slack email:", e);
+            UIkit.modal.alert(
+                `<h2>${t("slack.clear_email_error_title")}</h2><b class="uk-text-danger">${get_error(e)}</b>`,
+            );
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (loading || !slackEnabled) {
         return null;
     }
@@ -947,15 +1044,23 @@ function SlackSettings({ member }: { member: { email: string } }) {
             </legend>
             <div class="uk-card uk-card-default uk-card-small uk-card-body">
                 {hasSlackAccount ? (
-                    <div class="uk-flex uk-flex-middle">
-                        <i
-                            uk-icon="icon: check; ratio: 0.8"
-                            class="uk-text-success"
-                        ></i>
-                        <span class="uk-margin-small-left">
-                            {t("slack.status_connected")}
-                        </span>
-                    </div>
+                    <>
+                        <div class="uk-flex uk-flex-middle uk-margin-small-bottom">
+                            <i
+                                uk-icon="icon: check; ratio: 0.8"
+                                class="uk-text-success"
+                            ></i>
+                            <span class="uk-margin-small-left">
+                                {t("slack.status_connected")}
+                            </span>
+                        </div>
+                        {slackUsername && (
+                            <p class="uk-text-small uk-text-muted uk-margin-remove">
+                                {t("slack.username_label")}:{" "}
+                                <strong>{slackUsername}</strong>
+                            </p>
+                        )}
+                    </>
                 ) : (
                     <>
                         <div class="uk-flex uk-flex-middle uk-margin-small-bottom">
@@ -987,6 +1092,85 @@ function SlackSettings({ member }: { member: { email: string } }) {
                         </a>
                     </>
                 )}
+            </div>
+            <div class="uk-margin-top">
+                <div class="uk-card uk-card-default uk-card-small uk-card-body">
+                    <h6 class="uk-margin-remove-top uk-margin-small-bottom">
+                        {t("slack.email_header")}
+                    </h6>
+                    <p class="uk-text-small uk-text-muted uk-margin-small-bottom">
+                        {t("slack.email_description")}
+                    </p>
+                    <p class="uk-text-small uk-margin-small-bottom">
+                        <strong>{t("slack.current_email_label")}:</strong>{" "}
+                        {effectiveSlackEmail}
+                    </p>
+                    {slackOverrideEmail && (
+                        <p class="uk-text-small uk-text-muted uk-margin-small-bottom">
+                            {t("slack.using_override_notice")}
+                        </p>
+                    )}
+                    {editingEmail ? (
+                        <div class="uk-margin-small-top">
+                            <input
+                                type="email"
+                                class="uk-input uk-form-small uk-margin-small-bottom"
+                                placeholder={t("slack.email_placeholder")}
+                                value={newSlackEmail}
+                                onInput={(e) =>
+                                    setNewSlackEmail(
+                                        (e.target as HTMLInputElement).value,
+                                    )
+                                }
+                            />
+                            <div class="uk-flex uk-flex-middle">
+                                <button
+                                    class="uk-button uk-button-primary uk-button-small"
+                                    onClick={handleSaveSlackEmail}
+                                    disabled={saving || !newSlackEmail.trim()}
+                                >
+                                    {saving
+                                        ? t("common.saving")
+                                        : t("common.save")}
+                                </button>
+                                <button
+                                    class="uk-button uk-button-default uk-button-small uk-margin-small-left"
+                                    onClick={() => {
+                                        setEditingEmail(false);
+                                        setNewSlackEmail("");
+                                    }}
+                                    disabled={saving}
+                                >
+                                    {t("common.cancel")}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div class="uk-flex uk-flex-middle">
+                            <button
+                                class="uk-button uk-button-small uk-button-default"
+                                onClick={() => {
+                                    setEditingEmail(true);
+                                    setNewSlackEmail(slackOverrideEmail || "");
+                                }}
+                                disabled={saving}
+                            >
+                                {slackOverrideEmail
+                                    ? t("slack.change_email_button")
+                                    : t("slack.set_email_button")}
+                            </button>
+                            {slackOverrideEmail && (
+                                <button
+                                    class="uk-button uk-button-small uk-button-default uk-margin-small-left"
+                                    onClick={handleClearSlackEmail}
+                                    disabled={saving}
+                                >
+                                    {t("slack.clear_email_button")}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
             {hasSlackAccount && (
                 <div class="uk-margin-top">

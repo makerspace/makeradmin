@@ -6,7 +6,7 @@ from io import BytesIO
 from typing import Optional
 
 import requests
-from membership.models import Member
+from membership.models import Member, SlackEmailOverride
 from multiaccessy.models import PhysicalAccessEntry
 from PIL import Image
 from redis_cache import redis_connection
@@ -22,6 +22,17 @@ logger = logging.getLogger("slack")
 
 IMAGE_CACHE_VERSION = 5
 SLACK_UPLOADED_FILE_TTL = timedelta(days=60)
+
+
+def get_slack_email_for_member(member: Member) -> str:
+    """Get the email to use for Slack lookups, checking override table first."""
+    override = db_session.execute(
+        select(SlackEmailOverride).where(SlackEmailOverride.member_id == member.member_id)
+    ).scalar_one_or_none()
+
+    if override:
+        return override.slack_email
+    return member.email
 
 
 def member_from_slack_user_id(slack_client: WebClient, slack_user_id: str) -> Member | None:
@@ -56,7 +67,8 @@ def lookup_slack_user_by_email(slack_client: WebClient, email: str) -> Optional[
 def lookup_slack_users(slack_client: WebClient, member: list[Member]) -> list[str]:
     slack_user_ids: list[str] = []
     for m in member:
-        slack_user_id = lookup_slack_user_by_email(slack_client, m.email)
+        email = get_slack_email_for_member(m)
+        slack_user_id = lookup_slack_user_by_email(slack_client, email)
         if slack_user_id:
             slack_user_ids.append(slack_user_id)
     return slack_user_ids

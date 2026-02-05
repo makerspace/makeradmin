@@ -35,7 +35,17 @@ from membership.membership import (
     get_members_and_membership,
     get_membership_summary,
 )
-from membership.models import Group, GroupDoorAccess, Key, Member, Permission, Span, group_permission, member_group
+from membership.models import (
+    Group,
+    GroupDoorAccess,
+    Key,
+    Member,
+    Permission,
+    SlackEmailOverride,
+    Span,
+    group_permission,
+    member_group,
+)
 
 member_entity = MemberEntity(
     Member,
@@ -153,6 +163,52 @@ def member_get_access(entity_id=None):
 @service.route("/member/<int:entity_id>/permissions", method=GET, permission=PERMISSION_VIEW)
 def member_get_permissions(entity_id=None):
     return [{"permission_id": i, "permission": p} for i, p in get_member_permissions(entity_id)]
+
+
+@service.route("/member/<int:entity_id>/slack_info", method=GET, permission=MEMBER_VIEW)
+def member_get_slack_info(entity_id=None):
+    """Get Slack information for a specific member (admin only)."""
+    from service.config import config
+    from service.db import db_session
+    from slack.util import lookup_slack_user_by_email
+    from slack_sdk import WebClient
+    from sqlalchemy import select
+
+    member = db_session.get(Member, entity_id)
+    if not member:
+        return {}
+
+    # Get override if it exists (single query)
+    override = db_session.execute(
+        select(SlackEmailOverride).where(SlackEmailOverride.member_id == entity_id)
+    ).scalar_one_or_none()
+
+    slack_override_email = override.slack_email if override else None
+    effective_slack_email = slack_override_email if slack_override_email else member.email
+
+    # Try to get Slack username if configured
+    token = config.get("SLACK_BOT_TOKEN")
+    slack_username = None
+    slack_user_id = None
+    if token:
+        try:
+            slack_client = WebClient(token=token)
+            slack_user_id = lookup_slack_user_by_email(slack_client, effective_slack_email)
+            if slack_user_id:
+                user_info = slack_client.users_info(user=slack_user_id)
+                slack_username = user_info["user"]["profile"].get("real_name") or user_info["user"]["name"]
+        except Exception:
+            # If we can't get the username, just return None
+            pass
+
+    return {
+        "member_email": member.email,
+        "slack_override_email": slack_override_email,
+        "effective_slack_email": effective_slack_email,
+        "slack_username": slack_username,
+        "slack_user_id": slack_user_id,
+        "has_slack_account": slack_user_id is not None,
+    }
 
 
 @service.route("/member/all_with_membership", method=GET, permission=MEMBER_VIEW)

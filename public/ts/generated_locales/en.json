@@ -187,6 +187,11 @@
         "change_password": "Change",
         "change_phone_number": "Change",
         "change_pin_code": "Change",
+        "common": {
+            "cancel": "Cancel",
+            "save": "Save",
+            "saving": "Saving..."
+        },
         "email": "Email",
         "failed_set_password_alert": "Failed to send email for setting password: {{error}}",
         "first_name": "First name",
@@ -238,15 +243,30 @@
         "set_password": "Set",
         "set_password_alert": "We've sent an email to {{email}} with a link for changing your password.",
         "slack": {
+            "account_not_found_error": "No Slack account found with that email address. Please check the email or join Slack first.",
+            "change_email_button": "Change Slack email",
+            "clear_email_button": "Use member email",
+            "clear_email_error_title": "Failed to clear Slack email",
+            "current_email_label": "Current email used for Slack",
+            "email_description": "If you use a different email address for Slack than your member email, you can set it here. This helps the system find your Slack account for notifications and task delegation.",
+            "email_header": "Slack Email Address",
+            "email_placeholder": "your-slack-email@example.com",
             "email_reminder": "Make sure to use the same email address ({{email}}) when joining Slack.",
             "join_button": "Join Slack",
+            "save_email_error_title": "Failed to save Slack email",
+            "set_email_button": "Set custom Slack email",
             "slack_description": "Slack is our primary communication platform. Join to ask questions, get news, and connect with other members.",
             "status_connected": "Account connected",
             "status_not_connected": "Not connected",
             "task_delegation_description": "A bot will occasionally send you small tasks on Slack to help maintain the makerspace. These are suggestions and helpful advice. Unchecking this does not free you from the obligation that all members have to help maintain the makerspace.",
             "task_delegation_enabled": "Receive task suggestions",
             "task_delegation_header": "Task Delegation",
-            "title": "Slack"
+            "title": "Slack",
+            "username_label": "Slack username",
+            "using_override_notice": "You are using a custom email address for Slack.",
+            "verification_check_slack": "Please check Slack and click 'Confirm' to complete the linking process. This verification will expire in 15 minutes.",
+            "verification_sent_message": "Found your Slack account for {{email}}!",
+            "verification_sent_title": "Verify Your Slack Account"
         },
         "subscriptions": {
             "activate_auto_renewal": "Activate auto-renewal: {{price}} {{unit}}",

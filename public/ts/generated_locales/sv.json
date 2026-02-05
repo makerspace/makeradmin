@@ -187,6 +187,11 @@
         "change_password": "Byt",
         "change_phone_number": "Byt",
         "change_pin_code": "Byt",
+        "common": {
+            "cancel": "Avbryt",
+            "save": "Spara",
+            "saving": "Sparar..."
+        },
         "email": "Email",
         "failed_set_password_alert": "Misslyckades med att skicka en lönk för att byta lösenord: {{error}}",
         "first_name": "Förnamn",
@@ -238,15 +243,30 @@
         "set_password": "Välj",
         "set_password_alert": "Vi har skickat ett email till {{email}} med en länk för att byta ditt lösenord.",
         "slack": {
+            "account_not_found_error": "Inget Slack-konto hittades med den e-postadressen. Kontrollera e-postadressen eller gå med i Slack först.",
+            "change_email_button": "Ändra Slack-e-post",
+            "clear_email_button": "Använd medlems-e-post",
+            "clear_email_error_title": "Misslyckades att ta bort Slack-e-post",
+            "current_email_label": "Nuvarande e-post för Slack",
+            "email_description": "Om du använder en annan e-postadress för Slack än din medlems-e-post kan du ange den här. Detta hjälper systemet att hitta ditt Slack-konto för notifikationer och uppgiftsdelegering.",
+            "email_header": "Slack e-postadress",
+            "email_placeholder": "din-slack-epost@exempel.se",
             "email_reminder": "Se till att använda samma e-postadress ({{email}}) när du går med i Slack.",
             "join_button": "Gå med i Slack",
+            "save_email_error_title": "Misslyckades att spara Slack-e-post",
+            "set_email_button": "Ange anpassad Slack-e-post",
             "slack_description": "Slack är vår primära kommunikationsplattform. Gå med för att få ställa frågor, få nyheter, och kommunicera med andra medlemmar.",
             "status_connected": "Konto anslutet",
             "status_not_connected": "Inte ansluten",
             "task_delegation_description": "En bot kommer ibland skicka dig små uppgifter på Slack för att hjälpa till att underhålla makerspacet. Dessa är förslag och hjälpsamma råd. Att avmarkera detta befriar dig inte från skyldigheten som alla medlemmar har att hjälpa till att underhålla makerspacet.",
             "task_delegation_enabled": "Ta emot uppgiftsförslag",
             "task_delegation_header": "Uppgiftsdelegering",
-            "title": "Slack"
+            "title": "Slack",
+            "username_label": "Slack-användarnamn",
+            "using_override_notice": "Du använder en anpassad e-postadress för Slack.",
+            "verification_check_slack": "Kontrollera Slack och klicka på 'Bekräfta' för att slutföra länkningen. Denna verifiering upphör om 15 minuter.",
+            "verification_sent_message": "Hittade ditt Slack-konto för {{email}}!",
+            "verification_sent_title": "Verifiera ditt Slack-konto"
         },
         "subscriptions": {
             "activate_auto_renewal": "Aktivera automatisk förnyelse: {{price}} {{unit}}",

@@ -460,7 +460,12 @@ def handle_thespace_mention(event: dict) -> None:
 
     try:
         # Get members currently at the space
-        from slack.util import format_member_mention_list, get_members_currently_at_space, lookup_slack_user_by_email
+        from slack.util import (
+            format_member_mention_list,
+            get_members_currently_at_space,
+            get_slack_email_for_member,
+            lookup_slack_user_by_email,
+        )
 
         members_at_space = get_members_currently_at_space(DURATION_AT_SPACE_HEURISTIC)
 
@@ -484,7 +489,8 @@ def handle_thespace_mention(event: dict) -> None:
         slack_user_ids = []
         slack_user_ids_not_in_channel = []
         for member in members_at_space:
-            slack_user_id = lookup_slack_user_by_email(slack_client, member.email)
+            email = get_slack_email_for_member(member)
+            slack_user_id = lookup_slack_user_by_email(slack_client, email)
             if slack_user_id:
                 # Filter to only members in this channel (if we have that info)
                 if channel_member_ids is None or slack_user_id in channel_member_ids:
@@ -614,6 +620,8 @@ def slack_interaction() -> dict:
         return {"message": "Intermediate action ignored"}
     elif action.action_id == "new_task":
         return slack_handle_new_task_request(payload)
+    elif action.action_id in ["slack_email_confirm", "slack_email_cancel"]:
+        return slack_handle_email_verification(payload)
     else:
         return slack_handle_task_feedback(payload)
 
@@ -629,6 +637,108 @@ def slack_handle_new_task_request(payload: SlackInteraction) -> dict:
     delegate_task_for_member(member.member_id, slack_interaction=payload, force=True)
 
     return {"message": "New task assigned"}
+
+
+def slack_handle_email_verification(payload: SlackInteraction) -> dict:
+    """Handle Slack email verification confirmation or cancellation."""
+    from membership.models import SlackEmailOverride
+    from slack.verification import delete_verification, get_verification
+
+    slack_client = get_slack_client()
+    member = member_from_slack_user_id(slack_client, payload.user.id)
+
+    if not member:
+        raise UnprocessableEntity("Member not found")
+
+    # Retrieve verification from Redis
+    verification = get_verification(member.member_id)
+
+    if not verification:
+        # Verification expired or not found
+        try:
+            slack_client.chat_update(
+                channel=payload.channel.id,
+                ts=payload.message.ts,
+                text="Verification expired",
+                blocks=[
+                    SectionBlock(
+                        text="⏱️ *Verification Expired*\n\n"
+                        "This verification request has expired (15 minute limit).\n\n"
+                        "Please return to the member portal and try again if you still want to link your Slack account."
+                    )
+                ],
+            )
+        except SlackApiError as e:
+            logger.error(f"Failed to update Slack message for expired verification: {e}")
+
+        raise BadRequest("Verification expired or not found")
+
+    action = payload.actions[0]
+
+    if action.action_id == "slack_email_confirm":
+        # User confirmed - save the override to database
+        override = db_session.execute(
+            select(SlackEmailOverride).where(SlackEmailOverride.member_id == member.member_id)
+        ).scalar_one_or_none()
+
+        if override:
+            # Update existing
+            override.slack_email = verification.email
+        else:
+            # Create new
+            override = SlackEmailOverride(member_id=member.member_id, slack_email=verification.email)
+            db_session.add(override)
+
+        db_session.commit()
+        delete_verification(member.member_id)
+
+        logger.info(f"Member {member.member_number} confirmed Slack email: {verification.email}")
+
+        # Update Slack message to show success
+        try:
+            slack_client.chat_update(
+                channel=payload.channel.id,
+                ts=payload.message.ts,
+                text="Slack email confirmed",
+                blocks=[
+                    SectionBlock(
+                        text=f"✅ *Slack Email Linked Successfully*\n\n"
+                        f"Your MakerAdmin account is now linked to this Slack account using the email *{verification.email}*.\n\n"
+                        f"You will now receive notifications and task assignments via Slack DM."
+                    )
+                ],
+            )
+        except SlackApiError as e:
+            logger.error(f"Failed to update Slack message for confirmation: {e}")
+
+        return {"message": "Slack email confirmed"}
+
+    elif action.action_id == "slack_email_cancel":
+        # User cancelled - just clean up
+        delete_verification(member.member_id)
+
+        logger.info(f"Member {member.member_number} cancelled Slack email verification")
+
+        # Update Slack message to show cancellation
+        try:
+            slack_client.chat_update(
+                channel=payload.channel.id,
+                ts=payload.message.ts,
+                text="Verification cancelled",
+                blocks=[
+                    SectionBlock(
+                        text="❌ *Verification Cancelled*\n\n"
+                        "You have cancelled the Slack email linking process.\n\n"
+                        "No changes have been made to your account."
+                    )
+                ],
+            )
+        except SlackApiError as e:
+            logger.error(f"Failed to update Slack message for cancellation: {e}")
+
+        return {"message": "Verification cancelled"}
+
+    raise BadRequest(f"Unknown action: {action.action_id}")
 
 
 def slack_handle_room_preference_submission(payload: SlackInteraction) -> dict:

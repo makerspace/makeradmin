@@ -260,6 +260,20 @@ class PhoneNumberChangeRequest(Base):
         )
 
 
+class SlackEmailOverride(Base):
+    __tablename__ = "slack_email_override"
+
+    member_id: Mapped[int] = mapped_column(Integer, ForeignKey("membership_members.member_id"), primary_key=True)
+    slack_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    member: Mapped[Member] = relationship(Member, backref="slack_email_override", cascade_backrefs=False)
+
+    def __repr__(self) -> str:
+        return f"SlackEmailOverride(member_id={self.member_id}, slack_email={self.slack_email})"
+
+
 def normalise_phone_number(phone: Optional[str]) -> Optional[str]:
     if not phone:
         return None

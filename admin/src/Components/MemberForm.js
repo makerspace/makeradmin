@@ -4,7 +4,7 @@ import DateTimeShow from "./DateTimeShow";
 import Icon from "./icons";
 import TextInput from "./TextInput";
 
-const MemberForm = ({ member, onSave, onDelete }) => {
+const MemberForm = ({ member, slackInfo, onSave, onDelete }) => {
     const [saveDisabled, setSaveDisabled] = useState(true);
 
     useEffect(() => {
@@ -106,6 +106,40 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                         />
                     </div>
                 </fieldset>
+
+                {!member.id || !slackInfo ? (
+                    ""
+                ) : (
+                    <fieldset>
+                        <legend>
+                            <Icon icon="comment" /> Slack
+                        </legend>
+
+                        <div className="form-row">
+                            <label className="uk-form-label">Status</label>
+                            <div className="uk-form-controls">
+                                {slackInfo.has_slack_account ? (
+                                    <span className="uk-text-success">
+                                        <Icon icon="check" /> Ansluten
+                                    </span>
+                                ) : (
+                                    <span className="uk-text-muted">
+                                        Ej ansluten
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="form-row">
+                            <label className="uk-form-label">Slack-konto</label>
+                            <div className="uk-form-controls">
+                                {slackInfo.effective_slack_email || (
+                                    <span className="uk-text-muted">-</span>
+                                )}
+                            </div>
+                        </div>
+                    </fieldset>
+                )}
 
                 {!member.id ? (
                     ""

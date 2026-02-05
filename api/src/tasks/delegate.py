@@ -25,6 +25,7 @@ from slack.types import SlackChannel, SlackInteraction, SlackInteractionAction, 
 from slack.util import (
     convert_trello_markdown_to_slack_markdown,
     format_member_mention_list,
+    get_slack_email_for_member,
     lookup_slack_user_by_email,
     lookup_slack_users,
     upload_image_to_slack,
@@ -1255,9 +1256,9 @@ class TaskScore:
                 current_score = op.value
                 lines.append(f"{line_prefix}= {v_str} => {current_score:.2f}")
 
-        assert (
-            abs(current_score - self.score) < 0.0001
-        ), f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        assert abs(current_score - self.score) < 0.0001, (
+            f"Score calculation mismatch: calculated {current_score}, expected {self.score}"
+        )
         return "\n".join(lines)
 
 
@@ -1522,7 +1523,8 @@ def send_slack_message_to_member(
         return None
 
     slack_client = WebClient(token=token)
-    slack_user = lookup_slack_user_by_email(slack_client, member.email)
+    email = get_slack_email_for_member(member)
+    slack_user = lookup_slack_user_by_email(slack_client, email)
     if not slack_user:
         logger.info(f"Member {member.email} does not have a Slack account linked.")
         return None
@@ -1973,7 +1975,8 @@ def ask_room_preference_question(
         logger.info(f"Member {member.member_id} already has a pending question, not asking again")
         return None
 
-    slack_user = lookup_slack_user_by_email(slack_client, member.email)
+    email = get_slack_email_for_member(member)
+    slack_user = lookup_slack_user_by_email(slack_client, email)
     if not slack_user:
         logger.info(f"Member {member.email} does not have a Slack account linked.")
         return None
@@ -2059,7 +2062,8 @@ def ask_skill_level_question(
         logger.info(f"Member {member.member_id} already has a pending question, not asking again")
         return None
 
-    slack_user = lookup_slack_user_by_email(slack_client, member.email)
+    email = get_slack_email_for_member(member)
+    slack_user = lookup_slack_user_by_email(slack_client, email)
     if not slack_user:
         logger.info(f"Member {member.email} does not have a Slack account linked.")
         return None
