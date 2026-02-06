@@ -645,13 +645,10 @@ def slack_handle_email_verification(payload: SlackInteraction) -> dict:
     from slack.verification import delete_verification, get_verification
 
     slack_client = get_slack_client()
-    member = member_from_slack_user_id(slack_client, payload.user.id)
+    slack_user_id = payload.user.id
 
-    if not member:
-        raise UnprocessableEntity("Member not found")
-
-    # Retrieve verification from Redis
-    verification = get_verification(member.member_id)
+    # Retrieve verification from Redis using slack_user_id
+    verification = get_verification(slack_user_id)
 
     if not verification:
         # Verification expired or not found
@@ -673,6 +670,12 @@ def slack_handle_email_verification(payload: SlackInteraction) -> dict:
 
         raise BadRequest("Verification expired or not found")
 
+    # Get member from verification
+    member = db_session.get(Member, verification.member_id)
+    if not member:
+        delete_verification(slack_user_id)
+        raise UnprocessableEntity("Member not found")
+
     action = payload.actions[0]
 
     if action.action_id == "slack_email_confirm":
@@ -690,7 +693,7 @@ def slack_handle_email_verification(payload: SlackInteraction) -> dict:
             db_session.add(override)
 
         db_session.commit()
-        delete_verification(member.member_id)
+        delete_verification(slack_user_id)
 
         logger.info(f"Member {member.member_number} confirmed Slack email: {verification.email}")
 
@@ -715,7 +718,7 @@ def slack_handle_email_verification(payload: SlackInteraction) -> dict:
 
     elif action.action_id == "slack_email_cancel":
         # User cancelled - just clean up
-        delete_verification(member.member_id)
+        delete_verification(slack_user_id)
 
         logger.info(f"Member {member.member_number} cancelled Slack email verification")
 

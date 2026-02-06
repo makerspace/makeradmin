@@ -49,7 +49,7 @@ def store_verification(member_id: int, email: str, slack_user_id: str) -> None:
         email: The Slack email to verify
         slack_user_id: The Slack user ID found for this email
     """
-    key = f"{VERIFICATION_KEY_PREFIX}{member_id}"
+    key = f"{VERIFICATION_KEY_PREFIX}{slack_user_id}"
     verification = PendingVerification(member_id, email, slack_user_id)
     value = json.dumps(verification.to_dict())
 
@@ -57,17 +57,17 @@ def store_verification(member_id: int, email: str, slack_user_id: str) -> None:
     logger.info(f"Stored Slack email verification for member {member_id}")
 
 
-def get_verification(member_id: int) -> Optional[PendingVerification]:
+def get_verification(slack_user_id: str) -> Optional[PendingVerification]:
     """
     Retrieve a pending verification from Redis.
 
     Args:
-        member_id: The member ID to look up
+        slack_user_id: The Slack user ID to look up
 
     Returns:
         PendingVerification object if found, None if expired or not found
     """
-    key = f"{VERIFICATION_KEY_PREFIX}{member_id}"
+    key = f"{VERIFICATION_KEY_PREFIX}{slack_user_id}"
     value = redis_connection.get(key)
 
     if not value:
@@ -77,13 +77,13 @@ def get_verification(member_id: int) -> Optional[PendingVerification]:
     return PendingVerification.from_dict(data)
 
 
-def delete_verification(member_id: int) -> None:
+def delete_verification(slack_user_id: str) -> None:
     """
     Delete a pending verification from Redis.
 
     Args:
-        member_id: The member ID to clean up
+        slack_user_id: The Slack user ID to clean up
     """
-    key = f"{VERIFICATION_KEY_PREFIX}{member_id}"
+    key = f"{VERIFICATION_KEY_PREFIX}{slack_user_id}"
     redis_connection.delete(key)
-    logger.info(f"Deleted Slack email verification for member {member_id}")
+    logger.info(f"Deleted Slack email verification for slack user {slack_user_id}")
