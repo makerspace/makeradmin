@@ -20,6 +20,7 @@ from serde import field, serde, to_dict
 from serde.json import from_json, to_json
 from service.config import config, get_api_url, get_mysql_config
 from service.db import create_mysql_engine, db_session
+from settings.models import GlobalSettings
 from shop.models import Product, Transaction, TransactionContent
 from slack.types import SlackChannel, SlackInteraction, SlackInteractionAction, SlackMessage, SlackUser
 from slack.util import (
@@ -1954,6 +1955,10 @@ def process_new_visits() -> None:
     Look for new physical_access_log entries and delegate tasks for members who visited.
     Uses a Redis-stored last processed ID to avoid reprocessing.
     """
+    settings = GlobalSettings()
+    if not settings.task_delegator_enabled.read():
+        return
+
     last_id = int(redis_connection.get(REDIS_LAST_ID_KEY) or b"0")
 
     mark_ignored_tasks()

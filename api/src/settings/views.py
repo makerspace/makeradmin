@@ -1,10 +1,12 @@
 """API views for settings management."""
 
+import json
+from typing import get_origin
+
 from service.api_definition import GET, PUT, WEBSHOP_ADMIN, PUBLIC, BAD_VALUE, Arg
 from service.error import NotFound, UnprocessableEntity
 from service.db import db_session
 from settings.models import Setting, all_setting_properties, get_setting_property, _parse_value, _serialize_value
-import json
 
 from settings import service
 
@@ -53,11 +55,20 @@ def list_settings():
         # Use the same serialization logic as SettingProperty.write()
         default_str = _serialize_value(prop.default, type_class)
 
+        # Determine value type
+        origin = get_origin(type_class)
+        if origin is list:
+            value_type_name = "list"
+        elif hasattr(type_class, "__name__"):
+            value_type_name = type_class.__name__
+        else:
+            value_type_name = str(type_class)
+
         result.append(
             {
                 "key": key,
                 "value": db_setting.value if db_setting else default_str,
-                "value_type": type_class.__name__ if hasattr(type_class, "__name__") else str(type_class),
+                "value_type": value_type_name,
                 "description": prop.description,
                 "category": prop.category,
                 "is_public": prop.is_public,
@@ -85,10 +96,19 @@ def get_setting_detail(key):
     # Use the same serialization logic as SettingProperty.write()
     default_str = _serialize_value(prop.default, type_class)
 
+    # Determine value type
+    origin = get_origin(type_class)
+    if origin is list:
+        value_type_name = "list"
+    elif hasattr(type_class, "__name__"):
+        value_type_name = type_class.__name__
+    else:
+        value_type_name = str(type_class)
+
     return {
         "key": key,
         "value": db_setting.value if db_setting else default_str,
-        "value_type": type_class.__name__ if hasattr(type_class, "__name__") else str(type_class),
+        "value_type": value_type_name,
         "description": prop.description,
         "category": prop.category,
         "is_public": prop.is_public,

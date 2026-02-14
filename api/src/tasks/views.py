@@ -11,6 +11,7 @@ from serde.json import from_json, to_json
 from service.api_definition import GET, MEMBER_VIEW, POST, PUBLIC
 from service.db import db_session
 from service.error import BadRequest, NotFound, UnprocessableEntity
+from settings.models import GlobalSettings
 from slack.types import SlackInteraction
 from slack.util import get_slack_client, member_from_slack_user_id
 from slack_sdk import WebClient
@@ -401,13 +402,13 @@ def slack_events() -> dict:
                 return {"ok": True}
 
             # Check if message contains @theSpace or @thespace
+            settings = GlobalSettings()
+            if not settings.thespace_mention_enabled.read():
+                return {"ok": True}
+
             text = event.get("text", "").lower()
-            if (
-                "@thespace" in text
-                or "someone at the space" in text
-                or "anyone at makerspace now" in text
-                or "anyone at the makerspace right now" in text
-            ):
+            keywords = settings.thespace_keywords.read()
+            if any(keyword.lower() in text for keyword in keywords):
                 handle_thespace_mention(event)
 
         return {"ok": True}

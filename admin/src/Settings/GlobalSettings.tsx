@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import CreatableSelect from "react-select/creatable";
 import { get, put } from "../gateway";
 
 interface Setting {
@@ -70,6 +71,28 @@ const SettingRow: React.FC<{
                         {justSaved && !isSaving && <span>Saved</span>}
                     </span>
                 </div>
+            );
+        }
+
+        if (setting.value_type === "list") {
+            const items = JSON.parse(value || "[]");
+            const options = items.map((item: string) => ({
+                label: item,
+                value: item,
+            }));
+
+            return (
+                <CreatableSelect
+                    isMulti
+                    value={options}
+                    onChange={(newValues) => {
+                        const newItems = newValues.map((v) => v.value);
+                        setValue(JSON.stringify(newItems));
+                        setHasChanges(true);
+                    }}
+                    placeholder="Type and press Enter to add..."
+                    isDisabled={isSaving}
+                />
             );
         }
 

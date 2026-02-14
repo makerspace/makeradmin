@@ -83,6 +83,30 @@ class GlobalSettings:
         is_public=True,
     )
 
+    task_delegator_enabled: SettingProperty[bool] = SettingProperty(
+        key="task_delegator_enabled",
+        default=True,
+        description="Enable or disable the Slack task delegator bot",
+        category="slack",
+        is_public=False,
+    )
+
+    thespace_mention_enabled: SettingProperty[bool] = SettingProperty(
+        key="thespace_mention_enabled",
+        default=True,
+        description="Enable or disable the @thespace Slack mention handler",
+        category="slack",
+        is_public=False,
+    )
+
+    thespace_keywords: SettingProperty[List[str]] = SettingProperty(
+        key="thespace_keywords",
+        default=["@thespace", "someone at the space", "anyone at makerspace now", "anyone at the makerspace right now"],
+        description="Keywords that trigger the @thespace mention handler",
+        category="slack",
+        is_public=False,
+    )
+
 
 # Cache settings lookup at module initialization
 _SETTINGS_CACHE: Dict[str, tuple[SettingProperty, Type]] = {}
