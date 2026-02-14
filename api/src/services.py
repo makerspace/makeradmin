@@ -10,6 +10,7 @@ import messages
 import multiaccess
 import multiaccessy
 import quiz
+import settings
 import shop
 import shop.accounting
 import storage
@@ -36,4 +37,5 @@ services = (
     Instance(path="/tasks", service=tasks.service),
     Instance(path="/alerts", service=alerts.service),
     Instance(path="/storage", service=storage.service),
+    Instance(path="/settings", service=settings.service),
 )
