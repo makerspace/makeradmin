@@ -3,12 +3,12 @@
 import json
 from typing import get_origin
 
-from service.api_definition import GET, PUT, WEBSHOP_ADMIN, PUBLIC, BAD_VALUE, Arg
-from service.error import NotFound, UnprocessableEntity
+from service.api_definition import BAD_VALUE, GET, PUBLIC, PUT, WEBSHOP_ADMIN, Arg
 from service.db import db_session
-from settings.models import Setting, all_setting_properties, get_setting_property, _parse_value, _serialize_value
+from service.error import NotFound, UnprocessableEntity
 
 from settings import service
+from settings.models import Setting, _parse_value, _serialize_value, all_setting_properties, get_setting_property
 
 
 @service.route("/public", permission=PUBLIC, method=GET)
