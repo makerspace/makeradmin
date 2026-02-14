@@ -607,3 +607,44 @@ button > svg {
         0px 1.7px 4.2px rgba(0, 0, 0, 0.086),
         0px 4px 10px rgba(0, 0, 0, 0.12);
 }
+
+/* Settings page */
+.settings-row {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid #e5e5e5;
+    gap: 1rem;
+}
+
+.settings-row-left {
+    flex: 0 0 33%;
+}
+
+.settings-row-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-input-wrapper {
+    flex: 1;
+}
+
+.settings-label {
+    text-transform: capitalize;
+}
+
+.settings-save-button-container {
+    flex: 0 0 90px;
+    text-align: right;
+}
+
+.settings-status-message {
+    flex: 0 0 80px;
+}
+
+.settings-category-heading {
+    text-transform: capitalize;
+}

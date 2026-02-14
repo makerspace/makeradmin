@@ -21,8 +21,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
 
 # Install Python dependencies for the public server
-# (Only 3 simple packages for serving static files)
-RUN uv pip install --system --no-cache flask gunicorn pyjson5
+RUN uv pip install --system --no-cache flask gunicorn pyjson5 requests
 
 # Copy package file first, to avoid having to install dependencies every time a source file is updated
 COPY public/package.json public/package-lock.json /work/

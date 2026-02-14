@@ -71,11 +71,16 @@ class GlobalSettings:
         key="banner_text",
         default="",
         description="Text displayed as a banner on the member portal home page",
+        category="banner",
         is_public=True,
     )
 
     banner_enabled: SettingProperty[bool] = SettingProperty(
-        key="banner_enabled", default=False, description="Enable or disable the banner display", is_public=True
+        key="banner_enabled",
+        default=False,
+        description="Enable or disable the banner display",
+        category="banner",
+        is_public=True,
     )
 
 

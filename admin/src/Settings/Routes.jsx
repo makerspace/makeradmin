@@ -3,11 +3,16 @@ import { RedirectToSubpage } from "../Components/Routes";
 import About from "./About";
 import AccessTokenList from "./AccessTokenList";
 import ServiceTokenList from "./ServiceTokenList";
+import GlobalSettings from "./GlobalSettings";
 
 const routes = [
     {
         index: true,
-        element: <RedirectToSubpage subpage={"about"} />,
+        element: <RedirectToSubpage subpage={"settings"} />,
+    },
+    {
+        path: "settings",
+        element: <GlobalSettings />,
     },
     {
         path: "about",

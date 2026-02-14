@@ -172,6 +172,10 @@ const nav = {
             icon: "cog",
             children: [
                 {
+                    text: "Settings",
+                    target: "/settings/settings",
+                },
+                {
                     text: "About",
                     target: "/settings/about",
                 },

@@ -1,6 +1,6 @@
 """API views for settings management."""
 
-from service.api_definition import GET, PUT, WEBSHOP_ADMIN, BAD_VALUE, Arg
+from service.api_definition import GET, PUT, WEBSHOP_ADMIN, PUBLIC, BAD_VALUE, Arg
 from service.error import NotFound, UnprocessableEntity
 from service.db import db_session
 from settings.models import Setting, all_setting_properties, get_setting_property, _parse_value, _serialize_value
@@ -9,7 +9,33 @@ import json
 from settings import service
 
 
-@service.route("/settings", permission=WEBSHOP_ADMIN, method=GET)
+@service.route("/public", permission=PUBLIC, method=GET)
+def list_public_settings():
+    """List all public settings (no authentication required).
+
+    Returns only settings where is_public=True.
+    """
+    db_settings = {s.key: s for s in db_session.query(Setting).all()}
+
+    result = []
+    for key, (prop, type_class) in sorted(all_setting_properties().items()):
+        if not prop.is_public:
+            continue
+
+        db_setting = db_settings.get(key)
+        default_str = _serialize_value(prop.default, type_class)
+
+        result.append(
+            {
+                "key": key,
+                "value": db_setting.value if db_setting else default_str,
+            }
+        )
+
+    return result
+
+
+@service.route("", permission=WEBSHOP_ADMIN, method=GET)
 def list_settings():
     """List all settings with their current values and metadata.
 
@@ -43,7 +69,7 @@ def list_settings():
     return result
 
 
-@service.route("/settings/<string:key>", permission=WEBSHOP_ADMIN, method=GET)
+@service.route("/<string:key>", permission=WEBSHOP_ADMIN, method=GET)
 def get_setting_detail(key):
     """Get a specific setting with its metadata.
 
@@ -71,7 +97,7 @@ def get_setting_detail(key):
     }
 
 
-@service.route("/settings/<string:key>", permission=WEBSHOP_ADMIN, method=PUT)
+@service.route("/<string:key>", permission=WEBSHOP_ADMIN, method=PUT)
 def update_setting(key, value=Arg(str)):
     """Update a setting value.
 
