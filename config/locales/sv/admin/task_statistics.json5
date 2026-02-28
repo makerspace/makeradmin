@@ -32,6 +32,11 @@
         select_member_to_assign: "Välj medlem",
         assign: "Tilldela",
         cancel: "Avbryt",
+        mark_complete_anonymous: "Markera klar av anonym",
+        mark_complete_for_member: "Markera klar",
+        mark_complete_modal_title: "Markera uppgift som klar",
+        select_member_to_complete: "Välj den medlem som slutförde uppgiften",
+        mark_complete: "Markera klar",
     },
     member_preferences: {
         title: "Medlemspreferenser",

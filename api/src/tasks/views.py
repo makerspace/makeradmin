@@ -594,6 +594,72 @@ def assign_task_to_member() -> dict:
     return {"status": "success", "log_id": log_id, "message": f"Task assigned to member #{member.member_number}"}
 
 
+@service.route("/complete", method=POST, permission=MEMBER_VIEW)
+def complete_task() -> dict:
+    """
+    Mark a task as completed via admin UI.
+
+    Expects JSON body with:
+    - card_id: Trello card ID
+    - member_id: Optional member ID (omit or null for anonymous completion)
+    """
+    data = request.get_json()
+    if not data:
+        raise BadRequest("Missing JSON body")
+
+    card_id = data.get("card_id")
+    member_id = data.get("member_id")  # Optional — None means anonymous
+
+    if not card_id:
+        raise BadRequest("Missing card_id")
+
+    member = None
+    if member_id:
+        member = db_session.get(Member, member_id)
+        if not member:
+            raise NotFound(f"Member {member_id} not found")
+
+    try:
+        card = trello.get_card(card_id)
+    except Exception as e:
+        logger.error(f"Failed to fetch Trello card {card_id}: {e}")
+        raise BadRequest("Failed to fetch Trello card")
+
+    requirements = CardRequirements.from_card(card)
+
+    log = TaskDelegationLog(
+        member_id=member_id,
+        card_id=card_id,
+        card_name=card.name,
+        task_size=requirements.size,
+        action="completed",
+        details="Marked complete via admin UI",
+        slack_channel_id=None,
+        slack_message_ts=None,
+    )
+    db_session.add(log)
+
+    try:
+        if not requirements.infinitely_repeatable and requirements.repeat_interval is None:
+            trello.move_card_to_done(card_id)
+
+        if member:
+            trello.add_comment_to_card(
+                card_id,
+                f"Marked completed by admin for member #{member.member_number} {member.firstname} {member.lastname}",
+            )
+        else:
+            trello.add_comment_to_card(card_id, "Marked completed by admin (anonymous)")
+    except Exception as e:
+        logger.error(f"Failed to update Trello card {card_id}: {e}")
+
+    db_session.commit()
+
+    if member:
+        return {"status": "success", "message": f"Task marked complete for member #{member.member_number}"}
+    return {"status": "success", "message": "Task marked complete (anonymous)"}
+
+
 @service.route("/slack/interaction", method=POST, permission=PUBLIC)  # PUBLIC because Slack posts here
 def slack_interaction() -> dict:
     """

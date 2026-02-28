@@ -32,6 +32,11 @@
         select_member_to_assign: "Select member",
         assign: "Assign",
         cancel: "Cancel",
+        mark_complete_anonymous: "Mark complete by anonymous",
+        mark_complete_for_member: "Mark complete",
+        mark_complete_modal_title: "Mark Task Complete",
+        select_member_to_complete: "Select member who completed this task",
+        mark_complete: "Mark Complete",
     },
     member_preferences: {
         title: "Member Preferences",

@@ -1,6 +1,6 @@
 import { useJson } from "Hooks/useJson";
 import { useTranslation } from "i18n/hooks";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import MemberSelect, { MemberOption } from "../Components/MemberSelect";
 import { dateToRelative } from "../utils/dateUtils";
@@ -99,6 +99,11 @@ export default function AllTasksPage() {
     const [assigningCardId, setAssigningCardId] = useState<string | null>(null);
     const [modalSelectedMember, setModalSelectedMember] =
         useState<MemberOption | null>(null);
+    const [completingCardId, setCompletingCardId] = useState<string | null>(
+        null,
+    );
+    const [modalCompleteSelectedMember, setModalCompleteSelectedMember] =
+        useState<MemberOption | null>(null);
 
     const { data, isLoading, error, refresh } = useJson<AllTasksResponse>({
         url: `/tasks/statistics`,
@@ -171,7 +176,59 @@ export default function AllTasksPage() {
         }
     };
 
-    if (isLoading) {
+    const handleCompleteTaskAnonymous = async (
+        cardId: string,
+        cardName: string,
+    ) => {
+        try {
+            await post({
+                url: `/tasks/complete`,
+                data: { card_id: cardId },
+                expectedDataStatus: null,
+            });
+            showSuccess(`Task "${cardName}" has been marked complete`);
+            refresh();
+        } catch (err) {
+            showError(`Failed to mark task complete: ${err}`);
+        }
+    };
+
+    const handleCompleteTaskForMember = (cardId: string) => {
+        setCompletingCardId(cardId);
+        setModalCompleteSelectedMember(null);
+        UIkit.modal("#complete-task-modal").show();
+    };
+
+    const handleModalComplete = async () => {
+        if (!completingCardId || !modalCompleteSelectedMember) {
+            return;
+        }
+
+        const card = data?.cards.find((c) => c.card_id === completingCardId);
+        if (!card) return;
+
+        try {
+            await post({
+                url: `/tasks/complete`,
+                data: {
+                    card_id: completingCardId,
+                    member_id: modalCompleteSelectedMember.member_id,
+                },
+                expectedDataStatus: null,
+            });
+            showSuccess(
+                `Task "${card.card_name}" has been marked complete for ${modalCompleteSelectedMember.firstname} ${modalCompleteSelectedMember.lastname}`,
+            );
+            UIkit.modal("#complete-task-modal").hide();
+            setCompletingCardId(null);
+            setModalCompleteSelectedMember(null);
+            refresh();
+        } catch (err) {
+            showError(`Failed to mark task complete: ${err}`);
+        }
+    };
+
+    if (isLoading && !data) {
         return (
             <div className="uk-width-1-1">
                 <h2>{t("cards.title")}</h2>
@@ -248,7 +305,10 @@ export default function AllTasksPage() {
                             onChange={setModalSelectedMember}
                         />
                     </div>
-                    <div className="uk-modal-footer uk-text-right">
+                    <div
+                        className="uk-modal-footer uk-text-right uk-flex uk-flex-right"
+                        style={{ gap: "0.5rem" }}
+                    >
                         <button
                             className="uk-button uk-button-default uk-modal-close"
                             type="button"
@@ -262,6 +322,50 @@ export default function AllTasksPage() {
                             disabled={!modalSelectedMember}
                         >
                             {t("cards.assign")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal for marking task complete for a specific member */}
+            <div id="complete-task-modal" uk-modal="container: false">
+                <div className="uk-modal-dialog uk-modal-body">
+                    <button
+                        className="uk-modal-close-default"
+                        type="button"
+                        uk-close=""
+                    ></button>
+                    <h2 className="uk-modal-title">
+                        {t("cards.mark_complete_modal_title")}
+                    </h2>
+                    <div className="uk-margin">
+                        <label className="uk-form-label">
+                            {t("cards.select_member_to_complete")}
+                        </label>
+                        <MemberSelect
+                            name="complete-member-select"
+                            placeholder={t("cards.search_member_placeholder")}
+                            value={modalCompleteSelectedMember}
+                            onChange={setModalCompleteSelectedMember}
+                        />
+                    </div>
+                    <div
+                        className="uk-modal-footer uk-text-right uk-flex uk-flex-right"
+                        style={{ gap: "0.5rem" }}
+                    >
+                        <button
+                            className="uk-button uk-button-default uk-modal-close"
+                            type="button"
+                        >
+                            {t("cards.cancel")}
+                        </button>
+                        <button
+                            className="uk-button uk-button-primary"
+                            type="button"
+                            onClick={handleModalComplete}
+                            disabled={!modalCompleteSelectedMember}
+                        >
+                            {t("cards.mark_complete")}
                         </button>
                     </div>
                 </div>
@@ -282,9 +386,8 @@ export default function AllTasksPage() {
                 </thead>
                 <tbody>
                     {sortedCards.map((card) => (
-                        <>
+                        <React.Fragment key={card.card_id}>
                             <tr
-                                key={card.card_id}
                                 className={
                                     card.cannot_be_assigned_reason
                                         ? "uk-text-muted"
@@ -388,20 +491,72 @@ export default function AllTasksPage() {
                                         )}
                                     </td>
                                 )}
-                                <td>
-                                    <button
-                                        className="uk-button uk-button-small uk-button-primary"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleAssignTask(
-                                                card.card_id,
-                                                card.card_name,
-                                                selectedMember,
-                                            );
-                                        }}
-                                    >
-                                        {t("cards.assign_to_member")}
-                                    </button>
+                                <td onClick={(e) => e.stopPropagation()}>
+                                    <div className="uk-inline">
+                                        <button
+                                            className="uk-button uk-button-small uk-button-default"
+                                            type="button"
+                                            style={{
+                                                letterSpacing: "0.1em",
+                                                padding: "0 8px",
+                                            }}
+                                        >
+                                            •••
+                                        </button>
+                                        <div
+                                            data-uk-dropdown="mode: click; pos: bottom-right"
+                                            onClick={(e) =>
+                                                UIkit.dropdown(
+                                                    e.currentTarget as Element,
+                                                ).hide(false)
+                                            }
+                                        >
+                                            <ul className="uk-nav uk-dropdown-nav">
+                                                <li>
+                                                    <a
+                                                        onClick={() =>
+                                                            handleAssignTask(
+                                                                card.card_id,
+                                                                card.card_name,
+                                                                selectedMember,
+                                                            )
+                                                        }
+                                                    >
+                                                        {t(
+                                                            "cards.assign_to_member",
+                                                        )}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a
+                                                        onClick={() =>
+                                                            handleCompleteTaskAnonymous(
+                                                                card.card_id,
+                                                                card.card_name,
+                                                            )
+                                                        }
+                                                    >
+                                                        {t(
+                                                            "cards.mark_complete_anonymous",
+                                                        )}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a
+                                                        onClick={() =>
+                                                            handleCompleteTaskForMember(
+                                                                card.card_id,
+                                                            )
+                                                        }
+                                                    >
+                                                        {t(
+                                                            "cards.mark_complete_for_member",
+                                                        )}
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             {expandedCardId === card.card_id && (
@@ -419,7 +574,7 @@ export default function AllTasksPage() {
                                     </td>
                                 </tr>
                             )}
-                        </>
+                        </React.Fragment>
                     ))}
                 </tbody>
             </table>
