@@ -40,6 +40,7 @@ class MessageTemplate(enum.Enum):
     MEMBERBOOTH_BOX_EXPIRED = "memberbooth_box_expired"
     MEMBERBOOTH_BOX_EXPIRING_SOON = "memberbooth_box_expiring_soon"
     QUIZ_COMPLETION = "quiz_completion"
+    TASK_DELEGATION_PREFERENCE = "task_delegation_preference"
 
 
 class Message(Base):

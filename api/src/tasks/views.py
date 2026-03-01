@@ -689,6 +689,8 @@ def slack_interaction() -> dict:
         return slack_handle_new_task_request(payload)
     elif action.action_id in ["slack_email_confirm", "slack_email_cancel"]:
         return slack_handle_email_verification(payload)
+    elif action.action_id.startswith("task_delegation_preference_"):
+        return slack_handle_delegation_preference(payload)
     else:
         return slack_handle_task_feedback(payload)
 
@@ -704,6 +706,52 @@ def slack_handle_new_task_request(payload: SlackInteraction) -> dict:
     delegate_task_for_member(member.member_id, slack_interaction=payload, force=True)
 
     return {"message": "New task assigned"}
+
+
+def slack_handle_delegation_preference(payload: SlackInteraction) -> dict:
+    """Handle when a member responds to the 'continue receiving tasks?' question."""
+    action = payload.actions[0]
+    slack_client = get_slack_client()
+    member = member_from_slack_user_id(slack_client, payload.user.id)
+
+    if not member:
+        raise UnprocessableEntity("Member not found")
+
+    if action.action_id == "task_delegation_preference_no":
+        pref = MemberPreference(
+            member_id=member.member_id,
+            question_type=MemberPreferenceQuestionType.TASK_DELEGATION_ENABLED,
+            available_options="true,false",
+            selected_options="false",
+        )
+        db_session.add(pref)
+        db_session.commit()
+
+        slack_client.chat_update(
+            channel=payload.channel.id,
+            ts=payload.message.ts,
+            text="Task suggestions disabled. You can re-enable them at any time in the member portal.",
+            blocks=[
+                SectionBlock(
+                    text=MarkdownTextObject(
+                        text=":no_bell: Got it! We'll stop sending you task suggestions. You can re-enable them at any time in the member portal."
+                    )
+                )
+            ],
+        )
+    else:
+        # "yes" — pref_question_ignore_count is already set to the current count when we asked,
+        # so we just need to confirm to the member.
+        slack_client.chat_update(
+            channel=payload.channel.id,
+            ts=payload.message.ts,
+            text="Great! We'll keep sending you task suggestions.",
+            blocks=[
+                SectionBlock(text=MarkdownTextObject(text=":bell: Great! We'll keep sending you task suggestions."))
+            ],
+        )
+
+    return {"message": "Preference saved"}
 
 
 def slack_handle_email_verification(payload: SlackInteraction) -> dict:

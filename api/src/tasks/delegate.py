@@ -1,3 +1,4 @@
+import json
 import math
 import re
 import time
@@ -11,6 +12,8 @@ from typing import Callable, List, Literal, Optional, Sequence, Set, Tuple
 
 import requests
 from membership.models import Group, Member, member_group
+from messages.message import send_message
+from messages.models import Message, MessageTemplate
 from multiaccessy.models import PhysicalAccessEntry
 from PIL import Image
 from quiz.models import QuizAnswer, QuizQuestion
@@ -1164,6 +1167,19 @@ def is_task_delegation_enabled(member_id: int) -> bool:
     return pref.selected_options == "true"
 
 
+def consecutive_ignored_tasks(last_assigned_tasks: list[TaskDelegationLogSimple]) -> list[TaskDelegationLogSimple]:
+    """Return the leading run of ignored tasks (newest first), skipping still-pending and re-rolled tasks."""
+    result = []
+    for task in last_assigned_tasks:
+        if task.status in ("assigned", "not_done_rerolled"):
+            continue
+        if task.status == "ignored":
+            result.append(task)
+        else:
+            break
+    return result
+
+
 def member_recently_received_task(ctx: TaskContext) -> bool:
     # If a member has completed a task recently, don't assign them another one too soon.
     # The wait depends on the size of the task
@@ -1183,10 +1199,11 @@ def member_recently_received_task(ctx: TaskContext) -> bool:
         # It's then no longer assigned or completed, but we still don't want to assign them another task too soon.
         #
         # If the member explicitly wanted a new task, we allow assigning a new task sooner.
-        if (
-            ctx.time - last_assigned_task.created_at < timedelta(hours=14)
-            and last_assigned_task.status != "not_done_rerolled"
-        ):
+        # If the member has been ignoring tasks, increase the delay by 3x.
+        base_delay = timedelta(hours=14)
+        if len(consecutive_ignored_tasks(ctx.member.last_assigned_tasks)) >= 3:
+            base_delay *= 3
+        if ctx.time - last_assigned_task.created_at < base_delay and last_assigned_task.status != "not_done_rerolled":
             return True
 
     return False
@@ -1800,6 +1817,16 @@ def delegate_task_for_member(
         logger.info(f"Member {member_id} received a task recently; skipping delegation")
         return None
 
+    # If 3 tasks have been ignored in a row since the last preference question, ask again.
+    if not force and slack_interaction is None:
+        if should_ask_delegation_preference(member_id, ctx.member.last_assigned_tasks):
+            member = db_session.get(Member, member_id)
+            if member:
+                ask_delegation_preference_question(member)
+                db_session.commit()
+                logger.info(f"Queued delegation preference question for member {member_id}")
+                return None
+
     if picked_card is None:
         picked_card = select_card_for_member(ctx, ignore_reasons)
 
@@ -2010,6 +2037,24 @@ def clear_pending_question(member_id: int) -> None:
     redis_connection.delete(cache_key)
 
 
+def should_ask_delegation_preference(member_id: int, last_assigned_tasks: list[TaskDelegationLogSimple]) -> bool:
+    """Return True if 3 tasks have been ignored in a row since the last delegation preference message was sent."""
+    streak = consecutive_ignored_tasks(last_assigned_tasks)
+    if len(streak) < 3:
+        return False
+    last_message_date = db_session.execute(
+        select(Message.created_at)
+        .where(
+            Message.member_id == member_id,
+            Message.template == MessageTemplate.TASK_DELEGATION_PREFERENCE.value,
+            Message.status != Message.FAILED,
+        )
+        .order_by(Message.created_at.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+    return last_message_date is None or streak[2].created_at > last_message_date
+
+
 def ask_room_preference_question(
     member: Member,
     slack_client: WebClient,
@@ -2179,3 +2224,44 @@ def ask_skill_level_question(
     channel = slack_response.get("channel", "")
     ts = slack_response.get("ts", "")
     return (channel, ts)
+
+
+def ask_delegation_preference_question(member: Member) -> None:
+    """Queue a Slack message asking the member whether they want to continue receiving task suggestions."""
+    text = (
+        f"Hi {member.firstname}! We've noticed you haven't responded to the last few task suggestions. "
+        f"Would you like to continue receiving task suggestions?"
+    )
+
+    blocks: list[Block] = [
+        DividerBlock(),
+        SectionBlock(text=MarkdownTextObject(text=text)),
+        ActionsBlock(
+            block_id="task_delegation_preference",
+            elements=[
+                ButtonElement(
+                    text=PlainTextObject(text="Yes, keep sending tasks", emoji=True),
+                    action_id="task_delegation_preference_yes",
+                    value="yes",
+                    style="primary",
+                ),
+                ButtonElement(
+                    text=PlainTextObject(text="No, stop sending tasks", emoji=True),
+                    action_id="task_delegation_preference_no",
+                    value="no",
+                    style="danger",
+                ),
+            ],
+        ),
+    ]
+
+    send_message(
+        template=MessageTemplate.TASK_DELEGATION_PREFERENCE,
+        member=member,
+        db_session=db_session,
+        recipient=member.email,
+        recipient_type="slack",
+        subject="Continue receiving task suggestions?",
+        body=json.dumps([block.to_dict() for block in blocks]),
+    )
+    logger.info(f"Queued delegation preference question for member #{member.member_number}")
