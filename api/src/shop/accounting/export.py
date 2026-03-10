@@ -63,6 +63,7 @@ def export_accounting(start_date: datetime, end_date: datetime, aggregation: Agg
             Transaction.created_at >= start_date.astimezone(utc_zone),
             Transaction.created_at < end_date.astimezone(utc_zone),
             Transaction.status == Transaction.Status.completed,
+            Transaction.amount != 0,  # Gifts have an amount of zero
         )
         .outerjoin(TransactionContent)
         .all()

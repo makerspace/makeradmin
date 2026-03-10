@@ -74,7 +74,7 @@ def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> 
         .all()
     )
     for transaction in transactions:
-        if transaction.status != Transaction.Status.completed:
+        if transaction.status != Transaction.Status.completed or transaction.amount == 0:
             continue
         payments[transaction.id] = CompletedPayment(
             transaction_id=transaction.id,
