@@ -409,6 +409,11 @@ def slack_events() -> dict:
             text = event.get("text", "").lower()
             keywords = settings.thespace_keywords.read()
             if any(keyword.lower() in text for keyword in keywords):
+                logger.info(
+                    "thespace mention triggered: headers=%s body=%s",
+                    dict(request.headers),
+                    request.get_data(as_text=True),
+                )
                 handle_thespace_mention(event)
 
         return {"ok": True}
