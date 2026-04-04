@@ -188,12 +188,7 @@ const ProductImageSelect: React.FC<ProductImageSelectProps> = (props) => {
                     options={options}
                     value={currentValue}
                     getOptionValue={(option) => String(props.getValue(option))}
-                    getOptionLabel={(option) => {
-                        const label = props.getLabel(option);
-                        return typeof label === "string"
-                            ? label
-                            : String(label);
-                    }}
+                    formatOptionLabel={(option) => props.getLabel(option)}
                     onChange={handleSelectChange}
                     isDisabled={!options.length || uploading}
                     isLoading={uploading}
