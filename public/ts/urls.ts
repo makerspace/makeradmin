@@ -6,7 +6,7 @@ export const URL_SLACK_HELP = "https://wiki.makerspace.se/Slack";
 
 // NOTE: Should be updated roughly every year, since it expires after about 400 invites
 export const URL_SLACK_SIGNUP =
-    "https://join.slack.com/t/stockholmmakerspace/shared_invite/zt-3apcoyv3b-up1~_62eJDOJhderXUU7OQ";
+    "https://join.slack.com/t/stockholmmakerspace/shared_invite/zt-3v8t3bh83-gBiTsSXQb0UNTF9mwgXWhg";
 
 export const URL_WIKI = "https://wiki.makerspace.se";
 export const URL_GET_STARTED_QUIZ =
