@@ -27,8 +27,8 @@
         "react-day-picker": "^9.5",
         "react-dom": "^18.0.0",
         "react-i18next": "^15.4.1",
-        "react-router": "^7.9",
-        "react-router-dom": "^7.9",
+        "react-router": "^7.17",
+        "react-router-dom": "^7.17",
         "react-select": "^5.9",
         "uikit": "^3.22.0",
         "underscore": "^1.13.8"
