@@ -34,6 +34,12 @@ default = Dict(
         ACCESSY_DO_MODIFY="false",  # Do perform modify operations to Accessy, default is to log only, useful when developing.
         LOG_DIR="logs",
         SLACK_BOT_TOKEN=None,
+        # OIDC provider support: a single relying party (e.g. Outline) that can
+        # log in members via the authorization code flow. Redirect URIs are
+        # comma separated and matched exactly.
+        OIDC_CLIENT_ID="",
+        OIDC_CLIENT_SECRET="",
+        OIDC_REDIRECT_URIS="",
     ),
 )
 env = Env()

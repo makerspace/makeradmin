@@ -9,6 +9,7 @@ import membership
 import messages
 import multiaccess
 import multiaccessy
+import oidc
 import quiz
 import settings
 import shop
@@ -31,6 +32,7 @@ services = (
     Instance(
         path="/L/", service=multiaccess.short_url_service
     ),  # Shorthand URL service for QR codes. Must stay uppercase
+    Instance(path="/oidc", service=oidc.service),
     Instance(path="/quiz", service=quiz.service),
     Instance(path="/accessy", service=multiaccessy.service),
     Instance(path="/box_terminator", service=box_terminator.service),

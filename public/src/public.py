@@ -185,6 +185,16 @@ def reset_password():
     return render_template("reset_password.html")
 
 
+oidc = Section("oidc")
+
+
+@oidc.route("/authorize")
+def oidc_authorize():
+    """OIDC authorization endpoint: lets a logged in member continue to a
+    relying party (e.g. the wiki), showing the login page first if needed."""
+    return render_template("oidc_authorize.html")
+
+
 label = Section("label")
 
 
@@ -210,6 +220,7 @@ def serve_static(filepath: str) -> flask.Response:
 
 app.register_blueprint(shop)
 app.register_blueprint(member)
+app.register_blueprint(oidc)
 app.register_blueprint(label)
 
 
