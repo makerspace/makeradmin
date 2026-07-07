@@ -3,16 +3,28 @@ from logging import getLogger
 
 from core.auth import generate_token
 from core.models import AccessToken
-from flask import g, request
+from flask import Response, g, jsonify, request
 from membership.membership import get_membership_summary
 from membership.models import Member
-from service.api_definition import GET, POST, PUBLIC, USER, Arg, Enum, non_empty_str
+from service.api_definition import GET, POST, PUBLIC, USER, Arg, non_empty_str
 from service.db import db_session
 from service.error import BadRequest, Unauthorized
 
 from oidc import provider, service
 
 logger = getLogger("makeradmin")
+
+
+def oauth_error(error: str, description: str, status: int = 400, www_authenticate: bool = False) -> Response:
+    """Error response in the format required by RFC 6749 section 5.2, which
+    OAuth2 client libraries understand (unlike makeradmin's regular error
+    format)."""
+    response = jsonify(error=error, error_description=description)
+    response.status_code = status
+    response.headers["Cache-Control"] = "no-store"
+    if www_authenticate:
+        response.headers["WWW-Authenticate"] = 'Basic realm="makeradmin"'
+    return response
 
 
 @service.route("/authorize", method=POST, permission=USER)
@@ -47,28 +59,38 @@ def authorize(
 
 @service.route("/token", method=POST, permission=PUBLIC, flat_return=True)
 def token(
-    grant_type=Arg(Enum("authorization_code")),
-    code=Arg(non_empty_str),
+    grant_type=Arg(str, required=False),
+    code=Arg(str, required=False),
     client_id=Arg(str, required=False),
     client_secret=Arg(str, required=False),
     redirect_uri=Arg(str, required=False),
 ):
-    """OAuth2 token endpoint: exchange an authorization code for an access token."""
-    assert grant_type
+    """OAuth2 token endpoint: exchange an authorization code for an access token.
+
+    Errors are returned in the RFC 6749 format rather than makeradmin's usual
+    one, since the caller is an OAuth2 client library.
+    """
+    if grant_type is None:
+        return oauth_error("invalid_request", "Missing grant_type parameter.")
+    if grant_type != "authorization_code":
+        return oauth_error("unsupported_grant_type", "Only the authorization_code grant type is supported.")
+    if not code:
+        return oauth_error("invalid_request", "Missing code parameter.")
 
     # Client credentials arrive in the POST body or as HTTP Basic auth.
     basic = request.authorization
-    if basic is not None and basic.type == "basic":
+    used_basic_auth = basic is not None and basic.type == "basic"
+    if used_basic_auth:
         client_id = client_id or basic.username
         client_secret = client_secret or basic.password
 
     client = provider.validate_client_credentials(client_id or "", client_secret or "")
     if client is None:
-        raise Unauthorized("Invalid client credentials.")
+        return oauth_error("invalid_client", "Invalid client credentials.", 401, www_authenticate=used_basic_auth)
 
     member_id = provider.redeem_authorization_code(code, client, redirect_uri)
     if member_id is None:
-        raise Unauthorized("Invalid or expired authorization code.")
+        return oauth_error("invalid_grant", "Invalid, expired or already used authorization code.")
 
     access_token = AccessToken(
         user_id=member_id,
