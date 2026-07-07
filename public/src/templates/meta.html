@@ -5,6 +5,7 @@
     window.hostAdminFrontend = "{{ host_frontend }}";
     window.staticBasePath = "{{ STATIC }}";
     window.basePath = "{{ BASE_PATH }}";
+    window.publicSettings = {{ public_settings | tojson }};
 </script>
 <script
     defer

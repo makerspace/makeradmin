@@ -1,7 +1,7 @@
 import os
 import sys
 from logging import INFO, basicConfig, getLogger
-from typing import Any, Tuple
+from typing import Any, Dict, Tuple
 from urllib.parse import urlparse
 
 import flask
@@ -18,24 +18,26 @@ basicConfig(
 logger = getLogger("makeradmin")
 
 
-def get_banner_settings() -> Tuple[str, str]:
-    """Fetch banner settings from API."""
+def get_public_settings() -> Dict[str, str]:
+    """Fetch all public settings from API."""
     try:
         api_url = os.environ.get("HOST_BACKEND")
         response = requests.get(f"{api_url}/settings/public", timeout=2)
         response.raise_for_status()
 
         settings_data = response.json().get("data", [])
-        settings = {s["key"]: s["value"] for s in settings_data}
-
-        banner_enabled = settings.get("banner_enabled", "false").lower() in ("true", "1")
-        banner_text = settings.get("banner_text", "") if banner_enabled else ""
-        sidebar_classes = "sidebar-banner-adjust" if banner_text else ""
-
-        return banner_text, sidebar_classes
+        return {s["key"]: s["value"] for s in settings_data}
     except Exception as e:
-        logger.warning(f"Failed to load banner settings: {e}")
-        return "", ""
+        logger.warning(f"Failed to load public settings: {e}")
+        return {}
+
+
+def get_banner_settings(settings: Dict[str, str]) -> Tuple[str, str]:
+    """Extract banner settings from public settings dict."""
+    banner_enabled = settings.get("banner_enabled", "false").lower() in ("true", "1")
+    banner_text = settings.get("banner_text", "") if banner_enabled else ""
+    sidebar_classes = "sidebar-banner-adjust" if banner_text else ""
+    return banner_text, sidebar_classes
 
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
@@ -65,11 +67,13 @@ class Section(Blueprint):
 
 def render_template(path: str, **kwargs: Any) -> str:
     assert "STATIC" not in kwargs
-    banner, sidebar_additional_classes = get_banner_settings()
+    public_settings = get_public_settings()
+    banner, sidebar_additional_classes = get_banner_settings(public_settings)
     return flask.render_template(
         path,
         banner=banner,
         sidebar_additional_classes=sidebar_additional_classes,
+        public_settings=public_settings,
         BASE_PATH=HOST_PUBLIC_PATH,
         DOMAIN_PUBLIC=DOMAIN_PUBLIC,
         STATIC=f"{HOST_PUBLIC_PATH}/static{static_hash}",

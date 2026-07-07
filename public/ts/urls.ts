@@ -1,27 +1,23 @@
 import { MobileOperatingSystem, getMobileOperatingSystem } from "./environment";
 
-export const URL_FACEBOOK_GROUP =
-    "https://www.facebook.com/groups/makerspace.se";
-export const URL_SLACK_HELP = "https://wiki.makerspace.se/Slack";
+// Defaults for these settings live in api/src/settings/models.py; the API
+// always returns a value for every public setting, so the empty-string case
+// only happens if the settings could not be fetched at all.
+const setting = (key: string): string => window.publicSettings?.[key] ?? "";
 
-// NOTE: Should be updated roughly every year, since it expires after about 400 invites
-export const URL_SLACK_SIGNUP =
-    "https://join.slack.com/t/stockholmmakerspace/shared_invite/zt-3v8t3bh83-gBiTsSXQb0UNTF9mwgXWhg";
-
-export const URL_WIKI = "https://wiki.makerspace.se";
-export const URL_GET_STARTED_QUIZ =
-    "https://medlem.makerspace.se/member/quiz/1";
-export const URL_INSTAGRAM = "https://www.instagram.com/stockholmmakerspace/";
+export const URL_FACEBOOK_GROUP = setting("url_facebook_group");
+export const URL_SLACK_HELP = setting("url_slack_help");
+export const URL_SLACK_SIGNUP = setting("url_slack_signup");
+export const URL_WIKI = setting("url_wiki");
+export const URL_GET_STARTED_QUIZ = setting("url_get_started_quiz");
+export const URL_INSTAGRAM = setting("url_instagram");
 export const URL_RELATIVE_MEMBER_PORTAL = "/member";
-export const URL_CALENDAR = "https://www.makerspace.se/kalendarium";
-export const URL_CALENDLY_BOOK =
-    "https://calendly.com/medlemsintroduktion/medlemsintroduktion";
-export const URL_MEMBERBOOTH = "https://wiki.makerspace.se/Memberbooth";
-export const URL_ACCESSY_ANDROID =
-    "https://play.google.com/store/apps/details?id=com.axessions.app";
-export const URL_ACCESSY_IOS =
-    "https://apps.apple.com/se/app/accessy/id1478132190";
-export const URL_ACCESSY_WIKI = "https://wiki.makerspace.se/Accessy";
+export const URL_CALENDAR = setting("url_calendar");
+export const URL_CALENDLY_BOOK = setting("url_calendly_book");
+export const URL_MEMBERBOOTH = setting("url_memberbooth");
+export const URL_ACCESSY_ANDROID = setting("url_accessy_android");
+export const URL_ACCESSY_IOS = setting("url_accessy_ios");
+export const URL_ACCESSY_WIKI = setting("url_accessy_wiki");
 
 export const accessyURL = (): string => {
     if (getMobileOperatingSystem() == MobileOperatingSystem.Android) {

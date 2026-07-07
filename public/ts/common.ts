@@ -13,6 +13,7 @@ declare global {
         productId: number;
         transactionId: number;
         plausible: any;
+        publicSettings: Record<string, string>;
     }
 }
 

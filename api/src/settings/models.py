@@ -107,6 +107,102 @@ class GlobalSettings:
         is_public=False,
     )
 
+    url_facebook_group: SettingProperty[str] = SettingProperty(
+        key="url_facebook_group",
+        default="https://www.facebook.com/groups/makerspace.se",
+        description="Facebook group URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_slack_help: SettingProperty[str] = SettingProperty(
+        key="url_slack_help",
+        default="https://wiki.makerspace.se/Slack",
+        description="Slack help/info page URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_slack_signup: SettingProperty[str] = SettingProperty(
+        key="url_slack_signup",
+        default="https://http.cat/images/501.jpg",
+        description="Slack workspace signup/invite URL (invite links expire after about 400 invites, so this must be configured and rotated regularly)",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_wiki: SettingProperty[str] = SettingProperty(
+        key="url_wiki",
+        default="https://wiki.makerspace.se",
+        description="Wiki URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_get_started_quiz: SettingProperty[str] = SettingProperty(
+        key="url_get_started_quiz",
+        default="https://medlem.makerspace.se/member/quiz/1",
+        description="Get started quiz URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_instagram: SettingProperty[str] = SettingProperty(
+        key="url_instagram",
+        default="https://www.instagram.com/stockholmmakerspace/",
+        description="Instagram profile URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_calendar: SettingProperty[str] = SettingProperty(
+        key="url_calendar",
+        default="https://www.makerspace.se/kalendarium",
+        description="Events calendar URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_calendly_book: SettingProperty[str] = SettingProperty(
+        key="url_calendly_book",
+        default="https://calendly.com/medlemsintroduktion/medlemsintroduktion",
+        description="Calendly booking URL for member introductions",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_memberbooth: SettingProperty[str] = SettingProperty(
+        key="url_memberbooth",
+        default="https://wiki.makerspace.se/Memberbooth",
+        description="Memberbooth wiki page URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_accessy_android: SettingProperty[str] = SettingProperty(
+        key="url_accessy_android",
+        default="https://play.google.com/store/apps/details?id=com.axessions.app",
+        description="Accessy Android app (Google Play) URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_accessy_ios: SettingProperty[str] = SettingProperty(
+        key="url_accessy_ios",
+        default="https://apps.apple.com/se/app/accessy/id1478132190",
+        description="Accessy iOS app (App Store) URL",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_accessy_wiki: SettingProperty[str] = SettingProperty(
+        key="url_accessy_wiki",
+        default="https://wiki.makerspace.se/Accessy",
+        description="Accessy wiki page URL",
+        category="external_links",
+        is_public=True,
+    )
+
 
 # Cache settings lookup at module initialization
 _SETTINGS_CACHE: Dict[str, tuple[SettingProperty, Type]] = {}
