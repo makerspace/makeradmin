@@ -70,6 +70,9 @@ class TrelloCard:
     desc: Optional[str]
     attachments: Optional[List[TrelloAttachment]]
     pluginData: Optional[List[PluginDataEntry]]
+    # 8-char slug embedded in trello.com/c/<shortLink>/ URLs. Distinct from [id] (the
+    # 24-char object id); the two are not inter-convertible without the board data.
+    shortLink: Optional[str] = None
 
 
 def download_attachment(attachment: TrelloAttachment) -> bytes:
@@ -92,7 +95,7 @@ def _fetch_cards_from_trello() -> List[TrelloCard]:
     # Fetch cards on the board in lists; get labels and list info
     # Find board id from TRELLO_BOARD_URL path
     url = f"{TRELLO_API_BASE}/boards/{TRELLO_BOARD_ID}/cards"
-    params = {"fields": "name,idList,labels,desc", "pluginData": "1", "attachments": "1", **_auth_params()}
+    params = {"fields": "name,idList,labels,desc,shortLink", "pluginData": "1", "attachments": "1", **_auth_params()}
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
 
@@ -161,7 +164,7 @@ def cached_cards(list_name: str) -> List[TrelloCard]:
 
 def get_card(card_id: str) -> TrelloCard:
     url = f"{TRELLO_API_BASE}/cards/{card_id}"
-    params = {"fields": "name,idList,labels,desc", "pluginData": "1", "attachments": "1", **_auth_params()}
+    params = {"fields": "name,idList,labels,desc,shortLink", "pluginData": "1", "attachments": "1", **_auth_params()}
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
 

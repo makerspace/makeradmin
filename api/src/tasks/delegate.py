@@ -692,7 +692,10 @@ class CardRequirements:
         return messages
 
     @staticmethod
-    def from_card(card: trello.TrelloCard) -> "CardRequirements":
+    def from_card(
+        card: trello.TrelloCard,
+        card_id_by_short_link: Optional[dict[str, str]] = None,
+    ) -> "CardRequirements":
         labels = {label.name for label in card.labels}
         required: list[Tuple[str, Callable[[TaskContext], bool]]] = []
         size = TaskSize.SMALL
@@ -1052,18 +1055,23 @@ class CardRequirements:
                 logger.error(f"Invalid URL in 'Requires' instruction (not a Trello URL): {match}")
                 continue
 
-            # TODO: This is not the same type of id as used in Trello API calls. Need to convert.
-            card_id = match.split("/")[-2]
-            if not re.match(r"^[a-zA-Z0-9]+$", card_id):
+            # A trello.com/c/<slug>/ URL carries the card's shortLink, not the 24-char object
+            # id that completions are logged under ([TaskDelegationLog.card_id], keyed into
+            # [MemberTaskInfo.completed_card_ids]). Resolve the shortLink to the object id via
+            # the board map; without it the lookup below never matches and the dependent task
+            # is undeliverable to every member.
+            short_link = match.split("/")[-2]
+            if not re.match(r"^[a-zA-Z0-9]+$", short_link):
                 logger.error(
-                    f"Invalid Trello card URL in 'Requires' instruction: {match}. Found card id='{card_id}', but that doesn't look like a valid card id."
+                    f"Invalid Trello card URL in 'Requires' instruction: {match}. Found card id='{short_link}', but that doesn't look like a valid card id."
                 )
                 continue
 
+            required_card_id = (card_id_by_short_link or {}).get(short_link, short_link)
             required.append(
                 (
-                    f"Has not completed required card {card_id}",
-                    lambda context: context.member.completed_card_ids.get(card_id, 0) > 0,
+                    f"Has not completed required card {required_card_id}",
+                    lambda context, rid=required_card_id: context.member.completed_card_ids.get(rid, 0) > 0,
                 )
             )
 
@@ -1742,6 +1750,7 @@ def select_card_for_member(ctx: TaskContext, ignore_reasons: list[str]) -> Optio
     ]
 
     cards = trello.cached_cards(trello.SOURCE_LIST_NAME)
+    card_id_by_short_link = {card.shortLink: card.id for card in cards if card.shortLink}
 
     total_weight = 0.0
     picked_card: Optional[trello.TrelloCard] = None
@@ -1750,7 +1759,7 @@ def select_card_for_member(ctx: TaskContext, ignore_reasons: list[str]) -> Optio
         (
             card,
             task_score(
-                CardRequirements.from_card(card),
+                CardRequirements.from_card(card, card_id_by_short_link),
                 CardCompletionInfo.from_card(card),
                 ctx,
                 reference_task_assignment_contexts,
