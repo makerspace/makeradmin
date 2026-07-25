@@ -12,7 +12,7 @@ REQUIRED_CARD_SHORT_LINK = "AYZ8X7wN"
 REQUIRED_CARD_OBJECT_ID = "690cb47a8e5de7dfe1eef937"
 
 REQUIRES_DESC = (
-    f'Requires: [https://trello.com/c/{REQUIRED_CARD_SHORT_LINK}/46-organize-tormek-drawers]'
+    f"Requires: [https://trello.com/c/{REQUIRED_CARD_SHORT_LINK}/46-organize-tormek-drawers]"
     f'(https://trello.com/c/{REQUIRED_CARD_SHORT_LINK}/46-organize-tormek-drawers "smartCard-inline")'
 )
 
