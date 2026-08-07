@@ -34,12 +34,11 @@ default = Dict(
         ACCESSY_DO_MODIFY="false",  # Do perform modify operations to Accessy, default is to log only, useful when developing.
         LOG_DIR="logs",
         SLACK_BOT_TOKEN=None,
-        # OIDC provider support: a single relying party (e.g. Outline) that can
-        # log in members via the authorization code flow. Redirect URIs are
-        # comma separated and matched exactly.
-        OIDC_CLIENT_ID="",
-        OIDC_CLIENT_SECRET="",
-        OIDC_REDIRECT_URIS="",
+        # OIDC provider support: relying parties (e.g. Outline) that can log in
+        # members via the authorization code flow, as a JSON array of
+        # {client_id, client_secret, redirect_uris} objects. Redirect URIs are
+        # matched exactly. See oidc/provider.py.
+        OIDC_CLIENTS="",
     ),
 )
 env = Env()

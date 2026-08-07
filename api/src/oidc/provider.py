@@ -2,13 +2,22 @@
 
 This implements just enough of the OpenID Connect authorization code flow to
 act as an identity provider for first-party services such as Outline. Relying
-parties are configured statically (see OIDC_CLIENT_* config), authorization
+parties are configured statically (see OIDC_CLIENTS config), authorization
 codes are stored in redis with a short TTL, and access tokens reuse the
 regular access_tokens table so the existing bearer authentication applies to
 the userinfo endpoint.
 
 Note that no signed id_token is issued: clients are expected to fetch claims
 from the userinfo endpoint using the access token.
+
+Client configuration:
+
+    OIDC_CLIENTS=[{"client_id": "outline",
+                   "client_secret": "...",
+                   "redirect_uris": ["https://wiki.example.com/auth/oidc.callback"]}]
+
+Any number of clients may be listed. redirect_uris may also be written as a
+single comma separated string, and is always matched exactly.
 """
 
 import hmac
@@ -42,25 +51,72 @@ class OIDCClient:
     redirect_uris: list[str]
 
 
-def get_configured_client() -> Optional[OIDCClient]:
-    client_id = config.config.get("OIDC_CLIENT_ID")
-    client_secret = config.config.get("OIDC_CLIENT_SECRET")
-    redirect_uris = config.config.get("OIDC_REDIRECT_URIS")
-    if not client_id or not client_secret or not redirect_uris:
-        return None
+def _parse_redirect_uris(value: object) -> list[str]:
+    parts: list[object]
+    if isinstance(value, str):
+        parts = list(value.split(","))
+    elif isinstance(value, list):
+        parts = value
+    else:
+        raise ValueError("redirect_uris must be a list of strings, or a comma separated string")
+    uris = [str(uri).strip() for uri in parts]
+    uris = [uri for uri in uris if uri]
+    if not uris:
+        raise ValueError("redirect_uris must contain at least one URI")
+    return uris
+
+
+def _parse_client(entry: object) -> OIDCClient:
+    if not isinstance(entry, dict):
+        raise ValueError("each client must be a JSON object")
+    client_id = str(entry.get("client_id") or "")
+    client_secret = str(entry.get("client_secret") or "")
+    if not client_id:
+        raise ValueError("client_id is required")
+    if not client_secret:
+        raise ValueError(f"client_secret is required for client {client_id}")
     return OIDCClient(
         client_id=client_id,
         client_secret=client_secret,
-        redirect_uris=[uri.strip() for uri in redirect_uris.split(",") if uri.strip()],
+        redirect_uris=_parse_redirect_uris(entry.get("redirect_uris")),
     )
 
 
+def _configured_clients_json() -> list[OIDCClient]:
+    raw = config.config.get("OIDC_CLIENTS")
+    if not raw or not raw.strip():
+        return []
+    try:
+        entries = json.loads(raw)
+        if not isinstance(entries, list):
+            raise ValueError("OIDC_CLIENTS must be a JSON array of client objects")
+        return [_parse_client(entry) for entry in entries]
+    except (ValueError, TypeError) as e:
+        # A misconfigured relying party must not take down unrelated clients,
+        # so the whole list is dropped rather than raised to the request.
+        logger.error(f"ignoring OIDC_CLIENTS: {e}")
+        return []
+
+
+def get_configured_clients() -> dict[str, OIDCClient]:
+    """All configured relying parties, keyed by client_id."""
+    clients: dict[str, OIDCClient] = {}
+    for client in _configured_clients_json():
+        if client.client_id in clients:
+            logger.error(f"duplicate OIDC client_id {client.client_id} in configuration, ignoring the later one")
+            continue
+        clients[client.client_id] = client
+    return clients
+
+
 def validate_client_id(client_id: str) -> Optional[OIDCClient]:
-    client = get_configured_client()
-    if client is None:
-        logger.warning("OIDC login attempted but no OIDC client is configured")
+    clients = get_configured_clients()
+    if not clients:
+        logger.warning("OIDC login attempted but no OIDC clients are configured")
         return None
-    if not hmac.compare_digest(client.client_id, client_id):
+    client = clients.get(client_id)
+    if client is None:
+        logger.warning(f"OIDC login attempted with unknown client_id {client_id}")
         return None
     return client
 
