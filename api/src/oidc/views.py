@@ -5,10 +5,11 @@ from core.auth import generate_token
 from core.models import AccessToken
 from flask import Response, g, jsonify, request
 from membership.membership import get_membership_summary
-from membership.models import Member
+from membership.models import Group, Member
 from service.api_definition import GET, POST, PUBLIC, USER, Arg, non_empty_str
 from service.db import db_session
 from service.error import BadRequest, Unauthorized
+from sqlalchemy import select
 
 from oidc import provider, service
 
@@ -112,13 +113,28 @@ def token(
 
 @service.route("/userinfo", method=GET, permission=USER, flat_return=True)
 def userinfo():
-    """OIDC userinfo endpoint: standard claims for the authenticated member."""
+    """OIDC userinfo endpoint: standard claims for the authenticated member.
+
+    Group membership is exposed twice: `groups` holds the group names as a flat
+    list of strings, which is the shape relying parties expect when mapping
+    groups to roles, and `groups_detailed` pairs each name with its human
+    readable title.
+    """
     member = db_session.get(Member, g.user_id)
     if member is None or member.deleted_at is not None:
         raise Unauthorized("Member not found.")
 
     summary = get_membership_summary(member.member_id)
     name = f"{member.firstname} {member.lastname}".strip() if member.lastname else member.firstname
+
+    # Selecting columns rather than the Group entity keeps the correlated
+    # Group.num_members subquery out of the query; it is unused here.
+    groups = db_session.execute(
+        select(Group.name, Group.title)
+        .join(Member.groups)
+        .where(Member.member_id == member.member_id, Group.deleted_at == None)
+        .order_by(Group.group_id)
+    ).all()
 
     return dict(
         sub=str(member.member_id),
@@ -131,4 +147,6 @@ def userinfo():
         member_number=member.member_number,
         membership_active=summary.membership_active,
         labaccess_active=summary.effective_labaccess_active,
+        groups=[name for name, _ in groups],
+        groups_detailed=[dict(name=name, title=title) for name, title in groups],
     )

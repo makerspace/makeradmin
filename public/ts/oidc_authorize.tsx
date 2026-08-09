@@ -32,6 +32,10 @@ function clientDisplayName(client_id: string): string {
     return client_id.charAt(0).toUpperCase() + client_id.slice(1);
 }
 
+function setDocumentTitle(title: string) {
+    document.title = `${title} - Stockholm Makerspace`;
+}
+
 const StatusPage = ({
     title,
     message,
@@ -40,20 +44,22 @@ const StatusPage = ({
     title: string;
     message: string;
     spinner?: boolean;
-}) => (
-    <>
-        <Sidebar cart={null} />
-        <div id="content">
-            <div class="content-centering">
-                <div class="uk-width-medium" style="text-align: center;">
-                    <h1>{title}</h1>
-                    {spinner ? <div uk-spinner="ratio: 2" /> : null}
-                    <p>{message}</p>
+}) => {
+    return (
+        <>
+            <Sidebar cart={null} />
+            <div id="content">
+                <div class="content-centering">
+                    <div class="uk-width-medium" style="text-align: center;">
+                        <h1>{title}</h1>
+                        {spinner ? <div uk-spinner="ratio: 2" /> : null}
+                        <p>{message}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </>
-);
+        </>
+    );
+};
 
 common.documentLoaded().then(() => {
     const root = document.querySelector("#root") as HTMLElement;
@@ -65,6 +71,7 @@ common.documentLoaded().then(() => {
     }
 
     if (params == null) {
+        setDocumentTitle("Ogiltig förfrågan");
         render(
             <StatusPage
                 title="Ogiltig förfrågan"
@@ -77,6 +84,7 @@ common.documentLoaded().then(() => {
 
     const clientName = clientDisplayName(params.client_id);
 
+    setDocumentTitle(`Fortsätter till ${clientName}`);
     render(
         <StatusPage
             title={`Fortsätter till ${clientName}`}
@@ -102,12 +110,14 @@ common.documentLoaded().then(() => {
                 // Not logged in (or expired token): show the ordinary login
                 // page and come back here afterwards to finish the flow.
                 common.removeToken();
+                setDocumentTitle(`Logga in till ${clientName}`);
                 login.render_login(
                     root,
                     `Logga in för att fortsätta till ${clientName}`,
                     window.location.href,
                 );
             } else {
+                setDocumentTitle("Inloggningen misslyckades");
                 render(
                     <StatusPage
                         title="Inloggningen misslyckades"

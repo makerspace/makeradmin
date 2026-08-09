@@ -1,7 +1,14 @@
 from dataclasses import dataclass
 from typing import Sequence
 
-from service.api_definition import ALL_PERMISSIONS, MEMBER_VIEW, MEMBERBOOTH, WEBSHOP
+from service.api_definition import (
+    ALL_PERMISSIONS,
+    GROUP_MEMBER_VIEW,
+    MEMBER_VIEW,
+    MEMBERBOOTH,
+    MESSAGE_SEND,
+    WEBSHOP,
+)
 from service.config import config
 
 
@@ -35,6 +42,11 @@ SERVICE_USERS = (
         id=-3,
         name="multiaccess-program",
         permissions=[MEMBER_VIEW, WEBSHOP],
+    ),
+    ServiceUser(
+        id=-4,
+        name="makerevents",
+        permissions=[MEMBER_VIEW, GROUP_MEMBER_VIEW, MESSAGE_SEND],
     ),
 )
 
