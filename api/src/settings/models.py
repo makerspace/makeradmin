@@ -171,6 +171,23 @@ class GlobalSettings:
         is_public=True,
     )
 
+    intro_booking_method: SettingProperty[str] = SettingProperty(
+        key="intro_booking_method",
+        default="calendly",
+        description="Booking system for member introductions: 'calendly' uses the url_calendly_book page, "
+        "'makerspace_events' embeds the booker at url_intro_booking_embed",
+        category="external_links",
+        is_public=True,
+    )
+
+    url_intro_booking_embed: SettingProperty[str] = SettingProperty(
+        key="url_intro_booking_embed",
+        default="https://events.makerspace.se/embed/intro",
+        description="Member introduction booking embed URL, used when intro_booking_method is 'makerspace_events'",
+        category="external_links",
+        is_public=True,
+    )
+
     url_memberbooth: SettingProperty[str] = SettingProperty(
         key="url_memberbooth",
         default="https://wiki.makerspace.se/Memberbooth",

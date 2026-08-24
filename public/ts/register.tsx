@@ -5,6 +5,7 @@ import {
     StateUpdater,
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from "preact/hooks";
 import { PopupModal, useCalendlyEventListener } from "react-calendly";
@@ -34,8 +35,10 @@ import {
 } from "./payment_common";
 import {
     accessyURL,
+    INTRO_BOOKING_METHOD,
     URL_CALENDLY_BOOK,
     URL_GET_STARTED_QUIZ,
+    URL_INTRO_BOOKING_EMBED,
     URL_INSTAGRAM,
     URL_RELATIVE_MEMBER_PORTAL,
     URL_SLACK_HELP,
@@ -650,12 +653,71 @@ const TaskItem = ({
     );
 };
 
-const Success = ({ member }: { member: member_t }) => {
+const EMBED_CHANNEL = "makerspace-intro-embed";
+
+/// Embeds the events.makerspace.se intro booker. The embed has no session of
+/// its own: it asks the framing page for the member's login token via
+/// postMessage, and its server validates the token against /member/current.
+const IntroBooker = ({
+    loginToken,
+    onBooked,
+}: {
+    loginToken: string;
+    onBooked: () => void;
+}) => {
+    const frame = useRef<HTMLIFrameElement>(null);
+    const [height, setHeight] = useState(420);
+    const { t } = useTranslation("register");
+    const embedOrigin = useMemo(
+        () => new URL(URL_INTRO_BOOKING_EMBED).origin,
+        [],
+    );
+
+    useEffect(() => {
+        const onMessage = (e: MessageEvent) => {
+            if (e.origin !== embedOrigin) return;
+            if (e.data?.source !== EMBED_CHANNEL) return;
+            if (e.data.type === "ready") {
+                frame.current?.contentWindow?.postMessage(
+                    { source: EMBED_CHANNEL, type: "auth", token: loginToken },
+                    embedOrigin,
+                );
+            }
+            if (e.data.type === "height" && typeof e.data.height === "number") {
+                setHeight(e.data.height);
+            }
+            if (e.data.type === "booked") onBooked();
+        };
+        window.addEventListener("message", onMessage);
+        return () => window.removeEventListener("message", onMessage);
+    }, [loginToken]);
+
+    return (
+        <iframe
+            ref={frame}
+            title={t("success.bookButton")}
+            src={URL_INTRO_BOOKING_EMBED}
+            style={{ width: "100%", border: "none", height }}
+        />
+    );
+};
+
+const Success = ({
+    member,
+    loginToken,
+}: {
+    member: member_t;
+    loginToken: string | null;
+}) => {
     const [isBookModalOpen, setBookModalOpen] = useState(false);
     const [clickedSteps, setClickedSteps] = useState(
         new Set<number | string>(),
     );
     const { t } = useTranslation("register");
+    // Fall back to Calendly if the token is somehow missing, since the embed
+    // cannot show member-specific booking without it.
+    const useEventsBooker =
+        INTRO_BOOKING_METHOD === "makerspace_events" && loginToken !== null;
 
     useCalendlyEventListener({
         onEventScheduled: () => {
@@ -733,14 +795,18 @@ const Success = ({ member }: { member: member_t }) => {
                     setClickedSteps={setClickedSteps}
                     step="booked"
                 >
-                    {(_tick) => (
-                        <button
-                            className="flow-button primary flow-button-small"
-                            onClick={() => setBookModalOpen(true)}
-                        >
-                            {t("success.bookButton")}
-                        </button>
-                    )}
+                    {(_tick) =>
+                        useEventsBooker ? (
+                            t("success.bookIntroduction")
+                        ) : (
+                            <button
+                                className="flow-button primary flow-button-small"
+                                onClick={() => setBookModalOpen(true)}
+                            >
+                                {t("success.bookButton")}
+                            </button>
+                        )
+                    }
                 </TaskItem>
                 {steps.map((step, i) => (
                     <TaskItem
@@ -752,6 +818,14 @@ const Success = ({ member }: { member: member_t }) => {
                     </TaskItem>
                 ))}
             </ul>
+            {useEventsBooker && (
+                <IntroBooker
+                    loginToken={loginToken!}
+                    onBooked={() =>
+                        setClickedSteps((steps) => new Set(steps).add("booked"))
+                    }
+                />
+            )}
             <div class="uk-flex-1" />
             <a
                 href={URL_RELATIVE_MEMBER_PORTAL}
@@ -759,19 +833,21 @@ const Success = ({ member }: { member: member_t }) => {
             >
                 {t("success.continueToMemberPortal")}
             </a>
-            <PopupModal
-                url="https://calendly.com/medlemsintroduktion/medlemsintroduktion"
-                rootElement={document.getElementById("root")!}
-                open={isBookModalOpen}
-                onModalClose={() => setBookModalOpen(false)}
-                prefill={{
-                    name: member.firstname + " " + member.lastname,
-                    firstName: member.firstname,
-                    lastName: member.lastname,
-                    email: member.email,
-                    smsReminderNumber: member.phone,
-                }}
-            />
+            {!useEventsBooker && (
+                <PopupModal
+                    url={URL_CALENDLY_BOOK}
+                    rootElement={document.getElementById("root")!}
+                    open={isBookModalOpen}
+                    onModalClose={() => setBookModalOpen(false)}
+                    prefill={{
+                        name: member.firstname + " " + member.lastname,
+                        firstName: member.firstname,
+                        lastName: member.lastname,
+                        email: member.email,
+                        smsReminderNumber: member.phone,
+                    }}
+                />
+            )}
         </>
     );
 };
@@ -1012,6 +1088,7 @@ const RegisterPage = ({}: {}) => {
     });
 
     const [loggedInMember, setLoggedInMember] = useState<member_t | null>(null);
+    const [loginToken, setLoginToken] = useState<string | null>(null);
     const { t } = useTranslation("register");
     const { t: tCommon } = useTranslation("common");
     const card = useMemo(() => createStripeCardInput(), []);
@@ -1245,6 +1322,7 @@ const RegisterPage = ({}: {}) => {
                         discountInfo={discounts}
                         onRegistered={async (r) => {
                             common.login(r.loginToken);
+                            setLoginToken(r.loginToken);
                             setLoggedInMember(await LoadCurrentMemberInfo());
                             setState(State.Success);
                         }}
@@ -1262,7 +1340,7 @@ const RegisterPage = ({}: {}) => {
             return (
                 <>
                     <MakerspaceLogo />
-                    <Success member={loggedInMember} />
+                    <Success member={loggedInMember} loginToken={loginToken} />
                 </>
             );
         case State.Discounts:
