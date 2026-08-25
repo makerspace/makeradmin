@@ -6,11 +6,18 @@ from i18n.locales import translate
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from membership.models import Member
 from service.config import get_admin_url, get_public_url
+from settings.models import get_setting_property
 
 from messages.models import Message, MessageTemplate
 
 template_loader = FileSystemLoader("/config/messages")
 template_env = Environment(loader=template_loader, autoescape=select_autoescape())
+
+
+def get_setting_value(key: str) -> Any:
+    """Template helper: current value of a global setting, e.g. {{ setting("url_calendly_book") }}."""
+    prop, _ = get_setting_property(key)
+    return prop.read()
 
 
 def render_template(name: str, **kwargs: Any) -> str:
@@ -47,6 +54,7 @@ def send_message(
                 admin_url=get_admin_url,
                 member=member,
                 translate=translate,
+                setting=get_setting_value,
                 **kwargs,
             )
             if recipient_type == "email"
@@ -62,6 +70,7 @@ def send_message(
             admin_url=get_admin_url,
             member=member,
             translate=translate,
+            setting=get_setting_value,
             **kwargs,
         )
 
