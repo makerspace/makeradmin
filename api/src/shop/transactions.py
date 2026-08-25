@@ -86,6 +86,18 @@ class SubscriptionStart(DataClassJsonMixin):
     expected_to_pay_recurring: Decimal
 
 
+def get_stripe_token_transaction_ids(stripe_token: str) -> List[int]:
+    """Ids of every transaction already linked to a given stripe object id.
+
+    Unlike [get_source_transaction] this tolerates a token mapping to several transactions, which
+    is what a stripe invoice with more than one subscription line produces.
+    """
+    return [
+        row.transaction_id
+        for row in db_session.query(StripePending).filter(StripePending.stripe_token == stripe_token).all()
+    ]
+
+
 def get_source_transaction(source_id: str) -> Optional[Transaction]:
     try:
         return (

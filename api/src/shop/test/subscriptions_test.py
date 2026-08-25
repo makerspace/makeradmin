@@ -24,7 +24,7 @@ from dateutil.relativedelta import relativedelta
 from membership.member_auth import hash_password
 from membership.membership import get_membership_summary
 from membership.models import Member, Span
-from messages.models import Message
+from messages.models import Message, MessageTemplate
 from service.db import db_session
 from shop import stripe_constants, stripe_event, stripe_subscriptions
 from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys, PaymentIntentStatus
@@ -171,6 +171,7 @@ class SubscriptionTestWithoutStripe(ShopTestMixin, FlaskTestBase):
 class SubscriptionTestWithStripe(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     seen_event_ids: Set[str]
+    processed_events: List[stripe.Event]
 
     @classmethod
     @skipIf(not STRIPE_PRIVATE_KEY, "subscriptions tests require stripe api key in .env file")
@@ -214,6 +215,7 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         db_session.query(Span).delete()
         db_session.query(Message).delete()
         self.seen_event_ids = set()
+        self.processed_events = []
         self.earliest_possible_event_time = datetime.now(timezone.utc)
         self.clocks_to_destroy: List[FakeClock] = []
 
@@ -262,6 +264,16 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         self.clocks_to_destroy.append(clock)
         member = self.create_member_that_can_pay(clock, signed_labaccess)
         return (start_time, clock, member)
+
+    def transaction_count(self, member: Member) -> int:
+        return db_session.query(shop.models.Transaction).filter_by(member_id=member.member_id).count()
+
+    def receipt_count(self, member: Member) -> int:
+        return (
+            db_session.query(Message)
+            .filter(Message.member_id == member.member_id, Message.template == MessageTemplate.RECEIPT.value)
+            .count()
+        )
 
     def advance_clock(self, clock: FakeClock, time: datetime) -> None:
         clock.advance(to=time)
@@ -366,6 +378,7 @@ class SubscriptionTestWithStripe(FlaskTestBase):
             events_with_random_time.sort(key=lambda x: x[0])
 
         for _, ev in events_with_random_time:
+            self.processed_events.append(ev)
             stripe_event.stripe_event(ev, current_time=event_semantic_time(ev))
 
     def test_subscriptions_create_new_member(self) -> None:
@@ -461,6 +474,9 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         assert summary.membership_active
         assert summary.membership_end == (now + time_delta(years=1)).date()
 
+        # Regression: subscription invoices used to create completed transactions without a receipt.
+        assert self.receipt_count(member) == 1
+
         self.advance_clock(clock, now + time_delta(years=1, days=5))
 
         # Check that the subscription was renewed
@@ -468,6 +484,9 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         summary = get_membership_summary(member.member_id, clock.date)
         assert summary.membership_active
         assert summary.membership_end == (now + time_delta(years=2)).date()
+
+        # Every renewal invoice gets its own receipt.
+        assert self.receipt_count(member) == 2
 
         was_cancelled = stripe_subscriptions.cancel_subscription(member, SubscriptionType.MEMBERSHIP)
         assert was_cancelled
@@ -485,6 +504,38 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         summary = get_membership_summary(member.member_id, clock.date)
         assert not summary.membership_active
         assert member.stripe_membership_subscription_id is None
+
+    def test_subscriptions_invoice_paid_replay_is_ignored(self) -> None:
+        """
+        Checks that redelivering invoice.paid does not grant the period or send the receipt twice.
+        """
+        (now, clock, member) = self.setup_single_member()
+
+        stripe_subscriptions.start_subscription(
+            member,
+            SubscriptionType.MEMBERSHIP,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+        self.advance_clock(clock, now + time_delta(days=1))
+
+        summary = get_membership_summary(member.member_id, clock.date)
+        assert summary.membership_active
+        membership_end = summary.membership_end
+        transactions_after_first_delivery = self.transaction_count(member)
+        assert transactions_after_first_delivery == 1
+        assert self.receipt_count(member) == 1
+
+        paid_invoice_events = [ev for ev in self.processed_events if ev.type == "invoice.paid"]
+        assert len(paid_invoice_events) == 1, "The subscription should have produced exactly one paid invoice"
+
+        # Stripe redelivers the identical event when a previous delivery did not get a 200 response.
+        for ev in paid_invoice_events:
+            stripe_event.stripe_event(ev, current_time=event_semantic_time(ev))
+
+        assert self.transaction_count(member) == transactions_after_first_delivery
+        assert self.receipt_count(member) == 1
+        assert get_membership_summary(member.member_id, clock.date).membership_end == membership_end
 
     def test_subscriptions_cancel_scheduled(self) -> None:
         """

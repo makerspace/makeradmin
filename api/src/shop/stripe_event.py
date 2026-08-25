@@ -16,6 +16,7 @@ import shop.transactions
 from shop import stripe_subscriptions
 from shop.models import (
     ProductAction,
+    StripePending,
     Transaction,
     TransactionAction,
     TransactionContent,
@@ -35,6 +36,7 @@ from shop.transactions import (
     PaymentFailed,
     commit_fail_transaction,
     get_source_transaction,
+    get_stripe_token_transaction_ids,
 )
 
 logger = getLogger("makeradmin")
@@ -96,6 +98,17 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
         logger.info(f"Processing paid invoice {event['id']}")
         # Member has paid something and we can now add things accordingly...
         invoice = cast(stripe.Invoice, event.data.object)
+        invoice_id = invoice.id
+        assert invoice_id is not None
+
+        # Stripe redelivers invoice.paid until we answer 200, so without this guard a retry would
+        # create a second set of transactions for the same invoice: the member would be granted the
+        # subscription period twice and receive two receipts. The marker rows are written in the same
+        # database transaction as the transactions they point at, so they exist exactly when a
+        # previous delivery was fully committed.
+        already_processed = get_stripe_token_transaction_ids(invoice_id)
+        if already_processed:
+            raise IgnoreEvent(f"invoice {invoice_id} already handled, transactions {already_processed}")
 
         transaction_ids: List[int] = []
 
@@ -142,7 +155,8 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             transaction = Transaction(
                 member_id=member_id,
                 amount=amount,
-                status=Transaction.Status.completed,
+                # Paid already, but created pending so complete_transaction below does the completion.
+                status=Transaction.Status.pending,
                 # This created_at time is important, as any membership days that are added
                 # will not be added before this time.
                 # It is important that we set this explicitly instead of using the default (current time),
@@ -151,6 +165,12 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             )
             db_session.add(transaction)
             # We need to flush to get the id of the transaction
+            db_session.flush()
+            # Invariant: stripe_token holds the *invoice* id here, never the payment intent id.
+            # get_pending_source_transaction looks payment intents up in this same table, and a
+            # subscription's payment intent must not resolve to a transaction, otherwise the
+            # charge.succeeded event would try to charge an already paid transaction.
+            db_session.add(StripePending(transaction_id=transaction.id, stripe_token=invoice_id))
             db_session.flush()
             content = TransactionContent(
                 transaction_id=transaction.id,
@@ -172,6 +192,9 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             )
 
             db_session.flush()
+
+            # Must precede ship_orders: pending_actions_query only sees completed transactions.
+            shop.transactions.complete_transaction(transaction)
 
             transaction_ids.append(transaction.id)
 
@@ -201,8 +224,6 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             # Attach a makerspace transaction id to the stripe invoice item.
             # This is nice to have in the future if we need to match them somehow.
             # In the vast majority of all cases, this will just contain a single transaction id.
-            invoice_id = invoice.id
-            assert invoice_id is not None
             retry(
                 lambda: stripe.Invoice.modify(
                     invoice_id,
