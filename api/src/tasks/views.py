@@ -1,4 +1,5 @@
 import json
+import threading
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from logging import getLogger
@@ -6,6 +7,7 @@ from typing import Optional, cast, get_args
 
 from flask import request
 from membership.models import Member
+from redis_cache import redis_connection
 from serde import from_dict, serde
 from serde.json import from_json, to_json
 from service.api_definition import GET, MEMBER_VIEW, POST, PUBLIC
@@ -51,10 +53,22 @@ from tasks.models import MemberPreference, MemberPreferenceQuestionType, TaskDel
 
 logger = getLogger("task-delegator")
 
-# Event deduplication cache: stores processed event_ids with their timestamp
-# Format: {event_id: timestamp}
-_processed_events: dict[str, datetime] = {}
-_PROCESSED_EVENTS_TTL = timedelta(hours=1)  # Keep event IDs for 1 hour
+_SLACK_EVENT_DEDUP_TTL = timedelta(hours=1)
+
+
+def _slack_event_seen_before(event_id: str) -> bool:
+    """Atomically mark a Slack event id as processed, returning True if it already was.
+
+    The dedup store must be shared across gunicorn workers: Slack redelivers an
+    event on http_timeout and the retry usually lands on a different worker, so
+    a per-process dict lets duplicates through.
+    """
+    try:
+        return not redis_connection.set(f"slack_event_processed:{event_id}", 1, nx=True, ex=_SLACK_EVENT_DEDUP_TTL)
+    except Exception:
+        # Better to risk a duplicate reply than to drop the event entirely.
+        logger.exception("Redis unavailable for Slack event dedup")
+        return False
 
 
 @dataclass
@@ -369,22 +383,10 @@ def slack_events() -> dict:
 
     # Handle events
     if data.get("type") == "event_callback":
-        # Check for duplicate events using event_id
         event_id = data.get("event_id")
-        now = datetime.now()
-
-        if event_id:
-            # Clean up old event IDs (older than TTL)
-            global _processed_events
-            _processed_events = {eid: ts for eid, ts in _processed_events.items() if now - ts < _PROCESSED_EVENTS_TTL}
-
-            # Check if we've already processed this event
-            if event_id in _processed_events:
-                logger.info(f"Ignoring duplicate event {event_id}")
-                return {"ok": True}
-
-            # Mark this event as processed
-            _processed_events[event_id] = now
+        if event_id and _slack_event_seen_before(event_id):
+            logger.info(f"Ignoring duplicate event {event_id}")
+            return {"ok": True}
 
         event = data.get("event", {})
         event_type = event.get("type")
@@ -409,12 +411,10 @@ def slack_events() -> dict:
             text = event.get("text", "").lower()
             keywords = settings.thespace_keywords.read()
             if any(keyword.lower() in text for keyword in keywords):
-                logger.info(
-                    "thespace mention triggered: headers=%s body=%s",
-                    dict(request.headers),
-                    request.get_data(as_text=True),
-                )
-                handle_thespace_mention(event)
+                # Ack within Slack's 3 s deadline: the handler makes one Slack
+                # API call per member at the space, and a slow response makes
+                # Slack redeliver the event (http_timeout retries).
+                threading.Thread(target=_handle_thespace_mention_in_thread, args=(event,), daemon=True).start()
 
         return {"ok": True}
 
@@ -449,6 +449,15 @@ def get_all_channel_members(slack_client: WebClient, channel_id: str) -> set[str
         cursor = next_cursor
 
     return channel_member_ids
+
+
+def _handle_thespace_mention_in_thread(event: dict) -> None:
+    try:
+        handle_thespace_mention(event)
+    finally:
+        # db_session is thread-scoped; without remove() every mention thread
+        # leaks a pooled MySQL connection.
+        db_session.remove()
 
 
 def handle_thespace_mention(event: dict) -> None:
