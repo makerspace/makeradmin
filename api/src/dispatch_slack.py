@@ -19,7 +19,7 @@ from messages.models import Message
 from rocky.process import log_exception, stoppable
 from service.config import config, get_mysql_config
 from service.db import create_mysql_engine, db_session
-from slack.util import get_slack_client, lookup_slack_user_by_email
+from slack.util import get_slack_client, get_slack_email_for_member, lookup_slack_user_by_email
 from slack_sdk.errors import SlackApiError
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
@@ -47,7 +47,9 @@ def send_slack_messages(limit: int) -> None:
     skipped_messages = []
 
     for message in query:
-        recipient_email = message.recipient
+        # Resolve late: the member may have verified a Slack address after the message was queued,
+        # and senders write member.email into recipient without consulting the override table.
+        recipient_email = get_slack_email_for_member(message.member) if message.member else message.recipient
         msg = f"sending Slack message {message.id} to {recipient_email}"
 
         if not slack_client:

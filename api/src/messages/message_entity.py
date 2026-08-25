@@ -14,6 +14,10 @@ class MessageEntity(Entity):
         if not isinstance(recipients, list):
             raise UnprocessableEntity("Recipients should be a list.")
 
+        recipient_type = data.pop("recipient_type", "email")
+        if recipient_type not in ("email", "slack"):
+            raise UnprocessableEntity(what=BAD_VALUE, message="Recipient type should be email or slack")
+
         member_ids = set()
 
         for recipient in recipients:
@@ -45,7 +49,7 @@ class MessageEntity(Entity):
                     "recipient": member.email,
                     "member_id": member.member_id,
                     "status": "queued",
-                    "recipient_type": "email",
+                    "recipient_type": recipient_type,
                 },
                 commit=False,
             )
