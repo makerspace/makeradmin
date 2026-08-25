@@ -702,6 +702,69 @@ const IntroBooker = ({
     );
 };
 
+/// Shows the intro booker in a modal. Uses a native <dialog> so the browser
+/// provides focus trapping, Escape-to-close and top-layer rendering.
+const IntroBookerDialog = ({
+    loginToken,
+    open,
+    onClose,
+    onBooked,
+}: {
+    loginToken: string;
+    open: boolean;
+    onClose: () => void;
+    onBooked: () => void;
+}) => {
+    const dialog = useRef<HTMLDialogElement>(null);
+    // The embed stays mounted after the first open so reopening is instant
+    // and an in-progress booking isn't reset by a stray backdrop click.
+    const [everOpened, setEverOpened] = useState(false);
+    const { t } = useTranslation("common");
+
+    useEffect(() => {
+        const el = dialog.current;
+        if (!el) return;
+        if (open) {
+            setEverOpened(true);
+            if (!el.open) el.showModal();
+        } else if (el.open) {
+            el.close();
+        }
+    }, [open]);
+
+    // showModal() does not prevent the page behind from scrolling.
+    useEffect(() => {
+        if (!open) return;
+        const previous = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = previous;
+        };
+    }, [open]);
+
+    return (
+        <dialog
+            ref={dialog}
+            className="intro-booker-dialog"
+            onClose={onClose}
+            onClick={(e) => {
+                // The dialog itself is only the click target on the backdrop;
+                // clicks on the content hit the header or the iframe.
+                if (e.target === dialog.current) onClose();
+            }}
+        >
+            <div className="intro-booker-dialog-header">
+                <button type="button" aria-label={t("close")} onClick={onClose}>
+                    <span uk-icon="icon: close" />
+                </button>
+            </div>
+            {everOpened && (
+                <IntroBooker loginToken={loginToken} onBooked={onBooked} />
+            )}
+        </dialog>
+    );
+};
+
 const Success = ({
     member,
     loginToken,
@@ -795,18 +858,19 @@ const Success = ({
                     setClickedSteps={setClickedSteps}
                     step="booked"
                 >
-                    {(_tick) =>
-                        useEventsBooker ? (
-                            t("success.bookIntroduction")
-                        ) : (
+                    {(_tick) => (
+                        <>
                             <button
                                 className="flow-button primary flow-button-small"
                                 onClick={() => setBookModalOpen(true)}
                             >
-                                {t("success.bookButton")}
-                            </button>
-                        )
-                    }
+                                {useEventsBooker
+                                    ? t("success.bookIntroButton")
+                                    : t("success.bookButton")}
+                            </button>{" "}
+                            {t("success.bookIntroduction")}
+                        </>
+                    )}
                 </TaskItem>
                 {steps.map((step, i) => (
                     <TaskItem
@@ -818,14 +882,6 @@ const Success = ({
                     </TaskItem>
                 ))}
             </ul>
-            {useEventsBooker && (
-                <IntroBooker
-                    loginToken={loginToken!}
-                    onBooked={() =>
-                        setClickedSteps((steps) => new Set(steps).add("booked"))
-                    }
-                />
-            )}
             <div class="uk-flex-1" />
             <a
                 href={URL_RELATIVE_MEMBER_PORTAL}
@@ -833,6 +889,16 @@ const Success = ({
             >
                 {t("success.continueToMemberPortal")}
             </a>
+            {useEventsBooker && (
+                <IntroBookerDialog
+                    loginToken={loginToken!}
+                    open={isBookModalOpen}
+                    onClose={() => setBookModalOpen(false)}
+                    onBooked={() =>
+                        setClickedSteps((steps) => new Set(steps).add("booked"))
+                    }
+                />
+            )}
             {!useEventsBooker && (
                 <PopupModal
                     url={URL_CALENDLY_BOOK}

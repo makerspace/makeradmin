@@ -3,6 +3,7 @@
     back: "Tillbaka",
     and: "och",
     cancel: "Avbryt",
+    close: "Stäng",
     unit: {
         year_one: "år",
         year_other: "år",

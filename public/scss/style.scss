@@ -1945,6 +1945,9 @@ $palette-red: $palette4;
     a.flow-button,
     button.flow-button,
     input[type="submit"].flow-button {
+        // Anchors are inline by default; without this their padded background
+        // breaks across lines when surrounding text wraps on narrow screens.
+        display: inline-block;
         // Required for progress spinner
         position: relative;
         border: none;
@@ -2029,6 +2032,107 @@ $palette-red: $palette4;
         aspect-ratio: 300/210;
         margin: 0px 16px;
         align-self: center;
+    }
+
+    dialog.intro-booker-dialog {
+        width: min(680px, calc(100vw - 32px));
+        max-height: 85vh;
+        max-height: 85dvh;
+        padding: 0;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        // Pop-up animation. Browsers without @starting-style/allow-discrete
+        // support show and hide the dialog instantly instead.
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+        transition:
+            opacity 0.25s ease,
+            transform 0.25s ease,
+            display 0.25s ease allow-discrete,
+            overlay 0.25s ease allow-discrete;
+
+        &[open] {
+            opacity: 1;
+            transform: none;
+
+            @starting-style {
+                opacity: 0;
+                transform: translateY(16px) scale(0.97);
+            }
+        }
+
+        &::backdrop {
+            background: rgba(0, 0, 0, 0);
+            transition:
+                background-color 0.25s ease,
+                display 0.25s ease allow-discrete,
+                overlay 0.25s ease allow-discrete;
+        }
+
+        &[open]::backdrop {
+            background: rgba(0, 0, 0, 0.5);
+
+            @starting-style {
+                background: rgba(0, 0, 0, 0);
+            }
+        }
+
+        // Full-screen sheet on phones.
+        @media (max-width: 700px) {
+            width: 100vw;
+            max-width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+
+            iframe {
+                // The embed's reported height targets inline embedding; in
+                // the full-screen sheet the iframe must fill the viewport,
+                // scrolling internally if the content outgrows it.
+                flex: 1;
+                min-height: 0;
+                height: auto !important;
+            }
+        }
+    }
+
+    // Zero-height overlay: the close button floats over the embed's top-right
+    // corner instead of adding a header bar that clashes with its background.
+    .intro-booker-dialog-header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        height: 0;
+        display: flex;
+        justify-content: flex-end;
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            margin: 10px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            color: #666;
+
+            &:hover {
+                color: #000;
+                background: #fff;
+            }
+        }
     }
 
     form {

@@ -19,6 +19,7 @@
         "and": "och",
         "back": "Tillbaka",
         "cancel": "Avbryt",
+        "close": "Stäng",
         "continue": "Fortsätt",
         "logOut": "Logga ut",
         "priceUnit": "kr",
@@ -426,6 +427,7 @@
         },
         "success": {
             "bookButton": "Boka en medlemsintroduktion",
+            "bookIntroButton": "Boka intro",
             "bookIntroduction": "För att få tillgång till makerspacet så måste du gå på en medlemsintroduktion. Du kan boka en här, eller göra det senare.",
             "continueToMemberPortal": "Fortsätt till din medlemssida",
             "nextSteps": "Här är dina nästa steg:",

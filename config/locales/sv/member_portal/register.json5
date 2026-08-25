@@ -141,6 +141,7 @@
         bookIntroduction: "För att få tillgång till makerspacet så måste du gå på en medlemsintroduktion. Du kan boka en här, eller göra det senare.",
         nextSteps: "Här är dina nästa steg:",
         bookButton: "Boka en medlemsintroduktion",
+        bookIntroButton: "Boka intro",
         steps: {
             joinSlackButton: "Gå med i vår Slack",
             joinSlackWhy: "för att chatta med andra medlemmar.",

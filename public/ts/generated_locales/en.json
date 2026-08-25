@@ -19,6 +19,7 @@
         "and": "and",
         "back": "Back",
         "cancel": "Cancel",
+        "close": "Close",
         "continue": "Continue",
         "logOut": "Log out",
         "priceUnit": "kr",
@@ -426,6 +427,7 @@
         },
         "success": {
             "bookButton": "Book your member introduction",
+            "bookIntroButton": "Book intro",
             "bookIntroduction": "To gain access to the Makerspace you must attend a member introduction. You can book it here, or do it later.",
             "continueToMemberPortal": "Continue to your member page",
             "nextSteps": "Here are your next steps:",

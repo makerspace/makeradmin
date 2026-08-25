@@ -175,6 +175,7 @@
         bookIntroduction: "To gain access to the Makerspace you must attend a member introduction. You can book it here, or do it later.",
         nextSteps: "Here are your next steps:",
         bookButton: "Book your member introduction",
+        bookIntroButton: "Book intro",
         steps: {
             joinSlackButton: "Join our Slack",
             joinSlackWhy: "to chat with other members.",
