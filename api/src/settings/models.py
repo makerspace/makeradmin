@@ -9,6 +9,7 @@ This module provides a centralized settings management system with:
 
 import json
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, Generic, List, Type, TypeVar, get_args, get_origin
 
 from service.api_definition import BAD_VALUE
@@ -23,6 +24,11 @@ class Base(DeclarativeBase):
 
 
 T = TypeVar("T")
+
+
+class IntroBookingMethod(Enum):
+    Calendly = "calendly"
+    MakerspaceEvents = "makerspace_events"
 
 
 class SettingProperty(Generic[T]):
@@ -171,9 +177,9 @@ class GlobalSettings:
         is_public=True,
     )
 
-    intro_booking_method: SettingProperty[str] = SettingProperty(
+    intro_booking_method: SettingProperty[IntroBookingMethod] = SettingProperty(
         key="intro_booking_method",
-        default="calendly",
+        default=IntroBookingMethod.Calendly,
         description="Booking system for member introductions: 'calendly' uses the url_calendly_book page, "
         "'makerspace_events' embeds the booker at url_intro_booking_embed",
         category="external_links",
@@ -282,6 +288,8 @@ def _parse_value(value_str: str, type_class: Type) -> Any:
         return int(value_str)
     elif type_class == str:
         return value_str
+    elif isinstance(type_class, type) and issubclass(type_class, Enum):
+        return type_class(value_str)
 
     # Handle generic types (list, dict, list[str], etc.)
     origin = get_origin(type_class)
@@ -309,6 +317,8 @@ def _serialize_value(value: Any, type_class: Type) -> str:
         return str(int(value))
     elif type_class == str:
         return str(value) if value is not None else ""
+    elif isinstance(type_class, type) and issubclass(type_class, Enum):
+        return str(value.value)
 
     # Handle @serde dataclasses
     if hasattr(type_class, "__dataclass_fields__"):

@@ -6,10 +6,17 @@ interface Setting {
     key: string;
     value: string;
     value_type: string;
+    allowed_values: string[] | null;
     description: string;
     category: string;
     is_public: boolean;
 }
+
+const humanize = (text: string) =>
+    text
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 
 const SettingRow: React.FC<{
     setting: Setting;
@@ -25,9 +32,14 @@ const SettingRow: React.FC<{
         setHasChanges(false);
     }, [setting.value]);
 
+    // Checkboxes and dropdowns save immediately; text-like inputs get an
+    // explicit save button since typing produces incomplete values.
+    const savesOnChange =
+        setting.value_type === "bool" || setting.value_type === "enum";
+
     const handleChange = async (newValue: string) => {
         setValue(newValue);
-        if (setting.value_type === "bool") {
+        if (savesOnChange) {
             setIsSaving(true);
             try {
                 await onSave(setting.key, newValue);
@@ -66,6 +78,29 @@ const SettingRow: React.FC<{
                         }
                         disabled={isSaving}
                     />
+                    <span className="settings-status-message uk-margin-small-left uk-text-muted">
+                        {isSaving && <span>Saving...</span>}
+                        {justSaved && !isSaving && <span>Saved</span>}
+                    </span>
+                </div>
+            );
+        }
+
+        if (setting.value_type === "enum" && setting.allowed_values) {
+            return (
+                <div className="uk-flex uk-flex-middle">
+                    <select
+                        className="uk-select"
+                        value={value}
+                        onChange={(e) => handleChange(e.target.value)}
+                        disabled={isSaving}
+                    >
+                        {setting.allowed_values.map((allowed) => (
+                            <option key={allowed} value={allowed}>
+                                {humanize(allowed)}
+                            </option>
+                        ))}
+                    </select>
                     <span className="settings-status-message uk-margin-small-left uk-text-muted">
                         {isSaving && <span>Saving...</span>}
                         {justSaved && !isSaving && <span>Saved</span>}
@@ -119,7 +154,7 @@ const SettingRow: React.FC<{
             </div>
             <div className="settings-row-right">
                 <div className="settings-input-wrapper">{renderInput()}</div>
-                {hasChanges && setting.value_type !== "bool" && (
+                {hasChanges && !savesOnChange && (
                     <div className="settings-save-button-container">
                         <button
                             className="uk-button uk-button-primary uk-button-small"
@@ -186,7 +221,7 @@ export default function GlobalSettings() {
                 ([category, categorySettings]) => (
                     <div key={category} className="uk-margin-medium">
                         <h3 className="uk-heading-divider settings-category-heading">
-                            {category}
+                            {humanize(category)}
                         </h3>
                         <div className="uk-card uk-card-default uk-card-body">
                             {categorySettings.map((setting) => (

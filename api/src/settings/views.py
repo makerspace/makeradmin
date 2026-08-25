@@ -1,7 +1,8 @@
 """API views for settings management."""
 
 import json
-from typing import get_origin
+from enum import Enum
+from typing import Optional, Tuple, Type, get_origin
 
 from service.api_definition import BAD_VALUE, GET, PUBLIC, PUT, WEBSHOP_ADMIN, Arg
 from service.db import db_session
@@ -9,6 +10,17 @@ from service.error import NotFound, UnprocessableEntity
 
 from settings import service
 from settings.models import Setting, _parse_value, _serialize_value, all_setting_properties, get_setting_property
+
+
+def _type_info(type_class: Type) -> Tuple[str, Optional[list]]:
+    """Return the (value_type, allowed_values) pair exposed to the admin UI."""
+    if get_origin(type_class) is list:
+        return "list", None
+    if isinstance(type_class, type) and issubclass(type_class, Enum):
+        return "enum", [e.value for e in type_class]
+    if hasattr(type_class, "__name__"):
+        return type_class.__name__, None
+    return str(type_class), None
 
 
 @service.route("/public", permission=PUBLIC, method=GET)
@@ -55,20 +67,14 @@ def list_settings():
         # Use the same serialization logic as SettingProperty.write()
         default_str = _serialize_value(prop.default, type_class)
 
-        # Determine value type
-        origin = get_origin(type_class)
-        if origin is list:
-            value_type_name = "list"
-        elif hasattr(type_class, "__name__"):
-            value_type_name = type_class.__name__
-        else:
-            value_type_name = str(type_class)
+        value_type_name, allowed_values = _type_info(type_class)
 
         result.append(
             {
                 "key": key,
                 "value": db_setting.value if db_setting else default_str,
                 "value_type": value_type_name,
+                "allowed_values": allowed_values,
                 "description": prop.description,
                 "category": prop.category,
                 "is_public": prop.is_public,
@@ -96,19 +102,13 @@ def get_setting_detail(key):
     # Use the same serialization logic as SettingProperty.write()
     default_str = _serialize_value(prop.default, type_class)
 
-    # Determine value type
-    origin = get_origin(type_class)
-    if origin is list:
-        value_type_name = "list"
-    elif hasattr(type_class, "__name__"):
-        value_type_name = type_class.__name__
-    else:
-        value_type_name = str(type_class)
+    value_type_name, allowed_values = _type_info(type_class)
 
     return {
         "key": key,
         "value": db_setting.value if db_setting else default_str,
         "value_type": value_type_name,
+        "allowed_values": allowed_values,
         "description": prop.description,
         "category": prop.category,
         "is_public": prop.is_public,
@@ -139,7 +139,7 @@ def update_setting(key, value=Arg(str)):
         # Validate by attempting to parse - reuses the same logic as SettingProperty.read()
         _parse_value(value, type_class)
     except (ValueError, json.JSONDecodeError, Exception) as e:
-        type_name = type_class.__name__ if hasattr(type_class, "__name__") else str(type_class)
+        type_name, _ = _type_info(type_class)
         raise UnprocessableEntity(f"Invalid value for type {type_name}: {str(e)}", fields="value", what=BAD_VALUE)
 
     # Update or create setting
@@ -151,7 +151,7 @@ def update_setting(key, value=Arg(str)):
     setting.value = value
     db_session.commit()
 
-    type_name = type_class.__name__ if hasattr(type_class, "__name__") else str(type_class)
+    type_name, _ = _type_info(type_class)
     return {
         "key": key,
         "value": value,
