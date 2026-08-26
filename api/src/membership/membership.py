@@ -212,7 +212,11 @@ class AccessSummary:
 
 
 def get_access_summary(member_id: int) -> AccessSummary:
-    from multiaccessy.accessy import accessy_session
+    from multiaccessy.accessy import (
+        ACCESSY_LABACCESS_GROUP,
+        ACCESSY_SPECIAL_LABACCESS_GROUP,
+        accessy_session,
+    )
 
     if accessy_session is None:
         return AccessSummary(in_org=False, pending_invite_count=0, access_permission_group_names=[])
@@ -224,7 +228,9 @@ def get_access_summary(member_id: int) -> AccessSummary:
     msisdn: str | None = member.phone
     if msisdn is not None:
         pending_invite_count = sum(1 for no in accessy_session.get_pending_invitations() if no == msisdn)
-        accessy_member = accessy_session.get_org_user_from_phone(msisdn)
+        accessy_member = accessy_session.get_org_user_from_phone(
+            msisdn, [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP]
+        )
         in_org = accessy_member is not None
         groups = list(accessy_member.groups) if accessy_member is not None else []
     else:

@@ -219,6 +219,12 @@ def sync(today: Optional[date] = None, member_id: Optional[int] = None) -> None:
 
     group_ids_to_accessy_guids = sync_groups()
 
+    # Both branches below must look at the same groups, otherwise the diff sees a member as missing
+    # a group they already have and tries to add them again, which accessy rejects.
+    groups_of_interest = [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP] + list(
+        group_ids_to_accessy_guids.values()
+    )
+
     # If a specific member is given, sync only that member,
     # otherwise sync all members
     if member_id is not None:
@@ -227,12 +233,10 @@ def sync(today: Optional[date] = None, member_id: Optional[int] = None) -> None:
             raise Exception("Member does not exist")
         if member.phone is None:
             return
-        accessy_member = accessy_session.get_org_user_from_phone(member.phone)
+        accessy_member = accessy_session.get_org_user_from_phone(member.phone, groups_of_interest)
         actual_members = [accessy_member] if accessy_member is not None else []
     else:
-        actual_members = accessy_session.get_all_members(
-            [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP] + list(group_ids_to_accessy_guids.values())
-        )
+        actual_members = accessy_session.get_all_members(groups_of_interest)
 
     pending_invites = accessy_session.get_pending_invitations(after_date=today - timedelta(days=7))
     wanted_members = get_wanted_access(

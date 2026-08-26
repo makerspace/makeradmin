@@ -708,20 +708,25 @@ class AccessySession:
 
         return member
 
-    def _populate_user_groups(self, members: List[AccessyMember]) -> None:
-        for group in [ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP]:
+    def _populate_user_groups(self, members: List[AccessyMember], groups_of_interest: List[UUID]) -> None:
+        for group in groups_of_interest:
             user_ids_in_group = set(item.userId for item in self._get_users_in_access_group(group))
             for m in members:
                 if m.user_id in user_ids_in_group:
                     m.groups.add(group)
 
     def get_org_user_from_phone(
-        self, phone_number: MSISDN, users_in_org: list[dict] | None = None
+        self, phone_number: MSISDN, groups_of_interest: List[UUID], users_in_org: list[dict] | None = None
     ) -> Union[None, AccessyMember]:
-        """Get a AccessyMember from a phone number (if in org)."""
+        """Get a AccessyMember from a phone number (if in org), with affiliation for groups_of_interest.
+
+        Groups outside groups_of_interest are not filled in, so the caller must pass every group it
+        intends to diff against. Otherwise the member looks like they are missing a group they
+        already have, and adding them again fails with "membership already exists".
+        """
         member = self._get_org_user_from_phone(phone_number, users_in_org)
         if member is not None:
-            self._populate_user_groups([member])
+            self._populate_user_groups([member], groups_of_interest)
         return member
 
     def _get_org_user_from_phone(
