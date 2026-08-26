@@ -195,6 +195,10 @@ def set_slack_email(slack_email: str = Arg(non_empty_str)):
     from slack.verification import store_verification
     from slack_sdk.models.blocks import ActionsBlock, ButtonElement, SectionBlock
 
+    # Surrounding whitespace is easy to paste in by accident, and slack's lookup-by-email
+    # will never match it, so normalize before validating and storing.
+    slack_email = slack_email.strip()
+
     # Validate email format (basic check)
     if "@" not in slack_email or "." not in slack_email:
         raise BadRequest("Invalid email format")
