@@ -21,6 +21,19 @@ def handle_password(data):
         data["password"] = check_and_hash_password(unhashed_password)
 
 
+def normalize_email(data):
+    """Store emails in a single canonical form.
+
+    Surrounding whitespace is easy to paste in by accident and makes the address useless for
+    anything that looks it up verbatim, such as the slack lookup-by-email. The unique index on
+    the column already compares case insensitively, so lowercasing changes no uniqueness
+    semantics, it only keeps new rows consistent with how they are compared.
+    """
+    email = data.get("email")
+    if isinstance(email, str):
+        data["email"] = email.strip().lower()
+
+
 class MemberEntity(Entity):
     """
     Special handling of Member, requires subclassing entity:
@@ -36,6 +49,7 @@ class MemberEntity(Entity):
             data = request.json or {}
 
         handle_password(data)
+        normalize_email(data)
 
         # Locking was used here previously, but that did not work well with transactions
         # so now we use transactions to solve EVERYTHING.
@@ -73,6 +87,7 @@ class MemberEntity(Entity):
     def update(self, entity_id: int, commit=True):
         data = request.json or {}
         handle_password(data)
+        normalize_email(data)
         return self._update_internal(entity_id, data, commit=commit)
 
     def delete(self, entity_id: int, commit: bool = False) -> None:
