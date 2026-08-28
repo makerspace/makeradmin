@@ -42,6 +42,25 @@ class Test(TestCase):
             self.assertIsNone(provider.validate_client_credentials("grafana", "s1"))
             self.assertIsNone(provider.validate_client_id("unknown"))
 
+    def test_display_name_defaults_to_a_humanized_client_id(self) -> None:
+        entry = dict(client_id="lovable_booking", client_secret="s1", redirect_uris=["https://a.example.com"])
+        with configured(OIDC_CLIENTS=json.dumps([entry])):
+            client = provider.validate_client_id("lovable_booking")
+            assert client is not None
+            self.assertEqual("Lovable Booking", client.display_name)
+
+    def test_display_name_may_be_configured(self) -> None:
+        entry = dict(
+            client_id="lovable_booking",
+            client_secret="s1",
+            display_name="Makerspace Events",
+            redirect_uris=["https://a.example.com"],
+        )
+        with configured(OIDC_CLIENTS=json.dumps([entry])):
+            client = provider.validate_client_id("lovable_booking")
+            assert client is not None
+            self.assertEqual("Makerspace Events", client.display_name)
+
     def test_redirect_uris_may_be_a_comma_separated_string(self) -> None:
         entry = dict(
             client_id="outline", client_secret="s1", redirect_uris="https://a.example.com, https://b.example.com"

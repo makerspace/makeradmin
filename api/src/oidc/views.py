@@ -28,6 +28,21 @@ def oauth_error(error: str, description: str, status: int = 400, www_authenticat
     return response
 
 
+@service.route("/client_info", method=GET, permission=PUBLIC)
+def client_info(client_id=Arg(non_empty_str)):
+    """Public, non-secret metadata about a relying party.
+
+    The authorize page needs the client's display name before the member has
+    logged in, so this endpoint is unauthenticated. Only fields safe to show to
+    anyone who can start an authorization request are returned.
+    """
+    client = provider.validate_client_id(client_id)
+    if client is None:
+        raise BadRequest("Unknown OIDC client.", fields="client_id")
+
+    return dict(client_id=client.client_id, display_name=client.display_name)
+
+
 @service.route("/authorize", method=POST, permission=USER)
 def authorize(
     client_id=Arg(non_empty_str),

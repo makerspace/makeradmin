@@ -28,8 +28,13 @@ function parseParams(): AuthorizeParams | null {
     };
 }
 
-function clientDisplayName(client_id: string): string {
-    return client_id.charAt(0).toUpperCase() + client_id.slice(1);
+/** Fallback used until (or unless) the server tells us the client's configured display name. */
+function fallbackClientName(client_id: string): string {
+    return client_id
+        .split(/[_-]+/)
+        .filter((word) => word.length > 0)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 }
 
 function setDocumentTitle(title: string) {
@@ -82,17 +87,39 @@ common.documentLoaded().then(() => {
         return;
     }
 
-    const clientName = clientDisplayName(params.client_id);
+    let clientName = fallbackClientName(params.client_id);
+    // Once the authorize request has produced a login form or an error, the
+    // display name must not overwrite it, so track whether we still own the page.
+    let showingSpinner = true;
 
-    setDocumentTitle(`Fortsätter till ${clientName}`);
-    render(
-        <StatusPage
-            title={`Fortsätter till ${clientName}`}
-            message="Ett ögonblick..."
-            spinner
-        />,
-        root,
-    );
+    const renderSpinner = () => {
+        setDocumentTitle(`Fortsätter till ${clientName}`);
+        render(
+            <StatusPage
+                title={`Fortsätter till ${clientName}`}
+                message="Ett ögonblick..."
+                spinner
+            />,
+            root,
+        );
+    };
+
+    renderSpinner();
+
+    // Runs in parallel with the authorize request below: an unknown or
+    // unconfigured client just keeps the fallback name.
+    const clientNameLoaded = common
+        .ajax(
+            "GET",
+            apiBasePath +
+                "/oidc/client_info?client_id=" +
+                encodeURIComponent(params.client_id),
+        )
+        .then((json) => {
+            clientName = json.data.display_name;
+            if (showingSpinner) renderSpinner();
+        })
+        .catch(() => {});
 
     common
         .ajax("POST", apiBasePath + "/oidc/authorize", {
@@ -103,31 +130,35 @@ common.documentLoaded().then(() => {
             scope: params.scope,
         })
         .then((json) => {
+            showingSpinner = false;
             window.location.replace(json.data.redirect);
         })
-        .catch((e) => {
-            if (e.status === UNAUTHORIZED) {
-                // Not logged in (or expired token): show the ordinary login
-                // page and come back here afterwards to finish the flow.
-                common.removeToken();
-                setDocumentTitle(`Logga in till ${clientName}`);
-                login.render_login(
-                    root,
-                    `Logga in för att fortsätta till ${clientName}`,
-                    window.location.href,
-                );
-            } else {
-                setDocumentTitle("Inloggningen misslyckades");
-                render(
-                    <StatusPage
-                        title="Inloggningen misslyckades"
-                        message={
-                            e.message ||
-                            `Kunde inte logga in till ${clientName}.`
-                        }
-                    />,
-                    root,
-                );
-            }
-        });
+        .catch((e) =>
+            clientNameLoaded.then(() => {
+                showingSpinner = false;
+                if (e.status === UNAUTHORIZED) {
+                    // Not logged in (or expired token): show the ordinary login
+                    // page and come back here afterwards to finish the flow.
+                    common.removeToken();
+                    setDocumentTitle(`Logga in till ${clientName}`);
+                    login.render_login(
+                        root,
+                        `Logga in för att fortsätta till ${clientName}`,
+                        window.location.href,
+                    );
+                } else {
+                    setDocumentTitle("Inloggningen misslyckades");
+                    render(
+                        <StatusPage
+                            title="Inloggningen misslyckades"
+                            message={
+                                e.message ||
+                                `Kunde inte logga in till ${clientName}.`
+                            }
+                        />,
+                        root,
+                    );
+                }
+            }),
+        );
 });

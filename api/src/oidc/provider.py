@@ -14,10 +14,13 @@ Client configuration:
 
     OIDC_CLIENTS=[{"client_id": "outline",
                    "client_secret": "...",
+                   "display_name": "Makerspace Wiki",
                    "redirect_uris": ["https://wiki.example.com/auth/oidc.callback"]}]
 
 Any number of clients may be listed. redirect_uris may also be written as a
-single comma separated string, and is always matched exactly.
+single comma separated string, and is always matched exactly. display_name is
+what the member sees on the login page and defaults to the client_id with
+separators turned into spaces.
 """
 
 import hmac
@@ -49,6 +52,7 @@ class OIDCClient:
     client_id: str
     client_secret: str
     redirect_uris: list[str]
+    display_name: str
 
 
 def _parse_redirect_uris(value: object) -> list[str]:
@@ -66,6 +70,12 @@ def _parse_redirect_uris(value: object) -> list[str]:
     return uris
 
 
+def default_display_name(client_id: str) -> str:
+    """Human readable name for a client that did not configure a display_name."""
+    words = [word for word in client_id.replace("_", " ").replace("-", " ").split(" ") if word]
+    return " ".join(word[0].upper() + word[1:] for word in words) or client_id
+
+
 def _parse_client(entry: object) -> OIDCClient:
     if not isinstance(entry, dict):
         raise ValueError("each client must be a JSON object")
@@ -75,10 +85,12 @@ def _parse_client(entry: object) -> OIDCClient:
         raise ValueError("client_id is required")
     if not client_secret:
         raise ValueError(f"client_secret is required for client {client_id}")
+    display_name = str(entry.get("display_name") or "").strip()
     return OIDCClient(
         client_id=client_id,
         client_secret=client_secret,
         redirect_uris=_parse_redirect_uris(entry.get("redirect_uris")),
+        display_name=display_name or default_display_name(client_id),
     )
 
 
