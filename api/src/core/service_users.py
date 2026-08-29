@@ -7,6 +7,8 @@ from service.api_definition import (
     MEMBER_VIEW,
     MEMBERBOOTH,
     MESSAGE_SEND,
+    SPAN_MANAGE,
+    SPAN_VIEW,
     WEBSHOP,
 )
 from service.config import config
@@ -46,7 +48,7 @@ SERVICE_USERS = (
     ServiceUser(
         id=-4,
         name="makerevents",
-        permissions=[MEMBER_VIEW, GROUP_MEMBER_VIEW, MESSAGE_SEND],
+        permissions=[MEMBER_VIEW, GROUP_MEMBER_VIEW, MESSAGE_SEND, SPAN_VIEW, SPAN_MANAGE],
     ),
 )
 
