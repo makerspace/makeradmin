@@ -88,6 +88,7 @@ def send_slack_messages(limit: int) -> None:
                         channel=slack_user_id,
                         text=message.subject,  # Fallback text for notifications
                         blocks=blocks,
+                        unfurl_links=False,
                     )
                     break
                 except SlackApiError as e:
