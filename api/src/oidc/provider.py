@@ -8,7 +8,12 @@ regular access_tokens table so the existing bearer authentication applies to
 the userinfo endpoint.
 
 Note that no signed id_token is issued: clients are expected to fetch claims
-from the userinfo endpoint using the access token.
+from the userinfo endpoint using the access token. The discovery document
+therefore advertises an empty key set and no id_token signing algorithms.
+
+The issuer is HOST_BACKEND + "/oidc", and relying parties that use discovery
+(e.g. Supabase custom OIDC providers) must be configured with exactly that
+string, since they compare it to the issuer in the discovery document.
 
 Client configuration:
 
@@ -153,6 +158,41 @@ def issue_authorization_code(member_id: int, client: OIDCClient, redirect_uri: s
         params["state"] = state
     separator = "&" if "?" in redirect_uri else "?"
     return f"{redirect_uri}{separator}{urlencode(params)}"
+
+
+def issuer() -> str:
+    return config.get_api_url("/oidc")
+
+
+def discovery_document() -> dict:
+    """OpenID Connect discovery metadata, served at {issuer}/.well-known/openid-configuration."""
+    return dict(
+        issuer=issuer(),
+        # The member portal hosts the authorize page, since it owns the login form.
+        authorization_endpoint=config.get_public_url("/oidc/authorize"),
+        token_endpoint=config.get_api_url("/oidc/token"),
+        userinfo_endpoint=config.get_api_url("/oidc/userinfo"),
+        jwks_uri=config.get_api_url("/oidc/jwks"),
+        response_types_supported=["code"],
+        grant_types_supported=["authorization_code"],
+        subject_types_supported=["public"],
+        token_endpoint_auth_methods_supported=["client_secret_basic", "client_secret_post"],
+        scopes_supported=["openid", "profile", "email"],
+        claims_supported=[
+            "sub",
+            "email",
+            "email_verified",
+            "name",
+            "given_name",
+            "family_name",
+            "preferred_username",
+            "member_number",
+            "membership_active",
+            "labaccess_active",
+            "groups",
+            "groups_detailed",
+        ],
+    )
 
 
 def redeem_authorization_code(code: str, client: OIDCClient, redirect_uri: Optional[str]) -> Optional[int]:

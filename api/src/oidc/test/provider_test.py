@@ -75,6 +75,15 @@ class Test(TestCase):
             with self.subTest(raw=raw), configured(OIDC_CLIENTS=raw):
                 self.assertEqual({}, provider.get_configured_clients())
 
+    def test_discovery_issuer_matches_the_path_it_is_served_under(self) -> None:
+        # Supabase fetches {issuer}/.well-known/openid-configuration and rejects any issuer mismatch.
+        with configured(HOST_BACKEND="https://api.example.com", HOST_PUBLIC="https://member.example.com"):
+            doc = provider.discovery_document()
+            self.assertEqual("https://api.example.com/oidc", doc["issuer"])
+            self.assertEqual("https://member.example.com/oidc/authorize", doc["authorization_endpoint"])
+            self.assertEqual("https://api.example.com/oidc/token", doc["token_endpoint"])
+            self.assertEqual("https://api.example.com/oidc/userinfo", doc["userinfo_endpoint"])
+
     def test_duplicate_client_id_keeps_the_first_definition(self) -> None:
         duplicate = dict(OUTLINE, client_secret="other")
         with configured(OIDC_CLIENTS=json.dumps([OUTLINE, duplicate])):

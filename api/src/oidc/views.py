@@ -28,6 +28,18 @@ def oauth_error(error: str, description: str, status: int = 400, www_authenticat
     return response
 
 
+@service.route("/.well-known/openid-configuration", method=GET, permission=PUBLIC)
+def openid_configuration():
+    # Returned as a bare JSON object: discovery clients reject makeradmin's status/data envelope.
+    return jsonify(provider.discovery_document())
+
+
+@service.route("/jwks", method=GET, permission=PUBLIC)
+def jwks():
+    """Empty JSON Web Key Set: no id_tokens are signed, but discovery requires a jwks_uri."""
+    return jsonify(keys=[])
+
+
 @service.route("/client_info", method=GET, permission=PUBLIC)
 def client_info(client_id=Arg(non_empty_str)):
     """Public, non-secret metadata about a relying party.
