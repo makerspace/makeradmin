@@ -45,6 +45,7 @@ from shop.models import Product, ProductAction, ProductCategory
 from shop.stripe_constants import (
     CURRENCY,
     STRIPE_CURRENTY_BASE,
+    InvoiceStatus,
     PriceType,
     SubscriptionScheduleStatus,
     SubscriptionStatus,
@@ -478,12 +479,29 @@ class SubscriptionInfo:
     upcoming_invoice: Optional[UpcomingInvoice]
 
 
+def get_pending_invoice(subscription_id: str) -> Optional[stripe.Invoice]:
+    """Returns the subscription's invoice that Stripe has created but not yet charged, if any.
+
+    Stripe keeps a new subscription invoice as a draft for about an hour before charging it,
+    and keeps it open between retries after a failed payment.
+    stripe.Invoice.upcoming skips such an invoice and previews the one after it.
+    """
+    subscription = retry(lambda: stripe.Subscription.retrieve(subscription_id, expand=["latest_invoice"]))
+    invoice = subscription.latest_invoice
+    if not isinstance(invoice, stripe.Invoice) or invoice.next_payment_attempt is None:
+        return None
+    if invoice.status not in [InvoiceStatus.DRAFT, InvoiceStatus.OPEN]:
+        return None
+    return invoice
+
+
 def get_subscription_info_from_subscription(sub_type: SubscriptionType, sub_id: str) -> SubscriptionInfo:
     try:
         if sub_id.startswith("sub_sched_"):
             upcoming = stripe.Invoice.upcoming(schedule=sub_id)
         else:
-            upcoming = stripe.Invoice.upcoming(subscription=sub_id)
+            pending = get_pending_invoice(sub_id)
+            upcoming = pending if pending is not None else stripe.Invoice.upcoming(subscription=sub_id)
 
         return SubscriptionInfo(
             type=sub_type,
@@ -541,7 +559,7 @@ def list_subscriptions(member_id: int) -> List[SubscriptionInfo]:
                     print(
                         "If the subscription schedule has started, the member should have a reference to the started subscription instead."
                     )
-                    result.append(get_subscription_info_from_subscription(sub_type, sub_id))
+                    result.append(get_subscription_info_from_subscription(sub_type, sched["subscription"] or sub_id))
                 elif status in [
                     SubscriptionScheduleStatus.RELEASED,
                     SubscriptionScheduleStatus.COMPLETED,

@@ -88,6 +88,14 @@ class SubscriptionStatus(str, Enum):
     TRAILING = "trailing"
 
 
+class InvoiceStatus(str, Enum):
+    DRAFT = "draft"
+    OPEN = "open"
+    PAID = "paid"
+    UNCOLLECTIBLE = "uncollectible"
+    VOID = "void"
+
+
 class SourceType(str, Enum):
     THREE_D_SECURE = "three_d_secure"
     CARD = "card"

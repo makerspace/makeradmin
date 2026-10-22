@@ -537,6 +537,36 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         assert self.receipt_count(member) == 1
         assert get_membership_summary(member.member_id, clock.date).membership_end == membership_end
 
+    def test_subscriptions_next_charge_includes_pending_invoice(self) -> None:
+        """
+        Checks that an invoice Stripe has created but not yet charged is reported as the next charge.
+        """
+        (now, clock, member) = self.setup_single_member()
+
+        def next_charge() -> Optional[stripe_subscriptions.UpcomingInvoice]:
+            subscriptions = stripe_subscriptions.list_subscriptions(member.member_id)
+            return next(s for s in subscriptions if s.type == SubscriptionType.MEMBERSHIP).upcoming_invoice
+
+        stripe_subscriptions.start_subscription(
+            member,
+            SubscriptionType.MEMBERSHIP,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+
+        # Phase 1: the first invoice is still a draft, which Stripe charges an hour after the subscription starts.
+        self.advance_clock(clock, now + abs_tdelta(minutes=30))
+        upcoming = next_charge()
+        assert upcoming is not None
+        # Regression: this reported the renewal a year later, since stripe.Invoice.upcoming skips draft invoices.
+        assert upcoming.payment_date < now + abs_tdelta(days=1)
+
+        # Phase 2: the first invoice is paid, so the next charge is the renewal.
+        self.advance_clock(clock, now + time_delta(days=1))
+        upcoming = next_charge()
+        assert upcoming is not None
+        assert upcoming.payment_date > now + time_delta(months=11)
+
     def test_subscriptions_cancel_scheduled(self) -> None:
         """
         Checks that a subscription can be cancelled before it even started.
