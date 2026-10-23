@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from fnmatch import fnmatch
 from logging import getLogger
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, Optional, TypedDict
 
 import requests
 from redis_cache import redis_connection
@@ -33,7 +33,7 @@ class TrelloList(TypedDict):
     name: str
 
 
-def _auth_params() -> Dict[str, str]:
+def _auth_params() -> dict[str, str]:
     return {"key": TRELLO_KEY, "token": TRELLO_TOKEN}
 
 
@@ -66,10 +66,10 @@ class TrelloCard:
     id: str
     name: str
     idList: str
-    labels: List[Label]
+    labels: list[Label]
     desc: Optional[str]
-    attachments: Optional[List[TrelloAttachment]]
-    pluginData: Optional[List[PluginDataEntry]]
+    attachments: Optional[list[TrelloAttachment]]
+    pluginData: Optional[list[PluginDataEntry]]
     # 8-char slug embedded in trello.com/c/<shortLink>/ URLs. Distinct from [id] (the
     # 24-char object id); the two are not inter-convertible without the board data.
     shortLink: Optional[str] = None
@@ -88,7 +88,7 @@ def trello_id_to_timestamp(trello_id: str) -> datetime:
     return datetime.fromtimestamp(int(ts_hex, 16))
 
 
-def _fetch_cards_from_trello() -> List[TrelloCard]:
+def _fetch_cards_from_trello() -> list[TrelloCard]:
     if TRELLO_BOARD_URL == "":
         return []
 
@@ -99,10 +99,10 @@ def _fetch_cards_from_trello() -> List[TrelloCard]:
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
 
-    return from_dict(List[TrelloCard], r.json())
+    return from_dict(list[TrelloCard], r.json())
 
 
-def get_all_labels() -> List[Label]:
+def get_all_labels() -> list[Label]:
     if TRELLO_BOARD_URL == "":
         return []
 
@@ -112,7 +112,7 @@ def get_all_labels() -> List[Label]:
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
 
-    return from_dict(List[Label], r.json())
+    return from_dict(list[Label], r.json())
 
 
 def get_list_ids_by_name(name: str) -> list[str]:
@@ -124,7 +124,7 @@ def get_list_ids_by_name(name: str) -> list[str]:
     r = requests.get(url, params={"fields": "name", **_auth_params()}, timeout=10)
     r.raise_for_status()
 
-    data: List[TrelloList] = r.json()
+    data: list[TrelloList] = r.json()
     result = []
     for lst in data:
         if fnmatch(lst.get("name", ""), name):
@@ -142,7 +142,7 @@ def get_list_id_by_name(name: str) -> Optional[str]:
     return lists[0]
 
 
-def cached_cards(list_name: str) -> List[TrelloCard]:
+def cached_cards(list_name: str) -> list[TrelloCard]:
     if TRELLO_BOARD_URL == "":
         return []
 
@@ -150,7 +150,7 @@ def cached_cards(list_name: str) -> List[TrelloCard]:
     cached_data = redis_connection.get(cache_key)
 
     if cached_data:
-        return from_json(List[TrelloCard], cached_data)
+        return from_json(list[TrelloCard], cached_data)
 
     cards = _fetch_cards_from_trello()
     list_ids = get_list_ids_by_name(list_name)

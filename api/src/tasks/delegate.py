@@ -8,7 +8,7 @@ from enum import Enum, IntEnum
 from io import BytesIO
 from logging import getLogger
 from random import random
-from typing import Callable, List, Literal, Optional, Sequence, Set, Tuple
+from typing import Callable, Literal, Optional, Sequence
 
 import requests
 from membership.models import Group, Member, member_group
@@ -192,7 +192,7 @@ class MemberTaskInfo:
     completed_card_names: dict[str, int]
 
     # IDs of courses that this member has completed
-    completed_courses: Set[int]
+    completed_courses: set[int]
 
     # Number of hours spent at the space since the day after the last task was completed
     # If the member has never completed a task, this will be a very large value.
@@ -628,7 +628,7 @@ class CardCompletionInfo:
 @dataclass
 class CardRequirements:
     # List of (requirement name, requirement function) tuples.
-    required: Sequence[Tuple[str, Callable[[TaskContext], bool]]]
+    required: Sequence[tuple[str, Callable[[TaskContext], bool]]]
 
     # Size of the task
     size: TaskSize
@@ -697,13 +697,13 @@ class CardRequirements:
         card_id_by_short_link: Optional[dict[str, str]] = None,
     ) -> "CardRequirements":
         labels = {label.name for label in card.labels}
-        required: list[Tuple[str, Callable[[TaskContext], bool]]] = []
+        required: list[tuple[str, Callable[[TaskContext], bool]]] = []
         size = TaskSize.SMALL
         completion_message: list[Callable[[TaskContext], str | None]] = []
         introduction_message: list[Callable[[TaskContext], str | None]] = []
         location = None
         machine = None
-        checked_labels: Set[str] = set()
+        checked_labels: set[str] = set()
         priority = 1.0
 
         def has_label(label_name: str) -> bool:
@@ -1219,7 +1219,7 @@ def member_recently_received_task(ctx: TaskContext) -> bool:
 
 def visit_events_by_member_id(
     start: datetime, end: datetime, member_id: int | None = None
-) -> dict[int, list[Tuple[datetime, timedelta]]]:
+) -> dict[int, list[tuple[datetime, timedelta]]]:
     q = (
         select(PhysicalAccessEntry)
         .where(PhysicalAccessEntry.invoked_at >= start)
@@ -1236,7 +1236,7 @@ def visit_events_by_member_id(
         if event.member_id is not None:
             events_by_member.setdefault(event.member_id, []).append(event)
 
-    visits_by_member: dict[int, list[Tuple[datetime, timedelta]]] = {}
+    visits_by_member: dict[int, list[tuple[datetime, timedelta]]] = {}
     for member_id, events in events_by_member.items():
         last_event: PhysicalAccessEntry | None = None
         visits = []
@@ -1359,7 +1359,7 @@ def task_score_base(
     requirements: CardRequirements,
     completion_info: CardCompletionInfo,
     time: datetime,
-    ignore_reasons: List[str],
+    ignore_reasons: list[str],
 ) -> TaskScore:
     # If someone completes a task, we don't want to try to assign the same task again.
     if (
@@ -1400,7 +1400,7 @@ def task_score(
     completion_info: CardCompletionInfo,
     ctx: TaskContext,
     reference_task_assignment_contexts: list[TaskContext],
-    ignore_reasons: List[str],
+    ignore_reasons: list[str],
     all_cards: list[trello.TrelloCard],
 ) -> TaskScore:
     if (
@@ -1584,7 +1584,7 @@ def send_slack_message_to_member(
     trello_card: trello.TrelloCard,
     completion: CardCompletionInfo,
     slack_interaction: SlackInteraction | None = None,
-) -> Optional[Tuple[str, str]]:
+) -> Optional[tuple[str, str]]:
     token = config.get("SLACK_BOT_TOKEN")
     if not token:
         logger.warning("No SLACK_BOT_TOKEN configured; skipping Slack send")
@@ -2069,7 +2069,7 @@ def ask_room_preference_question(
     slack_client: WebClient,
     available_rooms: list[str],
     slack_interaction: SlackInteraction | None = None,
-) -> Optional[Tuple[str, str]]:
+) -> Optional[tuple[str, str]]:
     """Ask the member about their room preferences via Slack."""
     # Check if member already has a pending question
     if has_pending_question(member.member_id):
@@ -2142,7 +2142,7 @@ def ask_skill_level_question(
     slack_client: WebClient,
     slack_interaction: SlackInteraction | None = None,
     force: bool = False,
-) -> Optional[Tuple[str, str]]:
+) -> Optional[tuple[str, str]]:
     """Ask the member about skill level via Slack."""
     # Check if member joined within the past 2 months - if so, automatically mark as beginner
     if member.created_at and datetime.now() - member.created_at < timedelta(days=60):
