@@ -72,7 +72,7 @@ services:
     # This instance does NOT persist any data if the container is rebuilt.
     # Actually persistent data should be stored in the database.
     # This is used for things like accessy session keys and various accessy caches (cause accessy is slooow)
-    image: redis:alpine@sha256:987c376c727652f99625c7d205a1cba3cb2c53b92b0b62aade2bd48ee1593232
+    image: redis:alpine3.23@sha256:71885d8cc6e42f2bc0aa2eb853bfc4be200b5108a46ac50e117ae1df0531fb80
     command:
       - "--loglevel warning"
     networks:

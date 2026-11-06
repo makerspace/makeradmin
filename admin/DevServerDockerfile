@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.22@sha256:d2166de198f26e17e5a442f537754dd616ab069c47cc57b889310a717e0abbf9
+FROM node:24-alpine3.24@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
 
 RUN apk add --no-cache tzdata inotify-tools && rm -rf /var/cache/apk/*
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/

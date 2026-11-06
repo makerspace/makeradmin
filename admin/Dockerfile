@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.22@sha256:d2166de198f26e17e5a442f537754dd616ab069c47cc57b889310a717e0abbf9
+FROM node:24-alpine3.24@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
 
 RUN apk add --no-cache tzdata && rm -rf /var/cache/apk/*
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -27,7 +27,7 @@ RUN echo tsc --version
 
 RUN uv run /scripts/build_locales.py --locale-path=/config/locales --locale-override-path=/config/locale_overrides --output-json=/work/src/i18n/generated_locales --output-ts-type-definitions=/work/src/i18n/locales.ts --default-locale=en --modules admin common
 
-FROM nginx:alpine@sha256:74175cf34632e88c6cfe206897cbfe2d2fecf9bf033c40e7f9775a3689e8adc7
+FROM nginx:alpine3.24@sha256:713fc2ebfd92e8217db451477182ee91944b123d2b1ee9fd5a8c6e91ca6c3a11
 
 # Configuration file for nginx
 COPY admin/docker/nginx_default_host /etc/nginx/conf.d/default.conf
