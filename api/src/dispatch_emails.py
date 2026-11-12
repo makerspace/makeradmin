@@ -406,7 +406,11 @@ def memberbooth_labels(
             or isinstance(deserialized_label, FireSafetyLabel)
             or isinstance(deserialized_label, BoxLabel)
         ):
-            assert expires_at is not None
+            if expires_at is None:
+                # A box has no expiry when its member has no labaccess span, e.g. after an admin deletes the only one.
+                # Asserting here instead would crash the dispatcher and stop all outgoing messages.
+                logger.warning(f"Skipping label {label_id}: member {member.member_id} has no labaccess end date")
+                continue
             if expires_at < now.date() + timedelta(days=14):
                 # Expired or about to expire soon
                 if expires_at < now.date():
