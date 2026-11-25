@@ -37,10 +37,38 @@ class CompletedPayment(DataClassJsonMixin):
     fee: Decimal
 
 
-def convert_completed_stripe_charges_to_payments(
-    stripe_charges: List[Charge],
-) -> Dict[int, CompletedPayment]:
+@dataclass(frozen=True)
+class CourseBookingPayment:
+    """A paid course booking, charged by the course booking app on the shared stripe account."""
+
+    booking_id: str
+    # Net of refunds. Zero for a fully refunded booking, which still costs its fee.
+    amount: Decimal
+    charge_created: datetime
+    fee: Decimal
+
+
+@dataclass(frozen=True)
+class StripePayments:
+    """All income found in stripe for a period, split by the system that charged it."""
+
+    # Keyed on makeradmin transaction id.
+    transactions: Dict[int, CompletedPayment]
+    course_bookings: List[CourseBookingPayment]
+
+
+# Set by the course booking app on the charges it creates.
+COURSE_BOOKING_ID_METADATA_KEY = "booking_id"
+
+
+def convert_completed_stripe_charges_to_payments(stripe_charges: List[Charge]) -> StripePayments:
+    """Sort paid stripe charges into makeradmin transaction payments and course bookings.
+
+    Contract: every paid charge must be attributable to one of the two. An unknown charge
+    raises [BadRequest], since skipping it would silently leave income out of the books.
+    """
     payments: Dict[int, CompletedPayment] = {}
+    course_bookings: List[CourseBookingPayment] = []
     for charge in stripe_charges:
         if not charge.paid:
             continue
@@ -48,22 +76,40 @@ def convert_completed_stripe_charges_to_payments(
         if charge.balance_transaction is None:
             logger.error(f"Missing balance transaction in stripe charge, {charge.id}")
             raise BadRequest(f"Missing balance transaction in stripe charge, {charge.id}")
-        elif not MakerspaceMetadataKeys.TRANSACTION_IDS.value in charge.metadata:
-            if charge.payment_intent is None:
-                logger.error(f"Missing payment intent in stripe charge, {charge.id}")
-                raise BadRequest(f"Missing payment intent in stripe charge, {charge.id}")
-            intent = charge.payment_intent
-            id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
-        else:
-            id = int(charge.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+        fee = convert_from_stripe_amount(charge.balance_transaction.fee)
+        charge_created = datetime.fromtimestamp(charge.created, timezone.utc)
 
-        payments[id] = CompletedPayment(
-            transaction_id=id,
-            amount=convert_from_stripe_amount(charge.amount),
-            charge_created=datetime.fromtimestamp(charge.created, timezone.utc),
-            fee=convert_from_stripe_amount(charge.balance_transaction.fee),
+        transaction_id = charge.metadata.get(MakerspaceMetadataKeys.TRANSACTION_IDS.value)
+        if transaction_id is None and charge.payment_intent is not None:
+            transaction_id = charge.payment_intent.metadata.get(MakerspaceMetadataKeys.TRANSACTION_IDS.value)
+
+        if transaction_id is not None:
+            id = int(transaction_id)
+            payments[id] = CompletedPayment(
+                transaction_id=id,
+                amount=convert_from_stripe_amount(charge.amount),
+                charge_created=charge_created,
+                fee=fee,
+            )
+            continue
+
+        booking_id = charge.metadata.get(COURSE_BOOKING_ID_METADATA_KEY)
+        if booking_id is not None:
+            course_bookings.append(
+                CourseBookingPayment(
+                    booking_id=str(booking_id),
+                    amount=convert_from_stripe_amount(charge.amount - charge.amount_refunded),
+                    charge_created=charge_created,
+                    fee=fee,
+                )
+            )
+            continue
+
+        raise BadRequest(
+            f"Stripe charge {charge.id} is paid but belongs to neither a makeradmin transaction nor a course booking"
         )
-    return payments
+
+    return StripePayments(transactions=payments, course_bookings=course_bookings)
 
 
 def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
@@ -85,12 +131,14 @@ def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> 
     return payments
 
 
-def get_completed_payments_from_stripe(start_date: datetime, end_date: datetime) -> Dict[int, CompletedPayment]:
+def get_completed_payments_from_stripe(start_date: datetime, end_date: datetime) -> StripePayments:
     if debug_mode():
         logger.warning(
             "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"
         )
-        return create_fake_completed_payments_from_db(start_date, end_date)
+        return StripePayments(
+            transactions=create_fake_completed_payments_from_db(start_date, end_date), course_bookings=[]
+        )
 
     try:
         stripe_charges = get_stripe_charges(start_date, end_date)

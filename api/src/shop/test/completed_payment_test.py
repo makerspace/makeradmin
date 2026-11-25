@@ -13,7 +13,9 @@ import messages.models
 import shop.models
 from membership.models import Member
 from service.db import db_session
+from service.error import BadRequest
 from shop.completed_payment import (
+    CourseBookingPayment,
     convert_completed_stripe_charges_to_payments,
     create_fake_completed_payments_from_db,
 )
@@ -40,6 +42,14 @@ class FakeStripeCharge:
     amount: int
     metadata: Dict[str, Any]
     created: int  # unix timestamp
+    id: str = "ch_fake"
+    payment_intent: Any = None
+    amount_refunded: int = 0
+
+
+@dataclass
+class FakePaymentIntent:
+    metadata: Dict[str, Any]
 
 
 class CompletedPaymentTest(FlaskTestBase):
@@ -63,7 +73,7 @@ class CompletedPaymentTest(FlaskTestBase):
                 metadata=metadata,
             )
             stripe_charges.append(charge)
-        completed_payments = convert_completed_stripe_charges_to_payments(stripe_charges)
+        completed_payments = convert_completed_stripe_charges_to_payments(stripe_charges).transactions
         assert len(completed_payments) == 3
         for transaction_id in completed_payments:
             completed_payment = completed_payments[transaction_id]
@@ -73,6 +83,69 @@ class CompletedPaymentTest(FlaskTestBase):
             assert completed_payment.charge_created == datetime.fromtimestamp(
                 1701966186 + (transaction_id * 10000), tz=timezone.utc
             )
+
+    def fake_charge(self, **kwargs: Any) -> Charge:
+        defaults: Dict[str, Any] = dict(
+            created=1701966186,
+            balance_transaction=FakeBalanceTransaction(fee=convert_to_stripe_amount(10)),
+            paid=True,
+            amount=convert_to_stripe_amount(100),
+            metadata={},
+        )
+        return FakeStripeCharge(**(defaults | kwargs))  # type: ignore[return-value]
+
+    def test_transaction_id_is_read_from_payment_intent_when_missing_on_charge(self) -> None:
+        intent = FakePaymentIntent(metadata={MakerspaceMetadataKeys.TRANSACTION_IDS.value: "7"})
+
+        payments = convert_completed_stripe_charges_to_payments([self.fake_charge(payment_intent=intent)])
+
+        assert list(payments.transactions.keys()) == [7]
+        assert payments.course_bookings == []
+
+    def test_course_booking_charges_are_separated_from_transactions(self) -> None:
+        # Regression: course booking charges on the shared stripe account failed the whole
+        # export with KeyError 'makerspace_transaction_ids'.
+        booking_metadata = {"booking_id": "b1", "makerspace_member_id": "1"}
+        charges = [
+            self.fake_charge(metadata={MakerspaceMetadataKeys.TRANSACTION_IDS.value: "1"}),
+            self.fake_charge(
+                metadata=booking_metadata,
+                payment_intent=FakePaymentIntent(metadata=booking_metadata),
+                amount=convert_to_stripe_amount(150),
+                balance_transaction=FakeBalanceTransaction(fee=convert_to_stripe_amount(4)),
+            ),
+        ]
+
+        payments = convert_completed_stripe_charges_to_payments(charges)
+
+        assert list(payments.transactions.keys()) == [1]
+        assert payments.course_bookings == [
+            CourseBookingPayment(
+                booking_id="b1",
+                amount=Decimal("150.00"),
+                charge_created=datetime.fromtimestamp(1701966186, tz=timezone.utc),
+                fee=Decimal("4.00"),
+            )
+        ]
+
+    def test_course_booking_amount_is_net_of_refunds(self) -> None:
+        metadata = {"booking_id": "b1"}
+        charges = [
+            self.fake_charge(metadata=metadata, amount=10000, amount_refunded=10000),
+            self.fake_charge(metadata=metadata, amount=20000, amount_refunded=5000),
+        ]
+
+        bookings = convert_completed_stripe_charges_to_payments(charges).course_bookings
+
+        # A fully refunded booking is kept, as stripe does not return its fee.
+        assert [(b.amount, b.fee) for b in bookings] == [
+            (Decimal("0.00"), Decimal("10.00")),
+            (Decimal("150.00"), Decimal("10.00")),
+        ]
+
+    def test_unattributable_charge_fails_export(self) -> None:
+        with self.assertRaises(BadRequest):
+            convert_completed_stripe_charges_to_payments([self.fake_charge(payment_intent=FakePaymentIntent({}))])
 
     def test_create_fake_completed_payments_from_db(self) -> None:
         number_of_transactions = 3

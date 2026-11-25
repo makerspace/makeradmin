@@ -1,4 +1,4 @@
-import multiprocessing
+import threading
 from datetime import date
 from typing import Any
 
@@ -11,7 +11,7 @@ from service.error import InternalServerError
 from sqlalchemy import select
 
 from shop.accounting import service
-from shop.accounting.export import do_export
+from shop.accounting.export import do_export_in_thread
 from shop.accounting.models import AccountingExport, Aggregation
 
 
@@ -40,8 +40,10 @@ def start_accounting_export_route(year: int, month: int) -> int:
 
     db_session.commit()
 
-    job = multiprocessing.Process(target=do_export, args=(e,))
-    job.start()
+    # Invariant: the export never runs in a forked process. A fork inherits this worker's pooled MySQL
+    # sockets, and both processes then read each other's query results, which fails exports with
+    # garbage errors and corrupts unrelated requests served by this worker.
+    threading.Thread(target=do_export_in_thread, args=(created_id,), daemon=True).start()
 
     return created_id
 

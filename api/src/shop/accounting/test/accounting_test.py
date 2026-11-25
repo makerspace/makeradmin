@@ -273,6 +273,22 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             ProductToAccountCostCenter()
         self.assertTrue("not in range [1, 100]" in str(context.exception))
 
+    def test_product_without_accounting_only_fails_when_covered(self) -> None:
+        # Regression: a newly added product without accounting failed the export of every
+        # period, including periods it was never sold in.
+        category = db_session.query(ProductCategory).first()
+        assert category is not None
+        unconfigured = self.db.create_product(category_id=category.id, price=Decimal("10"))
+        configured_ids = {p.id for p in db_session.query(Product).all()} - {unconfigured.id}
+
+        prod_to_account = ProductToAccountCostCenter(configured_ids)
+        for product_id in configured_ids:
+            assert len(prod_to_account.get_account_cost_center(product_id)) > 0
+
+        with self.assertRaises(AccountingError) as context:
+            ProductToAccountCostCenter(configured_ids | {unconfigured.id})
+        self.assertTrue("has no accounting information" in str(context.exception))
+
     def test_product_to_accounting_outside_range_101(self) -> None:
         products = db_session.query(Product).all()
         self.db.create_product_account_cost_center(

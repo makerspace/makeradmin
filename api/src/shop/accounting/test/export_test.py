@@ -12,13 +12,16 @@ from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod
 from membership.models import Member
 from service.db import db_session
+from shop.accounting.accounting import AccountingError
 from shop.accounting.export import (
+    COURSE_BOOKING_SPECIAL_PRODUCT_ID,
+    course_bookings_to_transactions_with_accounting,
     do_export,
     export_accounting,
     transaction_fees_to_transaction_with_accounting,
 )
 from shop.accounting.models import AccountingExport, Aggregation
-from shop.completed_payment import CompletedPayment
+from shop.completed_payment import CompletedPayment, CourseBookingPayment, StripePayments
 from shop.models import (
     Product,
     ProductAccountsCostCenters,
@@ -94,6 +97,9 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
     count = 2
 
     def setUp(self) -> None:
+        # The bulk deletes below bypass the session, so members of the previous test would
+        # otherwise linger in the identity map and collide with the reused primary keys.
+        db_session.expunge_all()
         db_session.query(Member).delete()
         db_session.query(Product).delete()
         db_session.query(ProductCategory).delete()
@@ -191,7 +197,7 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
         ver_2_amounts = [Decimal("-1130.13"), Decimal("-231.47"), Decimal("1127.63"), Decimal("230.97")]
         ver_amounts = [ver_1_amounts, ver_2_amounts]
 
-        get_payments_from_stripe.return_value = self.completed_payments
+        get_payments_from_stripe.return_value = StripePayments(transactions=self.completed_payments, course_bookings=[])
 
         sie_str = export_accounting(start_date, end_date, Aggregation.month, self.member)
         sie_rows = sie_str.split("\n")
@@ -230,3 +236,62 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
             assert verification_row.strip() == "}"
 
         assert len(sie_rows) == 0
+
+    def course_bookings(self) -> List[CourseBookingPayment]:
+        created = datetime(2024, 3, 10, tzinfo=timezone.utc)
+        return [
+            CourseBookingPayment(
+                booking_id="b1", amount=Decimal("150.00"), charge_created=created, fee=Decimal("4.50")
+            ),
+            # Fully refunded: no income, but the fee is still paid.
+            CourseBookingPayment(booking_id="b2", amount=Decimal("0.00"), charge_created=created, fee=Decimal("3.00")),
+        ]
+
+    def create_course_booking_product(self) -> Product:
+        product = self.db.create_product(
+            product_metadata={"special_product_id": COURSE_BOOKING_SPECIAL_PRODUCT_ID}, show=False
+        )
+        for type in AccountingEntryType:
+            self.db.create_product_account_cost_center(
+                product_id=product.id,
+                account_id=self.transaction_accounts[type][0].id,
+                cost_center_id=None,
+                type=type.value,
+                fraction=100,
+            )
+        return product
+
+    def test_course_bookings_are_booked_on_course_booking_product(self) -> None:
+        self.create_course_booking_product()
+        bookings = self.course_bookings()
+
+        entries = course_bookings_to_transactions_with_accounting(bookings)
+        entries.extend(transaction_fees_to_transaction_with_accounting({}, bookings))
+
+        credit = [e for e in entries if e.type == AccountingEntryType.CREDIT]
+        debit = [e for e in entries if e.type == AccountingEntryType.DEBIT]
+        assert sum(e.amount for e in credit) == Decimal("150.00")
+        assert sum(e.amount for e in debit) == Decimal("150.00")
+        assert {e.account for e in credit} == {self.transaction_accounts[AccountingEntryType.CREDIT][0]}
+        fees = [e for e in debit if e.account is not None and e.account.account == "6573"]
+        assert sum(e.amount for e in fees) == Decimal("7.50")
+        # Invariant: one shared fee account object, or the fees end up on several verification rows.
+        assert len({id(e.account) for e in fees}) == 1
+
+    def test_course_bookings_without_product_fail_export(self) -> None:
+        with self.assertRaises(AccountingError) as context:
+            course_bookings_to_transactions_with_accounting(self.course_bookings())
+        assert COURSE_BOOKING_SPECIAL_PRODUCT_ID in str(context.exception)
+
+    @patch("shop.accounting.export.get_completed_payments_from_stripe")
+    def test_export_accounting_with_only_course_bookings(self, get_payments_from_stripe: Mock) -> None:
+        self.create_course_booking_product()
+        get_payments_from_stripe.return_value = StripePayments(transactions={}, course_bookings=self.course_bookings())
+
+        sie_str = export_accounting(datetime(2024, 3, 1), datetime(2024, 4, 1), Aggregation.month, self.member)
+
+        transaction_rows = [row.strip() for row in sie_str.split("\n") if row.strip().startswith("#TRANS")]
+        assert len(transaction_rows) == 3
+        assert transaction_rows[0].startswith('#TRANS 6573 {1 "GM"} 7.50 20240301')
+        amounts = sorted(Decimal(row.split("}")[1].split("2024")[0]) for row in transaction_rows[1:])
+        assert amounts == [Decimal("-150.00"), Decimal("142.50")]

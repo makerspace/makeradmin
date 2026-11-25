@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from logging import getLogger
-from typing import Dict, List, Tuple
+from typing import Collection, Dict, List, Tuple
 
 from basic_types.enums import AccountingEntryType
 from service.db import db_session
@@ -27,7 +27,8 @@ class AccountingError(Exception):
 
 @dataclass()
 class TransactionWithAccounting:
-    transaction_id: int
+    # None for income without a makeradmin transaction, such as course bookings.
+    transaction_id: int | None
     product_id: int | None
     amount: Decimal
     date: datetime
@@ -53,7 +54,7 @@ class RoundingErrorSource(Enum):
 
 @dataclass(frozen=True)
 class RoundingError:
-    transaction_id: int
+    transaction_id: int | None
     amount: Decimal
     type: AccountingEntryType
     source: RoundingErrorSource
@@ -61,11 +62,20 @@ class RoundingError:
 
 
 class ProductToAccountCostCenter:
-    def __init__(self) -> None:
+    """Validated accounts and cost centers per product.
+
+    Construction raises [AccountingError] for any covered product with incomplete accounting.
+    Pass product_ids to cover only those products, so a product missing accounting
+    blocks only the exports of periods it was sold in. None covers all products.
+    """
+
+    def __init__(self, product_ids: Collection[int] | None = None) -> None:
         self.product_to_account_cost_center: Dict[int, List[AccountCostCenter]] = {}
 
-        products = db_session.query(Product).all()
-        for product in products:
+        product_query = db_session.query(Product)
+        if product_ids is not None:
+            product_query = product_query.filter(Product.id.in_(product_ids))
+        for product in product_query.all():
             product_accounting = (
                 db_session.query(ProductAccountsCostCenters)
                 .outerjoin(TransactionAccount, ProductAccountsCostCenters.account)
@@ -159,10 +169,61 @@ def split_transaction_fee_over_transaction_contents(
     return split_fees, rounding_error
 
 
+def split_amounts_over_accounts(
+    product_accounting: List[AccountCostCenter],
+    amounts: Dict[AccountingEntryType, Decimal],
+    transaction_id: int | None,
+    product_id: int,
+    date: datetime,
+) -> Tuple[List[TransactionWithAccounting], List[RoundingError]]:
+    """Split one sale's credit and debit amounts over a product's accounts and cost centers.
+
+    Guarantee: the entries of each type sum to exactly the given amount. What rounding the
+    fractions to whole öre leaves over is added to the largest entry of that type.
+    """
+    entries: List[TransactionWithAccounting] = []
+    rounding_errors: List[RoundingError] = []
+    amounts_added: Dict[AccountingEntryType, Decimal] = {type: Decimal(0) for type in AccountingEntryType}
+    index_to_add_leftover_amount = {entry_type: (-1, Decimal("-1")) for entry_type in AccountingEntryType}
+
+    for accounting in product_accounting:
+        amount_to_add = amounts[accounting.type] * (
+            accounting.fraction * Decimal("0.01")
+        )  # Multiply with 0.01 instead of division by 100
+        amount_to_add = Decimal(round(amount_to_add, 2))
+
+        amounts_added[accounting.type] += amount_to_add
+        entries.append(
+            TransactionWithAccounting(
+                transaction_id=transaction_id,
+                product_id=product_id,
+                amount=amount_to_add,
+                date=date,
+                account=accounting.account,
+                cost_center=accounting.cost_center,
+                type=accounting.type,
+            )
+        )
+
+        if amount_to_add > index_to_add_leftover_amount[accounting.type][1]:
+            index_to_add_leftover_amount[accounting.type] = (len(entries) - 1, amount_to_add)
+
+    for entry_type, amount_added in amounts_added.items():
+        leftover_amount = amounts[entry_type] - amount_added
+        if leftover_amount != 0:
+            entries[index_to_add_leftover_amount[entry_type][0]].amount += leftover_amount
+            rounding_errors.append(
+                RoundingError(transaction_id, leftover_amount, entry_type, RoundingErrorSource.TRANSACTION_SPLIT, date)
+            )
+
+    return entries, rounding_errors
+
+
 def split_transactions_over_accounts(
     transactions: List[Transaction], completed_payments: Dict[int, CompletedPayment]
 ) -> Tuple[List[TransactionWithAccounting], List[RoundingError]]:
-    product_to_accounting = ProductToAccountCostCenter()
+    sold_product_ids = {content.product_id for transaction in transactions for content in transaction.contents}
+    product_to_accounting = ProductToAccountCostCenter(sold_product_ids)
     transactions_with_accounting: List[TransactionWithAccounting] = []
     rounding_errors: List[RoundingError] = []
 
@@ -185,52 +246,20 @@ def split_transactions_over_accounts(
             if not product_accounting:
                 raise AccountingError(f"Product with id {content.product_id} has no accounting information")
 
-            amounts_added: Dict[AccountingEntryType, Decimal] = {type: Decimal(0) for type in AccountingEntryType}
             content_amount_decimal = Decimal(
                 str(round(content.amount, 2))
             )  # The db should be using Decimal but seems to be using float, see github issue #416
-            adjusted_transaction_content_amounts: Dict[AccountingEntryType, Decimal] = {
-                AccountingEntryType.CREDIT: content_amount_decimal,
-                AccountingEntryType.DEBIT: content_amount_decimal - split_fees[content.id],
-            }
-
-            index_to_add_leftover_amount = {entry_type: (-1, Decimal("-1")) for entry_type in AccountingEntryType}
-            for accounting in product_accounting:
-                amount_to_add = adjusted_transaction_content_amounts[accounting.type] * (
-                    accounting.fraction * Decimal("0.01")
-                )  # Multiply with 0.01 instead of division by 100
-                amount_to_add = Decimal(round(amount_to_add, 2))
-
-                amounts_added[accounting.type] += amount_to_add
-
-                transacion_acc = TransactionWithAccounting(
-                    transaction_id=transaction.id,
-                    product_id=content.product_id,
-                    amount=amount_to_add,
-                    date=transaction.created_at,
-                    account=accounting.account,
-                    cost_center=accounting.cost_center,
-                    type=accounting.type,
-                )
-                transactions_with_accounting.append(transacion_acc)
-
-                if amount_to_add > index_to_add_leftover_amount[accounting.type][1]:
-                    index_to_add_leftover_amount[accounting.type] = (
-                        len(transactions_with_accounting) - 1,
-                        amount_to_add,
-                    )
-
-            for entry_type, amount_added in amounts_added.items():
-                leftover_amount = adjusted_transaction_content_amounts[entry_type] - amount_added
-                if leftover_amount != 0:
-                    transactions_with_accounting[index_to_add_leftover_amount[entry_type][0]].amount += leftover_amount
-                    rounding_error_obj = RoundingError(
-                        transaction.id,
-                        leftover_amount,
-                        entry_type,
-                        RoundingErrorSource.TRANSACTION_SPLIT,
-                        transaction.created_at,
-                    )
-                    rounding_errors.append(rounding_error_obj)
+            content_entries, content_rounding_errors = split_amounts_over_accounts(
+                product_accounting,
+                {
+                    AccountingEntryType.CREDIT: content_amount_decimal,
+                    AccountingEntryType.DEBIT: content_amount_decimal - split_fees[content.id],
+                },
+                transaction_id=transaction.id,
+                product_id=content.product_id,
+                date=transaction.created_at,
+            )
+            transactions_with_accounting.extend(content_entries)
+            rounding_errors.extend(content_rounding_errors)
 
     return transactions_with_accounting, rounding_errors
